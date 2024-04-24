@@ -878,6 +878,16 @@ video {
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
+.bg-terminus-red {
+  --tw-bg-opacity: 1;
+  background-color: rgb(186 24 27 / var(--tw-bg-opacity));
+}
+
+.bg-terminus-off-white {
+  --tw-bg-opacity: 1;
+  background-color: rgb(245 243 244 / var(--tw-bg-opacity));
+}
+
 .bg-hero-pattern {
   background-image: url('/static/images/cars.webp');
 }
@@ -1365,6 +1375,16 @@ video {
   .dark\:bg-gray-900 {
     --tw-bg-opacity: 1;
     background-color: rgb(17 24 39 / var(--tw-bg-opacity));
+  }
+
+  .dark\:bg-terminus-darker-red {
+    --tw-bg-opacity: 1;
+    background-color: rgb(102 7 8 / var(--tw-bg-opacity));
+  }
+
+  .dark\:bg-terminus-gray {
+    --tw-bg-opacity: 1;
+    background-color: rgb(22 26 29 / var(--tw-bg-opacity));
   }
 
   .dark\:text-gray-400 {
