@@ -4,6 +4,11 @@ __pycache__/
 .*
 !.gitignore
 
+*.jpg
+*.jpeg
+*.png
+*.svg
+
 package-lock.json
 credentials.*
 token.*
