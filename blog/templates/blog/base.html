@@ -6,15 +6,14 @@
         <title>{{ title }}</title>
         {% load static %}
         <link href="{% static 'css/main.css' %}" rel="stylesheet">
-        <link href="{% static 'favicon.ico' %}", rel="shortcut icon", type="img/png">
         <script src="https://unpkg.com/htmx.org@1.9.12"></script>
     </head>
     <body>
-        {% include "ecom/navbar.html" %}
+        {% include 'blog/navbar.html' %}
         <main>
             {% block content %}
             {% endblock content %}
         </main>
-        {% include "ecom/footer.html" %}
+        {% include 'blog/footer.html' %}
     </body>
 </html>
