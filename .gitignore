@@ -8,6 +8,8 @@ __pycache__/
 *.jpeg
 *.png
 *.svg
+*.mp4
+*.webm
 
 package-lock.json
 credentials.*
