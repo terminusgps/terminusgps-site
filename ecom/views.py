@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import JsonResponse
 
 def handle404(request, exception):
     context = { "title": "404", "exception": exception }
@@ -27,3 +28,7 @@ def contact(request):
 def product(request, product_id):
     context = { "title": "Product" }
     return render(request, "ecom/product.html", context=context)
+
+def cart(request):
+    context = { "title": "Your Cart" }
+    return render(request, "ecom/cart.html", context=context)
