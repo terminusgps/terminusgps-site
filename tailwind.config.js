@@ -22,7 +22,11 @@ module.exports = {
             backgroundImage: {
                 "hero-pattern": "url('/static/images/cars.webp')",
                 "moto-hero-pattern": "url('/static/images/moto.webp')",
+                "convertible-hero-pattern": "url('/static/images/convertible.jpg')",
             },
+            animation: {
+                "wiggle": "wiggle 1s ease-in-out infinite",
+            }
         },
   },
   plugins: [],
