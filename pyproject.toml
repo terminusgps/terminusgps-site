@@ -25,7 +25,6 @@ target-version = "py311"
 fixable = [ "ALL" ]
 select = [ "E4", "E7", "E9", "F" ]
 
-skip-magic-trailing-comma = true
 line-ending = "auto"
 
 [tool.ruff.format]
