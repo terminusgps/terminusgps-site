@@ -1,5 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
+
+from ecom.forms import ProductForm
 
 def handle404(request, exception):
     context = { "title": "404", "exception": exception }
@@ -32,3 +34,20 @@ def product(request, product_id):
 def cart(request):
     context = { "title": "Your Cart" }
     return render(request, "ecom/cart.html", context=context)
+
+def add_product(request):
+    if request.method == "POST":
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect("shop all")
+
+    else:
+        form = ProductForm()
+
+    context = {
+        "title": "Add Product",
+        "form": form
+    }
+
+    return render(request, "ecom/addproduct.html", context=context)
