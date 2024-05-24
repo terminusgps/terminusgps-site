@@ -1,2 +1,2 @@
 from .session import SquareSession
-from .payments import SquarePayments
+from .payments import SquareCustomer

@@ -1,12 +1,12 @@
+{% load static tailwind_tags %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ title }}</title>
-        {% load static %}
-        <link href="{% static 'css/main.css' %}" rel="stylesheet">
         <link href="{% static 'favicon.ico' %}", rel="shortcut icon", type="img/png">
+        {% tailwind_css %}
         <script src="https://unpkg.com/htmx.org@1.9.12"></script>
     </head>
     <body>
