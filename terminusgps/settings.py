@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,12 +25,12 @@ CLIENT = {
     },
     "PHONE": {
         "MAIN": "+18448634809",
-        "OTHER": "+7139045262",
+        "OTHER": "+17139045262",
     },
     "EMAIL": {
         "MAIN": "support@terminusgps.com",
         "SUPPORT": "support@terminusgps.com",
-        "SALES": "support@terminusgps.com",
+        "SALES": "sales@terminusgps.com",
         "NOREPLY": "no-reply@terminusgps.com",
     },
     "SOCIAL": {
@@ -57,6 +56,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     "ecom.apps.EcomConfig",
+    "dforms.apps.DformsConfig",
     "django_browser_reload",
     "django.contrib.admin",
     "django.contrib.auth",
