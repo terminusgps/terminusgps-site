@@ -1,0 +1,9 @@
+{% extends "dforms/base.html" %}
+{% load static %}
+{% block content %}
+<form action="/dform/register/", method="post">
+    {% csrf_token %}
+    {{ form }}
+</form>
+<script src="{% static 'js/register.js' %}"></script>
+{% endblock content %}

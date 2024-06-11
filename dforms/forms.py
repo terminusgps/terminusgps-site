@@ -1,5 +1,4 @@
 from django import forms
-from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from .wialon.validators import (imei_number_exists_in_db,
@@ -21,29 +20,3 @@ class WialonRegistration(forms.Form):
             imei_number_is_unassigned,
         ],
     )
-
-
-def validate_phone_number(value):
-    if not value.startswith("+"):
-        raise ValidationError(
-            _("Phone number must start with a '+'"), code="no_country_code"
-        )
-
-    if not value.replace("+", "").isdigit():
-        raise ValidationError(
-            _("Phone number must contain only digits and country code"),
-            code="not_digits",
-        )
-
-
-class MultiPhoneNumberField(forms.Field):
-    def to_python(self, value):
-        """Normalize the string into a list of phone numbers."""
-        if not value:
-            return []
-        return value.split(",")
-
-    def validate(self, value):
-        super().validate(value)
-        for num in value:
-            validate_phone_number(num)

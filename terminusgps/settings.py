@@ -4,19 +4,12 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure-*jz*vcf%7n!$ij5n6ef0snfpg_xvbkeb5##pswykn6n&q&v8&j"
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-WIALON_API_ACCESS_TOKEN = os.environ.get("WIALON_API_ACCESS_TOKEN", None)
-
-SQUARE_API_ACCESS_TOKEN = os.environ.get("SQUARE_API_ACCESS_TOKEN", None)
-
 CLIENT = {
     "NAME": "TerminusGPS",
     "TITLE": "TerminusGPS, LLC.",
+    "COPYRIGHT": "© 2024 TerminusGPS, LLC. All rights reserved.",
     "ADDRESS": {
         "STREET": "17240 Huffmeister Road",
         "CITY": "Cypress",
@@ -28,7 +21,7 @@ CLIENT = {
         "OTHER": "+17139045262",
     },
     "EMAIL": {
-        "MAIN": "support@terminusgps.com",
+        "MAIN": "contact@terminusgps.com",
         "SUPPORT": "support@terminusgps.com",
         "SALES": "sales@terminusgps.com",
         "NOREPLY": "no-reply@terminusgps.com",
@@ -37,18 +30,16 @@ CLIENT = {
         "FACEBOOK": "https://www.facebook.com/terminusgps",
         "INSTAGRAM": "https://www.instagram.com/terminusgps",
         "X": "https://www.x.com/terminusgps",
-        "TIKTOK": "",
+        "TIKTOK": "https://tiktok.com/@terminusgps",
     },
 }
-
+WIALON_API_ACCESS_TOKEN = os.environ.get("WIALON_API_ACCESS_TOKEN", None)
+SQUARE_API_ACCESS_TOKEN = os.environ.get("SQUARE_API_ACCESS_TOKEN", None)
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
-
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
-
-
 ALLOWED_HOSTS = []
 
 

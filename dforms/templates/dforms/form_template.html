@@ -1,7 +1,0 @@
-<form id="form" hx-post="{% url 'register' %}" hx-target="#form-container" hx-swap="outerHTML">
-    {% include 'dforms/partials/field.html' %}
-    <button type="submit">Submit</button>
-</form>
-<div id="form-container">
-    {% include 'dforms/partials/field.html' %}
-</div>
