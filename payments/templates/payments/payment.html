@@ -1,0 +1,6 @@
+{% extends "payments/layout.html" %}
+{% block content %}
+    <h1>Payment #{{ payment.id }}</h1>
+    <p>Amount: ${{ payment.amount }}</p>
+    <p>Status: {{ payment.status }}</p>
+{% endblock content %}

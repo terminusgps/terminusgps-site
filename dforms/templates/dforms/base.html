@@ -6,8 +6,22 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ title }} - {{ client.NAME }}</title>
         {% tailwind_css %}
+        <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
     </head>
     <body>
+        <nav class="lg:px-16 px-6 bg-white shadow-md flex flex-wrap items-center lg:py-0 py-2">
+            <div class="flex-1 flex justify-between items-center">
+                <a href="/forms" class="flex text-lg font-semibold">
+                    <img
+                        src="{% static "logo.png" %}"
+                        width="150"
+                        height="100"
+                        class="p-2"
+                        alt="{{ client.NAME }} Logo"
+                    />
+                </a>
+            </div>
+        </nav>
         <main>
             {% block content %}
             {% endblock content %}
@@ -28,9 +42,6 @@
                     </li>
                     <li>
                         <a href="/terms" class="hover:underline me-4 md:me-6">Terms and Conditions</a>
-                    </li>
-                    <li>
-                        <a href="/license" class="hover:underline me-4 md:me-6">License</a>
                     </li>
                 </ul>
             </div>

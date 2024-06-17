@@ -3,6 +3,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("register/", views.registration_form, name="register"),
-    path("license/", views.license, name="license"),
+    path("forms/<str:form_name>/", views.get_form, name="form"),
+    path("fields/<str:field_name>/", views.get_field, name="field"),
 ]

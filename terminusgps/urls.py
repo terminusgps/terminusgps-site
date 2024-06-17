@@ -23,6 +23,6 @@ from django.urls import include, path
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("__reload__/", include("django_browser_reload.urls")),
-    path("shop/", include("ecom.urls")),
+    path("pay/", include("payments.urls")),
     path("forms/", include("dforms.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

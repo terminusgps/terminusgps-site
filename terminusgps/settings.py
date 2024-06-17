@@ -34,7 +34,17 @@ CLIENT = {
     },
 }
 WIALON_API_ACCESS_TOKEN = os.environ.get("WIALON_API_ACCESS_TOKEN", None)
-SQUARE_API_ACCESS_TOKEN = os.environ.get("SQUARE_API_ACCESS_TOKEN", None)
+SQUARE_ACCESS_TOKEN = os.environ.get("SQUARE_ACCESS_TOKEN", None)
+SQUARE_APP_ID = os.environ.get("SQUARE_APP_ID", None)
+SQUARE_APP_SECRET = os.environ.get("SQUARE_APP_SECRET", None)
+
+QUICKBOOKS = {
+    "CLIENT_ID": os.environ.get("QB_CLIENT_ID", ""),
+    "CLIENT_SECRET": os.environ.get("QB_CLIENT_SECRET", ""),
+    "ENVIRONMENT": "sandbox",
+    "REDIRECT_URI": "http://localhost:8000/pay/qb/auth",
+}
+
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
@@ -46,8 +56,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    "ecom.apps.EcomConfig",
     "dforms.apps.DformsConfig",
+    "payments.apps.PaymentsConfig",
     "django_browser_reload",
     "django.contrib.admin",
     "django.contrib.auth",

@@ -5,16 +5,12 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ title }}</title>
-        <link href="{% static 'favicon.ico' %}", rel="shortcut icon", type="img/png">
         {% tailwind_css %}
-        <script src="https://unpkg.com/htmx.org@1.9.12"></script>
     </head>
     <body>
-        {% include "ecom/navbar.html" %}
         <main>
             {% block content %}
             {% endblock content %}
         </main>
-        {% include "ecom/footer.html" %}
     </body>
 </html>
