@@ -1,8 +1,15 @@
 import os
 from pathlib import Path
 
+from intuitlib.enums import Scopes
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+ADMINS = [
+    ("Blake", "blake@terminusgps.com"),
+    ("Lili", "lili@terminusgps.com"),
+]
 
 SECRET_KEY = "django-insecure-*jz*vcf%7n!$ij5n6ef0snfpg_xvbkeb5##pswykn6n&q&v8&j"
 DEBUG = True
@@ -34,15 +41,24 @@ CLIENT = {
     },
 }
 WIALON_API_ACCESS_TOKEN = os.environ.get("WIALON_API_ACCESS_TOKEN", None)
-SQUARE_ACCESS_TOKEN = os.environ.get("SQUARE_ACCESS_TOKEN", None)
-SQUARE_APP_ID = os.environ.get("SQUARE_APP_ID", None)
-SQUARE_APP_SECRET = os.environ.get("SQUARE_APP_SECRET", None)
+
+SQUAREUP = {
+    "ACCESS_TOKEN": os.environ.get("SQUARE_ACCESS_TOKEN", ""),
+    "APP_ID": os.environ.get("SQUARE_APP_ID", ""),
+    "APP_SECRET": os.environ.get("SQUARE_APP_SECRET", ""),
+}
 
 QUICKBOOKS = {
     "CLIENT_ID": os.environ.get("QB_CLIENT_ID", ""),
     "CLIENT_SECRET": os.environ.get("QB_CLIENT_SECRET", ""),
     "ENVIRONMENT": "sandbox",
-    "REDIRECT_URI": "http://localhost:8000/pay/qb/auth",
+    "REDIRECT_URI": "http://localhost:8000/pay/auth/",
+    "SCOPES": [
+        Scopes.OPENID,
+        Scopes.EMAIL,
+        Scopes.PAYMENT,
+        Scopes.PROFILE,
+    ],
 }
 
 STATICFILES_DIRS = [
