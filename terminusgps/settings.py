@@ -12,6 +12,7 @@ ADMINS = [
 ]
 
 SECRET_KEY = "django-insecure-*jz*vcf%7n!$ij5n6ef0snfpg_xvbkeb5##pswykn6n&q&v8&j"
+AUTH_ENCRYPTION_KEY = os.environ.get("ENCRYPTION_KEY", "")
 DEBUG = True
 CLIENT = {
     "NAME": "TerminusGPS",
@@ -42,6 +43,24 @@ CLIENT = {
 }
 WIALON_API_ACCESS_TOKEN = os.environ.get("WIALON_API_ACCESS_TOKEN", None)
 
+AUTH_VARS = {
+    "QUICKBOOKS": {
+        "CLIENT_ID": os.environ.get("QB_CLIENT_ID", ""),
+        "CLIENT_SECRET": os.environ.get("QB_CLIENT_SECRET", ""),
+        "ENVIRONMENT": os.environ.get("QB_ENVIRONMENT", ""),
+        "REDIRECT_URI": os.environ.get("QB_REDIRECT_URI", ""),
+        "SCOPES": [
+            scope.value
+            for scope in [Scopes.OPENID, Scopes.EMAIL, Scopes.PAYMENT, Scopes.PROFILE]
+        ],
+    },
+    "SQUARE": {
+        "ACCESS_TOKEN": os.environ.get("SQUARE_ACCESS_TOKEN", ""),
+        "APP_ID": os.environ.get("SQUARE_APP_ID", ""),
+        "APP_SECRET": os.environ.get("SQUARE_APP_SECRET", ""),
+    },
+}
+
 SQUAREUP = {
     "ACCESS_TOKEN": os.environ.get("SQUARE_ACCESS_TOKEN", ""),
     "APP_ID": os.environ.get("SQUARE_APP_ID", ""),
@@ -52,7 +71,7 @@ QUICKBOOKS = {
     "CLIENT_ID": os.environ.get("QB_CLIENT_ID", ""),
     "CLIENT_SECRET": os.environ.get("QB_CLIENT_SECRET", ""),
     "ENVIRONMENT": "sandbox",
-    "REDIRECT_URI": "http://localhost:8000/pay/auth/",
+    "REDIRECT_URI": "http://localhost:8000/pay/quickbooks/",
     "SCOPES": [
         Scopes.OPENID,
         Scopes.EMAIL,

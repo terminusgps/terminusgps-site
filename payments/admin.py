@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Payment, QuickbooksToken
+from .models import LightmetricsToken, QuickbooksToken
 
-admin.site.register(Payment)
+admin.site.register(LightmetricsToken)
 admin.site.register(QuickbooksToken)
