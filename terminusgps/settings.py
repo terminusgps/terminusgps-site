@@ -43,42 +43,14 @@ CLIENT = {
 }
 WIALON_API_ACCESS_TOKEN = os.environ.get("WIALON_API_ACCESS_TOKEN", None)
 
-AUTH_VARS = {
-    "QUICKBOOKS": {
-        "CLIENT_ID": os.environ.get("QB_CLIENT_ID", ""),
-        "CLIENT_SECRET": os.environ.get("QB_CLIENT_SECRET", ""),
-        "ENVIRONMENT": os.environ.get("QB_ENVIRONMENT", ""),
-        "REDIRECT_URI": os.environ.get("QB_REDIRECT_URI", ""),
-        "SCOPES": [
-            scope.value
-            for scope in [Scopes.OPENID, Scopes.EMAIL, Scopes.PAYMENT, Scopes.PROFILE]
-        ],
-    },
-    "SQUARE": {
-        "ACCESS_TOKEN": os.environ.get("SQUARE_ACCESS_TOKEN", ""),
-        "APP_ID": os.environ.get("SQUARE_APP_ID", ""),
-        "APP_SECRET": os.environ.get("SQUARE_APP_SECRET", ""),
-    },
-}
-
-SQUAREUP = {
-    "ACCESS_TOKEN": os.environ.get("SQUARE_ACCESS_TOKEN", ""),
-    "APP_ID": os.environ.get("SQUARE_APP_ID", ""),
-    "APP_SECRET": os.environ.get("SQUARE_APP_SECRET", ""),
-}
-
 QUICKBOOKS = {
     "CLIENT_ID": os.environ.get("QB_CLIENT_ID", ""),
     "CLIENT_SECRET": os.environ.get("QB_CLIENT_SECRET", ""),
-    "ENVIRONMENT": "sandbox",
-    "REDIRECT_URI": "http://localhost:8000/pay/quickbooks/",
-    "SCOPES": [
-        Scopes.OPENID,
-        Scopes.EMAIL,
-        Scopes.PAYMENT,
-        Scopes.PROFILE,
-    ],
+    "REDIRECT_URI": os.environ.get("QB_REDIRECT_URI", "http://localhost:8000/auth/"),
+    "ENVIRONMENT": os.environ.get("QB_ENVIRONMENT", "sandbox"),
+    "COMPANY_ID": os.environ.get("QB_COMPANY_ID", ""),
 }
+
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
@@ -92,7 +64,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     "dforms.apps.DformsConfig",
-    "payments.apps.PaymentsConfig",
+    "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
     "django_browser_reload",
     "django.contrib.admin",
     "django.contrib.auth",
