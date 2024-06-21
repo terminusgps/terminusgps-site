@@ -1,1 +1,1 @@
-from .token import QuickbooksToken
+from .quickbooks import QuickbooksToken
