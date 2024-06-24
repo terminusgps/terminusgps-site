@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db import models
+from django.http import HttpResponse
+from django.shortcuts import redirect
 from intuitlib.client import AuthClient
 from intuitlib.enums import Scopes
 from quickbooks import QuickBooks

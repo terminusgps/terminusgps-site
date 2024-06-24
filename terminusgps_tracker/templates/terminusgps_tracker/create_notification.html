@@ -1,0 +1,11 @@
+{% extends "terminusgps_tracker/layout.html" %}
+{% block content %}
+    <form action="/create_notification/" method="post">
+        <label for="wialon_username">Wialon Username:</label>
+        <input id="wialon_username"
+               type="text"
+               name="wialon_username"
+               value="{{ wialon_username }}">
+        <input type="submit" value="Submit">
+    </form>
+{% endblock content %}
