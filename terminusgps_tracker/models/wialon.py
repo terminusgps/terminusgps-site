@@ -2,15 +2,13 @@ import urllib.parse
 
 from django.conf import settings
 from django.db import models
-from django.http import HttpResponse
-from django.shortcuts import redirect
 
 from .token import BaseToken
 
 
 class WialonToken(BaseToken):
     user = models.ForeignKey("auth.User", on_delete=models.CASCADE)
-    username = models.CharField(max_length=255)
+    username = models.CharField(max_length=255, blank=True, default="")
 
     def __str__(self) -> str:
         return f"{self.user.username}'s Wialon Token"
@@ -41,6 +39,3 @@ class WialonToken(BaseToken):
         }
         encoded_params = urllib.parse.urlencode(params)
         return f"https://hosting.terminusgps.com/login.html?{encoded_params}"
-
-    def authorize(self, auth_url: str) -> HttpResponse:
-        return redirect(auth_url)

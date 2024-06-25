@@ -42,6 +42,8 @@ CLIENT = {
     },
 }
 WIALON_API_ACCESS_TOKEN = os.environ.get("WIALON_API_ACCESS_TOKEN", None)
+WIALON_CLIENT_ID = os.environ.get("WIALON_CLIENT_ID", None)
+WIALON_REDIRECT_URI = "http://localhost:8000/oauth2_callback/wialon"
 
 QUICKBOOKS = {
     "CLIENT_ID": os.environ.get("QB_CLIENT_ID", ""),

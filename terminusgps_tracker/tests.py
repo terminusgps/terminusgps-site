@@ -67,3 +67,15 @@ class WialonTokenTestCase(TestCase):
 
         self.assertEqual(self.token.access_token, unencrypted_access_token)
         self.assertNotEqual(self.token._access_token, unencrypted_access_token)
+
+    def test_authorize_new_user(self):
+        """Succeeds if an auth url is successfully generated for a brand new user."""
+        new_user = User.objects.create(
+            username="new_user",
+            password="new_password",
+            email="new_user@example.com",
+        )
+        token = WialonToken.objects.create(user=new_user)
+
+        self.client.login(username="new_user", password="new_password")
+        self.client.get(token.authorize(token.auth_url))
