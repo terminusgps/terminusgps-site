@@ -1,38 +1,104 @@
-import json
-from dataclasses import dataclass, field
-from typing import Any
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Optional, TypeVar
+
+E = TypeVar("E", bound="WialonProperty")
 
 from wialon import flags as wialon_flag
 
 from .session import WialonSession
 
 
+class WialonItemsType(Enum):
+    AVL_HW = "avl_hw"
+    AVL_RESOURCE = "avl_resource"
+    AVL_RETRANSLATOR = "avl_retranslator"
+    AVL_ROUTE = "avl_route"
+    AVL_UNIT = "avl_unit"
+    AVL_UNIT_GROUP = "avl_unit_group"
+    USER = "user"
+
+
+class WialonProperty(Enum):
+    LOGIN_DATE = "login_date"
+    PROFILEFIELD = "profilefield"
+    REL_ACCOUNT_DISABLED_MOD_TIME = "rel_account_disabled_mod_time"
+    REL_ACCOUNT_UNITS_USAGE = "rel_account_units_usage"
+    REL_ADMINFIELD_NAME = "rel_adminfield_name"
+    REL_ADMINFIELD_NAME_VALUE = "rel_adminfield_name_value"
+    REL_ADMINFIELD_VALUE = "rel_adminfield_value"
+    REL_BILLING_ACCOUNT_NAME = "sys_billing_account_name"
+    REL_BILLING_PARENT_ACCOUNT_NAME = "sys_billing_parent_account_name"
+    REL_BILLING_PLAN_NAME = "sys_billing_plan_name"
+    REL_CREATION_TIME = "rel_creation_time"
+    REL_CUSTOMFIELD_NAME = "rel_customfield_name"
+    REL_CUSTOMFIELD_NAME_VALUE = "rel_customfield_name_value"
+    REL_CUSTOMFIELD_VALUE = "rel_customfield_value"
+    REL_GROUP_UNIT_COUNT = "rel_group_unit_count"
+    REL_HW_TYPE_ID = "rel_hw_type_id"
+    REL_HW_TYPE_NAME = "rel_hw_type_name"
+    REL_IS_ACCOUNT = "rel_is_account"
+    REL_LAST_MSG_DATE = "rel_last_msg_date"
+    REL_PROFILEFIELD_NAME = "rel_profilefield_name"
+    REL_PROFILEFIELD_NAME_VALUE = "rel_profilefield_name_value"
+    REL_PROFILEFIELD_VALUE = "rel_profilefield_value"
+    REL_USER_CREATOR_NAME = "rel_user_creator_name"
+    RETRANSLATOR_ENABLED = "retranslator_enabled"
+    SYS_ACCOUNT_BALANCE = "sys_account_balance"
+    SYS_ACCOUNT_DAYS = "sys_account_days"
+    SYS_ACCOUNT_DISABLED = "sys_account_disabled"
+    SYS_ACCOUNT_ENABLE_PARENT = "sys_account_enable_parent"
+    SYS_BILLING_ACCOUNT_GUID = "sys_billing_account_guid"
+    SYS_COMM_STATE = "sys_comm_state"
+    SYS_ID = "sys_id"
+    SYS_NAME = "sys_name"
+    SYS_PHONE_NUMBER = "sys_phone_number"
+    SYS_PHONE_NUMBER2 = "sys_phone_number2"
+    SYS_UNIQUE_ID = "sys_unique_id"
+    SYS_USER_CREATOR = "sys_user_creator"
+
+    def __add__(self: E, other: E) -> E:
+        if not isinstance(other, WialonProperty):
+            raise TypeError(
+                f"Unsupported operand type(s) for +: 'WialonProperty' and '{type(other).__name__}'"
+            )
+        combined_value = f"{self.value},{other.value}"
+        return self.__class__(combined_value)
+
+    def __sub__(self: E, other: E) -> E:
+        if not isinstance(other, WialonProperty):
+            raise TypeError(
+                f"Unsupported operand type(s) for -: 'WialonProperty' and '{type(other).__name__}'"
+            )
+
+        if not "," in self.value:
+            new_value = "" if self.value == other.value else self.value
+        else:
+            values = self.value.split(",")
+            try:
+                values.remove(other.value)
+            except ValueError:
+                pass
+            new_value = ",".join(values)
+
+        return self.__class__(new_value) if new_value else self.__class__("")
+
+    def __repr__(self) -> str:
+        return f"<WialonProperty: '{self.value}'"
+
+
 @dataclass
 class WialonQuery:
-    items_type: str = "avl_unit"
+    items_type: WialonItemsType = WialonItemsType.AVL_UNIT
     prop_name: str = "sys_name"
     sort_type: str = "sys_name"
     prop_type: str = "property"
-    or_logic: int = 0
+    prop_value_mask: str = "*"
+    or_logic: int = 1
     _force: int = 0
     _flags: int = wialon_flag.ITEM_DATAFLAG_BASE
     _from: int = 0
     _to: int = 0
-    _prop_value_mask: str = field(init=False, default="*")
-
-    def __post_init__(self):
-        if not hasattr(self, "prop_value_mask"):
-            self.prop_value_mask = "*"
-        else:
-            self.prop_value_mask = self.prop_value_mask
-
-    @property
-    def prop_value_mask(self) -> str:
-        return self._prop_value_mask
-
-    @prop_value_mask.setter
-    def prop_value_mask(self, value: str) -> None:
-        self._prop_value_mask = f"*{value}*"
 
     def _gen_spec(self) -> dict[str, Any]:
         return {
@@ -68,4 +134,5 @@ class WialonQuery:
 
     def execute(self, session: WialonSession) -> dict:
         params: dict = self._gen_params()
-        return session.wialon_api.core_search_items(**params)
+        result = session.wialon_api.core_search_items(**params)
+        return result.get("items", {})
