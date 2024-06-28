@@ -65,17 +65,17 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    "dforms.apps.DformsConfig",
-    "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
-    "django_browser_reload",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.sessions",
     "django.contrib.messages",
+    "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
+    "django_browser_reload",
+    "django_htmx",
     "tailwind",
+    "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
     "theme",
 ]
 
@@ -94,6 +94,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_browser_reload.middleware.BrowserReloadMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
 ]
 
 ROOT_URLCONF = "terminusgps.urls"
