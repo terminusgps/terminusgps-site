@@ -23,6 +23,5 @@ from django.urls import include, path
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("__reload__/", include("django_browser_reload.urls")),
-    path("forms/", include("dforms.urls")),
     path("", include("terminusgps_tracker.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,8 +1,0 @@
-{% extends "terminusgps_tracker/register/base.html" %}
-{% block content %}
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_div }}
-        <button type="submit">Next</button>
-    </form>
-{% endblock content %}
