@@ -14,5 +14,7 @@ db.*
 *.mp4
 *.webm
 
+terminusgps_tracker/static/
+
 package-lock.json
 credentials.*
