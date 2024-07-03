@@ -1,11 +1,12 @@
+from django import forms
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
+from terminusgps_tracker.decorators import requires_wialon_token
 from terminusgps_tracker.models.wialon import WialonToken
-
-from .decorators import requires_wialon_token
-from .models import RegistrationForm
-from .wialonapi import WialonQuery, WialonSession
+from terminusgps_tracker.views.forms import (asset_form, contact_form,
+                                             person_form, registration_form)
+from terminusgps_tracker.wialonapi import WialonQuery, WialonSession
 
 
 def dashboard(request: HttpRequest) -> HttpResponse:
@@ -58,17 +59,16 @@ def oauth2_callback(request: HttpRequest, service: str) -> HttpResponse:
 
 
 def registration(request: HttpRequest, step: str) -> HttpResponse:
-    if request.method == "POST":
-        form = RegistrationForm(request.POST)
+    if step == "1":
+        return person_form(request)
+    elif step == "2":
+        return contact_form(request)
+    elif step == "3":
+        return asset_form(request)
+    elif step == "review":
+        return registration_form(request)
     else:
-        form = RegistrationForm()
-
-    context = {
-        "title": "Registration",
-        "form": form,
-        "step": step,
-    }
-    return render(request, "terminusgps_tracker/register/form.html", context=context)
+        return HttpResponse(status=400)
 
 
 @requires_wialon_token
@@ -96,3 +96,8 @@ def search(request: HttpRequest) -> HttpResponse:
         "items": items,
     }
     return render(request, "terminusgps_tracker/_wialon_results.html", context=context)
+
+
+def validate_view(request: HttpRequest, form: forms.Form) -> HttpResponse:
+    context = {"form": form}
+    return render(request, "terminusgps_tracker/forms/field.html", context=context)

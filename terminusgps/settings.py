@@ -4,63 +4,22 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ADMINS = [
-    ("Blake", "blake@terminusgps.com"),
-    ("Lili", "lili@terminusgps.com"),
-]
-
 SECRET_KEY = "django-insecure-*jz*vcf%7n!$ij5n6ef0snfpg_xvbkeb5##pswykn6n&q&v8&j"
 AUTH_ENCRYPTION_KEY = os.environ.get("ENCRYPTION_KEY", "")
 DEBUG = True
-CLIENT = {
-    "NAME": "TerminusGPS",
-    "TITLE": "TerminusGPS, LLC.",
-    "COPYRIGHT": "© 2024 TerminusGPS, LLC. All rights reserved.",
-    "ADDRESS": {
-        "STREET": "17240 Huffmeister Road",
-        "CITY": "Cypress",
-        "STATE": "TX",
-        "ZIP": 77429,
-    },
-    "PHONE": {
-        "MAIN": "+18448634809",
-        "OTHER": "+17139045262",
-    },
-    "EMAIL": {
-        "MAIN": "contact@terminusgps.com",
-        "SUPPORT": "support@terminusgps.com",
-        "SALES": "sales@terminusgps.com",
-        "NOREPLY": "no-reply@terminusgps.com",
-    },
-    "SOCIAL": {
-        "FACEBOOK": "https://www.facebook.com/terminusgps",
-        "INSTAGRAM": "https://www.instagram.com/terminusgps",
-        "X": "https://www.x.com/terminusgps",
-        "TIKTOK": "https://tiktok.com/@terminusgps",
-    },
-}
 WIALON_API_ACCESS_TOKEN = os.environ.get("WIALON_API_ACCESS_TOKEN", None)
 WIALON_CLIENT_ID = os.environ.get("WIALON_CLIENT_ID", None)
 WIALON_REDIRECT_URI = "http://localhost:8000/oauth2_callback/wialon"
-
-QUICKBOOKS = {
-    "CLIENT_ID": os.environ.get("QB_CLIENT_ID", ""),
-    "CLIENT_SECRET": os.environ.get("QB_CLIENT_SECRET", ""),
-    "REDIRECT_URI": os.environ.get("QB_REDIRECT_URI", "http://localhost:8000/auth/"),
-    "ENVIRONMENT": os.environ.get("QB_ENVIRONMENT", "sandbox"),
-    "COMPANY_ID": os.environ.get("QB_COMPANY_ID", ""),
-}
-
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "terminusgps.com"]
 
+QUICKBOOKS = {}
 
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -100,7 +59,10 @@ ROOT_URLCONF = "terminusgps.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [
+            "terminusgps_tracker/templates/terminusgps_tracker/forms/",
+            "terminusgps_tracker/templates/terminusgps_tracker/forms/widgets/",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

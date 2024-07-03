@@ -1,7 +1,5 @@
 from django.conf import settings
 from django.db import models
-from django.http import HttpResponse
-from django.shortcuts import redirect
 from intuitlib.client import AuthClient
 from intuitlib.enums import Scopes
 from quickbooks import QuickBooks
@@ -17,7 +15,7 @@ DEFAULT_QUICKBOOKS_SCOPES = [
 
 
 class QuickbooksToken(BaseToken):
-    redirect_uri = models.URLField(default=settings.QUICKBOOKS["REDIRECT_URI"])
+    redirect_uri = models.URLField(default="")
 
     def _get_auth_client(self) -> AuthClient:
         if not self.access_token:
