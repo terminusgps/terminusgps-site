@@ -12,7 +12,11 @@
         <main>
             <form method="post" class="max-w-sm mx-auto">
                 {% csrf_token %}
-                <div class="mb-5" id="form-container">{% include "terminusgps_tracker/forms/field.html" with form=form %}</div>
+                <div class="mb-5" id="form-container">
+                    {% for field in form %}
+                        {% include "terminusgps_tracker/forms/base_form.html" with form=form %}
+                    {% endfor %}
+                </div>
                 <button type="submit"
                         class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                     {% if step == "review" %}

@@ -60,8 +60,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            "terminusgps_tracker/templates/terminusgps_tracker/forms/",
-            "terminusgps_tracker/templates/terminusgps_tracker/forms/widgets/",
+            BASE_DIR / "templates",
         ],
         "APP_DIRS": True,
         "OPTIONS": {

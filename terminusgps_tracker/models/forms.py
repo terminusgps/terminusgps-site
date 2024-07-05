@@ -2,6 +2,7 @@ from django import forms
 
 
 class RegistrationForm(forms.Form):
+    name = "register"
     first_name = forms.CharField(
         max_length=255,
         required=True,
@@ -35,6 +36,7 @@ class RegistrationForm(forms.Form):
 
 
 class PersonForm(forms.Form):
+    name = "person"
     first_name = forms.CharField(
         max_length=255,
         required=True,
@@ -48,6 +50,7 @@ class PersonForm(forms.Form):
 
 
 class ContactForm(forms.Form):
+    name = "contact"
     email = forms.EmailField(
         required=True,
         label="Email",
@@ -60,6 +63,7 @@ class ContactForm(forms.Form):
 
 
 class AssetForm(forms.Form):
+    name = "asset"
     asset_name = forms.CharField(
         max_length=255,
         required=True,

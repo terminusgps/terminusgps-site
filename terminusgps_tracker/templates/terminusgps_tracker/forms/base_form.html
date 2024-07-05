@@ -1,0 +1,13 @@
+<div class="mb-5" id="form-container">
+    {% for field in form %}
+        {% if field.name not in form.changed_data %}
+            {% include "terminusgps_tracker/forms/fields/base.html" with form=form field=field %}
+        {% else %}
+            {% if not field.errors %}
+                {% include "terminusgps_tracker/forms/fields/ok.html" with form=form field=field %}
+            {% else %}
+                {% include "terminusgps_tracker/forms/fields/err.html" with form=form field=field %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+</div>
