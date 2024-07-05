@@ -1,0 +1,5 @@
+<div class="mb-5" id="form-container">
+    {% for field in form %}
+        {% include "terminusgps_tracker/forms/field.html" with form=form field=field %}
+    {% endfor %}
+</div>

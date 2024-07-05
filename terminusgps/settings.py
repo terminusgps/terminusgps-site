@@ -20,9 +20,21 @@ ALLOWED_HOSTS = ["127.0.0.1", "localhost", "terminusgps.com"]
 
 QUICKBOOKS = {}
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "LOCATION": "127.0.0.1:11211",
+        "OPTIONS": {
+            "allow_unicode_keys": True,
+            "default_noreply": False,
+        },
+    }
+}
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
+    "django.contrib.admindocs",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.messages",

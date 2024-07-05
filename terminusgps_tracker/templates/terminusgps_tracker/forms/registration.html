@@ -1,0 +1,23 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{{ title }}</title>
+        {% tailwind_css %}
+        <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+    </head>
+    <body>
+        <main>
+            <form class="max-w-sm mx-auto">
+                {% csrf_token %}
+                {% include "terminusgps_tracker/forms/form.html" with form=form %}
+                <button type="submit"
+                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    Submit
+                </button>
+            </form>
+        </main>
+    </body>
+</html>
