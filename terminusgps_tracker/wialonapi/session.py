@@ -1,10 +1,13 @@
-from typing import Self
+import os
+from typing import Optional, Self
 
 from wialon import Wialon
 
 
 class WialonSession:
-    def __init__(self, token: str) -> None:
+    def __init__(self, token: Optional[str] = "") -> None:
+        if not token:
+            token = os.environ.get("WIALON_HOSTING_API_TOKEN", "")
         self.wialon_api: Wialon = Wialon()
         self.token = token
 
