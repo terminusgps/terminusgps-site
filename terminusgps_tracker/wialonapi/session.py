@@ -1,15 +1,15 @@
 import os
-from typing import Optional, Self
+from typing import Self
 
 from wialon import Wialon
 
 
 class WialonSession:
-    def __init__(self, token: Optional[str] = "") -> None:
-        if not token:
-            token = os.environ.get("WIALON_HOSTING_API_TOKEN", "")
+    def __init__(self, token: str = "") -> None:
         self.wialon_api: Wialon = Wialon()
-        self.token = token
+        self.token: str = (
+            token if token else os.environ.get("WIALON_HOSTING_API_TOKEN", "")
+        )
 
         return None
 
@@ -18,7 +18,7 @@ class WialonSession:
         self.wialon_api.sid = login["eid"]
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> str | None:
+    def __exit__(self, exc_type=None, exc_val=None, exc_tb=None) -> str | None:
         if any([exc_type, exc_val, exc_tb]):
             return f"Error: {exc_val}"
         self.wialon_api.core_logout()

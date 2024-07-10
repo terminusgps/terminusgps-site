@@ -3,23 +3,23 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from terminusgps_tracker.wialonapi import WialonQuery, WialonSession
-
-
-def validate_phone_number(value: str) -> None:
-    pass
+from terminusgps_tracker.wialonapi import WialonSession
+from terminusgps_tracker.wialonapi.query import imei_number_exists_in_wialon
 
 
 def validate_imei_number_exists(value: str) -> None:
-    if not value:
-        raise ValidationError(
-            _("IMEI number '%(value)s' does not exist in the TerminusGPS database."),
-            params={"value": value},
-        )
+    with WialonSession() as session:
+        if not imei_number_exists_in_wialon(value, session):
+            raise ValidationError(
+                _(
+                    "IMEI number '%(value)s' does not exist in the TerminusGPS database."
+                ),
+                params={"value": value},
+            )
 
 
 class RegistrationForm(forms.Form):
-    template_name = "terminusgps_tracker/registration_form.html"
+    field_template_name = "terminusgps_tracker/forms/field.html"
     first_name = forms.CharField(
         max_length=255,
         required=True,

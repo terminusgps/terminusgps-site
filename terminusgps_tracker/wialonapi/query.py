@@ -18,6 +18,12 @@ class WialonItemsType(Enum):
     AVL_UNIT_GROUP = "avl_unit_group"
     USER = "user"
 
+    def __str__(self) -> str:
+        return self.value
+
+    def __repr__(self) -> str:
+        return f"<WialonItemsType: '{self.value}'>"
+
 
 class WialonProperty(Enum):
     LOGIN_DATE = "login_date"
@@ -84,14 +90,14 @@ class WialonProperty(Enum):
         return self.__class__(new_value) if new_value else self.__class__("")
 
     def __repr__(self) -> str:
-        return f"<WialonProperty: '{self.value}'"
+        return f"<WialonProperty: '{self.value}'>"
 
 
 @dataclass
 class WialonQuery:
     items_type: WialonItemsType = WialonItemsType.AVL_UNIT
-    prop_name: str = "sys_name"
-    sort_type: str = "sys_name"
+    prop_name: WialonProperty = WialonProperty.SYS_NAME
+    sort_type: WialonProperty = WialonProperty.SYS_NAME
     prop_type: str = "property"
     prop_value_mask: str = "*"
     or_logic: int = 1
@@ -102,10 +108,10 @@ class WialonQuery:
 
     def _gen_spec(self) -> dict[str, Any]:
         return {
-            "itemsType": self.items_type,
-            "propName": self.prop_name,
+            "itemsType": self.items_type.value,
+            "propName": self.prop_name.value,
             "propValueMask": self.prop_value_mask,
-            "sortType": self.sort_type,
+            "sortType": self.sort_type.value,
             "propType": self.prop_type,
             "or_logic": self.or_logic,
         }
@@ -134,5 +140,18 @@ class WialonQuery:
 
     def execute(self, session: WialonSession) -> dict:
         params: dict = self._gen_params()
+        print(f"Performing query... {params = }")
         result = session.wialon_api.core_search_items(**params)
         return result.get("items", {})
+
+
+def imei_number_exists_in_wialon(imei_number: str, session: WialonSession) -> bool:
+    query = WialonQuery()
+    query.prop_value_mask = f"*{imei_number}*"
+    query.prop_name = WialonProperty.SYS_UNIQUE_ID
+    query.sort_type = WialonProperty.SYS_UNIQUE_ID
+    result = query.execute(session)
+    for unit in result:
+        if unit.get("nm") == imei_number:
+            return True
+    return False

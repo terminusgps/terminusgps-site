@@ -1,5 +1,7 @@
+from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
+from django.urls import reverse_lazy
 from django.views.generic.edit import FormView
 
 from terminusgps_tracker.models import RegistrationForm
@@ -23,4 +25,18 @@ class RegistrationFormView(FormView):
         "asset_name",
         "imei_number",
     ]
-    success_url = "/forms/success/"
+    success_url = reverse_lazy("/forms/success/")
+
+    def email_credentials(self, to_addr: str) -> None:
+        """Email the Wialon username and password to the provided email address."""
+        raise NotImplementedError
+
+    def form_valid(self, form: RegistrationForm):
+        form = form.save()
+        self.email_credentials(to_addr=form.cleaned_data["email"])
+        messages.success(
+            self.request,
+            f"Registration complete! Your asset has been registered and your new Wialon credentials have been emailed to {form.cleaned_data['email']}.",
+        )
+
+        return super().form_valid(form)
