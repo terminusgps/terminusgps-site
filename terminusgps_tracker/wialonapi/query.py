@@ -77,7 +77,7 @@ class WialonProperty(Enum):
                 f"Unsupported operand type(s) for -: 'WialonProperty' and '{type(other).__name__}'"
             )
 
-        if not "," in self.value:
+        if "," not in self.value:
             new_value = "" if self.value == other.value else self.value
         else:
             values = self.value.split(",")
@@ -140,18 +140,17 @@ class WialonQuery:
 
     def execute(self, session: WialonSession) -> dict:
         params: dict = self._gen_params()
-        print(f"Performing query... {params = }")
         result = session.wialon_api.core_search_items(**params)
-        return result.get("items", {})
+        return result
 
 
 def imei_number_exists_in_wialon(imei_number: str, session: WialonSession) -> bool:
     query = WialonQuery()
-    query.prop_value_mask = f"*{imei_number}*"
+    query.toggle_or_logic()
+    query.prop_value_mask = f"{imei_number}"
     query.prop_name = WialonProperty.SYS_UNIQUE_ID
     query.sort_type = WialonProperty.SYS_UNIQUE_ID
     result = query.execute(session)
-    for unit in result:
-        if unit.get("nm") == imei_number:
-            return True
+    if result.get("totalItemsCount", 0) == 1:
+        return True
     return False

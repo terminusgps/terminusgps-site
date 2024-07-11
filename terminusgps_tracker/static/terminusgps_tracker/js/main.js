@@ -1,7 +1,7 @@
 function updateAssetName(event) {
 	console.log("Running updateAssetName. Event isTrusted: ", event.isTrusted);
-	const firstName = document.getElementById("first_name");
-	const assetName = document.getElementById("asset_name");
+	const firstName = document.getElementById("id_first_name");
+	const assetName = document.getElementById("id_asset_name");
 	const baseEnding = "'s Ride";
 
 	if (event.isTrusted) {
@@ -10,8 +10,8 @@ function updateAssetName(event) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-	const firstName = document.getElementById("first_name");
-	const assetName = document.getElementById("asset_name");
+	const firstName = document.getElementById("id_first_name");
+	const assetName = document.getElementById("id_asset_name");
 
 	firstName.addEventListener("input", updateAssetName);
 	assetName.addEventListener("input", function (event) {

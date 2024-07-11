@@ -2,12 +2,14 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from typing import Union
 
 from terminusgps_tracker.wialonapi import WialonSession
 from terminusgps_tracker.wialonapi.query import imei_number_exists_in_wialon
 
 
 def validate_imei_number_exists(value: str) -> None:
+    """Checks if the given value is present in the TerminusGPS UUID database."""
     with WialonSession() as session:
         if not imei_number_exists_in_wialon(value, session):
             raise ValidationError(
@@ -59,6 +61,9 @@ class RegistrationForm(forms.Form):
             validate_imei_number_exists,
         ],
     )
+
+    def send_creds_email(self, to_addr: Union[list[str], str]) -> None:
+        """Sends this form's credentials via email to the given address(es)."""
 
     def get_absolute_url(self):
         return reverse("/forms/registration/", kwargs={"pk": self.pk})

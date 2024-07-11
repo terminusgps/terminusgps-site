@@ -12,8 +12,8 @@ urlpatterns = [
     path("search/wialon/", views.search_wialon, name="search wialon"),
     path(
         "forms/registration/",
-        views.RegistrationFormView.as_view(),
-        name="registration form",
+        views.form_registration,
+        name="form registration",
     ),
-    path("forms/success/", views.form_success_view, name="success form"),
+    path("forms/success/", views.form_success_view, name="form success"),
 ]
