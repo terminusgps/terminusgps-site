@@ -665,6 +665,10 @@ video {
   z-index: 40;
 }
 
+.m-4 {
+  margin: 1rem;
+}
+
 .mx-auto {
   margin-left: auto;
   margin-right: auto;
@@ -782,6 +786,10 @@ video {
 
 .justify-center {
   justify-content: center;
+}
+
+.justify-items-center {
+  justify-items: center;
 }
 
 .space-y-2 > :not([hidden]) ~ :not([hidden]) {

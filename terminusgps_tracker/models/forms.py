@@ -2,7 +2,8 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from typing import Union
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
 
 from terminusgps_tracker.wialonapi import WialonSession
 from terminusgps_tracker.wialonapi.query import imei_number_exists_in_wialon
@@ -54,7 +55,6 @@ class RegistrationForm(forms.Form):
     imei_number = forms.CharField(
         max_length=20,
         required=True,
-        disabled=True,
         label="IMEI #",
         help_text="This should've been filled out for you. If not, please contact support@terminusgps.com",
         validators=[
@@ -62,8 +62,20 @@ class RegistrationForm(forms.Form):
         ],
     )
 
-    def send_creds_email(self, to_addr: Union[list[str], str]) -> None:
-        """Sends this form's credentials via email to the given address(es)."""
+    def send_creds_email(self, email: str, passw: str) -> None:
+        """Sends a form's credentials via email."""
+        context = {"username": email, "passw": passw}
+        email_message = EmailMessage(
+            subject="TerminusGPS/Wialon Credentials",
+            body=render_to_string("terminusgps_tracker/email_credentials.html", context),
+            from_email="support@terminusgps.com",
+            to=[email],
+            bcc=["pspeckman@terminusgps.com"],
+            reply_to=["pspeckman@terminusgps.com", "support@terminusgps.com"],
+        )
+        email_message.content_subtype = "html"
+        email_message.send()
+
 
     def get_absolute_url(self):
         return reverse("/forms/registration/", kwargs={"pk": self.pk})
