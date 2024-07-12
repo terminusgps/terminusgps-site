@@ -50,7 +50,7 @@ class WialonSession:
         """Assigns a Wialon asset to the provided user ID, returns its own ID."""
         asset_id = self._get_wialon_id(imei_number)
         self.rename_wialon_asset(asset_id, asset_name)
-        self.set_default_wialon_access(user_id, asset_id)
+        self.set_default_wialon_access(asset_id, user_id)
 
     def set_user_settings_flags(self, user_id: str) -> None:
         """Sets user settings flags on the provided Wialon user."""
@@ -69,7 +69,7 @@ class WialonSession:
 
 
 
-    def set_default_wialon_access(self, user_id: str, asset_id: str) -> None:
+    def set_default_wialon_access(self, asset_id: str, user_id: str) -> None:
         """Sets the default access flags for the provided Wialon asset and user."""
         logger.info(f"Setting default access flags for user #{user_id} and asset #{asset_id}.")
         params = {
