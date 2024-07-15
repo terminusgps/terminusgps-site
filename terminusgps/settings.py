@@ -11,7 +11,7 @@ WIALON_API_ACCESS_TOKEN = os.environ.get("WIALON_API_ACCESS_TOKEN", None)
 WIALON_CLIENT_ID = os.environ.get("WIALON_CLIENT_ID", None)
 WIALON_REDIRECT_URI = "http://localhost:8000/oauth2_callback/wialon"
 DEFAULT_FROM_EMAIL = "support@terminusgps.com"
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
@@ -28,11 +28,11 @@ MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "terminusgps.com"]
 
-QUICKBOOKS = {}
-
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+SESSION_COOKIE_HTTPONLY = True
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         "LOCATION": "127.0.0.1:11211",
         "OPTIONS": {
             "allow_unicode_keys": True,
@@ -40,7 +40,6 @@ CACHES = {
         },
     }
 }
-SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 INSTALLED_APPS = [
     "django.contrib.admin",

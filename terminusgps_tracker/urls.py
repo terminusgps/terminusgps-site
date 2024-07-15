@@ -16,4 +16,5 @@ urlpatterns = [
         name="form registration",
     ),
     path("forms/success/", views.form_success_view, name="form success"),
+    path("creds/", views.forms.credentials_email_view, name="credentials email"),
 ]

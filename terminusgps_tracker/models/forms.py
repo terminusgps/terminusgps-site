@@ -1,3 +1,5 @@
+import string
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.urls import reverse
@@ -8,6 +10,32 @@ from django.core.mail import EmailMessage
 
 from terminusgps_tracker.wialonapi import WialonSession
 from terminusgps_tracker.wialonapi.query import imei_number_exists_in_wialon
+
+def validate_wialon_password(value: str) -> None:
+    """Checks if the given value is a valid Wialon password."""
+    valid_special_chars = set("!#$%-.:;@?_~")
+    if not any(c in string.ascii_uppercase for c in value):
+        raise ValidationError(
+            _("Wialon password must contain at least one uppercase letter."),
+            params={"value": value}
+        )
+    elif not any(c in string.ascii_lowercase for c in value):
+        raise ValidationError(
+            _("Wialon password must contain at least one lowercase letter."),
+            params={"value": value}
+        )
+    elif not any(c in string.digits for c in value):
+        raise ValidationError(
+            _("Wialon password must contain at least one digit."),
+            params={"value": value}
+        )
+    elif not any(c in valid_special_chars for c in value):
+        raise ValidationError(
+            _("Wialon password must contain at least one special symbol. Symbols: '%(symbols)s'"),
+            params={"symbols": "".join(valid_special_chars)}
+        )
+    else:
+        return None
 
 
 def validate_imei_number_exists(value: str) -> None:
@@ -24,6 +52,7 @@ def validate_imei_number_exists(value: str) -> None:
 
 class RegistrationForm(forms.Form):
     field_template_name = "terminusgps_tracker/forms/field.html"
+    initial = {}
     first_name = forms.CharField(
         max_length=255,
         required=True,
@@ -41,26 +70,26 @@ class RegistrationForm(forms.Form):
         label="Email",
         help_text="Please enter your email address.",
     )
-    phone_number = forms.CharField(
-        max_length=12,
-        required=False,
-        label="Phone #",
-        help_text="Please enter your phone number in any format.",
-    )
     asset_name = forms.CharField(
         max_length=255,
         required=True,
         label="Asset Name",
         help_text="Please enter a name for your new asset.",
     )
+    wialon_password = forms.CharField(
+        max_length=64,
+        min_length=8,
+        required=True,
+        label="Wialon Password",
+        validators=[validate_wialon_password],
+        widget=forms.PasswordInput,
+    )
     imei_number = forms.CharField(
         max_length=20,
         required=True,
         label="IMEI #",
         help_text="This should've been filled out for you. If not, please contact support@terminusgps.com",
-        validators=[
-            validate_imei_number_exists,
-        ],
+        validators=[validate_imei_number_exists],
     )
 
     def send_creds_email(self, email: str, passw: str) -> None:
@@ -68,7 +97,7 @@ class RegistrationForm(forms.Form):
         context = {"username": email, "passw": passw}
         with mail.get_connection() as connection:
             email_message = EmailMessage(
-                subject="TerminusGPS Credentials",
+                subject="Your Credentials",
                 body=render_to_string("terminusgps_tracker/email_credentials.html", context),
                 from_email="support@terminusgps.com",
                 to=[email],
@@ -78,7 +107,6 @@ class RegistrationForm(forms.Form):
             )
             email_message.content_subtype = "html"
             email_message.send()
-
 
     def get_absolute_url(self):
         return reverse("/forms/registration/", kwargs={"pk": self.pk})
