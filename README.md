@@ -1,3 +1,3 @@
-# TerminusGPS Ecom Website
+# TerminusGPS Website
 
 © 2023-2024 TerminusGPS, LLC - All Rights Reserved.
