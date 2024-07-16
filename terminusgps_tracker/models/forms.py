@@ -96,7 +96,7 @@ class RegistrationForm(forms.Form):
         """Sends a form's credentials via email."""
         context = {"username": email, "passw": passw}
         with mail.get_connection() as connection:
-            email_message = EmailMessage(
+            msg = EmailMessage(
                 subject="Your Credentials",
                 body=render_to_string("terminusgps_tracker/email_credentials.html", context),
                 from_email="support@terminusgps.com",
@@ -105,8 +105,8 @@ class RegistrationForm(forms.Form):
                 reply_to=["pspeckman@terminusgps.com", "support@terminusgps.com"],
                 connection=connection,
             )
-            email_message.content_subtype = "html"
-            email_message.send()
+            msg.content_subtype = "html"
+            msg.send()
 
     def get_absolute_url(self):
         return reverse("/forms/registration/", kwargs={"pk": self.pk})
