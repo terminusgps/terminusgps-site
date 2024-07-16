@@ -17,7 +17,7 @@ click==8.1.7
 cookiecutter==2.6.0
 cryptography==42.0.8
 deprecation==2.1.0
-Django==5.0.4
+Django==5.0.7
 django-browser-reload==1.12.1
 django-tailwind==3.8.0
 ecdsa==0.19.0
