@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 from django.core import mail
 from django.core.mail import EmailMessage
 
-from terminusgps_tracker.wialonapi import WialonSession
+from terminusgps_tracker.wialonapi.session import WialonSession
 from terminusgps_tracker.wialonapi.query import imei_number_exists_in_wialon
 
 def validate_wialon_password(value: str) -> None:

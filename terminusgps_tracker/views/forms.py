@@ -2,8 +2,8 @@ import logging
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
 
-from terminusgps_tracker.wialonapi import WialonSession
-from terminusgps_tracker.models import RegistrationForm
+from terminusgps_tracker.wialonapi.session import WialonSession
+from terminusgps_tracker.models.forms import RegistrationForm
 
 logger = logging.getLogger(__name__)
 
