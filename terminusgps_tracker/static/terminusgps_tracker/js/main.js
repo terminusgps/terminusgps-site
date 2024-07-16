@@ -1,5 +1,4 @@
 function updateAssetName(event) {
-	console.log("Running updateAssetName. Event isTrusted: ", event.isTrusted);
 	const firstName = document.getElementById("id_first_name");
 	const assetName = document.getElementById("id_asset_name");
 	const baseEnding = "'s Ride";
