@@ -1,81 +1,25 @@
-from django.contrib.auth.models import User
 from django.test import TestCase
 
-from .models import QuickbooksToken, WialonToken
+from terminusgps_tracker.models.forms import RegistrationForm
 
-
-class QuickbooksTokenTestCase(TestCase):
-    def test_set_and_retrieve_access_token(self) -> None:
-        """Test setting and retrieving access token."""
-        unencrypted_access_token = "super_secure_access_token"
-        test_user = User.objects.create_user(
-            username="test_user",
-            password="test_password",
-            email="test_user@example.com",
-        )
-        test_token = QuickbooksToken.objects.create(user=test_user)
-
-        test_token.access_token = unencrypted_access_token
-
-        self.assertEqual(test_token.access_token, unencrypted_access_token)
-        self.assertNotEqual(test_token._access_token, unencrypted_access_token)
-
-    def test_set_and_retrieve_refresh_token(self) -> None:
-        """Test setting and retrieving refresh token."""
-        unencrypted_refresh_token = "super_secure_refresh_token"
-        test_user = User.objects.create_user(
-            username="test_user",
-            password="test_password",
-            email="test_user@example.com",
-        )
-        test_token = QuickbooksToken.objects.create(user=test_user)
-
-        test_token.refresh_token = unencrypted_refresh_token
-
-        self.assertEqual(test_token.refresh_token, unencrypted_refresh_token)
-        self.assertNotEqual(test_token._refresh_token, unencrypted_refresh_token)
-
-
-class QuickbooksAuthorizationTestCase(TestCase):
-    def test_authorize_new_user(self) -> None:
-        test_user = User.objects.create_user(
-            username="test_user",
-            password="test_password",
-            email="test_user@example.com",
-        )
-        test_token = QuickbooksToken.objects.create(
-            user=test_user,
-        )
-
-        self.client.login(username="test_user", password="test_password")
-
-
-class WialonTokenTestCase(TestCase):
+class RegistrationFormTestCase(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(
-            username="test_user",
-            password="test_password",
-            email="test_user@example.com",
-        )
-        self.token = WialonToken.objects.create(user=self.user)
+        self.form_data = {
+            "first_name": "Test",
+            "last_name": "User",
+            "email": "testuser@domain.com",
+            "wialon_password": "AppleSauce1@!",
+            "asset_name": "Test's Ride",
+            "imei_number": "123",
+        }
 
-    def test_set_and_retrieve_access_token(self):
-        """Succeeds if an access token can be set and retrieved from :models:`terminusgps_tracker.models.WialonToken`."""
-        unencrypted_access_token = "a_very_secure_access_token"
+    def test_valid_form(self) -> None:
+        form_data = self.form_data.copy()
+        form = RegistrationForm(form_data)
+        self.assertTrue(form.is_valid())
 
-        self.token.access_token = unencrypted_access_token
-
-        self.assertEqual(self.token.access_token, unencrypted_access_token)
-        self.assertNotEqual(self.token._access_token, unencrypted_access_token)
-
-    def test_authorize_new_user(self):
-        """Succeeds if an auth url is successfully generated for a brand new user."""
-        new_user = User.objects.create(
-            username="new_user",
-            password="new_password",
-            email="new_user@example.com",
-        )
-        token = WialonToken.objects.create(user=new_user)
-
-        self.client.login(username="new_user", password="new_password")
-        self.client.get(token.authorize(token.auth_url))
+    def test_invalid_form(self) -> None:
+        form_data = self.form_data.copy()
+        form_data["email"] = ""
+        form = RegistrationForm(form_data)
+        self.assertFalse(form.is_valid())
