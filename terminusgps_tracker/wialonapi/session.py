@@ -1,14 +1,14 @@
-import os
 import logging
-import string
+import os
 import secrets
-from typing import Self
+import string
 
+from typing import Self
 from wialon import Wialon
 from wialon import flags as wialon_flag
 
-stdout_handler = logging.StreamHandler()
-logging.basicConfig(level=logging.DEBUG, handlers=[stdout_handler])
+from terminusgps.logging_config import LOGGING_CONFIG
+logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger(__name__)
 
 

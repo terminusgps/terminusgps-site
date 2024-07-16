@@ -11,8 +11,8 @@ WIALON_API_ACCESS_TOKEN = os.environ.get("WIALON_API_ACCESS_TOKEN", None)
 WIALON_CLIENT_ID = os.environ.get("WIALON_CLIENT_ID", None)
 WIALON_REDIRECT_URI = "http://localhost:8000/oauth2_callback/wialon"
 DEFAULT_FROM_EMAIL = "support@terminusgps.com"
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_PORT = 587
@@ -20,6 +20,15 @@ EMAIL_SUBJECT_PREFIX = "[TerminusGPS] "
 EMAIL_USE_LOCALTIME = True
 EMAIL_USE_TLS = True
 
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "offline"},
+    }
+}
+SITE_ID = 2
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 
 STATICFILES_DIRS = [
     BASE_DIR / "static",
@@ -42,6 +51,10 @@ CACHES = {
 }
 
 INSTALLED_APPS = [
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
     "django.contrib.admin",
     "django.contrib.admindocs",
     "django.contrib.auth",
@@ -64,6 +77,8 @@ INTERNAL_IPS = [
 ]
 
 MIDDLEWARE = [
+    "allauth.account.auth_backends.AuthenticationBackend",
+    "allauth.account.middleware.AccountMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
