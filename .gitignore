@@ -1,7 +1,7 @@
 node_modules/
 __pycache__/
 migrations/
-main.css
+theme/static/css/dist/styles.css
 db.*
 
 .*
