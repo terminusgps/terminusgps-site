@@ -51,10 +51,6 @@ CACHES = {
 }
 
 INSTALLED_APPS = [
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
-    "allauth.socialaccount.providers.google",
     "django.contrib.admin",
     "django.contrib.admindocs",
     "django.contrib.auth",
@@ -77,8 +73,6 @@ INTERNAL_IPS = [
 ]
 
 MIDDLEWARE = [
-    "allauth.account.auth_backends.AuthenticationBackend",
-    "allauth.account.middleware.AccountMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
