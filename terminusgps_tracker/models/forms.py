@@ -4,55 +4,54 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django.template.loader import render_to_string
-from django.core import mail
-from django.core.mail import EmailMessage
+from django.core.validators import validate_email
 
 from terminusgps_tracker.wialonapi.session import WialonSession
 from terminusgps_tracker.wialonapi.query import imei_number_exists_in_wialon
 
-def validate_wialon_password(value: str) -> None:
-    """Checks if the given value is a valid Wialon password."""
-    valid_special_chars = set("!#$%-.:;@?_~")
-    if not any(c in string.ascii_uppercase for c in value):
-        raise ValidationError(
-            _("Wialon password must contain at least one uppercase letter."),
-            params={"value": value}
-        )
-    elif not any(c in string.ascii_lowercase for c in value):
-        raise ValidationError(
-            _("Wialon password must contain at least one lowercase letter."),
-            params={"value": value}
-        )
-    elif not any(c in string.digits for c in value):
-        raise ValidationError(
-            _("Wialon password must contain at least one digit."),
-            params={"value": value}
-        )
-    elif not any(c in valid_special_chars for c in value):
-        raise ValidationError(
-            _("Wialon password must contain at least one special symbol. Symbols: '%(symbols)s'"),
-            params={"symbols": "".join(valid_special_chars)}
-        )
-    else:
-        return None
+def validate_imei_number_is_available(value: str) -> None:
+    """Checks if the given value represents an IMEI # of an unactivated Wialon unit."""
+    with WialonSession() as session:
+        if imei_number_exists_in_wialon(value, session):
+            unactivated_units = session.get_unactivated_units()
+            id = session._get_wialon_id(value)
 
+            if id not in unactivated_units:
+                raise ValidationError(
+                    _("IMEI number '%(value)s' is unavailable for registration. Please contact TerminusGPS."),
+                    params={"value": value}
+                )
 
 def validate_imei_number_exists(value: str) -> None:
-    """Checks if the given value is present in the TerminusGPS UUID database."""
+    """Checks if the given value is present in the TerminusGPS database."""
     with WialonSession() as session:
         if not imei_number_exists_in_wialon(value, session):
             raise ValidationError(
-                _(
-                    "IMEI number '%(value)s' does not exist in the TerminusGPS database."
-                ),
+                _("IMEI number '%(value)s' does not exist in the TerminusGPS database."),
                 params={"value": value},
             )
 
+def validate_contains_uppercase(value: str) -> None:
+    if not any(c in string.ascii_uppercase for c in value):
+        raise ValidationError(_("Must contain at least one uppercase letter."))
 
-class RegistrationForm(forms.Form):
-    field_template_name = "terminusgps_tracker/forms/field.html"
-    initial = {}
+def validate_contains_lowercase(value: str) -> None:
+    if not any(c in string.ascii_lowercase for c in value):
+        raise ValidationError(_("Must contain at least one lowercase letter."))
+
+def validate_contains_digit(value: str) -> None:
+    if not any(c in string.digits for c in value):
+        raise ValidationError(_("Must contain at least one digit."),)
+
+def validate_contains_special_char(value: str) -> None:
+    valid_special_chars = set("!#$%-.:;@?_~")
+    if not any(c in valid_special_chars for c in value):
+        raise ValidationError(
+            _("Must contain at least one special symbol. Symbols: '%(symbols)s'"),
+            params={"symbols": "".join(valid_special_chars)}
+        )
+
+class PersonForm(forms.Form):
     first_name = forms.CharField(
         max_length=255,
         required=True,
@@ -65,10 +64,27 @@ class RegistrationForm(forms.Form):
         label="Last Name",
         help_text="Please enter your last name.",
     )
+
+class ContactForm(forms.Form):
     email = forms.EmailField(
         required=True,
         label="Email",
         help_text="Please enter your email address.",
+        validators=[validate_email]
+    )
+    phone_number = forms.CharField(
+        required=True,
+        label="Phone #",
+        help_text="Please enter your phone number.",
+    )
+
+class AssetForm(forms.Form):
+    imei_number = forms.CharField(
+        required=True,
+        label="IMEI #",
+        help_text="This should've been filled out for you. If not, please contact support@terminusgps.com",
+        disabled=True,
+        validators=[validate_imei_number_exists],
     )
     asset_name = forms.CharField(
         max_length=255,
@@ -81,32 +97,57 @@ class RegistrationForm(forms.Form):
         min_length=8,
         required=True,
         label="Wialon Password",
-        validators=[validate_wialon_password],
-        widget=forms.PasswordInput,
+        widget=forms.PasswordInput(),
+        validators=[
+            validate_contains_uppercase,
+            validate_contains_lowercase,
+            validate_contains_digit,
+            validate_contains_special_char,
+        ],
     )
-    imei_number = forms.CharField(
-        max_length=20,
+    wialon_password_confirmation = forms.CharField(
+        max_length=64,
+        min_length=8,
         required=True,
-        label="IMEI #",
-        help_text="This should've been filled out for you. If not, please contact support@terminusgps.com",
-        validators=[validate_imei_number_exists],
+        label="Confirm Wialon Password",
+        widget=forms.PasswordInput(),
+        validators=[
+            validate_contains_uppercase,
+            validate_contains_lowercase,
+            validate_contains_digit,
+            validate_contains_special_char,
+        ],
     )
 
-    def send_creds_email(self, email: str, passw: str) -> None:
-        """Sends a form's credentials via email."""
-        context = {"username": email, "passw": passw}
-        with mail.get_connection() as connection:
-            msg = EmailMessage(
-                subject="Your Credentials",
-                body=render_to_string("terminusgps_tracker/email_credentials.html", context),
-                from_email="support@terminusgps.com",
-                to=[email],
-                bcc=["pspeckman@terminusgps.com"],
-                reply_to=["pspeckman@terminusgps.com", "support@terminusgps.com"],
-                connection=connection,
-            )
-            msg.content_subtype = "html"
-            msg.send()
+class RegistrationForm(PersonForm, ContactForm, AssetForm):
+    field_order = [
+        "first_name",
+        "last_name",
+        "asset_name",
+        "imei_number",
+        "email",
+        "wialon_password",
+        "wialon_password_confirmation",
+    ]
+
+    phone_number = None
+
+    def clean(self) -> dict:
+        cleaned_data = super(RegistrationForm, self).clean()
+        if "wialon_password" and "wialon_password_confirmation" in cleaned_data:
+            password_1 = cleaned_data["wialon_password"]
+            password_2 = cleaned_data["wialon_password_confirmation"]
+            if password_1 != password_2:
+                self.add_error("wialon_password", "Passwords do not match.")
+                self.add_error("wialon_password_confirmation", "Passwords do not match.")
+
+            if "email" in cleaned_data:
+                if password_1 == cleaned_data["email"]:
+                    self.add_error("wialon_password", "Password cannot be equal to email.")
+                if password_2 == cleaned_data["email"]:
+                    self.add_error("wialon_password_confirmation", "Password cannot be equal to email.")
+
+        return cleaned_data
 
     def get_absolute_url(self):
         return reverse("/forms/registration/", kwargs={"pk": self.pk})

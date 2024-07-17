@@ -10,7 +10,7 @@
     </head>
     <body>
         <main>
-            <h2 class="my-8 text-2xl text-center text-gray-900 dark:text-white">TerminusGPS Registration Form</h2>
+            <h2 class="my-8 text-3xl text-center text-gray-900 dark:text-white">TerminusGPS Registration Form</h2>
             <form method="post" action="{% url 'form registration' %}">
                 {% csrf_token %}
                 {% for field in form %}
@@ -22,6 +22,7 @@
                                id="{{ field.id_for_label }}"
                                name="{{ field.name }}"
                                value="{{ field.value|default_if_none:'' }}"
+                               type="{{ field.field.widget.input_type|default_if_none:'text' }}"
                                {% if field.required %}required{% endif %}>
                     {% elif not field.errors %}
                         <label for="{{ field.id_for_label }}"
@@ -30,6 +31,7 @@
                                id="{{ field.id_for_label }}"
                                name="{{ field.name }}"
                                value="{{ field.value|default_if_none:'' }}"
+                               type="{{ field.field.widget.input_type|default_if_none:'text' }}"
                                {% if field.required %}required{% endif %}>
                         <p class="mt-2 mb-4 text-sm text-green-600 dark:text-green-500">
                             <span class="font-medium"><i>Looks good!</i></span>
@@ -41,6 +43,7 @@
                                id="{{ field.id_for_label }}"
                                name="{{ field.name }}"
                                value="{{ field.value|default_if_none:'' }}"
+                               type="{{ field.field.widget.input_type|default_if_none:'text' }}"
                                {% if field.required %}required{% endif %}>
                         <p class="mt-2 mb-4 text-sm text-red-600 dark:text-red-500">
                             <span class="font-medium"><i>Oops!</i></span>
@@ -54,7 +57,7 @@
                 </div>
                 {% endfor %}
                 <button type="submit"
-                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        class="m-4 justify-items-center w-fit text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                     Submit
                 </button>
                 </form>

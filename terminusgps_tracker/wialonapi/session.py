@@ -102,6 +102,16 @@ class WialonSession:
         response = self.wialon_api.item_update_name(**params)
         logger.debug(f"WialonSession.rename_wialon_asset response: {response}")
 
+    def get_unactivated_units(self) -> list[str]:
+        group_id = "27890571"
+        logger.info("Retrieving list of unactivated units from Wialon...")
+        params = {
+            "id": group_id,
+            "flags": wialon_flag.ITEM_DATAFLAG_BASE,
+        }
+        response = self.wialon_api.core_search_item(**params)
+        return response.get("item").get("u", [])
+
     def _get_wialon_id(self, imei_number: str) -> str:
         """Takes a Wialon IMEI # and returns its corresponding Wialon ID."""
         logger.info(f"Retrieving Wialon id for '{imei_number}'...")
