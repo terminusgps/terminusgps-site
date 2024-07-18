@@ -9,19 +9,6 @@ from django.core.validators import validate_email
 from terminusgps_tracker.wialonapi.session import WialonSession
 from terminusgps_tracker.wialonapi.query import imei_number_exists_in_wialon
 
-def validate_imei_number_is_available(value: str) -> None:
-    """Checks if the given value represents an IMEI # of an unactivated Wialon unit."""
-    with WialonSession() as session:
-        if imei_number_exists_in_wialon(value, session):
-            unactivated_units = session.get_unactivated_units()
-            id = session._get_wialon_id(value)
-
-            if id not in unactivated_units:
-                raise ValidationError(
-                    _("IMEI number '%(value)s' is unavailable for registration. Please contact TerminusGPS."),
-                    params={"value": value}
-                )
-
 def validate_imei_number_exists(value: str) -> None:
     """Checks if the given value is present in the TerminusGPS database."""
     with WialonSession() as session:
@@ -30,6 +17,10 @@ def validate_imei_number_exists(value: str) -> None:
                 _("IMEI number '%(value)s' does not exist in the TerminusGPS database."),
                 params={"value": value},
             )
+
+def validate_is_digit(value: str) -> None:
+    if not value.isdigit():
+        raise ValidationError(_("'%(value)s' can only contain digits."), params={"value": value})
 
 def validate_contains_uppercase(value: str) -> None:
     if not any(c in string.ascii_uppercase for c in value):
@@ -50,6 +41,7 @@ def validate_contains_special_char(value: str) -> None:
             _("Must contain at least one special symbol. Symbols: '%(symbols)s'"),
             params={"symbols": "".join(valid_special_chars)}
         )
+
 
 class PersonForm(forms.Form):
     first_name = forms.CharField(
@@ -84,7 +76,10 @@ class AssetForm(forms.Form):
         label="IMEI #",
         help_text="This should've been filled out for you. If not, please contact support@terminusgps.com",
         disabled=True,
-        validators=[validate_imei_number_exists],
+        validators=[
+            validate_is_digit,
+            validate_imei_number_exists,
+       ],
     )
     asset_name = forms.CharField(
         max_length=255,
@@ -119,6 +114,7 @@ class AssetForm(forms.Form):
         ],
     )
 
+
 class RegistrationForm(PersonForm, ContactForm, AssetForm):
     field_order = [
         "first_name",
@@ -133,7 +129,9 @@ class RegistrationForm(PersonForm, ContactForm, AssetForm):
     phone_number = None
 
     def clean(self) -> dict:
+        print("RegistrationForm.clean called")
         cleaned_data = super(RegistrationForm, self).clean()
+        print(f"Before logic: {cleaned_data = }")
         if "wialon_password" and "wialon_password_confirmation" in cleaned_data:
             password_1 = cleaned_data["wialon_password"]
             password_2 = cleaned_data["wialon_password_confirmation"]
@@ -147,7 +145,22 @@ class RegistrationForm(PersonForm, ContactForm, AssetForm):
                 if password_2 == cleaned_data["email"]:
                     self.add_error("wialon_password_confirmation", "Password cannot be equal to email.")
 
+        print(f"After logic: {cleaned_data = }")
         return cleaned_data
 
     def get_absolute_url(self):
+        print("RegistrationForm.get_absolute_url called")
         return reverse("/forms/registration/", kwargs={"pk": self.pk})
+
+    def clean_imei_number(self) -> str:
+        print("RegistrationForm.clean_imei_number called")
+        imei_number = self.cleaned_data.get("imei_number")
+        if not imei_number:
+            self.add_error("imei_number", "This field is required.")
+        if not imei_number.isdigit():
+            self.add_error("imei_number", "IMEI # can only contain digits.")
+        if len(imei_number) > 20:
+            self.add_error("imei_number", "IMEI # must be less than 20 chars.")
+        if len(imei_number) < 12:
+            self.add_error("imei_number", "IMEI # must be greater than 12 chars.")
+        return imei_number

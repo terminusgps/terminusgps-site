@@ -152,8 +152,8 @@ def imei_number_exists_in_wialon(imei_number: str, session: WialonSession) -> bo
     query.sort_type = WialonProperty.SYS_UNIQUE_ID
     result = query.execute(session)
 
-    print(f"{result["totalItemsCount"] == 1 = }")
-    if result["totalItemsCount"] == 1:
+    total_items = int(result.get("totalItemsCount", 0))
+    if total_items == 1:
         return True
     else:
         return False

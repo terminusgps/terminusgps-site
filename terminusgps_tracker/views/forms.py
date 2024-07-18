@@ -18,40 +18,46 @@ def form_success_view(request: HttpRequest) -> HttpResponse:
             request, "terminusgps_tracker/forms/success.html", {"title": "Success!", "to_addr": to_addr}
         )
 
-def attach_imei_number(request: HttpRequest, form: RegistrationForm) -> RegistrationForm:
-    try:
-        imei_number = request.session["imei_number"]
-    except KeyError:
-        imei_number = request.GET.get("imei", "")
-        request.session["imei_number"] = imei_number
+def get_initial_imei_number(request) -> dict:
+    initial = {}
+    if request.method == "GET":
+        imei_number = request.GET.get("imei", None)
+        if imei_number is not None:
+            initial["imei_number"] = imei_number
+            print(f"{initial["imei_number"] = }")
 
-    form.fields["imei_number"].initial = imei_number
-    return form
+    return initial
 
 def form_registration(request: HttpRequest) -> HttpResponse:
-    if request.GET.get("imei", None) is not None:
-        request.session["imei_number"] = request.GET.get("imei")
+    initial_data = get_initial_imei_number(request)
 
-
-    if not request.method == "POST":
-        form = RegistrationForm()
-        form = attach_imei_number(request, form)
+    if request.method == "POST":
+        form = RegistrationForm(request.POST, initial=initial_data)
+        print(f"{request.POST = }")
+        print(f"{form.data = }")
+        print(f"{form.errors = }")
     else:
-        form = RegistrationForm(request.POST)
-        form = attach_imei_number(request, form)
-        if form.is_valid():
-            with WialonSession() as session:
-                wialon_user_id = session.create_wialon_user(
-                    username=form.cleaned_data["email"],
-                    password=form.cleaned_data["wialon_password"],
-                )
-                session.assign_wialon_asset(
-                    user_id=wialon_user_id,
-                    asset_name=form.cleaned_data["asset_name"],
-                    imei_number=form.cleaned_data["imei_number"],
-                )
-            request.session["to_addr"] = form.cleaned_data["email"]
-            return redirect("form success")
+        print(f"{request.GET = }")
+        form = RegistrationForm(initial=initial_data)
+        print(f"{form.initial = }")
+
+    if request.method == "POST" and form.is_valid():
+        with WialonSession() as session:
+            wialon_user_id = session.create_wialon_user(
+                username=form.cleaned_data["email"],
+                password=form.cleaned_data["wialon_password"],
+            )
+            session.assign_wialon_asset(
+                user_id=wialon_user_id,
+                asset_name=form.cleaned_data["asset_name"],
+                imei_number=form.cleaned_data["imei_number"],
+            )
+
+        if "imei_number" in request.session:
+            del request.session["imei_number"]
+
+        request.session["to_addr"] = form.cleaned_data["email"]
+        return redirect("form success")
 
     context = {"title": "Registration", "form": form}
     return render(request, "terminusgps_tracker/forms/registration.html", context)
