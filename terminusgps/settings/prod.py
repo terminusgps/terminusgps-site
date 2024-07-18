@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
-    "django_htmx",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
 ]
 
