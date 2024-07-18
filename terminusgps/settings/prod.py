@@ -6,7 +6,7 @@ from terminusgps.aws import get_secret_key
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = ["api.terminusgps.com"]
-DEBUG = True
+DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 INTERNAL_IPS = ["127.0.0.1"]
 LANGUAGE_CODE = "en-us"
@@ -62,9 +62,7 @@ ROOT_URLCONF = "terminusgps.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [
-            BASE_DIR / "templates",
-        ],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -83,15 +81,7 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
-    },
-    "postgresql": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "testdb",
-        "USER": "blake",
-        "PASSWORD": "terminusgps",
-        "HOST": "",
-        "PORT": "",
-    },
+    }
 }
 
 AUTH_PASSWORD_VALIDATORS = [

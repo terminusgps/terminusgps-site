@@ -157,3 +157,28 @@ def imei_number_exists_in_wialon(imei_number: str, session: WialonSession) -> bo
         return True
     else:
         return False
+
+def imei_number_is_unregistered(imei_number: str, session: WialonSession) -> bool:
+    query = WialonQuery()
+    query.toggle_or_logic()
+    query.prop_value_mask = f"*{imei_number}*"
+    query.prop_name = WialonProperty.SYS_UNIQUE_ID
+    query.sort_type = WialonProperty.SYS_UNIQUE_ID
+    result = query.execute(session)
+
+    total_items = int(result.get("totalItemsCount", 0))
+    if total_items != 1:
+        return False
+    unit_id = int(result.get("items")[0].get("id"))
+
+    query = WialonQuery()
+    query.items_type = WialonItemsType.AVL_UNIT_GROUP
+    query.prop_value_mask = "*Unactivated*"
+    query.prop_name = WialonProperty.SYS_NAME
+    query.sort_type = WialonProperty.SYS_NAME
+    result = query.execute(session)
+    unactivated_units = result.get("items")[0].get("u")
+
+    if unit_id in unactivated_units:
+        return True
+    return False

@@ -7,7 +7,23 @@ from django.utils.translation import gettext_lazy as _
 from django.core.validators import validate_email
 
 from terminusgps_tracker.wialonapi.session import WialonSession
-from terminusgps_tracker.wialonapi.query import imei_number_exists_in_wialon
+from terminusgps_tracker.wialonapi.query import imei_number_exists_in_wialon, imei_number_is_unregistered
+
+def get_initial_imei_number(request) -> dict:
+    initial = {}
+
+    if request.method == "GET":
+        imei_number = request.GET.get("imei", None)
+        if imei_number is not None:
+            initial["imei_number"] = imei_number
+            request.session["imei_number"] = imei_number
+
+    elif request.method == "POST":
+        if "imei_number" in request.POST:
+            initial["imei_number"] = request.session["imei_number"]
+            request.session["imei_number"] = request.POST.get("imei_number")
+
+    return initial
 
 def validate_imei_number_exists(value: str) -> None:
     """Checks if the given value is present in the TerminusGPS database."""
@@ -75,11 +91,6 @@ class AssetForm(forms.Form):
         required=True,
         label="IMEI #",
         help_text="This should've been filled out for you. If not, please contact support@terminusgps.com",
-        disabled=True,
-        validators=[
-            validate_is_digit,
-            validate_imei_number_exists,
-       ],
     )
     asset_name = forms.CharField(
         max_length=255,
@@ -114,6 +125,13 @@ class AssetForm(forms.Form):
         ],
     )
 
+class DriverForm(PersonForm, ContactForm):
+    fields_order = [
+        "first_name",
+        "last_name",
+        "email",
+        "phone_number",
+    ]
 
 class RegistrationForm(PersonForm, ContactForm, AssetForm):
     field_order = [
@@ -129,9 +147,7 @@ class RegistrationForm(PersonForm, ContactForm, AssetForm):
     phone_number = None
 
     def clean(self) -> dict:
-        print("RegistrationForm.clean called")
         cleaned_data = super(RegistrationForm, self).clean()
-        print(f"Before logic: {cleaned_data = }")
         if "wialon_password" and "wialon_password_confirmation" in cleaned_data:
             password_1 = cleaned_data["wialon_password"]
             password_2 = cleaned_data["wialon_password_confirmation"]
@@ -145,22 +161,67 @@ class RegistrationForm(PersonForm, ContactForm, AssetForm):
                 if password_2 == cleaned_data["email"]:
                     self.add_error("wialon_password_confirmation", "Password cannot be equal to email.")
 
-        print(f"After logic: {cleaned_data = }")
         return cleaned_data
 
     def get_absolute_url(self):
-        print("RegistrationForm.get_absolute_url called")
         return reverse("/forms/registration/", kwargs={"pk": self.pk})
 
     def clean_imei_number(self) -> str:
-        print("RegistrationForm.clean_imei_number called")
-        imei_number = self.cleaned_data.get("imei_number")
-        if not imei_number:
-            self.add_error("imei_number", "This field is required.")
-        if not imei_number.isdigit():
-            self.add_error("imei_number", "IMEI # can only contain digits.")
-        if len(imei_number) > 20:
-            self.add_error("imei_number", "IMEI # must be less than 20 chars.")
-        if len(imei_number) < 12:
-            self.add_error("imei_number", "IMEI # must be greater than 12 chars.")
-        return imei_number
+        value = self.cleaned_data.get("imei_number")
+        max_length = 20
+        min_length = 12
+
+        if not value:
+            self.add_error(
+                "imei_number",
+                ValidationError(
+                    _("This is required."),
+                )
+            )
+
+        if not value.isdigit():
+            self.add_error(
+                "imei_number",
+                ValidationError(
+                    _("Can only contain digits."),
+                    params={"value": value}
+                )
+            )
+
+        if len(value) > max_length:
+            self.add_error(
+                "imei_number",
+                ValidationError(
+                    _("Must be less than '%(max_length)s' chars long. It has %(curr_length)s."),
+                    params={"max_length": max_length, "curr_length": len(value)}
+                )
+            )
+
+        if len(value) < min_length:
+            self.add_error(
+                "imei_number",
+                ValidationError(
+                    _("Must be greater than '%(min_length)s' chars long. It has %(curr_length)s."),
+                    params={"min_length": min_length, "curr_length": len(value)}
+                )
+            )
+
+        with WialonSession() as session:
+            if not imei_number_exists_in_wialon(value, session):
+                self.add_error(
+                    "imei_number",
+                    ValidationError(
+                        _("'%(value)s' was not found in the TerminusGPS database. Please double-check your asset's IMEI #."),
+                        params={"value": value}
+                    )
+               )
+            if not imei_number_is_unregistered(value, session):
+                self.add_error(
+                    "imei_number",
+                    ValidationError(
+                        _("'%(value)s' is already registered with another user. Please double-check your asset's IMEI #."),
+                        params={"value": value}
+                    )
+                )
+
+        return value 
