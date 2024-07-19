@@ -42,10 +42,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
+    "django_browser_reload",
     "django_htmx",
+    "tailwind",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
+    "theme",
 ]
-
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
