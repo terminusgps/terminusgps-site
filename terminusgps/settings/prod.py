@@ -27,13 +27,9 @@ FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o644
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "127.0.0.1:11211",
-        "OPTIONS": {
-            "allow_unicode_keys": True,
-            "default_noreply": False,
-        },
-    }
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": "/home/ubuntu/tmp/django_cache",
+    },
 }
 
 INSTALLED_APPS = [
