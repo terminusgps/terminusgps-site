@@ -15,14 +15,17 @@ logger = logging.getLogger(__name__)
 class WialonSession:
     def __init__(self, token: str = "") -> None:
         self.wialon_api: Wialon = Wialon()
-        self.token: str = (
-            token if token else os.environ.get("WIALON_HOSTING_API_TOKEN", "")
-        )
+        self.token = os.environ.get("WIALON_HOSTING_API_TOKEN", "")
 
         return None
 
     def __enter__(self) -> Self:
-        login = self.wialon_api.token_login(token=self.token)
+        params = {
+            "token": self.token,
+            "operateAs": "27881459", # Terminus1000
+            "fl": 1,
+        }
+        login = self.wialon_api.token_login(**params)
         self.wialon_api.sid = login["eid"]
         return self
 
