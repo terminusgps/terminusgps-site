@@ -22,7 +22,6 @@ class WialonSession:
     def __enter__(self) -> Self:
         params = {
             "token": self.token,
-            "operateAs": "27881459", # Terminus1000
             "fl": 1,
         }
         login = self.wialon_api.token_login(**params)
