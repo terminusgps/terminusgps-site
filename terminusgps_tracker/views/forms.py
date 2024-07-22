@@ -31,6 +31,7 @@ def form_registration(request: HttpRequest) -> HttpResponse:
             del request.session["imei_number"]
 
         request.session["to_addr"] = form.cleaned_data["email"]
+        request.session["password"] = form.cleaned_data["wialon_password"]
         return redirect("form success")
 
     context = {"title": "Registration", "form": form}
@@ -49,11 +50,13 @@ def form_driver(request: HttpRequest) -> HttpResponse:
 
 def form_success_view(request: HttpRequest) -> HttpResponse:
     to_addr = request.session.get("to_addr", None)
+    password = request.session.get("password", None)
     try:
         del request.session["to_addr"]
+        del request.session["password"]
     except KeyError as e:
         raise KeyError(e)
     finally:
         return render(
-            request, "terminusgps_tracker/forms/success.html", {"title": "Success!", "to_addr": to_addr}
+            request, "terminusgps_tracker/forms/success.html", {"title": "Success!", "to_addr": to_addr, "password": password}
         )
