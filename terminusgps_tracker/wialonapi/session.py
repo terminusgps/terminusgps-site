@@ -15,7 +15,11 @@ logger = logging.getLogger(__name__)
 class WialonSession:
     def __init__(self, token: str = "") -> None:
         self.wialon_api: Wialon = Wialon()
-        self.token = os.environ.get("WIALON_HOSTING_API_TOKEN", "")
+        token = os.environ.get("WIALON_HOSTING_API_TOKEN", None)
+        if token is None:
+            raise ValueError("No 'WIALON_HOSTING_API_TOKEN' env variable set.")
+        else:
+            self.token = token
 
         return None
 
