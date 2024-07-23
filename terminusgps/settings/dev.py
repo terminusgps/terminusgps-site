@@ -89,14 +89,6 @@ DATABASES = {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
     },
-    "postgresql": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "testdb",
-        "USER": "blake",
-        "PASSWORD": "terminusgps",
-        "HOST": "",
-        "PORT": "",
-    },
 }
 
 AUTH_PASSWORD_VALIDATORS = [
