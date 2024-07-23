@@ -23,14 +23,7 @@ class WialonAsset(models.Model):
         return f"{self.name} - #{self.id}"
 
     def save(self, *args, **kwargs) -> None:
-        if self.id is None and self.uuid is None:
-            raise ValueError("ID and UUID are unset.")
-        elif self.id is None:
-            raise ValueError("ID is unset.")
-        elif self.uuid is None:
-            raise ValueError("UUID is unset.")
-
-        if self.name is None:
+        if not self.name:
             self.name = str(self.uuid)
 
         super().save(*args, **kwargs)

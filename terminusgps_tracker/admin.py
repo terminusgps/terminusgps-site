@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models.customer import Customer, WialonAsset
+from .models.customer import Customer, WialonAsset, WialonToken
 
 class WialonAssetAdmin(admin.ModelAdmin):
     list_display = (
@@ -11,4 +11,5 @@ class WialonAssetAdmin(admin.ModelAdmin):
     )
 
 admin.site.register(Customer)
+admin.site.register(WialonToken)
 admin.site.register(WialonAsset, WialonAssetAdmin)
