@@ -2,6 +2,7 @@ import string
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import validate_email
@@ -9,12 +10,12 @@ from django.core.validators import validate_email
 from terminusgps_tracker.wialonapi.session import WialonSession
 from terminusgps_tracker.wialonapi.query import imei_number_exists_in_wialon, imei_number_is_unregistered
 
-def get_initial_imei_number(request) -> dict:
+def get_initial_imei_number(request: HttpRequest) -> dict:
     initial = {}
 
     if request.method == "GET":
         imei_number = request.GET.get("imei", None)
-        if imei_number is not None:
+        if imei_number:
             initial["imei_number"] = imei_number
             request.session["imei_number"] = imei_number
 

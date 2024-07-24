@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.core.signing import Signer
 
 class WialonAsset(models.Model):
     class ItemType(models.TextChoices):
@@ -28,3 +29,23 @@ class WialonAsset(models.Model):
 
         super().save(*args, **kwargs)
 
+class AuthToken:
+    class ServiceType(models.TextChoices):
+        WIALON = "WI", _("Wialon")
+        QUICKBOOKS = "QB", _("Quickbooks")
+        LIGHTMETRICS = "LM", _("Lightmetrics")
+
+    _access_token = models.CharField(max_length=255)
+    _refresh_token = models.CharField(max_length=255)
+    expiry_date = models.DateTimeField(blank=True, null=True, default=None)
+    service_type = models.CharField(
+        max_length=2,
+        choices=ServiceType.choices,
+        default=ServiceType.WIALON,
+    )
+
+    def _sign_token(self, value: str) -> str:
+        return Signer().sign(value)
+    
+    def _unsign_token(self, value: str) -> str:
+        return Signer().unsign(value)

@@ -1,53 +1,31 @@
-from typing import Union
-
-from django.core.signing import Signer
 from django.contrib.auth.models import User
 from django.db import models
-from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
-from terminusgps_tracker.models.asset import WialonAsset
-from terminusgps_tracker.validators import validate_item_type_user
-
-class WialonToken(models.Model):
-    _access_token = models.CharField(max_length=256)
-    _refresh_token = models.CharField(max_length=256)
-    expiry_date = models.DateTimeField(default=timezone.now)
-
-    @property
-    def access_token(self) -> str:
-        signer = Signer(salt=self.id)
-        return signer.unsign(self._access_token)
-
-    @access_token.setter
-    def access_token(self, value: str) -> None:
-        signer = Signer(salt=self.id)
-        self._access_token = signer.sign(value)
-
-    @property
-    def refresh_token(self) -> str:
-        signer = Signer(salt=self.id)
-        return signer.unsign(self._refresh_token)
-
-    @refresh_token.setter
-    def refresh_token(self, value: str) -> None:
-        signer = Signer(salt=self.id)
-        self._refresh_token = signer.sign(value)
+from terminusgps_tracker.models.asset import WialonAsset, AuthToken
+from terminusgps_tracker.validators import validate_item_type_user, validate_service_type_wialon 
 
 
 class Customer(models.Model):
+    class Meta:
+        db_table_comment = "A customer is a user who has access to the Wialon API."
+        default_permissions = ["add", "change", "view"]
+        permissions = [
+            ("can_use_wialon_api", _("Can use Wialon API.")),
+        ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     asset = models.ForeignKey(
         WialonAsset,
         on_delete=models.CASCADE,
-        validators=[validate_item_type_user]
+        validators=[validate_item_type_user],
+    )
+    auth_token = models.ForeignKey( AuthToken,
+        on_delete=models.CASCADE,
+        verbose_name="wialon_authorization_token",
+        validators=[validate_service_type_wialon],
     )
 
     def __str__(self) -> str:
         return self.user.username
 
-    def set_access_token(self) -> None:
-        if not hasattr(self.user, "auth_token"):
-            self.user.auth_token = self.user.auth_token.create(user=self.user)
-
-    def get_access_token(self) -> Union[str, None]:
-        return self.user.auth_token.key if hasattr(self.user, "auth_token") else None
