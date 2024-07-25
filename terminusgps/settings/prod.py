@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from terminusgps.aws import get_secret_key
+from terminusgps.aws import get_secret
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -8,11 +8,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 ALLOWED_HOSTS = [".terminusgps.com", "54.208.209.26"]
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+ENCRYPTION_KEY = get_secret("TerminusGPSEncryptionKey")
 INTERNAL_IPS = ["127.0.0.1", "localhost"]
 LANGUAGE_CODE = "en-us"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
-SECRET_KEY = get_secret_key()
+SECRET_KEY = get_secret("TerminusGPS-site-key")
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]

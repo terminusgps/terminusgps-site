@@ -1,8 +1,11 @@
 from typing import Callable
+
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from terminusgps_tracker.models.asset import WialonAsset, AuthToken
+from terminusgps_tracker.models.asset import WialonAsset
+from terminusgps_tracker.models.token import AuthToken
+
 
 def service_type_validator_factory(expected_service_type: AuthToken.ServiceType) -> Callable:
     def validate_service_type_func(value: str) -> None:

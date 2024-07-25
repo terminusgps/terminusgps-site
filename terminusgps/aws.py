@@ -2,11 +2,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 
-def get_secret_key() -> str:
-
-    secret_name = "TerminusGPS-site-key"
-    region_name = "us-east-1"
-
+def get_secret(secret_name: str, region_name: str = "us-east-1") -> str:
     # Create a Secrets Manager client
     session = boto3.session.Session()
     client = session.client(

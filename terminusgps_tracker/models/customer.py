@@ -2,8 +2,8 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from terminusgps_tracker.models.asset import WialonAsset, AuthToken
-from terminusgps_tracker.validators import validate_item_type_user, validate_service_type_wialon 
+from terminusgps_tracker.models.asset import WialonAsset
+from terminusgps_tracker.validators import validate_item_type_user
 
 
 class Customer(models.Model):
@@ -20,12 +20,6 @@ class Customer(models.Model):
         on_delete=models.CASCADE,
         validators=[validate_item_type_user],
     )
-    auth_token = models.ForeignKey( AuthToken,
-        on_delete=models.CASCADE,
-        verbose_name="wialon_authorization_token",
-        validators=[validate_service_type_wialon],
-    )
 
     def __str__(self) -> str:
         return self.user.username
-

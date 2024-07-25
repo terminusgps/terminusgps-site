@@ -1,18 +1,17 @@
 from pathlib import Path
 
-from terminusgps.aws import get_secret_key
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+ENCRYPTION_KEY = "HX2qfcgHEtzd0UWUgDFUMKOeTVq5u-6DYASldb057W4="
 INTERNAL_IPS = ["127.0.0.1"]
 LANGUAGE_CODE = "en-us"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
-SECRET_KEY = get_secret_key()
+SECRET_KEY = "po=qc@jlt0e#h6c8xv96vr%v2l^ib=f9m0!m-@bv0cz25pm$-g"
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]
@@ -21,6 +20,8 @@ TAILWIND_APP_NAME = "theme"
 TIME_ZONE = "America/Chicago"
 USE_I18N = True
 USE_TZ = True
+WIALON_REDIRECT_URI = "http://localhost:8000/auth/callback/"
+CLIENT_ID = "terminusgps.com"
 
 CACHES = {
     "default": {

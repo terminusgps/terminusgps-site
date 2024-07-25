@@ -1,1 +1,3 @@
-from .forms import form_success_view, form_registration, form_driver
+from .auth import auth_view
+from .dashboard import DashboardView
+from .forms import form_driver, form_registration, form_success_view

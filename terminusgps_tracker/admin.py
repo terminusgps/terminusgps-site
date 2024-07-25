@@ -1,6 +1,8 @@
 from django.contrib import admin
 
-from .models.customer import Customer, WialonAsset, AuthToken
+from .models.asset import WialonAsset
+from .models.customer import Customer
+
 
 class WialonAssetAdmin(admin.ModelAdmin):
     list_display = (
@@ -10,6 +12,5 @@ class WialonAssetAdmin(admin.ModelAdmin):
         "item_type"
     )
 
-admin.site.register(AuthToken)
 admin.site.register(Customer)
 admin.site.register(WialonAsset, WialonAssetAdmin)
