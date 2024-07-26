@@ -3,7 +3,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from terminusgps_tracker.models.asset import WialonAsset
-from terminusgps_tracker.validators import validate_item_type_user
 
 
 class Customer(models.Model):
@@ -18,7 +17,6 @@ class Customer(models.Model):
     asset = models.ForeignKey(
         WialonAsset,
         on_delete=models.CASCADE,
-        validators=[validate_item_type_user],
     )
 
     def __str__(self) -> str:

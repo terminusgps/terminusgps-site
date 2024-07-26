@@ -1,21 +1,21 @@
-from django.conf import settings
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect
+from django.utils import timezone
 
-from terminusgps_tracker.models.service import AuthService
+from terminusgps_tracker.models.service import AuthService, AuthToken
 
 
-def auth_view(request: HttpRequest, service_type: str) -> HttpResponse:
-    if service_type.upper() not in AuthService.ServiceType.__members__:
+def auth_view(request: HttpRequest, service_name: str) -> HttpResponse:
+    if service_name.upper() not in AuthService.AuthServiceName.__members__:
         return HttpResponse(status=404)
-
-    token, _ = AuthService.objects.get_or_create(
+    
+    service = AuthService.objects.filter(name__contains=service_name.upper()).first()
+    token, created = AuthToken.objects.get_or_create(
         user=request.user,
-        service_type=service_type.upper(),
+        service=service,
     )
-    context = {
-        "title": f"Authorize {service_type.title()}",
-        "token": token,
-        "client": token.get_client(settings.CLIENT_ID),
-    }
-    return render(request, "terminusgps_tracker/auth.html", context=context)
+
+    if created or token.expiry_date is None:
+        return redirect(service.auth_url)
+    elif token.expiry_date < timezone.now():
+        token.refresh(service.auth_url)

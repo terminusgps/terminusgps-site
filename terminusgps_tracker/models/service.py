@@ -1,41 +1,62 @@
 from typing import Union
+from urllib.parse import urlencode
 
 from cryptography.fernet import Fernet
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.signing import Signer
 from django.db import models
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from oauthlib.oauth2 import WebApplicationClient
 
 
 class AuthService(models.Model):
-    class ServiceType(models.TextChoices):
+    class AuthServiceName(models.TextChoices):
         WIALON = "WI", _("Wialon Hosting")
         QUICKBOOKS = "QB", _("Quickbooks")
         LIGHTMETRICS = "LM", _("Lightmetrics")
         FLEETRUN = "FR", _("Fleetrun")
         SURFSIGHT = "SI", _("Surfsight")
 
-    _access_token = models.CharField(max_length=255, null=True, default=None)
-    _refresh_token = models.CharField(max_length=255, null=True, default=None)
-    _auth_code = models.CharField(max_length=255, null=True, default=None)
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    state = models.CharField(max_length=255, null=True, blank=True, default=None)
-    expiry_date = models.DateTimeField(blank=True, null=True, default=None)
-    service_type = models.CharField(
+    name = models.CharField(
         max_length=2,
-        choices=ServiceType.choices,
-        default=ServiceType.WIALON,
+        choices=AuthServiceName.choices,
+        default=AuthServiceName.WIALON,
     )
 
     def __str__(self) -> str:
-        return f"{self.user.username}'s {self.service_type.title()} token"
+        return self.name.title()
 
-    def __repr__(self) -> str:
-        return f"AuthService(user='{self.user.username}', state='{self.state}', expiry_date={self.expiry_date}, service_type='{self.service_type.title()}')"
+    def _generate_auth_url(self) -> str:
+        params = urlencode({"client_id": "terminusgps.com"})
+        match self.name:
+            case AuthService.AuthServiceName.WIALON:
+                url = "https://hosting.terminusgps.com/login.html?"
+            case AuthService.AuthServiceName.QUICKBOOKS:
+                url = "http://localhost:8000/?"
+            case _:
+                url = "https://localhost:8000/?"
+
+        return url + params
+
+    @property
+    def auth_url(self) -> str:
+        return self._generate_auth_url()
+
+class AuthServiceImage(models.Model):
+    name = models.CharField(max_length=255)
+    service = models.ForeignKey(AuthService, on_delete=models.CASCADE)
+    source = models.ImageField(upload_to="services")
+
+    def __str__(self) -> str:
+        return f"{self.service} Image #{self.id}"
+
+class AuthToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    service = models.ForeignKey(AuthService, on_delete=models.CASCADE)
+    _access_token = models.CharField(max_length=255)
+    _refresh_token = models.CharField(max_length=255)
+    _auth_code = models.CharField(max_length=255)
+    _token_type = models.CharField(max_length=255, default="Bearer")
 
     def _sign_value(self, value: str) -> str:
         signer = Signer()
@@ -84,48 +105,3 @@ class AuthService(models.Model):
     @auth_code.setter
     def auth_code(self, value: str) -> None:
         self._auth_code = self._encrypt_value(value)
-
-    def is_expired(self) -> bool:
-        return self.expiry_date is not None and self.expiry_date < timezone.now()
-
-    def get_client(self, id: str, **kwargs) -> WebApplicationClient:
-        return WebApplicationClient(
-            client_id=id,
-            code=self.auth_code,
-            **kwargs,
-        )
-
-    def get_redirect_uri(self) -> Union[str, None]:
-        match self.service_type:
-            case AuthService.ServiceType.WIALON:
-                redirect_uri = settings.WIALON_REDIRECT_URI
-            case AuthService.ServiceType.QUICKBOOKS:
-                redirect_uri = settings.QUICKBOOKS_REDIRECT_URI
-            case AuthService.ServiceType.LIGHTMETRICS:
-                redirect_uri = settings.LIGHTMETRICS_REDIRECT_URI
-            case _:
-                redirect_uri = None
-
-        return redirect_uri
-
-class AuthServiceImage(models.Model):
-    class ImageName(models.TextChoices):
-        LOGO = "LO", _("Logo")
-        ICON = "IC", _("Icon")
-        BANNER = "BA", _("Banner")
-        RESOURCE = "RE", _("Resource")
-
-    source = models.ImageField(upload_to="services")
-    service_type = models.CharField(
-        max_length=2,
-        choices=AuthService.ServiceType.choices,
-        default=AuthService.ServiceType.WIALON,
-    )
-    image_type = models.CharField(
-        max_length=2,
-        choices=ImageName.choices,
-        default=ImageName.RESOURCE,
-    )
-
-    def __str__(self) -> str:
-        return f"{self.service_type} Image #{self.id}"
