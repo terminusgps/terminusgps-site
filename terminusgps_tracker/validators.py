@@ -4,12 +4,12 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from terminusgps_tracker.models.asset import WialonAsset
-from terminusgps_tracker.models.token import AuthToken
+from terminusgps_tracker.models.service import AuthService
 
 
-def service_type_validator_factory(expected_service_type: AuthToken.ServiceType) -> Callable:
+def service_type_validator_factory(expected_service_type: AuthService.ServiceType) -> Callable:
     def validate_service_type_func(value: str) -> None:
-        token = AuthToken.objects.get(id=value)
+        token = AuthService.objects.get(id=value)
         if token.service_type != expected_service_type:
             raise ValidationError(
                 _("Invalid service type '%(service_type)s'. Expected service type '%(expected_service_type)s'."),
@@ -38,4 +38,4 @@ def validate_item_type_unit(value: str) -> None:
 
 def validate_service_type_wialon(value: str) -> None:
     """Checks if the given value is a valid Wialon service type."""
-    return service_type_validator_factory(AuthToken.ServiceType.WIALON)(value)
+    return service_type_validator_factory(AuthService.ServiceType.WIALON)(value)

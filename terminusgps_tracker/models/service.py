@@ -3,17 +3,20 @@ from typing import Union
 from cryptography.fernet import Fernet
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.signing import Signer
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from oauthlib.oauth2 import WebApplicationClient
 
 
-class AuthToken(models.Model):
+class AuthService(models.Model):
     class ServiceType(models.TextChoices):
-        WIALON = "WI", _("Wialon")
+        WIALON = "WI", _("Wialon Hosting")
         QUICKBOOKS = "QB", _("Quickbooks")
         LIGHTMETRICS = "LM", _("Lightmetrics")
+        FLEETRUN = "FR", _("Fleetrun")
+        SURFSIGHT = "SI", _("Surfsight")
 
     _access_token = models.CharField(max_length=255, null=True, default=None)
     _refresh_token = models.CharField(max_length=255, null=True, default=None)
@@ -32,15 +35,25 @@ class AuthToken(models.Model):
         return f"{self.user.username}'s {self.service_type.title()} token"
 
     def __repr__(self) -> str:
-        return f"AuthToken(user='{self.user.username}', state='{self.state}', expiry_date={self.expiry_date}, service_type='{self.service_type.title()}')"
+        return f"AuthService(user='{self.user.username}', state='{self.state}', expiry_date={self.expiry_date}, service_type='{self.service_type.title()}')"
+
+    def _sign_value(self, value: str) -> str:
+        signer = Signer()
+        return signer.sign(value)
+
+    def _unsign_value(self, value: str) -> str:
+        signer = Signer()
+        return signer.unsign(value)
 
     def _encrypt_value(self, value: str) -> str:
         f = Fernet(settings.ENCRYPTION_KEY)
-        return f.encrypt(value.decode()).encode()
+        signed_value = self._sign_value(value)
+        return f.encrypt(signed_value.decode()).encode()
 
     def _decrypt_value(self, value: str) -> str:
         f = Fernet(settings.ENCRYPTION_KEY)
-        return f.decrypt(value.encode()).decode()
+        decrypted_value = f.decrypt(value.encode()).decode()
+        return self._unsign_value(decrypted_value)
 
     @property
     def access_token(self) -> Union[str, None]:
@@ -84,13 +97,35 @@ class AuthToken(models.Model):
 
     def get_redirect_uri(self) -> Union[str, None]:
         match self.service_type:
-            case AuthToken.ServiceType.WIALON:
+            case AuthService.ServiceType.WIALON:
                 redirect_uri = settings.WIALON_REDIRECT_URI
-            case AuthToken.ServiceType.QUICKBOOKS:
+            case AuthService.ServiceType.QUICKBOOKS:
                 redirect_uri = settings.QUICKBOOKS_REDIRECT_URI
-            case AuthToken.ServiceType.LIGHTMETRICS:
+            case AuthService.ServiceType.LIGHTMETRICS:
                 redirect_uri = settings.LIGHTMETRICS_REDIRECT_URI
             case _:
                 redirect_uri = None
 
         return redirect_uri
+
+class AuthServiceImage(models.Model):
+    class ImageName(models.TextChoices):
+        LOGO = "LO", _("Logo")
+        ICON = "IC", _("Icon")
+        BANNER = "BA", _("Banner")
+        RESOURCE = "RE", _("Resource")
+
+    source = models.ImageField(upload_to="services")
+    service_type = models.CharField(
+        max_length=2,
+        choices=AuthService.ServiceType.choices,
+        default=AuthService.ServiceType.WIALON,
+    )
+    image_type = models.CharField(
+        max_length=2,
+        choices=ImageName.choices,
+        default=ImageName.RESOURCE,
+    )
+
+    def __str__(self) -> str:
+        return f"{self.service_type} Image #{self.id}"

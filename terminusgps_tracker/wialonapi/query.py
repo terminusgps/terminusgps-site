@@ -1,12 +1,13 @@
 from dataclasses import dataclass
-from wialon import flags as wialon_flag
 from enum import Enum
 from typing import Any, TypeVar
+
+from wialon import flags as wialon_flag
 
 E = TypeVar("E", bound="WialonProperty")
 
 
-from terminusgps_tracker.wialonapi.session import WialonSession
+from .session import WialonSession
 
 
 class WialonItemsType(Enum):

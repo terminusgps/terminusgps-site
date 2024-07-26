@@ -24,8 +24,9 @@ class WialonAsset(models.Model):
         return f"{self.name} - #{self.id}"
 
     def save(self, *args, **kwargs) -> None:
+        if self.uuid == self.id and self.item_type != WialonAsset.ItemType.USER:
+            raise ValueError("Asset UUID and ID must be different for non-user assets.")
         if not self.name:
             self.name = str(self.uuid)
 
         super().save(*args, **kwargs)
-

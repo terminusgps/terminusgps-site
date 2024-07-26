@@ -2,14 +2,14 @@ from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
-from terminusgps_tracker.models.token import AuthToken
+from terminusgps_tracker.models.service import AuthService
 
 
 def auth_view(request: HttpRequest, service_type: str) -> HttpResponse:
-    if service_type.upper() not in AuthToken.ServiceType.__members__:
+    if service_type.upper() not in AuthService.ServiceType.__members__:
         return HttpResponse(status=404)
 
-    token, _ = AuthToken.objects.get_or_create(
+    token, _ = AuthService.objects.get_or_create(
         user=request.user,
         service_type=service_type.upper(),
     )
