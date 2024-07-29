@@ -1,4 +1,7 @@
+
+from django.contrib.auth.forms import BaseUserCreationForm
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -6,13 +9,6 @@ from terminusgps_tracker.models.asset import WialonAsset
 
 
 class Customer(models.Model):
-    class Meta:
-        db_table_comment = "A customer is a user who has access to the Wialon API."
-        default_permissions = ["add", "change", "view"]
-        permissions = [
-            ("can_use_wialon_api", _("Can use Wialon API.")),
-        ]
-
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     asset = models.ForeignKey(
         WialonAsset,
@@ -21,3 +17,12 @@ class Customer(models.Model):
 
     def __str__(self) -> str:
         return self.user.username
+
+class CustomerCreationForm(BaseUserCreationForm):
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
+    email = models.EmailField()
+
+    def confirm_login_allowed(self, user: User) -> None:
+        if not user.is_active:
+            raise ValidationError(_("Sorry, inactivate accounts are not welcome here."))

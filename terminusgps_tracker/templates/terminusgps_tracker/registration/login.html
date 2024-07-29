@@ -1,0 +1,27 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{{ title }}</title>
+        {% tailwind_css %}
+    </head>
+    <body>
+        <main>
+            {% if form.errors %}{{ form.errors }}{% endif %}
+            {% if form.next %}{% endif %}
+            <form method="post">
+                {% csrf_token %}
+                {{ form.username.label }}
+                {{ form.username }}
+                {{ form.password1.label }}
+                {{ form.password1 }}
+                {{ form.password2.label }}
+                {{ form.password2 }}
+                {{ form.email.label }}
+                {{ form.email }}
+                <button type="submit">Login</button>
+            </main>
+        </body>
+    </html>

@@ -13,7 +13,7 @@ urlpatterns = [
         views.form_driver,
         name="form driver",
     ),
+    path("dashboard/", views.DashboardView.as_view(), name="dashboard"),
     path("forms/success/", views.form_success_view, name="form success"),
-    path("<str:service_name>/auth/", views.auth_view, name="auth"),
-    path("dashboard/", views.DashboardView.as_view(), name="dashboard")
+    path("login/", views.form_login, name="form login"),
 ]

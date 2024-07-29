@@ -3,40 +3,29 @@ from urllib.parse import urlencode
 
 from cryptography.fernet import Fernet
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.signing import Signer
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 
 
 class AuthService(models.Model):
-    class AuthServiceName(models.TextChoices):
-        WIALON = "WI", _("Wialon Hosting")
-        QUICKBOOKS = "QB", _("Quickbooks")
-        LIGHTMETRICS = "LM", _("Lightmetrics")
-        FLEETRUN = "FR", _("Fleetrun")
-        SURFSIGHT = "SI", _("Surfsight")
-
-    name = models.CharField(
-        max_length=2,
-        choices=AuthServiceName.choices,
-        default=AuthServiceName.WIALON,
-    )
+    class Meta:
+        permissions = [
+            ("create_service", "Can create a service."),
+            ("view_service", "Can view the service."),
+            ("edit_service", "Can edit the service."),
+            ("delete_service", "Can delete the service."),
+        ]
+    name = models.CharField(max_length=255)
+    desc = models.TextField(verbose_name="description", max_length=2047)
+    redirect_url = models.URLField(max_length=200)
+    base_auth_url = models.URLField(max_length=200)
 
     def __str__(self) -> str:
         return self.name.title()
 
     def _generate_auth_url(self) -> str:
         params = urlencode({"client_id": "terminusgps.com"})
-        match self.name:
-            case AuthService.AuthServiceName.WIALON:
-                url = "https://hosting.terminusgps.com/login.html?"
-            case AuthService.AuthServiceName.QUICKBOOKS:
-                url = "http://localhost:8000/?"
-            case _:
-                url = "https://localhost:8000/?"
-
-        return url + params
+        return self.base_auth_url + "?" + params
 
     @property
     def auth_url(self) -> str:
@@ -51,7 +40,7 @@ class AuthServiceImage(models.Model):
         return f"{self.service} Image #{self.id}"
 
 class AuthToken(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     service = models.ForeignKey(AuthService, on_delete=models.CASCADE)
     _access_token = models.CharField(max_length=255)
     _refresh_token = models.CharField(max_length=255)
