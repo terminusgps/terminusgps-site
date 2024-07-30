@@ -1,9 +1,12 @@
 import logging
 
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 
-from terminusgps_tracker.models.forms import (CustomerRegistrationForm,
+from terminusgps_tracker.models.forms import (CustomerLoginForm,
+                                              CustomerRegistrationForm,
                                               DriverForm, RegistrationForm,
                                               get_initial_imei_number)
 from terminusgps_tracker.wialonapi.session import WialonSession
@@ -11,15 +14,37 @@ from terminusgps_tracker.wialonapi.session import WialonSession
 logger = logging.getLogger(__name__)
 
 def form_customer_registration(request: HttpRequest) -> HttpResponse:
-    context = {"title": "Registration"}
-    if request.method == "POST" or request.htmx:
-        context.update({"form": CustomerRegistrationForm(request.POST)})
-    elif request.method == "GET":
-        context.update({"form": CustomerRegistrationForm()})
-    else:
-        return HttpResponse(status=405)
-
+    if not request.method == "POST":
+        form = CustomerRegistrationForm()
+    elif request.method == "POST":
+        form = CustomerRegistrationForm(request.POST)
+        if form.is_valid():
+            User.objects.create_user(
+                username=form.cleaned_data["email"],
+                email=form.cleaned_data["email"],
+                password=form.cleaned_data["password1"],
+                first_name=form.cleaned_data["first_name"],
+                last_name=form.cleaned_data["last_name"],
+            ).save()
+            return redirect("form customer login")
+    context = {"title": "Registration", "form": form}
     return render(request, "terminusgps_tracker/forms/customer_registration.html", context=context)
+
+def form_customer_login(request: HttpRequest) -> HttpResponse:
+    if request.user.is_anonymous or not request.user.is_authenticated:
+        return redirect("form customer registration")
+    if not request.method == "POST":
+        form = CustomerLoginForm()
+    elif request.method == "POST":
+        form = CustomerLoginForm(request.POST)
+        if form.is_valid():
+            user = authenticate(request, username=form.cleaned_data["email"], password=form.cleaned_data["password"])
+            if user is not None:
+                login(request, user)
+                return redirect("dashboard")
+    context = {"title": "Login", "form": form}
+    return render(request, "terminusgps_tracker/forms/customer_login.html", context=context)
+
 
 def form_registration(request: HttpRequest) -> HttpResponse:
     initial_data = get_initial_imei_number(request)

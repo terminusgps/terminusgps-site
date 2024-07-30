@@ -20,7 +20,6 @@ TAILWIND_APP_NAME = "theme"
 TIME_ZONE = "America/Chicago"
 USE_I18N = True
 USE_TZ = True
-WIALON_REDIRECT_URI = "http://localhost:8000/auth/callback/"
 CLIENT_ID = "terminusgps.com"
 
 CACHES = {

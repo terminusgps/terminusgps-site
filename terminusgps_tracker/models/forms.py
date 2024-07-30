@@ -1,6 +1,8 @@
 import string
 
 from django import forms
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.http import HttpRequest
@@ -104,6 +106,38 @@ class CustomerRegistrationForm(forms.Form):
             self.add_error("password2", _("Passwords do not match."))
 
         return cleaned_data
+
+class CustomerLoginForm(forms.Form):
+    email = forms.EmailField(
+        max_length=255,
+        required=True,
+        label=_("Email"),
+        help_text=_("Please enter your email address.")
+    )
+    password = forms.CharField(
+        max_length=64,
+        min_length=8,
+        required=True,
+        label=_("Password"),
+        widget=forms.PasswordInput,
+    )
+
+    def clean(self, *args, **kwargs) -> dict:
+        cleaned_data = super().clean(*args, **kwargs)
+
+        email = cleaned_data.get("email", "")
+        password = cleaned_data.get("password", "")
+
+
+        if email:
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                self.add_error("email", _("Couldn't find a user associated with that email address."))
+            else:
+                if password and user:
+                    if not check_password(password, user.password):
+                        self.add_error("password", _("Incorrect password."))
 
 class PersonForm(forms.Form):
     first_name = forms.CharField(

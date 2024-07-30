@@ -18,5 +18,10 @@ urlpatterns = [
         views.form_customer_registration,
         name="form customer registration",
     ),
+    path(
+        "forms/customer_login/",
+        views.form_customer_login,
+        name="form customer login",
+    ),
     path("forms/success/", views.form_success_view, name="form success"),
 ]

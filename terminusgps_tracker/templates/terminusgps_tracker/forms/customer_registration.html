@@ -1,6 +1,6 @@
 {% extends "terminusgps_tracker/layout.html" %}
 {% block content %}
-    <h2 class="my-8 text-3xl text-center text-gray-900 dark:text-white">TerminusGPS {{ title|title }} Form</h2>
+    <h2 class="my-8 text-3xl text-center text-gray-900 dark:text-white">Customer {{ title|title }}</h2>
     <form method="post" action="{% url 'form customer registration' %}">
         {% csrf_token %}
         {% for field in form %}
