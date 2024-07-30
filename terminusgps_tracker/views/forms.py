@@ -3,17 +3,23 @@ import logging
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 
-from terminusgps_tracker.models.customer import CustomerCreationForm
-from terminusgps_tracker.models.forms import (DriverForm, RegistrationForm,
+from terminusgps_tracker.models.forms import (CustomerRegistrationForm,
+                                              DriverForm, RegistrationForm,
                                               get_initial_imei_number)
 from terminusgps_tracker.wialonapi.session import WialonSession
 
 logger = logging.getLogger(__name__)
 
-def form_login(request: HttpRequest) -> HttpResponse:
-    form = CustomerCreationForm()
-    context = {"title": "User Creation Form", "form": form}
-    return render(request, "terminusgps_tracker/registration/login.html", context=context)
+def form_customer_registration(request: HttpRequest) -> HttpResponse:
+    context = {"title": "Registration"}
+    if request.method == "POST" or request.htmx:
+        context.update({"form": CustomerRegistrationForm(request.POST)})
+    elif request.method == "GET":
+        context.update({"form": CustomerRegistrationForm()})
+    else:
+        return HttpResponse(status=405)
+
+    return render(request, "terminusgps_tracker/forms/customer_registration.html", context=context)
 
 def form_registration(request: HttpRequest) -> HttpResponse:
     initial_data = get_initial_imei_number(request)

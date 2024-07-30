@@ -1,4 +1,3 @@
-from .auth import auth_view
 from .dashboard import DashboardView
-from .forms import (form_driver, form_login, form_registration,
+from .forms import (form_customer_registration, form_driver, form_registration,
                     form_success_view)

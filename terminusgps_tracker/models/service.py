@@ -42,10 +42,10 @@ class AuthServiceImage(models.Model):
 class AuthToken(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     service = models.ForeignKey(AuthService, on_delete=models.CASCADE)
+    token_type = models.CharField(max_length=255, default="Bearer")
     _access_token = models.CharField(max_length=255)
     _refresh_token = models.CharField(max_length=255)
     _auth_code = models.CharField(max_length=255)
-    _token_type = models.CharField(max_length=255, default="Bearer")
 
     def _sign_value(self, value: str) -> str:
         signer = Signer()

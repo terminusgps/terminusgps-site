@@ -2,13 +2,15 @@ import string
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django.core.validators import validate_email
 
+from terminusgps_tracker.wialonapi.query import (imei_number_exists_in_wialon,
+                                                 imei_number_is_unregistered)
 from terminusgps_tracker.wialonapi.session import WialonSession
-from terminusgps_tracker.wialonapi.query import imei_number_exists_in_wialon, imei_number_is_unregistered
+
 
 def get_initial_imei_number(request: HttpRequest) -> dict:
     initial = {}
@@ -59,6 +61,49 @@ def validate_contains_special_char(value: str) -> None:
             params={"symbols": "".join(valid_special_chars)}
         )
 
+class CustomerRegistrationForm(forms.Form):
+    first_name = forms.CharField(
+        max_length=255,
+        required=True,
+        label=_("First Name"),
+        help_text=_("Please enter your first name."),
+    )
+    last_name = forms.CharField(
+        max_length=255,
+        required=True,
+        label=_("Last Name"),
+        help_text=_("Please enter your last name."),
+    )
+    email = forms.EmailField(
+        max_length=255,
+        required=True,
+        label=_("Email"),
+        help_text=_("Please enter your email address.")
+    )
+    password1 = forms.CharField(
+        max_length=64,
+        min_length=8,
+        label=_("Password"),
+        widget=forms.PasswordInput,
+    )
+    password2 = forms.CharField(
+        max_length=64,
+        min_length=8,
+        label=_("Confirm Password"),
+        widget=forms.PasswordInput,
+    )
+
+    def clean(self, *args, **kwargs) -> dict:
+        cleaned_data = super().clean(*args, **kwargs)
+
+        password1 = cleaned_data["password1"]
+        password2 = cleaned_data["password2"]
+
+        if password1 != password2:
+            self.add_error("password1", _("Passwords do not match."))
+            self.add_error("password2", _("Passwords do not match."))
+
+        return cleaned_data
 
 class PersonForm(forms.Form):
     first_name = forms.CharField(
@@ -184,8 +229,7 @@ class RegistrationForm(PersonForm, ContactForm, AssetForm):
             self.add_error(
                 "imei_number",
                 ValidationError(
-                    _("Can only contain digits."),
-                    params={"value": value}
+                    _("Can only contain digits.")
                 )
             )
 
