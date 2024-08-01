@@ -11,17 +11,9 @@ authors = [
 ]
 
 [tool.ruff]
+builtins = ["objects"]
 target-version = "py312"
-src = [
-    "terminusgps_tracker",
-    "terminusgps",
-    "theme",
-]
-include = [
-    "*.py",
-    "*/*.py",
-    "*/*/*.py",
-]
+extend-exclude = ["migrations/*.py", "tests/*.py"]
 
 [tool.ruff.format]
 docstring-code-format = true

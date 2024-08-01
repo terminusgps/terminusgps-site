@@ -9,17 +9,17 @@
     </head>
     <body>
         <main>
-            <h2 class="my-8 text-3xl text-center text-gray-900 dark:text-white">TerminusGPS {{ title|title }} Form</h2>
+            <h2 class="my-8 text-center text-3xl text-gray-900 dark:text-white">TerminusGPS {{ title|title }} Form</h2>
             <form method="post" action="{% url 'form driver' %}">
                 {% csrf_token %}
                 {% for field in form %}
                     <div class="m-4 justify-items-center">
                         {% if not form.is_bound %}
                             <label for="{{ field.id_for_label }}"
-                                   class="block mt-4 mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                   class="mb-2 mt-4 block text-sm font-medium text-gray-900 dark:text-white">
                                 {{ field.label }}
                             </label>
-                            <input class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            <input class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
                                    id="{{ field.id_for_label }}"
                                    name="{{ field.name }}"
                                    type="{{ field.field.widget.input_type|default_if_none:'text' }}"
@@ -28,36 +28,36 @@
                                    {% if field.disabled %}disabled{% endif %}>
                         {% elif not field.errors %}
                             <label for="{{ field.id_for_label }}"
-                                   class="block mt-4 mb-2 text-sm font-medium text-green-700 dark:text-green-500">
+                                   class="mb-2 mt-4 block text-sm font-medium text-green-700 dark:text-green-500">
                                 {{ field.label }}
                             </label>
-                            <input class="bg-green-50 border border-green-500 text-green-900 dark:text-green-400 placeholder-green-700 dark:placeholder-green-500 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:border-green-500"
+                            <input class="block w-full rounded-lg border border-green-500 bg-green-50 p-2.5 text-sm text-green-900 placeholder-green-700 focus:border-green-500 focus:ring-green-500 dark:border-green-500 dark:bg-gray-700 dark:text-green-400 dark:placeholder-green-500"
                                    id="{{ field.id_for_label }}"
                                    name="{{ field.name }}"
                                    value="{% if field.value %}{{ field.value|default_if_none:'' }}{% else %}{{ field.intial|default_if_none:'' }}{% endif %}"
                                    type="{{ field.field.widget.input_type|default_if_none:'text' }}"
                                    {% if field.required %}required{% endif %}
                                    {% if field.disabled %}disabled{% endif %}>
-                            <p class="mt-2 mb-4 text-sm text-green-600 dark:text-green-500">
+                            <p class="mb-4 mt-2 text-sm text-green-600 dark:text-green-500">
                                 <span class="font-medium"><i>Looks good!</i></span>
                             </p>
                         {% else %}
                             <label for="{{ field.id_for_label }}"
-                                   class="block mt-4 mb-2 text-sm font-medium text-red-700 dark:text-red-500">
+                                   class="mb-2 mt-4 block text-sm font-medium text-red-700 dark:text-red-500">
                                 {{ field.label }}
                             </label>
-                            <input class="bg-red-50 border border-red-500 text-red-900 placeholder-red-700 text-sm rounded-lg focus:ring-red-500 dark:bg-gray-700 focus:border-red-500 block w-full p-2.5 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500"
+                            <input class="block w-full rounded-lg border border-red-500 bg-red-50 p-2.5 text-sm text-red-900 placeholder-red-700 focus:border-red-500 focus:ring-red-500 dark:border-red-500 dark:bg-gray-700 dark:text-red-500 dark:placeholder-red-500"
                                    id="{{ field.id_for_label }}"
                                    name="{{ field.name }}"
                                    value="{% if field.value %}{{ field.value|default_if_none:'' }}{% else %}{{ field.intial|default_if_none:'' }}{% endif %}"
                                    type="{{ field.field.widget.input_type|default_if_none:'text' }}"
                                    {% if field.required %}required{% endif %}
                                    {% if field.disabled %}disabled{% endif %}>
-                            <p class="mt-2 mb-4 text-sm text-red-600 dark:text-red-500">
+                            <p class="mb-4 mt-2 text-sm text-red-600 dark:text-red-500">
                                 <span class="font-medium"><i>Oops!</i></span>
-                                <ul class="mt-4 mb-2 text-sm">
+                                <ul class="mb-2 mt-4 text-sm">
                                     {% for error in field.errors %}
-                                        <li class="mt-2 mb-4 text-sm text-red-600 dark:text-red-500">- {{ error }}</li>
+                                        <li class="mb-4 mt-2 text-sm text-red-600 dark:text-red-500">- {{ error }}</li>
                                     {% endfor %}
                                 </ul>
                             </p>
@@ -65,7 +65,7 @@
                     </div>
                 {% endfor %}
                 <button type="submit"
-                        class="m-4 justify-items-center w-fit text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        class="m-4 w-fit justify-items-center rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 sm:w-auto dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                     Submit
                 </button>
             </form>

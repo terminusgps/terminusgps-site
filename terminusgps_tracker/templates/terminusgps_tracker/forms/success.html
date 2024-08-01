@@ -11,21 +11,21 @@
         <main>
             <div class="fixed inset-0 flex items-center justify-center bg-gray-200 bg-opacity-75 dark:bg-gray-800">
                 <div id="static-modal"
-                    class="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                    class="fixed left-0 right-0 top-0 z-50 h-[calc(100%-1rem)] max-h-full w-full items-center justify-center overflow-y-auto overflow-x-hidden md:inset-0">
                     <!-- Modal content -->
-                    <div class="mx-8 my-4 relative bg-white rounded-lg shadow dark:bg-gray-700">
+                    <div class="relative mx-8 my-4 rounded-lg bg-white shadow dark:bg-gray-700">
                         <!-- Modal header -->
-                        <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                        <div class="flex items-center justify-between rounded-t border-b p-4 md:p-5 dark:border-gray-600">
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">You're registered! 👍</h3>
                         </div>
                         <!-- Modal body -->
-                        <div class="p-4 md:p-5 space-y-4">
+                        <div class="space-y-4 p-4 md:p-5">
                             <p class="text-base leading-relaxed text-gray-600 dark:text-gray-400">Thanks for choosing TerminusGPS!</p>
                             <p class="text-base leading-relaxed text-gray-600 dark:text-gray-400">Your account has been created, please login using your new credentials.</p>
-                            <p class="text-base leading-relaxed text-gray-600 dark:text-gray-400">You may login via the "Fleet Login" button on the <a href="https://terminusgps.com/" class="text-blue-400 dark:text-blue-200 underline underline-offset-auto">offical TerminusGPS website</a>, or by clicking the "<a href="https://hosting.terminusgps.com/" class="text-blue-400 dark:text-blue-200 underline underline-offset-auto">Login</a>" button below. For additional assistance, please contact <a href="mailto:support@terminusgps.com" class="text-blue-400 dark:text-blue-200 underline underline-offset-auto">TerminusGPS support</a>.</p>
+                            <p class="text-base leading-relaxed text-gray-600 dark:text-gray-400">You may login via the "Fleet Login" button on the <a href="https://terminusgps.com/" class="text-blue-400 underline underline-offset-auto dark:text-blue-200">offical TerminusGPS website</a>, or by clicking the "<a href="https://hosting.terminusgps.com/" class="text-blue-400 underline underline-offset-auto dark:text-blue-200">Login</a>" button below. For additional assistance, please contact <a href="mailto:support@terminusgps.com" class="text-blue-400 underline underline-offset-auto dark:text-blue-200">TerminusGPS support</a>.</p>
                             <div class="relative overflow-x-auto">
-                                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                <table class="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
+                                    <thead class="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
                                         <tr>
                                             <th scope="col" class="px-6 py-3">
                                                 Wialon Username
@@ -36,11 +36,11 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                        <tr class="border-b bg-white dark:border-gray-700 dark:bg-gray-800">
+                                            <th scope="row" class="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white">
                                                 {{ to_addr|default_if_none:"Your Email Address" }}
                                             </th>
-                                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                            <th scope="row" class="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white">
                                                 {{ password|default_if_none:"Your Password" }}
                                             </th>
                                         </tr>
@@ -49,16 +49,16 @@
                             </div>
                         </div>
                         <!-- Modal footer -->
-                        <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                        <div class="flex items-center rounded-b border-t border-gray-200 p-4 md:p-5 dark:border-gray-600">
                             <a href="https://hosting.terminusgps.com/">
                                 <button type="button"
-                                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                    class="rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                                     Login
                                 </button>
                             </a>
                             <a href="https://www.terminusgps.com/app-support?mc_cid=55c9b4f210/">
                                 <button type="button"
-                                    class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                                    class="ms-3 rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700">
                                     Login Tutorial
                                 </button>
                             </a>

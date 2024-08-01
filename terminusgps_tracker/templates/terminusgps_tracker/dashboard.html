@@ -1,14 +1,14 @@
 {% extends "terminusgps_tracker/layout.html" %}
 {% block content %}
-    <h1 class="text-3xl text-gray-800 dark:text-gray-200">{{ user.first_name|title }}'s Dashboard</h1>
-    <div class="text-center mt-2">
-        <h2 class="text-2xl text-gray-800 dark:text-gray-200">Quick Links</h2>
+<h1 class="text-3xl text-gray-800 dark:text-gray-200">{{ user.first_name|title }}'s Dashboard</h1>
+<div class="mt-2 text-center">
+    <h2 class="text-2xl text-gray-800 dark:text-gray-200">Quick Links</h2>
     <div id="services-container" class="block px-4 py-2">
-    {% for service in services %}
-        {% include "terminusgps_tracker/partials/service.html" with service=service only %}
-    {% empty %}
+        {% for service in services %}
+            {% include "terminusgps_tracker/partials/service.html" with service=service only %}
+        {% empty %}
         No services found... :(
-    {% endfor %}
+        {% endfor %}
     </div>
-    </div>
+</div>
 {% endblock content %}
