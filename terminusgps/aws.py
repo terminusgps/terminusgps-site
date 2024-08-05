@@ -3,7 +3,7 @@ from botocore.exceptions import ClientError
 
 def get_secret(secret_name: str) -> str:
     # Create a Secrets Manager client
-    session = boto3.session.Session(profile_name="secret-rotator")
+    session = boto3.session.Session(profile_name="terminusgps-admin-session")
     client = session.client(
         service_name="secretsmanager",
         region_name="us-east-1",
