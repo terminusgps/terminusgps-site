@@ -8,7 +8,7 @@
         {% tailwind_css %}
     </head>
     <body>
-        <main>
+        <main class="bg-white-200 dark:bg-gray-600">
             <h2 class="my-8 text-center text-3xl text-gray-900 dark:text-white">TerminusGPS {{ title|title }} Form</h2>
             <form method="post" action="{% url 'form registration' %}">
                 {% csrf_token %}
