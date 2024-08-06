@@ -656,6 +656,10 @@ video {
   margin-bottom: 1rem;
 }
 
+.mb-5 {
+  margin-bottom: 1.25rem;
+}
+
 .ms-3 {
   margin-inline-start: 0.75rem;
 }
@@ -672,10 +676,6 @@ video {
   margin-top: 2rem;
 }
 
-.mb-5 {
-  margin-bottom: 1.25rem;
-}
-
 .block {
   display: block;
 }
@@ -686,10 +686,6 @@ video {
 
 .table {
   display: table;
-}
-
-.hidden {
-  display: none;
 }
 
 .size-10 {
