@@ -1,12 +1,13 @@
 import boto3
 from botocore.exceptions import ClientError
 
-def get_secret(secret_name: str) -> str:
+
+def get_secret(secret_name: str, region_name: str = "us-east-1") -> str:
     # Create a Secrets Manager client
-    session = boto3.session.Session(profile_name="terminusgps-admin-session")
+    session = boto3.session.Session(profile_name="terminusgps-site")
     client = session.client(
-        service_name="secretsmanager",
-        region_name="us-east-1",
+        service_name='secretsmanager',
+        region_name=region_name
     )
 
     try:
