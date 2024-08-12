@@ -1,0 +1,9 @@
+{% extends "terminusgps_tracker/layout.html" %}
+{% block content %}
+{% load static %}
+    <script src="{% static 'terminusgps_tracker/js/documentation.js' %}" defer></script>
+    <h2 class="text-gray-800 dark:text-gray-200">{{ title }}</h2>
+    <div class="text-gray-800 dark:text-gray-200">
+        {{ content|safe }}
+    </div>
+{% endblock content %}

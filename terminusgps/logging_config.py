@@ -37,6 +37,11 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": False,
         },
+        "terminusgps_tracker.markdown_processor": {
+            "handlers": ["default", "file"],
+            "level": "INFO",
+            "propagate": False,
+        },
         "__main__": {
             "handlers": ["default"],
             "level": "DEBUG",

@@ -24,4 +24,5 @@ urlpatterns = [
         name="form customer login",
     ),
     path("forms/success/", views.form_success_view, name="form success"),
+    path("docs/<str:page_name>/", views.documentation_view, name="doc view")
 ]
