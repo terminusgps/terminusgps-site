@@ -43,8 +43,20 @@ module.exports = {
 		// '../../**/*.py'
 	],
 	theme: {
-		extend: {},
-	},
+        extend: {
+            colors: {
+                "terminus-black": "#0B090A",
+                "terminus-red-800": "#660708",
+                "terminus-red-600": "#A4161A",
+                "terminus-red-400": "#BA181B",
+                "terminus-red-200": "#E5383B",
+                "terminus-gray-800": "#161A1D",
+                "terminus-gray-600": "#B1A7A6",
+                "terminus-gray-400": "#D3D3D3",
+                "terminus-gray-200": "#F5F3F4",
+            }
+        },
+    },
 	plugins: [
 		/**
 		 * '@tailwindcss/forms' is the forms plugin that provides a minimal styling
