@@ -1,45 +1,121 @@
 document.addEventListener("DOMContentLoaded", function() {
-    const elements = document.querySelectorAll("[data-md-element]");
-    elements.forEach(function(element) {
-        const elementType = element.getAttribute("data-md-element");
-
-        switch (elementType) {
-            case "h1":
-                element.classList.add("text-gray-500 dark:text-white");
-                break;
-            case "h2":
-                element.classList.add("text-gray-500 dark:text-white");
-                break;
-            case "h3":
-                element.classList.add("text-gray-500 dark:text-white");
-                break;
-            case "h4":
-                element.classList.add("text-gray-500 dark:text-white");
-                break;
-            case "h5":
-                element.classList.add("text-gray-500 dark:text-white");
-                break;
-            case "h6":
-                element.classList.add("text-gray-500 dark:text-white");
-                break;
-            case "p":
-                element.classList.add("text-gray-500 dark:text-white");
-                break;
-            case "ul":
-                element.classList.add("text-gray-500 dark:text-white");
-                break;
-            case "li":
-                element.classList.add("text-gray-500 dark:text-white");
-                break;
-            case "ol":
-                element.classList.add("text-gray-500 dark:text-white");
-                break;
-            case "li":
-                element.classList.add("text-gray-500 dark:text-white");
-                break;
-            case "a":
-                element.classList.add("text-blue-600 dark:text-blue-400 underline underline-offset-auto hover:text-blue-400 dark:hover:text-blue-600");
-                break;
-        }
-    });
+    const article = document.querySelector("article.prose");
+    if (article) {
+        article.querySelectorAll("h1").forEach(el => {
+            el.classList.add(
+                "text-gray-900",
+                "dark:text-gray-100",
+            );
+        });
+        article.querySelectorAll("h2").forEach(el => {
+            el.classList.add(
+                "text-gray-800",
+                "dark:text-gray-200",
+            );
+        });
+        article.querySelectorAll("h3").forEach(el => {
+            el.classList.add(
+                "text-gray-800",
+                "dark:text-gray-200",
+            );
+        });
+        article.querySelectorAll("h4").forEach(el => {
+            el.classList.add(
+                "text-gray-800",
+                "dark:text-gray-200",
+            );
+        });
+        article.querySelectorAll("h5").forEach(el => {
+            el.classList.add(
+                "text-gray-800",
+                "dark:text-gray-200",
+            );
+        });
+        article.querySelectorAll("h6").forEach(el => {
+            el.classList.add(
+                "text-gray-800",
+                "dark:text-gray-200",
+            );
+        });
+        article.querySelectorAll("p").forEach(el => {
+            el.classList.add(
+                "text-gray-800",
+                "dark:text-gray-200",
+            );
+        });
+        article.querySelectorAll("a").forEach(el => {
+            el.classList.add(
+                "text-blue-400",
+                "hover:text-blue-600",
+                "dark:text-blue-600",
+                "dark:hover:text-blue-400",
+            );
+        });
+        article.querySelectorAll("ul").forEach(el => {
+            el.classList.add(
+                "text-gray-800",
+                "dark:text-gray-200",
+            );
+        });
+        article.querySelectorAll("ol").forEach(el => {
+            el.classList.add(
+                "text-gray-800",
+                "dark:text-gray-200",
+            );
+        });
+        article.querySelectorAll("li").forEach(el => {
+            el.classList.add(
+                "text-gray-800",
+                "dark:text-gray-200",
+            );
+        });
+        article.querySelectorAll("strong").forEach(el => {
+            el.classList.add(
+                "text-gray-900",
+                "dark:text-gray-100",
+            );
+        });
+        article.querySelectorAll("em").forEach(el => {
+            el.classList.add(
+                "text-gray-800",
+                "font-semibold",
+                "dark:text-gray-200",
+            );
+        });
+        article.querySelectorAll("code").forEach(el => {
+            el.classList.add(
+                "bg-gray-700",
+                "dark:bg-gray-200",
+                "dark:text-gray-900",
+                "p-1",
+                "rounded-sm",
+                "text-gray-50",
+            );
+        });
+        article.querySelectorAll("pre").forEach(el => {
+            el.classList.add(
+            );
+        });
+        article.querySelectorAll("blockquote").forEach(el => {
+            el.classList.add(
+                "p-4",
+                "rounded-md",
+                "bg-blue-200",
+                "dark:bg-blue-500",
+                "opacity-60",
+            );
+        });
+        article.querySelectorAll("table").forEach(el => {
+            el.classList.add(
+                "touch-pan-x",
+                "border",
+                "border-solid",
+                "dark:text-gray-100",
+                "rounded-lg",
+                "shadow",
+                "text-gray-900",
+                "text-left",
+            );
+        });
+    }
 });
