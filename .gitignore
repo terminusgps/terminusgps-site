@@ -1,6 +1,7 @@
 node_modules/
 __pycache__/
 migrations/
+output/
 db.*
 
 .*
@@ -12,6 +13,8 @@ db.*
 *.svg
 *.mp4
 *.webm
+*.csv
+*.xlsx
 
 
 package-lock.json
