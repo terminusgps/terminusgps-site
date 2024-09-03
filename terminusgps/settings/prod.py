@@ -24,6 +24,28 @@ USE_TZ = True
 FILE_UPLOAD_PERMISSIONS = 0o644
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o644
 
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "session_profile": "terminusgps-site-profile",
+            "bucket_name": "terminusgps-bucket",
+            "querystring_expire": 3600,
+            "url_protocol": "https:",
+            "file_overwrite": False,
+            "location": "static/",
+            "gzip": True,
+            "region_name": "us-east-1",
+            "use_ssl": True,
+            "verify": False,
+            "addressing_style": "virtual",
+        }
+    },
+}
+
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache"

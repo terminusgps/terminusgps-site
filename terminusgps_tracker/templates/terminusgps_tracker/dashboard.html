@@ -1,14 +1,82 @@
 {% extends "terminusgps_tracker/layout.html" %}
 {% block content %}
-<h1 class="text-3xl text-gray-800 dark:text-gray-200">{{ user.first_name|title }}'s Dashboard</h1>
-<div class="mt-2 text-center">
-    <h2 class="text-2xl text-gray-800 dark:text-gray-200">Quick Links</h2>
-    <div id="services-container" class="block px-4 py-2">
-        {% for service in services %}
-            {% include "terminusgps_tracker/partials/service.html" with service=service only %}
-        {% empty %}
-        No services found... :(
-        {% endfor %}
+    <div class="relative overflow-x-auto">
+        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400 table-auto">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <caption class="p-5 text-lg font-semibold text-left rtl:text-right text-gray-900 bg-white dark:text-white dark:bg-gray-800">
+                    Invoice for Order #{{ order.id }} - {{ order.date|date:"F j, Y" }}
+                    <p class="mt-1 text-sm font-normal text-gray-500 dark:text-gray-400">This is a caption.</p>
+                </caption>
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        #
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Service Date
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Product/Service Name
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Product/Service Description
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Quantity
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Rate
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Amount
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Tax
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Total Amount
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 odd:bg-gray-100 dark:odd:bg-gray-600">
+                    <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        {{ item.index }}
+                    </th>
+                    <td class="px-6 py-4">
+                        {{ item.date }}
+                    </td>
+                    <td class="px-6 py-4">
+                        {{ item.name }}
+                    </td>
+                    <td class="px-6 py-4">
+                        {{ item.description|truncatechars:32 }}
+                    </td>
+                    <td class="px-6 py-4">
+                        {{ item.quantity }}
+                    </td>
+                    <td class="px-6 py-4">
+                        ${{ item.rate }}/hr
+                    </td>
+                    <td class="px-6 py-4">
+                        ${{ item.amount }}
+                    </td>
+                    <td class="px-6 py-4">
+                        {{ item.tax_rate }}
+                    </td>
+                    <td class="px-6 py-4">
+                        ${{ item.total_amount }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-</div>
+    <div class="grid">
+        <p>Total: ${{ order.total }}</p>
+        <p>Subtotal: ${{ order.subtotal }}</p>
+        <p>Grand Total: ${{ order.grand_total }}</p>
+    </div>
+    <button type="submit" class="transition-colors duration-700 ease-out hover:ease-in motion-reduce:transition-none motion-reduce:hover:transition-none rounded-md border-terminus-black bg-gradient-to-tr from-terminus-black via-terminus-red-500 to-terminus-red-100 px-4 py-2 text-terminus-white">Submit</button>
+    <button type="button" class="rounded-md border-terminus-gray-400 bg-gradient-to-tr from-terminus-gray-900 via-terminus-gray-500 to-terminus-gray-100 px-4 py-2">Alternative</button>
 {% endblock content %}

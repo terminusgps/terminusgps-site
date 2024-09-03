@@ -6,7 +6,7 @@ def get_secret(secret_name: str, region_name: str = "us-east-1") -> str:
     # Create a Secrets Manager client
     session = boto3.session.Session(profile_name="terminusgps-site")
     client = session.client(
-        service_name='secretsmanager',
+        service_name="secretsmanager",
         region_name=region_name
     )
 
@@ -19,4 +19,4 @@ def get_secret(secret_name: str, region_name: str = "us-east-1") -> str:
         # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
         raise e
 
-    return get_secret_value_response['SecretString']
+    return get_secret_value_response["SecretString"]

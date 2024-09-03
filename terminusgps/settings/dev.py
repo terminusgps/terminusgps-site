@@ -21,6 +21,9 @@ TIME_ZONE = "America/Chicago"
 USE_I18N = True
 USE_TZ = True
 CLIENT_ID = "terminusgps.com"
+PAYMENT_HOST = "localhost:8000"
+PAYMENT_USES_SSL = False
+
 
 STORAGES = {
     "default": {
@@ -56,6 +59,8 @@ INSTALLED_APPS = [
     "tailwind",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
     "theme",
+    "payments",
+    "rest_framework",
 ]
 
 

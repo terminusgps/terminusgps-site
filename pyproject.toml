@@ -11,13 +11,31 @@ authors = [
 ]
 
 [tool.ruff]
-builtins = ["objects"]
+include = ["pyproject.toml", "terminusgps/*.py", "terminusgps/**/*.py", "terminusgps_tracker/*.py", "terminusgps_tracker/**/*.py"]
+line-length = 88
+indent-width = 4
 target-version = "py312"
-extend-exclude = ["migrations/*.py", "tests/*.py"]
-
-[tool.ruff.format]
-docstring-code-format = true
-skip-magic-trailing-comma = true
+extend-exclude = ["migrations/*.py"]
 
 [tool.ruff.lint]
 logger-objects = ["terminusgps.logger"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+docstring-code-format = false
+skip-magic-trailing-comma = true
+
+[tool.pyright]
+exclude = [
+    "**/**/node_modules",
+    "**/**/__pycache__",
+    "**/tests",
+    "**/migrations",
+]
+stubPath = "terminusgps_tracker/stubs"
+reportMissingImports = "error"
+reportMissingTypeStubs = true
+pythonVersion = "3.12"
+pythonPlatform = "Linux"

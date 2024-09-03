@@ -1,27 +1,28 @@
 import logging
 import os
+import requests
 import secrets
 import string
 
-from typing import Self
+from os import environ as env
+from requests.structures import CaseInsensitiveDict
+from typing import Self, Any, Optional
+from urllib.parse import urlencode
 from wialon import Wialon
 from wialon import flags as wialon_flag
 
-from terminusgps.logging_config import LOGGING_CONFIG
-logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger(__name__)
 
-
 class WialonSession:
-    def __init__(self, token: str = "") -> None:
+    def __init__(self, token: Optional[str] = None) -> None:
         self.wialon_api: Wialon = Wialon()
-        token = os.environ.get("WIALON_HOSTING_API_TOKEN", None)
-        if token is None:
-            raise ValueError("No 'WIALON_HOSTING_API_TOKEN' env variable set.")
-        else:
+        if token is not None:
             self.token = token
-
-        return None
+        else:
+            try:
+                self.token = os.environ["WIALON_HOSTING_API_TOKEN"]
+            except KeyError:
+                raise ValueError("No Wialon API access token provided.")
 
     def __enter__(self) -> Self:
         params = {
@@ -118,6 +119,36 @@ class WialonSession:
         response = self.wialon_api.core_search_item(**params)
         return response.get("item").get("u", [])
 
+    def create_geofence(
+        self,
+        user_data: dict[str, Any],
+        wialon_id: Optional[str] = None,
+        radius: int = 100,
+    ) -> None:
+        x, y = get_coords_by_addr(user_data.addr)
+        params = {
+            "itemId": wialon_id if wialon_id is not None else "27881459",     
+            "id": 0,                   # Geofence ID (0 for new)
+            "callMode": "create",      # Geofence Action: create, update, delete, reset_image
+            "n": user_data.full_name,  # Geofence Name
+            "d": user_data.full_name,  # Geofence Description
+            "t": 3,                    # Geofence Type (1 - line, 2 - polygon, 3 - circle)
+            "w": radius*2,             # Geofence Width
+            "f": 0x20,                 # Geofence Flags
+            "c": "197B30",             # Geofence Color
+            "tc": "FF5500",            # Geofence Text color
+            "ts": "12",                # Geofence Text size
+            "min": "1",                # Geofence Minimum visibility
+            "max": "19",               # Geofence Maximum visibility
+            "p": {                     # Geofence Perimeter
+                "x": x,
+                "y": y,
+                "r": radius,
+            },
+
+        }
+        self.wialon_api.resource_update_zone(**params)
+
     def _get_wialon_id(self, imei_number: str) -> str:
         """Takes a Wialon IMEI # and returns its corresponding Wialon ID."""
         logger.info(f"Retrieving Wialon id for '{imei_number}'...")
@@ -161,3 +192,4 @@ class WialonSession:
             ):
                 break
         return password
+

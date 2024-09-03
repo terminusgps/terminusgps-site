@@ -1,4 +1,3 @@
-
 from django.contrib.auth.forms import BaseUserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -10,10 +9,7 @@ from terminusgps_tracker.models.asset import WialonAsset
 
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    asset = models.ForeignKey(
-        WialonAsset,
-        on_delete=models.CASCADE,
-    )
+    asset = models.ForeignKey(WialonAsset, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return self.user.username

@@ -15,6 +15,10 @@ Common pitfalls, frequently asked questions, and clarifications concerning the n
 
 ## FAQ
 TODO
+```py
+import secrets
+print(secrets.token_urlsafe(64))
+```
 
 ## User goal
 A user knows what the goal of their call is, even if they think they don't. Ask for more clarification if a user goal hasn't been defined yet. They have to help us first by describing the problem so we can identify a solution as quickly as possible.

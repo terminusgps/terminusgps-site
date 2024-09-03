@@ -1,60 +1,75 @@
-/**
- * This is a minimal config.
- *
- * If you need the full config, get it from here:
- * https://unpkg.com/browse/tailwindcss@latest/stubs/defaultConfig.stub.js
- */
-
 module.exports = {
 	content: [
-		/**
-		 * HTML. Paths to Django template files that will contain Tailwind CSS classes.
-		 */
-
-		/*  Templates within theme app (<tailwind_app_name>/templates), e.g. base.html. */
 		"../templates/**/*.html",
-
-		/*
-		 * Main templates directory of the project (BASE_DIR/templates).
-		 * Adjust the following line to match your project structure.
-		 */
 		"../../templates/**/*.html",
-
-		/*
-		 * Templates in other django apps (BASE_DIR/<any_app_name>/templates).
-		 * Adjust the following line to match your project structure.
-		 */
 		"../../**/templates/**/*.html",
 		"../../**/models/forms.py",
-
-		/**
-		 * JS: If you use Tailwind CSS in JavaScript, uncomment the following lines and make sure
-		 * patterns match your project structure.
-		 */
-		/* JS 1: Ignore any JavaScript in node_modules folder. */
 		"!../../**/node_modules",
-		/* JS 2: Process all JavaScript files in the project. */
 		"../../**/*.js",
-
-		/**
-		 * Python: If you use Tailwind CSS classes in Python, uncomment the following line
-		 * and make sure the pattern below matches your project structure.
-		 */
-		// '../../**/*.py'
 	],
-	theme: {
+    theme: {
         extend: {
             colors: {
                 "terminus-black": "#0B090A",
-                "terminus-red-800": "#660708",
-                "terminus-red-600": "#A4161A",
+                "terminus-red-900": "#660708",
+                "terminus-red-800": "#760B0D",
+                "terminus-red-700": "#850F11",
+                "terminus-red-600": "#951316",
+                "terminus-red-500": "#A4161A",
                 "terminus-red-400": "#BA181B",
-                "terminus-red-200": "#E5383B",
-                "terminus-gray-800": "#161A1D",
-                "terminus-gray-600": "#B1A7A6",
-                "terminus-gray-400": "#D3D3D3",
-                "terminus-gray-200": "#F5F3F4",
-            }
+                "terminus-red-300": "#C52023",
+                "terminus-red-200": "#D0282B",
+                "terminus-red-100": "#DB3033",
+                "terminus-red-50": "#E5383B",
+                "terminus-gray-900": "#161A1D",
+                "terminus-gray-800": "#2A2C2F",
+                "terminus-gray-700": "#3D3E40",
+                "terminus-gray-600": "#646162",
+                "terminus-gray-500": "#8B8484",
+                "terminus-gray-400": "#B1A7A6",
+                "terminus-gray-300": "#D3D3D3",
+                "terminus-gray-200": "#E4E3E4",
+                "terminus-gray-100": "#F5F3F4",
+                "terminus-white": "#FFFFFF",
+            },
+            typography: ({ theme }) => ({
+                terminus: {
+                    css: {
+                        "--tw-prose-body": theme("colors.terminus-gray-700"),
+                        "--tw-prose-headings": theme("colors.terminus-gray-900"),
+                        "--tw-prose-lead": theme("colors.terminus-gray-800"),
+                        "--tw-prose-links": theme("colors.terminus-red-200"),
+                        "--tw-prose-bold": theme("colors.terminus-red-700"),
+                        "--tw-prose-counters": theme("colors.terminus-red-50"),
+                        "--tw-prose-bullets": theme("colors.terminus-red-800"),
+                        "--tw-prose-hr": theme("colors.terminus-gray-900"),
+                        "--tw-prose-quotes": theme("colors.terminus-gray-900"),
+                        "--tw-prose-quote-borders": theme("colors.terminus-red-700"),
+                        "--tw-prose-captions": theme("colors.terminus-gray-900"),
+                        "--tw-prose-code": theme("colors.terminus-gray-900"),
+                        "--tw-prose-pre-code": theme("colors.terminus-gray-900"),
+                        "--tw-prose-pre-bg": theme("colors.terminus-gray-900"),
+                        "--tw-prose-th-borders": theme("colors.terminus-red-800"),
+                        "--tw-prose-td-borders": theme("colors.terminus-red-400"),
+                        "--tw-prose-invert-body": theme("colors.terminus-gray-300"),
+                        "--tw-prose-invert-headings": theme("colors.terminus-gray-100"),
+                        "--tw-prose-invert-lead": theme("colors.terminus-gray-200"),
+                        "--tw-prose-invert-links": theme("colors.terminus-red-700"),
+                        "--tw-prose-invert-bold": theme("colors.terminus-red-100"),
+                        "--tw-prose-invert-counters": theme("colors.terminus-gray-900"),
+                        "--tw-prose-invert-bullets": theme("colors.terminus-red-50"),
+                        "--tw-prose-invert-hr": theme("colors.terminus-gray-900"),
+                        "--tw-prose-invert-quotes": theme("colors.terminus-gray-300"),
+                        "--tw-prose-invert-quote-borders": theme("colors.terminus-red-600"),
+                        "--tw-prose-invert-captions": theme("colors.terminus-gray-200"),
+                        "--tw-prose-invert-code": theme("colors.terminus-gray-200"),
+                        "--tw-prose-invert-pre-code": theme("colors.terminus-gray-900"),
+                        "--tw-prose-invert-pre-bg": "rgb(0 0 0 / 50%)",
+                        "--tw-prose-invert-th-borders": theme("colors.terminus-red-400"),
+                        "--tw-prose-invert-td-borders": theme("colors.terminus-red-800"),
+                    }
+                }
+            }),
         },
     },
 	plugins: [
