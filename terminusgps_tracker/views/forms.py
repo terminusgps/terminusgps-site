@@ -13,6 +13,3 @@ class RegistrationFormView(FormView):
         if "imei" in self.request.GET:
             initial["imei_number"] = self.request.GET.get("imei", "")
         return initial
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
