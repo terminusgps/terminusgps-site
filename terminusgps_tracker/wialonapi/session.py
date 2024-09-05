@@ -1,13 +1,9 @@
 import logging
 import os
-import requests
 import secrets
 import string
 
-from os import environ as env
-from requests.structures import CaseInsensitiveDict
 from typing import Self, Any, Optional
-from urllib.parse import urlencode
 from wialon import Wialon
 from wialon import flags as wialon_flag
 
@@ -149,9 +145,8 @@ class WialonSession:
         }
         self.wialon_api.resource_update_zone(**params)
 
-    def _get_wialon_id(self, imei_number: str) -> str:
+    def get_wialon_id(self, imei_number: str) -> str:
         """Takes a Wialon IMEI # and returns its corresponding Wialon ID."""
-        logger.info(f"Retrieving Wialon id for '{imei_number}'...")
         params = {
             "spec": {
                 "itemsType": "avl_unit",
@@ -159,19 +154,17 @@ class WialonSession:
                 "propValueMask": f"*{imei_number}*",
                 "sortType": "sys_unique_id",
                 "propType": "property",
-                "or_logic": 1,
+                "or_logic": 0,
             },
             "force": 0,
-            "flags": wialon_flag.ITEM_DATAFLAG_BASE,
+            "flags": 1,
             "from": 0,
             "to": 0,
         }
-        logger.debug(f"WialonSession._get_wialon_id params: {params}")
-        response = self.wialon_api.core_search_items(**params)
-        logger.debug(f"WialonSession._get_wialon_id response: {response}")
-        if not response.get("totalItemsCount", 0) == 1:
-            raise ValueError(f"IMEI number '{imei_number}' not found in Wialon.")
-        return response.get("items")[0].get("id")
+        items = self.wialon_api.core_search_items(**params).get("items", [])
+        if len(items) != 1:
+            raise ValueError(f"Invalid IMEI #: '{imei_number}'")
+        return items[0].get("id")
 
     def generate_wialon_password(self, length: int = 12) -> str:
         """Returns a valid Wialon password of the given length."""

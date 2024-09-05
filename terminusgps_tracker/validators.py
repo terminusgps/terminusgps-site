@@ -3,6 +3,34 @@ import string
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from terminusgps_tracker.wialonapi.session import WialonSession
+
+def validate_imei_number_is_available(value: str) -> str:
+    """Raises `django.ValidationError` unless value is a valid IMEI #."""
+    with WialonSession() as session:
+        params = {
+            "spec": {
+                "itemsType": "avl_unit",
+                "propName": "sys_unique_id",
+                "propValueMask": f"*{value}*",
+                "sortType": "sys_unique_id",
+                "propType": "property",
+                "or_logic": 0,
+            },
+            "force": 0,
+            "flags": 1,
+            "from": 0,
+            "to": 0,
+        }
+        response = session.wialon_api.core_search_items(**params)
+
+    items = response.get("items", [])
+    if len(items) != 1:
+        raise ValidationError(_("IMEI # '%(value)s' could not be located in the Terminus GPS database."), params={"value": value})
+    elif items[0].get("nm") != value:
+        raise ValidationError(_("IMEI # '%(value)s' is already registered."), params={"value": value})
+    return value
+
 
 def validate_contains_uppercase_letter(value: str) -> str:
     """Raises `django.ValidationError` unless value contains at least one uppercase letter."""
