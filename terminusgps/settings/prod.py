@@ -1,8 +1,6 @@
 import os
 from pathlib import Path
 
-#from terminusgps.aws import get_secret
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -31,20 +29,7 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "storages.backends.s3.S3Storage",
-        "OPTIONS": {
-            "session_profile": "terminusgps-site-profile",
-            "bucket_name": "terminusgps-bucket",
-            "querystring_expire": 3600,
-            "url_protocol": "https:",
-            "file_overwrite": False,
-            "location": "static/",
-            "gzip": True,
-            "region_name": "us-east-1",
-            "use_ssl": True,
-            "verify": False,
-            "addressing_style": "virtual",
-        }
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
 
