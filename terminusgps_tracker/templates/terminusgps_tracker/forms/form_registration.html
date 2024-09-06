@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 <div class="m-4 lg:m-6 xl:m-8">
-    <h1 class="text-2xl text-center">Terminus GPS Registration Form</h1>
+    <h1 class="text-2xl text-center dark:text-gray-50">Terminus GPS Registration Form</h1>
     <form action="{% url 'registration form' %}" method="post" class="m-4 md:m-6 lg:m-8">
         {% csrf_token %}
         {% if not form.is_bound %}
@@ -14,19 +14,7 @@
                 {% include "terminusgps_tracker/partials/_field_bound.html" with field=field only %}
             {% endfor %}
         {% endif %}
-        <button hx-on:click="toggleHelpModal()" class="px-4 py-2 mt-4 my-2 bg-gray-200 rounded rounded-md border border-solid border-gray-800" type="button">Help</button>
-        <button class="px-4 py-2 mt-4 my-2 bg-red-400 rounded rounded-md border border-solid border-gray-800" type="submit">Submit</button>
-        <div id="modal_help" class="p-6 border border-dashed border-2 border-gray-800 rounded rounded-md hidden">
-            <h3 class="mb-4 text-md">Password Requirements</h3>
-            <ul class="mb-4 p-2 text-sm">
-                <li>• Password must be at least 8 characters long.</li>
-                <li>• Password cannot be more than 32 characters long.</li>
-                <li>• Password must contain at least one uppercase letter.</li>
-                <li>• Password must contain at least one lowercase letter.</li>
-                <li>• Password must contain at least one digit.</li>
-                <li>• Password must contain at least special symbol.</li>
-            </ul>
-        </div>
+        <button class="px-4 py-2 mt-4 my-2 text-gray-50 bg-blue-500 hover:bg-blue-300 rounded rounded-md border border-solid border-gray-800" type="submit">Submit</button>
     </form>
 </div>
 <script src="{% static 'terminusgps_tracker/js/registration.js' %}" defer></script>

@@ -25,6 +25,28 @@ class RegistrationFormView(FormView):
         initial["imei_number"] = self.request.GET.get("imei", "")
         return initial
 
+    def form_valid(self, form: RegistrationForm) -> HttpResponse:
+        response = super().form_valid(form)
+        user_id = self.create_wialon_user(
+            username=form.cleaned_data["email"],
+            password=form.cleaned_data["wialon_password_1"],
+        )
+        self.rename_wialon_unit(
+            name=form.cleaned_data["asset_name"],
+            imei_number=form.cleaned_data["imei_number"]
+        )
+        self.assign_unit_to_user(user_id=user_id, imei_number=form.cleaned_data["imei_number"])
+        return response
+
+    def rename_wialon_unit(self, name: str, imei_number: str) -> None:
+        with WialonSession() as session:
+            unit_id = session.get_wialon_id(imei_number)
+            params = {
+                "itemId": unit_id,
+                "name": name,
+            }
+            session.wialon_api.item_update_name(**params)
+
     def create_wialon_user(self, username: str, password: str) -> str:
         with WialonSession() as session:
             params = {
@@ -33,7 +55,7 @@ class RegistrationFormView(FormView):
                 "password": password,
                 "dataFlags": wialon_flag.ITEM_DATAFLAG_BASE,
             }
-            unit_id = session.wialon_api.core_create_user(**params).get("item").get("id")
+            unit_id = session.wialon_api.core_create_user(**params).get("item", {}).get("id", "")
         return unit_id
 
     def assign_unit_to_user(self, user_id: str, imei_number: str) -> None:

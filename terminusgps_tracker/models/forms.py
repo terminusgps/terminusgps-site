@@ -4,7 +4,13 @@ from django.core.exceptions import ValidationError
 
 from django.utils.translation import gettext_lazy as _
 
-from terminusgps_tracker.validators import validate_imei_number_is_available, validate_wialon_compliant_password
+from terminusgps_tracker.validators import (
+    validate_contains_digit,
+    validate_contains_lowercase_letter,
+    validate_contains_special_symbol,
+    validate_contains_uppercase_letter,
+    validate_imei_number_is_available,
+)
 
 class RegistrationForm(forms.Form):
     imei_number = forms.CharField(
@@ -14,6 +20,13 @@ class RegistrationForm(forms.Form):
         required=True,
         help_text="You can find this underneath the QR Code you received with your vehicle.",
         validators=[validate_imei_number_is_available],
+    )
+    asset_name = forms.CharField(
+        label="Asset Name",
+        min_length=4,
+        max_length=128,
+        required=True,
+        help_text="This is what your vehicle will be named in the Terminus GPS app."
     )
     email = forms.EmailField(
         label="Email Address",
@@ -27,7 +40,12 @@ class RegistrationForm(forms.Form):
         min_length=8,
         max_length=32,
         required=True,
-        validators=[validate_wialon_compliant_password],
+        validators=[
+            validate_contains_digit,
+            validate_contains_lowercase_letter,
+            validate_contains_special_symbol,
+            validate_contains_uppercase_letter,
+        ],
         widget=forms.PasswordInput(),
     )
     wialon_password_2 = forms.CharField(
@@ -35,6 +53,12 @@ class RegistrationForm(forms.Form):
         min_length=8,
         max_length=32,
         required=True,
+        validators=[
+            validate_contains_digit,
+            validate_contains_lowercase_letter,
+            validate_contains_special_symbol,
+            validate_contains_uppercase_letter,
+        ],
         widget=forms.PasswordInput(),
     )
 
