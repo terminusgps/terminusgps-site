@@ -28,40 +28,40 @@ def validate_imei_number_is_available(value: str) -> str:
     if len(items) != 1:
         raise ValidationError(_("IMEI # '%(value)s' could not be located in the Terminus GPS database."), params={"value": value})
     elif items[0].get("nm") != value:
-        raise ValidationError(_("IMEI # '%(value)s' is already registered."), params={"value": value})
+        raise ValidationError(_("IMEI # '%(value)s' is unavailable."), params={"value": value})
     return value
 
 
 def validate_contains_uppercase_letter(value: str) -> str:
-    """Raises `django.ValidationError` unless value contains at least one uppercase letter."""
+    """Returns input value if it contains an uppercase letter, otherwise raises `django.core.exceptions.ValidationError`."""
     if not any(char in string.ascii_uppercase for char in value):
-        raise ValidationError(_("Value must contain at least one uppercase letter."))
+        raise ValidationError(_("Must contain at least one uppercase letter."))
     return value
 
 def validate_contains_lowercase_letter(value: str) -> str:
-    """Raises `django.ValidationError` unless value contains at least one lowercase letter."""
+    """Returns input value if it contains a lowercase letter, otherwise raises `django.core.exceptions.ValidationError`."""
     if not any(char in string.ascii_lowercase for char in value):
-        raise ValidationError(_("Value must contain at least one lowercase letter."))
+        raise ValidationError(_("Must contain at least one lowercase letter."))
     return value
 
 def validate_contains_digit(value: str) -> str:
-    """Raises `django.ValidationError` unless value contains at least one digit."""
+    """Returns input value if it contains a digit, otherwise raises `django.core.exceptions.ValidationError`."""
     if not any(char in string.digits for char in value):
-        raise ValidationError(_("Value must contain at least one lowercase letter."))
+        raise ValidationError(_("Must contain at least one lowercase letter."))
     return value
 
 def validate_contains_special_symbol(value: str) -> str:
-    """Raises `django.ValidationError` unless value contains at least one special symbol."""
+    """Returns input value if it contains a special symbol, otherwise raises `django.core.exceptions.ValidationError`."""
     special_symbols: set[str] = set("@#$%!?&_-")
     if not any(char in special_symbols for char in value):
         raise ValidationError(
-            _("Value must contain at least one special symbol. Symbols: '%(symbols)s'"),
+            _("Must contain at least one special symbol. Symbols: '%(symbols)s'"),
             params={"symbols": special_symbols}
         )
     return value
 
 def validate_wialon_compliant_password(value: str) -> str:
-    """Raises `django.ValidationError` unless value is a Wialon compliant password."""
+    """Returns input value if it is a valid, Wialon-compliant password, otherwise raises `django.core.exceptions.ValidationError`."""
     validate_contains_uppercase_letter(value)
     validate_contains_lowercase_letter(value)
     validate_contains_digit(value)
