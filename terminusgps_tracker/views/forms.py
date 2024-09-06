@@ -20,10 +20,10 @@ class RegistrationFormView(FormView):
     success_url = reverse_lazy("form success")
     initial = {}
 
-    def get_initial(self) -> dict[str, Any]:
-        initial = super().get_initial()
-        initial["imei_number"] = self.request.GET.get("imei", "")
-        return initial
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["imei_number"] = self.request.GET.get("imei", "")
+        return context
 
     def form_valid(self, form: RegistrationForm) -> HttpResponse:
         response = super().form_valid(form)

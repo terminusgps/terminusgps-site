@@ -7,7 +7,11 @@
         {% csrf_token %}
         {% if not form.is_bound %}
             {% for field in form %}
-                {% include "terminusgps_tracker/partials/_field_unbound.html" with field=field only %}
+                {% if imei_number and field.name == "imei_number" %}
+                    {% include "terminusgps_tracker/partials/_field_unbound.html" with field=field value=imei_number only %}
+                {% else %}
+                    {% include "terminusgps_tracker/partials/_field_unbound.html" with field=field only %}
+                {% endif %}
             {% endfor %}
         {% else %}
             {% for field in form %}
