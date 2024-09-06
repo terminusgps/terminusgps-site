@@ -10,7 +10,6 @@ db.*
 *.jpg
 *.jpeg
 *.png
-*.svg
 *.mp4
 *.webm
 *.csv
