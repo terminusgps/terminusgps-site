@@ -59,8 +59,6 @@ INSTALLED_APPS = [
     "tailwind",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
     "theme",
-    "payments",
-    "rest_framework",
 ]
 
 
