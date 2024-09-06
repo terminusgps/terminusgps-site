@@ -6,7 +6,13 @@
         name="{{ field.name }}"
         value="{{ field.value }}"
         {% if field.name == "wialon_password_1" or field.name == "wialon_password_1" %}type="password"{% else %}type="text"{% endif %}
+        {% if field.help_text %}
+        aria-describedby="{{ field.auto_id }}_helptext"
+        {% endif %}
     >
+    {% if field.help_text %}
+    <p class="hidden" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</p>
+    {% endif %}
 </div>
 {% else %}
 <div class="mb-4">
@@ -18,7 +24,7 @@
     <ul class="list-disc list-inside">
         <span class="sr-only">{{ field.name|title }} Errors</span>
         {% for error in field.errors %}
-        <li class="mt-4 text-sm dark:text-gray-50">{{ error }}</li>
+        <li class="mt-4 text-sm md:text-md font-serif dark:text-gray-50">{{ error }}</li>
         {% endfor %}
     </ul>
 </div>

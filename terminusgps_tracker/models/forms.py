@@ -18,28 +18,29 @@ class RegistrationForm(forms.Form):
         min_length=4,
         max_length=17,
         required=True,
-        help_text="You can find this underneath the QR Code you received with your vehicle.",
+        help_text="You can find this number underneath the QR Code you received with your vehicle.",
         validators=[validate_imei_number_is_available],
     )
     asset_name = forms.CharField(
         label="Asset Name",
         min_length=4,
-        max_length=128,
+        max_length=256,
         required=True,
-        help_text="This is what your vehicle will be named in the Terminus GPS app."
+        help_text="This is what your vehicle will be named in the Terminus GPS Tracking app.",
     )
     email = forms.EmailField(
         label="Email Address",
         min_length=4,
         max_length=128,
         required=True,
-        help_text="A good email address we can reach you at."
+        help_text="A good email address.",
     )
     wialon_password_1 = forms.CharField(
         label="Password",
         min_length=8,
         max_length=32,
         required=True,
+        help_text="The password for your new Terminus GPS account.",
         validators=[
             validate_contains_digit,
             validate_contains_lowercase_letter,
@@ -53,6 +54,7 @@ class RegistrationForm(forms.Form):
         min_length=8,
         max_length=32,
         required=True,
+        help_text="Repeat the password for your new Terminus GPS account.",
         validators=[
             validate_contains_digit,
             validate_contains_lowercase_letter,

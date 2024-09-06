@@ -10,7 +10,7 @@ from terminusgps_tracker.models.forms import RegistrationForm
 from terminusgps_tracker.wialonapi.session import WialonSession
 
 def form_success_view(request: HttpRequest) -> HttpResponse:
-    context = {"redirect_url": "https://terminusgps.com/"}
+    context = {"redirect_url": "https://hosting.terminusgps.com/"}
     return render(request, "terminusgps_tracker/forms/form_success.html", context=context)
 
 class RegistrationFormView(FormView):
