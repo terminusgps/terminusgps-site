@@ -10,9 +10,39 @@ from terminusgps_tracker.validators import (
     validate_contains_special_symbol,
     validate_contains_uppercase_letter,
     validate_imei_number_is_available,
+    validate_does_not_contain_forbidden_symbol,
 )
 
 class RegistrationForm(forms.Form):
+    first_name = forms.CharField(
+        label="First Name",
+        min_length=1,
+        max_length=128,
+        required=True,
+        help_text="Your first name.",
+        validators=[validate_does_not_contain_forbidden_symbol],
+    )
+    last_name = forms.CharField(
+        label="Last Name",
+        min_length=1,
+        max_length=128,
+        required=True,
+        help_text="Your last name.",
+        validators=[validate_does_not_contain_forbidden_symbol],
+    )
+    email = forms.EmailField(
+        label="Email Address",
+        min_length=4,
+        max_length=128,
+        required=True,
+        help_text="A good email address.",
+        validators=[validate_does_not_contain_forbidden_symbol],
+    )
+    phone_number = forms.CharField(
+        label="Phone #",
+        required=False,
+        help_text="This phone will receive notifications concerning your Terminus GPS assets.",
+    )
     imei_number = forms.CharField(
         label="IMEI #",
         min_length=4,
@@ -27,13 +57,7 @@ class RegistrationForm(forms.Form):
         max_length=256,
         required=True,
         help_text="This is what your vehicle will be named in the Terminus GPS Tracking app.",
-    )
-    email = forms.EmailField(
-        label="Email Address",
-        min_length=4,
-        max_length=128,
-        required=True,
-        help_text="A good email address.",
+        validators=[validate_does_not_contain_forbidden_symbol],
     )
     wialon_password_1 = forms.CharField(
         label="Password",
@@ -46,6 +70,7 @@ class RegistrationForm(forms.Form):
             validate_contains_lowercase_letter,
             validate_contains_special_symbol,
             validate_contains_uppercase_letter,
+            validate_does_not_contain_forbidden_symbol,
         ],
         widget=forms.PasswordInput(),
     )
@@ -60,6 +85,7 @@ class RegistrationForm(forms.Form):
             validate_contains_lowercase_letter,
             validate_contains_special_symbol,
             validate_contains_uppercase_letter,
+            validate_does_not_contain_forbidden_symbol,
         ],
         widget=forms.PasswordInput(),
     )

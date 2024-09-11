@@ -1,151 +1,163 @@
-import logging
 import os
-import secrets
-import string
 
-from typing import Self, Any, Optional
-from wialon import Wialon
-from wialon import flags as wialon_flag
+from typing import Self, Optional
+from wialon import Wialon, WialonError
+import terminusgps_tracker.wialonapi.flags as flag
 
-logger = logging.getLogger(__name__)
+BOT_ID = "27881459"
 
 class WialonSession:
-    def __init__(self, token: Optional[str] = None) -> None:
+    def __init__(self) -> None:
+        self.creator_id: str = BOT_ID
         self.wialon_api: Wialon = Wialon()
-        if token is not None:
-            self.token = token
-        else:
-            try:
-                self.token = os.environ["WIALON_HOSTING_API_TOKEN"]
-            except KeyError:
-                raise ValueError("No Wialon API access token provided.")
+        self.token: str | None = os.getenv("WIALON_HOSTING_API_TOKEN")
 
     def __enter__(self) -> Self:
-        params = {
+        if self.token is None:
+            raise ValueError("No Wialon API token provided.")
+        result = self.wialon_api.token_login(**{
             "token": self.token,
-            "fl": 1,
-        }
-        login = self.wialon_api.token_login(**params)
-        self.wialon_api.sid = login["eid"]
+        })
+        self.wialon_api.sid = result["eid"]
         return self
 
     def __exit__(self, exc_type=None, exc_val=None, exc_tb=None) -> str | None:
         if any([exc_type, exc_val, exc_tb]):
             return f"Error: {exc_val}"
         self.wialon_api.core_logout()
-        return None
 
-    def create_wialon_user(self, username: str, password: str) -> str | None:
-        """Creates a Wialon user and returns its ID."""
-        logger.info(f"Creating a new Wialon user named '{username}'...")
-        params = {
-            "creatorId": "27881459", # Terminus1000's User ID
-            "name": username,
-            "password": password,
-            "dataFlags": wialon_flag.ITEM_DATAFLAG_BASE,
-        }
-        logger.debug(f"WialonSession.create_wialon_user: {params}")
-        response = self.wialon_api.core_create_user(**params)
-        logger.debug(f"WialonSession.create_wialon_user: {response}")
-        return response.get("item", {}).get("id", None)
-
-    def assign_wialon_asset(self, user_id: str, asset_name: str, imei_number: str) -> str | None:
-        """Assigns a Wialon asset to the provided user ID, returns its own ID."""
-        asset_id = self._get_wialon_id(imei_number)
-        self.rename_wialon_asset(asset_id, asset_name)
-        self.set_default_wialon_access(asset_id, user_id)
-
-    def set_user_settings_flags(self, user_id: str) -> None:
-        """Sets user settings flags on the provided Wialon user."""
-        logger.info(f"Setting default userflags for user #{user_id}.")
-        params = {
-            "userId": user_id,
-            "flags": sum([
-                wialon_flag.ITEM_USER_USERFLAG_CANNOT_CHANGE_SETTINGS,
-                wialon_flag.ITEM_USER_USERFLAG_CANNOT_CHANGE_PASSWORD,
-            ]),
-            "flagsMask": wialon_flag.ITEM_USER_USERFLAG_CANNOT_CHANGE_SETTINGS - wialon_flag.ITEM_USER_USERFLAG_CANNOT_CHANGE_PASSWORD,
-        }
-        logger.debug(f"WialonSession.set_user_settings_flags params: {params}")
-        response = self.wialon_api.user_update_user_flags(**params)
-        logger.debug(f"WialonSession.set_user_settings_flags params: {response}")
-
-
-
-    def set_default_wialon_access(self, asset_id: str, user_id: str) -> None:
-        """Sets the default access flags for the provided Wialon asset and user."""
-        logger.info(f"Setting default access flags for user #{user_id} and asset #{asset_id}.")
-        params = {
-            "userId": user_id,
-            "itemId": asset_id,
-            "accessMask": sum([
-                wialon_flag.ITEM_ACCESSFLAG_VIEW,
-                wialon_flag.ITEM_ACCESSFLAG_VIEW_PROPERTIES,
-                wialon_flag.ITEM_ACCESSFLAG_EDIT_NAME,
-                wialon_flag.ITEM_ACCESSFLAG_VIEW_CFIELDS,
-                wialon_flag.ITEM_ACCESSFLAG_EDIT_CFIELDS,
-                wialon_flag.ITEM_ACCESSFLAG_EDIT_IMAGE,
-                wialon_flag.ITEM_ACCESSFLAG_VIEW_ADMINFIELDS,
+    def set_user_access_flags(self, unit_id: str, user_id: str, flags: Optional[int] = None) -> None:
+        if flags is None:
+            print(f"Setting user #{user_id} to default access for item #{unit_id}...")
+            flags = sum([
+                flag.ACCESSFLAG_MANAGE_ATTACHED_FILES,
+                flag.ACCESSFLAG_MANAGE_CUSTOM_FIELDS,
+                flag.ACCESSFLAG_MANAGE_ICON,
+                flag.ACCESSFLAG_MANAGE_ITEM_ACCESS,
+                flag.ACCESSFLAG_QUERY_REPORTS,
+                flag.ACCESSFLAG_RENAME_ITEM,
+                flag.ACCESSFLAG_UNIT_EXECUTE_COMMANDS,
+                flag.ACCESSFLAG_UNIT_EXPORT_MESSAGES,
+                flag.ACCESSFLAG_UNIT_IMPORT_MESSAGES,
+                flag.ACCESSFLAG_UNIT_MANAGE_ASSIGNMENTS,
+                flag.ACCESSFLAG_UNIT_MANAGE_SERVICE_INTERVALS,
+                flag.ACCESSFLAG_UNIT_MANAGE_TRIP_DETECTOR,
+                flag.ACCESSFLAG_UNIT_REGISTER_EVENTS,
+                flag.ACCESSFLAG_UNIT_VIEW_COMMANDS,
+                flag.ACCESSFLAG_UNIT_VIEW_SERVICE_INTERVALS,
+                flag.ACCESSFLAG_VIEW_ADMIN_FIELDS,
+                flag.ACCESSFLAG_VIEW_ATTACHED_FILES,
+                flag.ACCESSFLAG_VIEW_CUSTOM_FIELDS,
+                flag.ACCESSFLAG_VIEW_ITEM_BASIC,
+                flag.ACCESSFLAG_VIEW_ITEM_DETAILED,
             ])
-        }
-        logger.debug(f"WialonSession.set_default_wialon_access: {params}")
-        response = self.wialon_api.user_update_item_access(**params)
-        logger.debug(f"WialonSession.set_default_wialon_access response: {response}")
 
-    def rename_wialon_asset(self, wialon_id: str, name: str) -> None:
-        """Renames a given Wialon asset to the provided name."""
-        logger.info(f"Renaming Wialon id '{wialon_id}' to '{name}'...")
-        if len(name) <= 3:
-            raise ValueError(f"New name must be at least 4 characters long. '{name}' is {len(name)} chars long.")
-        params = {
-            "itemId": wialon_id,
-            "name": name,
-        }
-        logger.debug(f"WialonSession.rename_wialon_asset params: {params}")
-        response = self.wialon_api.item_update_name(**params)
-        logger.debug(f"WialonSession.rename_wialon_asset response: {response}")
+        try:
+            self.wialon_api.user_update_item_access(**{
+                "userId": user_id,
+                "itemId": unit_id,
+                "accessMask": flags,
+            })
+        except WialonError as e:
+            raise e
+        else:
+            return
 
-    def get_unactivated_units(self) -> list[str]:
-        group_id = "27890571"
-        logger.info("Retrieving list of unactivated units from Wialon...")
-        params = {
-            "id": group_id,
-            "flags": wialon_flag.ITEM_DATAFLAG_BASE,
-        }
-        response = self.wialon_api.core_search_item(**params)
-        return response.get("item").get("u", [])
+    def set_user_settings_flags(self, user_id: str, flags: Optional[int] = None, flags_mask: Optional[int] = None) -> None:
+        if flags is None or flags_mask is None:
+            print(f"Setting user #{user_id} to default settings...")
+            flags_mask = sum([
+                flag.SETTINGSFLAG_USER_DISABLED,
+                flag.SETTINGSFLAG_USER_CANNOT_CHANGE_PASSWORD,
+                flag.SETTINGSFLAG_USER_CAN_CREATE_ITEMS,
+                flag.SETTINGSFLAG_USER_CANNOT_CHANGE_SETTINGS,
+                flag.SETTINGSFLAG_USER_CAN_SEND_SMS,
+            ])
 
-    def create_geofence(
-        self,
-        user_data: dict[str, Any],
-        wialon_id: Optional[str] = None,
-        radius: int = 100,
-    ) -> None:
-        x, y = get_coords_by_addr(user_data.addr)
-        params = {
-            "itemId": wialon_id if wialon_id is not None else "27881459",     
-            "id": 0,                   # Geofence ID (0 for new)
-            "callMode": "create",      # Geofence Action: create, update, delete, reset_image
-            "n": user_data.full_name,  # Geofence Name
-            "d": user_data.full_name,  # Geofence Description
-            "t": 3,                    # Geofence Type (1 - line, 2 - polygon, 3 - circle)
-            "w": radius*2,             # Geofence Width
-            "f": 0x20,                 # Geofence Flags
-            "c": "197B30",             # Geofence Color
-            "tc": "FF5500",            # Geofence Text color
-            "ts": "12",                # Geofence Text size
-            "min": "1",                # Geofence Minimum visibility
-            "max": "19",               # Geofence Maximum visibility
-            "p": {                     # Geofence Perimeter
-                "x": x,
-                "y": y,
-                "r": radius,
-            },
+            flags = sum([
+                -flag.SETTINGSFLAG_USER_DISABLED,
+                -flag.SETTINGSFLAG_USER_CANNOT_CHANGE_PASSWORD,
+                flag.SETTINGSFLAG_USER_CAN_CREATE_ITEMS,
+                flag.SETTINGSFLAG_USER_CANNOT_CHANGE_SETTINGS,
+                flag.SETTINGSFLAG_USER_CAN_SEND_SMS,
+            ])
 
-        }
-        self.wialon_api.resource_update_zone(**params)
+        try:
+            self.wialon_api.user_update_user_flags(**{
+                "userId": user_id,
+                "flags": flags,
+                "flagsMask": flags_mask,
+            })
+        except WialonError as e:
+            raise e
+        else:
+            return
 
-    def get_wialon_id(self, imei_number: str) -> str:
+    def create_account(self, resource_id: str, plan: str) -> None:
+        print(f"Creating account for resource #{resource_id}...")
+        try:
+            self.wialon_api.account_create_account(**{
+                "itemId": resource_id,
+                "plan": plan,
+            })
+        except WialonError as e:
+            raise e
+        else:
+            return
+
+    def create_group(self, name: str) -> str:
+        print(f"Creating group '{name}'...")
+        try:
+            response = self.wialon_api.core_create_unit_group(**{
+                "creatorId": self.creator_id,
+                "name": name,
+                "dataFlags": flag.DATAFLAG_UNIT_BASE,
+            })
+        except WialonError as e:
+            raise e
+        else:
+            return response["item"].get("id", "")
+
+    def create_resource(self, name: str) -> str:
+        print(f"Creating resource '{name}'...")
+        try:
+            response = self.wialon_api.core_create_resource(**{
+                "creatorId": self.creator_id,
+                "name": name,
+                "dataFlags": flag.DATAFLAG_RESOURCE_BASE,
+            })
+        except WialonError as e:
+            raise e
+        else:
+            return response["item"].get("id", "")
+
+    def create_user(self, username: str, password: str) -> str:
+        print(f"Creating user '{username}'...")
+        try:
+            response = self.wialon_api.core_create_user(**{
+                "creatorId": self.creator_id,
+                "name": username,
+                "password": password,
+                "dataFlags": flag.DATAFLAG_USER_BASE,
+            })
+        except WialonError as e:
+            raise e
+        else:
+            return response["item"].get("id", "")
+
+    def get_unactivated_units(self, group_id: str = "27890571") -> list[str]:
+        try:
+            response = self.wialon_api.core_search_item(**{
+                "id": group_id,
+                "flags": flag.DATAFLAG_UNIT_BASE,
+            })
+        except WialonError as e:
+            raise e
+        else:
+            return response["item"].get("u", [])
+
+    def get_id(self, imei_number: str) -> str:
+        print(f"Retrieving id from '{imei_number}'...")
         """Takes a Wialon IMEI # and returns its corresponding Wialon ID."""
         params = {
             "spec": {
@@ -157,32 +169,15 @@ class WialonSession:
                 "or_logic": 0,
             },
             "force": 0,
-            "flags": 1,
+            "flags": flag.DATAFLAG_UNIT_BASE,
             "from": 0,
             "to": 0,
         }
-        items = self.wialon_api.core_search_items(**params).get("items", [])
-        if len(items) != 1:
-            raise ValueError(f"Invalid IMEI #: '{imei_number}'")
-        return items[0].get("id")
-
-    def generate_wialon_password(self, length: int = 12) -> str:
-        """Returns a valid Wialon password of the given length."""
-        length += 1
-        letters = tuple(string.ascii_letters)
-        numbers = tuple(string.digits)
-        symbols = ("@", "#", "$", "%", "!")
-
-        while True:
-            password = "".join(
-                secrets.choice(letters + numbers + symbols) for i in range(length)
-            )
-            if (
-                any(c.islower() for c in password)
-                and any(c.isupper() for c in password)
-                and any(c.isdigit() for c in password)
-                and any(c in symbols for c in password)
-            ):
-                break
-        return password
-
+        try:
+            items: list = self.wialon_api.core_search_items(**params).get("items", [])
+        except WialonError as e:
+            raise e
+        else:
+            if len(items) != 1:
+                raise ValueError(f"Invalid IMEI #: '{imei_number}'")
+            return items[0].get("id")

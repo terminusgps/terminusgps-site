@@ -6,13 +6,7 @@
         name="{{ field.name }}"
         value="{{ field.value }}"
         {% if field.name == "wialon_password_1" or field.name == "wialon_password_2" %}type="password"{% else %}type="text"{% endif %}
-        {% if field.help_text %}
-        aria-describedby="{{ field.auto_id }}_helptext"
-        {% endif %}
     >
-    {% if field.help_text %}
-    <p class="hidden" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</p>
-    {% endif %}
 </div>
 {% else %}
 <div class="mb-4">
