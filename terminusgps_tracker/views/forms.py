@@ -34,6 +34,7 @@ class RegistrationFormView(FormView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["imei_number"] = self.imei_number
+        context["title"] = "Registration Form"
         return context
 
     def form_valid(self, form: RegistrationForm) -> HttpResponse:
