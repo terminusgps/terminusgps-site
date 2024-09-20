@@ -9,7 +9,6 @@ from terminusgps_tracker.wialonapi.geofences import (
     get_owner_id,
     save_output_df,
 )
-from terminusgps_tracker.wialonapi.geofences.geofence import generate_params
 from .session import WialonSession
 
 def test() -> None:
@@ -40,7 +39,6 @@ def test() -> None:
 def main() -> None:
     exec_start = perf_counter()
     input_df = pd.read_csv("/home/blake/input_data.csv")
-    input_df = input_df.sample(16)
     extracted_data = extract_df(input_df)
     print(f"Extracted {len(extracted_data)} coordinate pairs in total.")
 

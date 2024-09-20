@@ -24,7 +24,6 @@ CLIENT_ID = "terminusgps.com"
 PAYMENT_HOST = "localhost:8000"
 PAYMENT_USES_SSL = False
 
-
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -60,7 +59,6 @@ INSTALLED_APPS = [
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
     "theme",
 ]
-
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

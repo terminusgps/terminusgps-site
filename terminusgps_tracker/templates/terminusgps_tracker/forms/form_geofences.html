@@ -1,0 +1,27 @@
+{% extends "terminusgps_tracker/layout.html" %}
+{% load static %}
+{% block content %}
+<div class="m-8 md:m-6 lg:m-4 border border-solid rounded rounded-lg bg-terminus-gray-100 dark:bg-terminus-gray-700">
+    <div class="flex flex-cols items-center">
+        <img class="m-6" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo" height="60" width="60">
+        <div>
+            <h1 class="mx-6 mt-4 mb-2 font-serif text-2xl text-terminus-gray-800 dark:text-gray-50">Terminus GPS</h1>
+            <h2 class="mx-6 mb-4 font-serif text-xl text-terminus-gray-600 dark:text-gray-50">Simplify, Monitor, Protect</h2>
+        </div>
+    </div>
+    <form enctype="multipart/form-data" action="{% url 'geofences form' %}" method="post" class="m-4 md:m-6 lg:m-8">
+        {% csrf_token %}
+        {% if not form.is_bound %}
+            {% for field in form %}
+                    {% include "terminusgps_tracker/partials/_field_unbound.html" with field=field only %}
+            {% endfor %}
+        {% else %}
+            {% for field in form %}
+                {% include "terminusgps_tracker/partials/_field_bound.html" with field=field only %}
+            {% endfor %}
+        {% endif %}
+        <button hx-on:click="alert('Nope.')"class="px-4 py-2 mt-4 mb-2 min-w-full text-gray-50 bg-gray-500 hover:bg-gray-300 rounded rounded-md border border-solid border-gray-800" type="button">Help</button>
+        <button class="px-4 py-2 mb-4 mt-2 min-w-full text-gray-50 bg-blue-500 hover:bg-blue-300 rounded rounded-md border border-solid border-gray-800" type="submit">Submit</button>
+    </form>
+</div>
+{% endblock content %}

@@ -6,13 +6,18 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
+from django.conf import settings
 from wialon import WialonError
 
+import terminusgps_tracker.wialonapi.flags as flag
 from terminusgps_tracker.models.forms import RegistrationForm
+from terminusgps_tracker.wialonapi.items import WialonUnit, WialonResource, WialonUnitGroup, WialonUser
 from terminusgps_tracker.wialonapi.session import WialonSession
 
+DEFAULT_OWNER_ID = "27881459"
+
 def form_success_view(request: HttpRequest) -> HttpResponse:
-    context = {"redirect_url": "https://hosting.terminusgps.com/"}
+    context = {"redirect_url": "https://hosting.terminusgps.com"}
     return render(request, "terminusgps_tracker/forms/form_success.html", context=context)
 
 class RegistrationFormView(FormView):
@@ -33,92 +38,101 @@ class RegistrationFormView(FormView):
 
     def form_valid(self, form: RegistrationForm) -> HttpResponse:
         response = super().form_valid(form)
-        full_name = " ".join((form.cleaned_data["first_name"], form.cleaned_data["last_name"]))
-        username, password = form.cleaned_data["email"], form.cleaned_data["wialon_password_1"]
-        with WialonSession() as session:
-            try:
-                # resource_id = session.create_resource(full_name + " Resource")
-                group_id = session.create_group(full_name + " Unit Group")
-                unit_id = session.get_id(form.cleaned_data["imei_number"])
-                user_id = session.create_user(username, password)
-
-                print(f"Renaming unit #{unit_id} to '{form.cleaned_data["asset_name"]}'...")
-                self.rename_wialon_unit(unit_id, form.cleaned_data["asset_name"], session=session)
-                print(f"Assigning user '{form.cleaned_data["email"]}' to unit '{form.cleaned_data["asset_name"]}'...")
-                self.assign_user_to_unit(unit_id, user_id, session=session)
-                print(f"Assigning unit '{form.cleaned_data["asset_name"]}' to group '#{group_id}'...")
-                self.assign_units_to_group(list(unit_id), group_id, session=session)
-                # print("Creating new account...")
-                # self.create_wialon_account(resource_id, session=session)
-                # print(f"Migrating user '{form.cleaned_data["email"]}' to new account...")
-                # self.migrate_user_to_account(user_id, resource_id, session=session)
+        try:
+            with WialonSession() as session:
+                unit = self.get_wialon_unit(imei_number=form.cleaned_data["imei_number"], session=session)
+                super_user = self.create_wialon_user(
+                    username=f"Super {form.cleaned_data["first_name"]} {form.cleaned_data["last_name"]}",
+                    password=form.cleaned_data["wialon_password_1"],
+                    session=session,
+                )
+                end_user = self.create_wialon_user(
+                    username=form.cleaned_data["email"],
+                    password=form.cleaned_data["wialon_password_1"],
+                    creator_id=str(super_user.id),
+                    session=session
+                )
+                group = self.create_wialon_unit_group(
+                    name=f"{form.cleaned_data["first_name"]} {form.cleaned_data["last_name"]}'s Group",
+                    creator_id=str(super_user.id),
+                    session=session,
+                )
+                group.add_unit(unit)
+                super_user.assign_unit(unit, access_mask=flag.ACCESSFLAG_FULL_ACCESS)
+                end_user.assign_unit(unit)
+                end_user.assign_email(form.cleaned_data["email"])
                 if form.cleaned_data["phone_number"]:
-                    print(f"Assigning '{form.cleaned_data["phone_number"]}' to '{form.cleaned_data["asset_name"]}'...")
-                    self.assign_to_number_to_unit(unit_id, phone=form.cleaned_data["phone_number"], session=session)
+                    to_number: tuple[str, str] = "to_number", form.cleaned_data["phone_number"]
+                    unit.add_afield(to_number)
+                    end_user.assign_phone(form.cleaned_data["phone_number"])
 
-            except WialonError:
-                form.add_error("imei_number", ValidationError(_("Something went wrong on our end. Please try again later.")))
+        except WialonError as e:
+            if settings.DEBUG:
+                raise e
+            else:
+                form.add_error("imei_number", ValidationError(_("Something went wrong on our end. Please try again later."), code="invalid"))
                 return self.form_invalid(form)
 
         return response
 
-    def migrate_user_to_account(self, user_id: str, resource_id: str, *, session: WialonSession) -> None:
-        try:
-            session.wialon_api.account_change_account(**{
-                "itemId": user_id,
-                "resourceId": resource_id,
-            })
-        except WialonError as e:
-            raise e
-        else:
-            return
+    def get_wialon_unit_id(self, imei_number: str, session: WialonSession) -> str | None:
+        return session.get_id_from_iccid(imei_number)
 
-    def rename_wialon_unit(self, unit_id: str, name: str, *, session: WialonSession) -> None:
+    def get_wialon_unit(self, imei_number: str, session: WialonSession) -> WialonUnit:
         try:
-            session.wialon_api.item_update_name(**{
-                "itemId": unit_id,
-                "name": name,
-            })
+            return WialonUnit(
+                id=self.get_wialon_unit_id(imei_number, session=session),
+                session=session,
+            )
         except WialonError as e:
             raise e
 
-    def create_wialon_account(self, resource_id: str, *, session: WialonSession) -> None:
+    def create_wialon_user(
+        self,
+        username: str,
+        password: str,
+        *,
+        creator_id: str = DEFAULT_OWNER_ID,
+        session: WialonSession
+    ) -> WialonUser:
         try:
-            session.wialon_api.account_create_account(**{
-                "itemId": resource_id,
-                "plan": "Simple Terminus GPS",
-            })
+            return WialonUser(
+                creator_id=creator_id,
+                name=username,
+                password=password,
+                session=session,
+            )
         except WialonError as e:
             raise e
 
-    def assign_units_to_group(self, unit_ids: list[str], group_id: str, *, session: WialonSession) -> None:
+    def create_wialon_unit_group(
+        self,
+        name: str,
+        *,
+        creator_id: str = DEFAULT_OWNER_ID,
+        session: WialonSession
+    ) -> WialonUnitGroup:
         try:
-            session.wialon_api.unit_group_update_units(**{
-                "itemId": group_id,
-                "units": unit_ids,
-            })
+            return WialonUnitGroup(
+                creator_id=creator_id,
+                name=name,
+                session=session,
+            )
         except WialonError as e:
             raise e
 
-    def assign_to_number_to_unit(self, unit_id: str, phone: str, *, session: WialonSession) -> None:
-        if not phone.startswith("+1"):
-            phone = "".join(["+1", phone])
+    def create_wialon_resource(
+        self,
+        name: str,
+        *,
+        creator_id: str = DEFAULT_OWNER_ID,
+        session: WialonSession
+    ) -> WialonResource:
         try:
-            session.wialon_api.update_custom_field(**{
-                "itemId": unit_id,
-                "callMode": "create",
-                "n": "to_number",
-                "v": phone,
-            })
-            session.wialon_api.unit_update_phone(**{
-                "itemId": unit_id,
-                "phoneNumber": phone,
-            })
-        except WialonError as e:
-            raise e
-
-    def assign_user_to_unit(self, unit_id: str, user_id: str, *, session: WialonSession) -> None:
-        try:
-            session.set_user_access_flags(unit_id, user_id)
+            return WialonResource(
+                creator_id=creator_id,
+                name=name,
+                session=session,
+            )
         except WialonError as e:
             raise e
