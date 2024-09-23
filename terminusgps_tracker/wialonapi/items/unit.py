@@ -41,7 +41,7 @@ class WialonUnit(WialonBase):
             self.is_active = bool(search_result.get("act", 0))
 
     def is_member(self, group: WialonUnitGroup) -> bool:
-        if self.id in group.units:
+        if group.units and self.id in group.units:
             return True
         else:
             return False
