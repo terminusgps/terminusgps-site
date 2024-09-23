@@ -64,3 +64,69 @@ class WialonBase:
             })
         except WialonError as e:
             raise e
+
+    def update_afield(self, field_id: int, field: tuple[str, str]) -> None:
+        try:
+            self.session.wialon_api.item_update_admin_field(**{
+                "itemId": self.id,
+                "id": field_id,
+                "callMode": "update",
+                "n": field[0],
+                "v": field[1],
+            })
+        except WialonError as e:
+            raise e
+
+    def add_cfield(self, field: tuple[str, str]) -> None:
+        try:
+            self.session.wialon_api.item_update_custom_field(**{
+                "itemId": self.id,
+                "id": 0,
+                "callMode": "create",
+                "n": field[0],
+                "v": field[1],
+            })
+        except WialonError as e:
+            raise e
+
+    def update_cfield(self, field_id: int, field: tuple[str, str]) -> None:
+        try:
+            self.session.wialon_api.item_update_custom_field(**{
+                "itemId": self.id,
+                "id": field_id,
+                "callMode": "update",
+                "n": field[0],
+                "v": field[1],
+            })
+        except WialonError as e:
+            raise e
+
+    def add_cproperty(self, field: tuple[str, str]) -> None:
+        try:
+            self.session.wialon_api.item_update_custom_property(**{
+                "itemId": self.id,
+                "name": field[0],
+                "value": field[1],
+            })
+        except WialonError as e:
+            raise e
+
+    def add_profile_field(self, field: tuple[str, str]) -> None:
+        try:
+            self.session.wialon_api.item_update_profile_field(**{
+                "itemId": self.id,
+                "n": field[0],
+                "v": field[1],
+            })
+        except WialonError as e:
+            raise e
+
+    def get_bound_account_id(self) -> str:
+        try:
+            response = self.session.wialon_api.account_list_change_accounts(**{
+                "units": [self.id]
+            })
+        except WialonError as e:
+            raise e
+        else:
+            return response[0].get("id", "")

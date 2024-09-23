@@ -10,11 +10,32 @@ from terminusgps_tracker.validators import (
     validate_contains_special_symbol,
     validate_contains_uppercase_letter,
     validate_does_not_contain_forbidden_symbol,
+    validate_does_not_contain_hyphen,
     validate_imei_number_is_available,
     validate_starts_with_plus_one,
     validate_username_is_unique,
-    validate_does_not_contain_hyphen,
 )
+
+class GeofenceUploadForm(forms.Form):
+    file = forms.FileField(
+        label="Geofence input data",
+    )
+
+    def clean(self) -> dict[str, Any] | None:
+        cleaned_data: dict[str, Any] | None = super().clean()
+        if cleaned_data is not None:
+            file_extension = cleaned_data["file"].name.split(".")[-1]
+            valid_extensions: tuple = "csv", "xlsx"
+            if not any([file_extension == ext for ext in valid_extensions]):
+                self.add_error(
+                    "file",
+                    ValidationError(
+                        _("File must have one of these extensions: '%(valid_extensions)s'"),
+                        params={"valid_extensions": valid_extensions},
+                        code="invalid",
+                    )
+                )
+        return cleaned_data
 
 class RegistrationForm(forms.Form):
     first_name = forms.CharField(
@@ -101,7 +122,19 @@ class RegistrationForm(forms.Form):
 
             if password_1 and password_2:
                 if password_1 != password_2:
-                    self.add_error("wialon_password_1", ValidationError(_("Passwords do not match.")))
-                    self.add_error("wialon_password_2", ValidationError(_("Passwords do not match.")))
+                    self.add_error(
+                        "wialon_password_1",
+                        ValidationError(
+                            _("Passwords do not match."),
+                            code="invalid",
+                        )
+                    )
+                    self.add_error(
+                        "wialon_password_2",
+                        ValidationError(
+                            _("Passwords do not match."),
+                            code="invalid",
+                        )
+                    )
 
         return cleaned_data

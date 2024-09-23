@@ -1,1 +1,1 @@
-from .forms import RegistrationFormView, form_success_view
+from .forms import RegistrationFormView, GeofenceUploadFormView, form_success_view

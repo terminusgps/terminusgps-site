@@ -10,7 +10,7 @@ from django.conf import settings
 from wialon import WialonError
 
 import terminusgps_tracker.wialonapi.flags as flag
-from terminusgps_tracker.models.forms import RegistrationForm
+from terminusgps_tracker.models.forms import GeofenceUploadForm, RegistrationForm
 from terminusgps_tracker.wialonapi.items import WialonUnit, WialonResource, WialonUnitGroup, WialonUser
 from terminusgps_tracker.wialonapi.session import WialonSession
 
@@ -19,6 +19,17 @@ DEFAULT_OWNER_ID = "27881459"
 def form_success_view(request: HttpRequest) -> HttpResponse:
     context = {"redirect_url": "https://hosting.terminusgps.com"}
     return render(request, "terminusgps_tracker/forms/form_success.html", context=context)
+
+class GeofenceUploadFormView(FormView):
+    form_class = GeofenceUploadForm
+    http_method_names = ["get", "post"]
+    template_name = "terminusgps_tracker/forms/form_geofence_upload.html"
+    success_url = reverse_lazy("form success")
+    initial = {}
+
+    def form_valid(self, form: GeofenceUploadForm) -> HttpResponse:
+        response = super().form_valid(form)
+        return response
 
 class RegistrationFormView(FormView):
     form_class = RegistrationForm

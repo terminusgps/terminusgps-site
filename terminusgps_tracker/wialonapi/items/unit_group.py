@@ -34,8 +34,8 @@ class WialonUnitGroup(WialonBase):
         else:
             return self._units
 
-    def is_member(self, unit: WialonBase) -> bool:
-        if self.units and unit.id in self.units:
+    def is_member(self, item: WialonBase) -> bool:
+        if self.units and item.id in self.units:
             return True
         else:
             return False
@@ -58,7 +58,7 @@ class WialonUnitGroup(WialonBase):
             self._id = response.get("item", {}).get("id")
 
     def add_unit(self, unit: WialonBase) -> None:
-        """Adds a WialonUnit to this group."""
+        """Adds a Wialon object to this group."""
         if unit.id is None:
             raise ValueError(f"Invalid unit provided: {unit}")
         elif not self.units:
@@ -75,13 +75,11 @@ class WialonUnitGroup(WialonBase):
             raise e
 
     def rm_unit(self, unit: WialonBase) -> None:
-        """Removes a WialonUnit from this group, if it is a member of this group."""
-        if not self.units:
-            raise ValueError("Failed to retrieve this group's members.")
-        elif unit.id is None:
+        """Removes a Wialon object from this group, if it is a member of this group."""
+        if unit.id is None:
             raise ValueError(f"Invalid unit provided: {unit}")
 
-        if self.is_member(unit):
+        if self.units and self.is_member(unit):
             target_index: int = self.units.index(str(unit.id))
             new_units: list[str] = self.units.copy().pop(target_index)
             try:

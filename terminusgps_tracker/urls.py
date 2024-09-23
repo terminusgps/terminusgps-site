@@ -9,6 +9,11 @@ urlpatterns = [
         name="registration form",
     ),
     path(
+        "forms/geofence_upload/",
+        views.GeofenceUploadFormView.as_view(),
+        name="geofence upload form",
+    ),
+    path(
         "forms/success/",
         views.form_success_view,
         name="form success"

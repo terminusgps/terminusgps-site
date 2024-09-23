@@ -1,4 +1,7 @@
+import json
+
 from wialon.api import WialonError
+from urllib.parse import quote_plus
 
 import terminusgps_tracker.wialonapi.flags as flag
 from terminusgps_tracker.wialonapi.items.base import WialonBase
@@ -11,7 +14,6 @@ DEFAULT_ACCESS_MASK: int = sum([
     flag.ACCESSFLAG_MANAGE_CUSTOM_FIELDS,
     flag.ACCESSFLAG_MANAGE_ICON,
     flag.ACCESSFLAG_QUERY_REPORTS,
-    flag.ACCESSFLAG_VIEW_ADMIN_FIELDS,
     flag.ACCESSFLAG_VIEW_ATTACHED_FILES,
     flag.ACCESSFLAG_UNIT_VIEW_CONNECTIVITY,
     flag.ACCESSFLAG_UNIT_VIEW_SERVICE_INTERVALS,
@@ -22,13 +24,12 @@ DEFAULT_ACCESS_MASK: int = sum([
 
 class WialonUser(WialonBase):
     def create(self, **kwargs) -> None:
-        """Creates a new user in Wialon and sets this user's id attribute to the newly created user's Wialon id."""
         if kwargs.get("creator_id", None) is None:
-            raise ValueError("Tried to create user but creator id was not provided.")
+            raise ValueError("Tried to create a user but creator id was none.")
         if kwargs.get("name", None) is None:
-            raise ValueError("Tried to create user but name was not provided.")
+            raise ValueError("Tried to create a user but name was none.")
         if kwargs.get("password", None) is None:
-            raise ValueError("Tried to create user but password was not provided.")
+            raise ValueError("Tried to create a user but password was none.")
 
         try:
             response = self.session.wialon_api.core_create_user(**{
@@ -45,27 +46,19 @@ class WialonUser(WialonBase):
     def assign_phone(self, phone: str) -> None:
         """Sets the phone for this user in Wialon."""
         try:
-            self.session.wialon_api.item_update_custom_property(**{
-                "itemId": self.id,
-                "name": "phone",
-                "value": phone,
-            })
+            self.add_cproperty(("phone", quote_plus(phone)))
         except WialonError as e:
             raise e
 
     def assign_email(self, email: str) -> None:
         """Sets the email for this user in Wialon."""
         try:
-            self.session.wialon_api.item_update_custom_property(**{
-                "itemId": self.id,
-                "name": "email",
-                "value": email,
-            })
+            self.add_cproperty(("email", email))
         except WialonError as e:
             raise e
 
     def assign_unit(self, unit: WialonBase, access_mask: int = DEFAULT_ACCESS_MASK) -> None:
-        """Assigns a WialonUnit to this user according to a supplied access mask integer."""
+        """Assigns a `WialonUnit` to this user according to a supplied access mask integer."""
         try:
             self.session.wialon_api.user_update_item_access(**{
                 "userId": self.id,
@@ -76,7 +69,6 @@ class WialonUser(WialonBase):
             raise e
 
     def set_settings_flags(self, flags: int, flags_mask: int) -> None:
-        """Sets the settings flags for this user according to supplied flags and flag mask integers."""
         try:
             self.session.wialon_api.user_update_user_flags(**{
                 "userId": self.id,
@@ -87,12 +79,36 @@ class WialonUser(WialonBase):
             raise e
 
     def update_password(self, old_password: str, new_password: str) -> None:
-        """Updates the password of this user to the supplied new password."""
         try:
             self.session.wialon_api.user_update_password(**{
                 "userId": self.id,
                 "oldPassword": old_password,
                 "newPassword": new_password,
+            })
+        except WialonError as e:
+            raise e
+
+    def send_online_notice(self, subject: str, body: str = "") -> None:
+        raise NotImplementedError
+        def create_message(body: str) -> str:
+            return json.dumps({
+                "body": body,
+                "head": {
+                    "c": int("030303", 16),
+                    "fs": 12,
+                    "multiple": 0,
+                },
+            })
+
+        try:
+            self.session.wialon_api.user_update_user_notification(**{
+                "itemId": self.id,
+                "id": 0,
+                "callMode": "create",
+                "h": subject,
+                "d": create_message(body),
+                "s": "",
+                "ttl": "",
             })
         except WialonError as e:
             raise e

@@ -1,10 +1,10 @@
 import pandas as pd
 
 from dataclasses import dataclass
-from wialon import WialonError
+from wialon.api import WialonError
 
 from terminusgps_tracker.wialonapi.session import WialonSession
-from terminusgps_tracker.wialonapi.progress_bar import get_progress_bar
+from terminusgps_tracker.wialonapi.geofences.progress_bar import get_progress_bar
 
 DEFAULT_OWNER_ID = int("27881459")
 LINE = 1

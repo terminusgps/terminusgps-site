@@ -6,8 +6,8 @@ from wialon.api import Wialon, WialonError
 import terminusgps_tracker.wialonapi.flags as flag
 
 class WialonSession:
-    def __init__(self, **kwargs) -> None:
-        self.token = kwargs.get("token", None)
+    def __init__(self, token: Optional[str] = None) -> None:
+        self.token = token
         self.wialon_api: Wialon = Wialon()
 
     @property
@@ -61,7 +61,7 @@ class WialonSession:
 
     def login(self, token: Optional[str] = None) -> None:
         """Logs into the Wialon API and starts a new session."""
-        if token:
+        if token is not None:
             self.token: str = token
         elif getenv("WIALON_API_TOKEN") is not None:
             self.token: str = getenv("WIALON_API_TOKEN", "")
@@ -87,6 +87,7 @@ class WialonSession:
     def logout(self) -> None:
         """Logs out of the Wialon API and raises an error if the session was not destroyed."""
         logout_response: dict = self.wialon_api.core_logout({})
+        print(f"Logged out of session as {self.username}:", self.wialon_api.sid)
         if logout_response.get("error") != 0:
             raise ValueError(f"Failed to properly logout of Wialon session #{self.id}")
 
@@ -94,15 +95,11 @@ def main() -> None:
     # Easily create and destroy Wialon sessions using Python's context managers
     ## With environment variable token. Default behavior
     with WialonSession() as session:
-        print(f"Logged in as: {session.username}")
-        print(f"Session ID: #{session.id}")
         result = session.wialon_api.core_check_unique(**{"type": "user", "value": "Terminus-1000"})
         print(result)
 
     ## With plaintext token
     with WialonSession(token=getenv("WIALON_PETER_TOKEN")) as session:
-        print(f"Logged in as: {session.username}")
-        print(f"Session ID: #{session.id}")
         result = session.wialon_api.core_check_unique(**{"type": "user", "value": "Terminus-1000"})
         print(result)
 

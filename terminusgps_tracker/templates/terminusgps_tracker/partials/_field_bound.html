@@ -7,7 +7,7 @@
         name="{{ field.name }}"
         value="{{ field.value }}"
         {% if field.name == "wialon_password_1" or field.name == "wialon_password_2" %}type="password"{% endif %}
-        {% if field.name == "file" or field.name == "asset_icon" %}type="file"{% endif %}
+        {% if field.name == "file" %}type="file"{% endif %}
         {% if field.name != "wialon_password_1" or field.name != "wialon_password_2" or field.name != "file" %}type="text"{% endif %}
     >
 </div>
@@ -19,7 +19,7 @@
         id="{{ field.auto_id }}"
         name="{{ field.name }}"
         {% if field.name == "wialon_password_1" or field.name == "wialon_password_2" %}type="password"{% endif %}
-        {% if field.name == "file" or field.name == "asset_icon" %}type="file"{% endif %}
+        {% if field.name == "file" %}type="file"{% endif %}
         {% if field.name != "wialon_password_1" or field.name != "wialon_password_2" or field.name != "file" %}type="text"{% endif %}
     >
     <ul class="list-disc list-inside">

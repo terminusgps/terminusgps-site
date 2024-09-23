@@ -3,7 +3,6 @@ from wialon.api import WialonError
 import terminusgps_tracker.wialonapi.flags as flag
 from terminusgps_tracker.wialonapi.items.base import WialonBase
 from terminusgps_tracker.wialonapi.items.unit_group import WialonUnitGroup
-from terminusgps_tracker.wialonapi.items.resource import WialonResource
 
 
 class WialonUnit(WialonBase):
@@ -27,17 +26,22 @@ class WialonUnit(WialonBase):
         else:
             self._id = response.get("item", {}).get("id")
 
+    def populate(self) -> None:
+        super().populate()
+        try:
+            search_result = self.session.wialon_api.core_search_item(**{
+                "id": self.id,
+                "flags": flag.DATAFLAG_UNIT_ADVANCED_PROPERTIES,
+            })
+        except WialonError as e:
+            raise e
+        else:
+            self.unique_id = search_result.get("uid", "")
+            self.phone = search_result.get("ph", "")
+            self.is_active = bool(search_result.get("act", 0))
+
     def is_member(self, group: WialonUnitGroup) -> bool:
         if self.id in group.units:
             return True
         else:
             return False
-
-    def migrate(self, resource: WialonResource) -> None:
-        try:
-            self.session.wialon_api.account_change_account(**{
-                "itemId": self.id,
-                "resourceId": resource.id,
-            })
-        except WialonError as e:
-            raise e

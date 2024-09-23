@@ -4,6 +4,7 @@ from wialon.api import WialonError
 
 import terminusgps_tracker.wialonapi.flags as flag
 from terminusgps_tracker.wialonapi.items.base import WialonBase
+from terminusgps_tracker.wialonapi.items.unit import WialonUnit
 
 @dataclass
 class WialonRetranslatorConfig:
@@ -15,7 +16,6 @@ class WialonRetranslatorConfig:
     debug: bool = False
     v6type: bool = False
     attach_sensors: bool = False
-
 
 class WialonRetranslator(WialonBase):
     def create(self, **kwargs) -> None:
@@ -46,3 +46,29 @@ class WialonRetranslator(WialonBase):
             raise e
         else:
             self._id = response.get("item", {}).get("id")
+
+    def add_unit(self, unit: WialonUnit) -> None:
+        try:
+            self.session.wialon_api.retranslator_update_units(**{
+                "itemId": self.id,
+                "units": [{
+                    "a": unit.unique_id,
+                    "i": unit.id,
+                }],
+                "callMode": "add"
+            })
+        except WialonError as e:
+            raise e
+
+    def rm_unit(self, unit: WialonUnit) -> None:
+        try:
+            self.session.wialon_api.retranslator_update_units(**{
+                "itemId": self.id,
+                "units": [{
+                    "a": unit.unique_id,
+                    "i": unit.id,
+                }],
+                "callMode": "remove"
+            })
+        except WialonError as e:
+            raise e
