@@ -125,7 +125,7 @@ ACCESSFLAG_ROUTE_MANAGE_ROUTE = 0x0000000100000
 
 ## Other - https://sdk.wialon.com/wiki/en/sidebar/remoteapi/apiref/core/check_items_billing#other
 ### Sets all possible access flags to an item
-ACCESSFLAG_FULL_ACCESS = 0xfffffffffffffff
+ACCESSFLAG_FULL_ACCESS = 0xFFFFFFFFFFFFFFF
 
 # Data flags
 ## Resource (Accounts) - https://sdk.wialon.com/wiki/en/sidebar/remoteapi/apiref/format/resource

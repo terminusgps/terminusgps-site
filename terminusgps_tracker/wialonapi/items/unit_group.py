@@ -1,12 +1,33 @@
-from wialon.api import WialonError
-
+from typing import TypedDict
 import terminusgps_tracker.wialonapi.flags as flag
 from terminusgps_tracker.wialonapi.items.base import WialonBase
 
+from .user import DEFAULT_ACCESS_MASK, WialonUser
+
+
+class CreateWialonUnitGroupKwargs(TypedDict):
+    owner: WialonBase
+    name: str
+
+
 class WialonUnitGroup(WialonBase):
-    def _get_unit_list(self) -> list:
-        try:
-            response = self.session.wialon_api.core_search_items(**{
+    def create(self, **kwargs) -> str | None:
+        owner: WialonBase = kwargs["owner"]
+        name: str = kwargs["name"]
+
+        response: dict = self.session.wialon_api.core_create_unit_group(
+            **{
+                "creatorId": owner.id,
+                "name": name,
+                "dataFlags": flag.DATAFLAG_UNIT_BASE,
+            }
+        )
+        return response.get("item", {}).get("id")
+
+    @property
+    def items(self) -> list[str]:
+        response = self.session.wialon_api.core_search_items(
+            **{
                 "spec": {
                     "itemsType": "avl_unit_group",
                     "propName": "sys_id",
@@ -19,73 +40,44 @@ class WialonUnitGroup(WialonBase):
                 "flags": flag.DATAFLAG_UNIT_BASE,
                 "from": 0,
                 "to": 0,
-            })
-        except WialonError as e:
-            raise e
-        else:
-            return response.get("items")[0].get("u", [])
-
-    @property
-    def units(self) -> list:
-        try:
-            self._units = self._get_unit_list()
-        except WialonError as e:
-            raise e
-        else:
-            return self._units
+            }
+        )
+        return [str(unit_id) for unit_id in response.get("items")[0].get("u", [])]
 
     def is_member(self, item: WialonBase) -> bool:
-        if self.units and item.id in self.units:
+        if str(item.id) in self.items:
             return True
-        else:
-            return False
+        return False
 
-    def create(self, **kwargs) -> None:
-        if kwargs.get("creator_id", None) is None:
-            raise ValueError("Tried to create group but creator id was not provided.")
-        if kwargs.get("name", None) is None:
-            raise ValueError("Tried to create group but name was not provided.")
+    def grant_access(
+        self, user: WialonUser, access_mask: int = DEFAULT_ACCESS_MASK
+    ) -> None:
+        """Grants access to this group to the provided user."""
+        self.session.wialon_api.user_update_item_access(
+            **{"userId": user.id, "itemId": self.id, "accessMask": access_mask}
+        )
 
-        try:
-            response = self.session.wialon_api.core_create_unit_group(**{
-                "creatorId": kwargs["creator_id"],
-                "name": kwargs["name"],
-                "dataFlags": flag.DATAFLAG_UNIT_BASE,
-            })
-        except WialonError as e:
-            raise e
-        else:
-            self._id = response.get("item", {}).get("id")
-
-    def add_unit(self, unit: WialonBase) -> None:
+    def add_item(self, item: WialonBase) -> None:
         """Adds a Wialon object to this group."""
-        if unit.id is None:
-            raise ValueError(f"Invalid unit provided: {unit}")
-        elif not self.units:
-            new_units: list[str] = [str(unit.id)]
+        current_items = self.items
+        if not current_items:
+            new_items: list[str] = [str(item.id)]
         else:
-            new_units: list[str] = self.units.copy().append(str(unit.id))
+            new_items: list[str] = current_items + [str(item.id)]
 
-        try:
-            self.session.wialon_api.unit_group_update_units(**{
-                "itemId": self.id,
-                "units": new_units,
-            })
-        except WialonError as e:
-            raise e
+        self.session.wialon_api.unit_group_update_units(
+            **{"itemId": self.id, "units": new_items}
+        )
 
-    def rm_unit(self, unit: WialonBase) -> None:
+    def rm_item(self, item: WialonBase) -> None:
         """Removes a Wialon object from this group, if it is a member of this group."""
-        if unit.id is None:
-            raise ValueError(f"Invalid unit provided: {unit}")
+        if not self.is_member(item):
+            raise ValueError(
+                f"Cannot remove {item} because it is not a member of this group."
+            )
 
-        if self.units and self.is_member(unit):
-            target_index: int = self.units.index(str(unit.id))
-            new_units: list[str] = self.units.copy().pop(target_index)
-            try:
-                self.session.wialon_api.unit_group_update_units(**{
-                    "itemId": self.id,
-                    "units": new_units,
-                })
-            except WialonError as e:
-                raise e
+        current_items = self.items
+        new_items = [unit_id for unit_id in current_items if unit_id != str(item.id)]
+        self.session.wialon_api.unit_group_update_units(
+            **{"itemId": self.id, "units": new_items}
+        )

@@ -1,1 +1,8 @@
-from .forms import RegistrationFormView, GeofenceUploadFormView, form_success_view
+from .forms import (
+    RegistrationFormView,
+    LoginFormView,
+    LogoutFormView,
+    AssetCustomizationFormView,
+    form_success_redirect,
+)
+from .dashboard import DashboardView

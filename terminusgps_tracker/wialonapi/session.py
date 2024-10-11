@@ -1,9 +1,23 @@
+import logging
 from os import getenv
 from typing import Optional
 
 from wialon.api import Wialon, WialonError
+from django.conf import settings
 
+from terminusgps_tracker.wialonapi.errors import (
+    WialonLoginError,
+    WialonLogoutError,
+    WialonTokenNotFoundError,
+)
 import terminusgps_tracker.wialonapi.flags as flag
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+stdout_handler = logging.StreamHandler()
+stdout_handler.setLevel(logging.DEBUG)
+logger.addHandler(stdout_handler)
+
 
 class WialonSession:
     def __init__(self, token: Optional[str] = None) -> None:
@@ -15,18 +29,15 @@ class WialonSession:
         return self.wialon_api.sid
 
     def __enter__(self) -> "WialonSession":
-        try:
-            self.login(token=self.token)
-        except WialonError as e:
-            raise e
+        self.login(token=self.token)
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:
         self.logout()
 
     def get_id_from_iccid(self, iccid: str) -> str | None:
-        try:
-            response = self.wialon_api.core_search_items(**{
+        response = self.wialon_api.core_search_items(
+            **{
                 "spec": {
                     "itemsType": "avl_unit",
                     "propName": "sys_unique_id",
@@ -39,23 +50,26 @@ class WialonSession:
                 "flags": flag.DATAFLAG_UNIT_BASE,
                 "from": 0,
                 "to": 0,
-            })
-        except WialonError as e:
-            raise e
-        else:
-            if response.get("totalItemsCount", 0) != 1:
-                return None
-            return response["items"][0].get("id")
+            }
+        )
+        if response.get("totalItemsCount", 0) != 1:
+            logger.warning(f"Failed to retrieve id from '{iccid}'.")
+            return None
+        return response["items"][0].get("id")
 
     def refresh_session(self, operate_as: Optional[str] = None) -> None:
         """Refreshes the Wialon API session without logging out, and re-sets the session id attribute."""
         try:
-            login_response: dict = self.wialon_api.core_duplicate(**{
-                "operateAs": operate_as if operate_as else "",
-                "continueCurrentSession": False,
-            })
-        except WialonError as e:
-            raise e
+            login_response: dict = self.wialon_api.core_duplicate(
+                **{
+                    "operateAs": operate_as if operate_as else "",
+                    "continueCurrentSession": False,
+                }
+            )
+        except WialonError:
+            logger.warning(
+                "Failed to refresh session, continuing with original session."
+            )
         else:
             self.wialon_api.sid = login_response.get("eid")
 
@@ -66,42 +80,54 @@ class WialonSession:
         elif getenv("WIALON_API_TOKEN") is not None:
             self.token: str = getenv("WIALON_API_TOKEN", "")
         else:
-            raise ValueError("No Wialon API token provided or found in environment variable `WIALON_API_TOKEN`.")
+            raise WialonTokenNotFoundError(token=None, wialon_error=None)
 
         try:
-            login_response: dict = self.wialon_api.token_login(**{
-                "token": self.token,
-                "fl": 0x1,
-            })
+            login_response: dict = self.wialon_api.token_login(
+                **{"token": self.token, "fl": 0x1}
+            )
         except WialonError as e:
-            raise e
+            raise WialonLoginError(token=self.token, wialon_error=e)
         else:
-            self.wialon_api.sid = login_response.get("eid")
+            self.wialon_api.sid = login_response.get("eid", "")
             if not login_response.get("user", {}):
                 self.username = login_response.get("au")
             else:
                 self.username = login_response.get("user", {}).get("nm")
-            print(f"Logged into session as {self.username}:", self.wialon_api.sid)
-
+            logger.info(
+                f"Logged into session #{self.wialon_api.sid} as {self.username}."
+            )
 
     def logout(self) -> None:
         """Logs out of the Wialon API and raises an error if the session was not destroyed."""
+        session_id = str(self.wialon_api.sid)
         logout_response: dict = self.wialon_api.core_logout({})
-        print(f"Logged out of session as {self.username}:", self.wialon_api.sid)
-        if logout_response.get("error") != 0:
-            raise ValueError(f"Failed to properly logout of Wialon session #{self.id}")
+        if logout_response.get("error") == 0:
+            logger.info(
+                f"Logged out of session #{self.wialon_api.sid} as {self.username}."
+            )
+        elif settings.DEBUG:
+            raise WialonLogoutError(session_id=session_id, wialon_error=None)
+        else:
+            logger.warning(f"Failed to properly destroy session: '{session_id}'.")
+
 
 def main() -> None:
     # Easily create and destroy Wialon sessions using Python's context managers
     ## With environment variable token. Default behavior
     with WialonSession() as session:
-        result = session.wialon_api.core_check_unique(**{"type": "user", "value": "Terminus-1000"})
+        result = session.wialon_api.core_check_unique(
+            **{"type": "user", "value": "Terminus-1000"}
+        )
         print(result)
 
     ## With plaintext token
     with WialonSession(token=getenv("WIALON_PETER_TOKEN")) as session:
-        result = session.wialon_api.core_check_unique(**{"type": "user", "value": "Terminus-1000"})
+        result = session.wialon_api.core_check_unique(
+            **{"type": "user", "value": "Terminus-1000"}
+        )
         print(result)
+
 
 if __name__ == "__main__":
     main()

@@ -1,47 +1,85 @@
-from wialon.api import WialonError
+from typing import Any, TypedDict
+from urllib.parse import quote_plus
 
 import terminusgps_tracker.wialonapi.flags as flag
 from terminusgps_tracker.wialonapi.items.base import WialonBase
-from terminusgps_tracker.wialonapi.items.unit_group import WialonUnitGroup
+
+
+class CreateWialonUnitKwargs(TypedDict):
+    owner: WialonBase
+    name: str
+    hw_type: str
 
 
 class WialonUnit(WialonBase):
-    def create(self, **kwargs) -> None:
-        if kwargs.get("creator_id", None) is None:
-            raise ValueError("Tried to create unit but creator id was not provided.")
-        if kwargs.get("name", None) is None:
-            raise ValueError("Tried to create unit but name was not provided.")
-        if kwargs.get("hw_type", None) is None:
-            raise ValueError("Tried to create unit but hw_type was not provided.")
+    def create(self, **kwargs: CreateWialonUnitKwargs) -> str | None:
+        owner: WialonBase = kwargs["owner"]
+        name: str = kwargs["name"]
+        hw_type: str = kwargs["hw_type"]
 
-        try:
-            response = self.session.wialon_api.core_create_unit(**{
-                "creatorId": kwargs["creator_id"],
-                "name": kwargs["name"],
-                "hwTypeId": kwargs["hw_type"],
+        response: dict = self.session.wialon_api.core_create_unit(
+            **{
+                "creatorId": str(owner.id),
+                "name": name,
+                "hwTypeId": hw_type,
                 "dataFlags": flag.DATAFLAG_UNIT_BASE,
-            })
-        except WialonError as e:
-            raise e
-        else:
-            self._id = response.get("item", {}).get("id")
+            }
+        )
+        return response.get("item", {}).get("id")
 
     def populate(self) -> None:
         super().populate()
-        try:
-            search_result = self.session.wialon_api.core_search_item(**{
-                "id": self.id,
-                "flags": flag.DATAFLAG_UNIT_ADVANCED_PROPERTIES,
-            })
-        except WialonError as e:
-            raise e
-        else:
-            self.unique_id = search_result.get("uid", "")
-            self.phone = search_result.get("ph", "")
-            self.is_active = bool(search_result.get("act", 0))
+        search = self.session.wialon_api.core_search_item(
+            id=self.id, flags=flag.DATAFLAG_UNIT_ADVANCED_PROPERTIES
+        )
+        self.unique_id = search.get("uid", "")
+        self.phone = search.get("ph", "")
+        self.is_active = bool(search.get("act", 0))
 
-    def is_member(self, group: WialonUnitGroup) -> bool:
-        if group.units and self.id in group.units:
-            return True
+    def set_access_password(self, access_password: str) -> None:
+        self.session.wialon_api.unit_update_access_password(
+            **{"itemId": self.id, "accessPassword": access_password}
+        )
+
+    def activate(self) -> None:
+        if self.is_active:
+            return
         else:
-            return False
+            self.session.wialon_api.unit_set_active(
+                **{"itemId": self.id, "active": int(True)}
+            )
+            self.populate()
+
+    def deactivate(self) -> None:
+        if not self.is_active:
+            return
+        else:
+            self.session.wialon_api.unit_set_active(
+                **{"itemId": self.id, "active": int(False)}
+            )
+            self.populate()
+
+    def assign_phone(self, phone: str) -> None:
+        self.session.wialon_api.unit_update_phone(
+            **{"itemId": self.id, "phoneNumber": quote_plus(phone)}
+        )
+        self.populate()
+
+    def _get_fields(self) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        result = self.session.wialon_api.core_search_item(
+            id=self.id,
+            flags=sum(
+                [flag.DATAFLAG_UNIT_CUSTOM_FIELDS, flag.DATAFLAG_UNIT_ADMIN_FIELDS]
+            ),
+        )
+        return result["item"]["aflds"].values(), result["item"]["flds"].values()
+
+    def get_phone_numbers(self) -> list[str]:
+        phone_numbers = []
+        admin_fields, custom_fields = self._get_fields()
+        if self.phone:
+            phone_numbers.append(self.phone)
+        for field in admin_fields + custom_fields:
+            if field.get("n") == "to_number":
+                phone_numbers.append(field.get("v"))
+        return phone_numbers

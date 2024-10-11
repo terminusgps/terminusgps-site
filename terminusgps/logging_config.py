@@ -1,11 +1,8 @@
-
 LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "standard": {
-            "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-        },
+        "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"}
     },
     "handlers": {
         "default": {
@@ -22,11 +19,7 @@ LOGGING_CONFIG = {
         },
     },
     "loggers": {
-        "": {
-            "handlers": ["default"],
-            "level": "WARNING",
-            "propagate": False,
-        },
+        "": {"handlers": ["default"], "level": "WARNING", "propagate": False},
         "terminusgps_tracker.models": {
             "handlers": ["default", "file"],
             "level": "INFO",
@@ -37,15 +30,6 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": False,
         },
-        "terminusgps_tracker.markdown_processor": {
-            "handlers": ["default", "file"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "__main__": {
-            "handlers": ["default"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-    }
+        "__main__": {"handlers": ["default"], "level": "DEBUG", "propagate": False},
+    },
 }

@@ -3,7 +3,7 @@ module.exports = {
 		"../templates/**/*.html",
 		"../../templates/**/*.html",
 		"../../**/templates/**/*.html",
-		"../../**/models/forms.py",
+		"../../**/forms/*.py",
 		"!../../**/node_modules",
 		"../../**/*.js",
 	],

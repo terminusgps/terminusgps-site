@@ -1,150 +1,165 @@
 from typing import Any
 
+from django.conf import settings
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
+from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
-from django.conf import settings
-from wialon import WialonError
+from wialon.api import WialonError
 
-import terminusgps_tracker.wialonapi.flags as flag
-from terminusgps_tracker.models.forms import GeofenceUploadForm, RegistrationForm
-from terminusgps_tracker.wialonapi.items import WialonUnit, WialonResource, WialonUnitGroup, WialonUser
+from terminusgps_tracker.forms import CustomerRegistrationForm, AssetCustomizationForm
+from terminusgps_tracker.forms.customer import CustomerAuthenticationForm
+from terminusgps_tracker.models import CustomerProfile
+from terminusgps_tracker.wialonapi.items.resource import WialonResource
+from terminusgps_tracker.wialonapi.items.unit import WialonUnit
+from terminusgps_tracker.wialonapi.items.unit_group import WialonUnitGroup
+from terminusgps_tracker.wialonapi.items.user import WialonUser
 from terminusgps_tracker.wialonapi.session import WialonSession
 
-DEFAULT_OWNER_ID = "27881459"
 
-def form_success_view(request: HttpRequest) -> HttpResponse:
-    context = {"redirect_url": "https://hosting.terminusgps.com"}
-    return render(request, "terminusgps_tracker/forms/form_success.html", context=context)
+def form_success_redirect(
+    request: HttpRequest, redirect_url: str = "https://hosting.terminusgps.com/"
+) -> HttpResponse:
+    context = {"title": "Success", "redirect_url": redirect_url}
+    return render(
+        request, "terminusgps_tracker/forms/form_success.html", context=context
+    )
 
-class GeofenceUploadFormView(FormView):
-    form_class = GeofenceUploadForm
+
+class LoginFormView(LoginView):
+    authentication_form = CustomerAuthenticationForm
     http_method_names = ["get", "post"]
-    template_name = "terminusgps_tracker/forms/form_geofence_upload.html"
-    success_url = reverse_lazy("form success")
-    initial = {}
+    template_name = "terminusgps_tracker/forms/form_login.html"
+    extra_context = {"title": "Login", "client_name": settings.CLIENT_NAME}
+    redirect_authenticated_user = False
+    success_url = reverse_lazy("dashboard")
 
-    def form_valid(self, form: GeofenceUploadForm) -> HttpResponse:
-        response = super().form_valid(form)
-        return response
+
+class LogoutFormView(LogoutView):
+    template_name = "terminusgps_tracker/forms/form_logout.html"
+    http_method_names = ["get", "post"]
+    extra_context = {"title": "Logout", "client_name": settings.CLIENT_NAME}
+
+    def get_success_url(self) -> str:
+        return reverse_lazy("form login")
+
 
 class RegistrationFormView(FormView):
-    form_class = RegistrationForm
+    form_class = CustomerRegistrationForm
     http_method_names = ["get", "post"]
     template_name = "terminusgps_tracker/forms/form_registration.html"
-    success_url = reverse_lazy("form success")
-    initial = {}
+    extra_context = {"title": "Registration", "client_name": settings.CLIENT_NAME}
+    success_url = reverse_lazy("form asset customization")
 
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        self.imei_number: str = self.request.GET.get("imei", "")
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        context["imei_number"] = self.imei_number
-        context["title"] = "Registration Form"
-        return context
-
-    def form_valid(self, form: RegistrationForm) -> HttpResponse:
-        response = super().form_valid(form)
+    def form_valid(self, form: CustomerRegistrationForm) -> HttpResponse:
+        response = super().form_valid(form=form)
+        customer_profile = CustomerProfile.objects.create(
+            user=User.objects.create_user(
+                username=form.cleaned_data["email"],
+                first_name=form.cleaned_data["first_name"],
+                last_name=form.cleaned_data["last_name"],
+                password=form.cleaned_data["password1"],
+            )
+        )
         try:
-            with WialonSession() as session:
-                unit = self.get_wialon_unit(imei_number=form.cleaned_data["imei_number"], session=session)
-                super_user = self.create_wialon_user(
-                    username=f"Super {form.cleaned_data["first_name"]} {form.cleaned_data["last_name"]}",
-                    password=form.cleaned_data["wialon_password_1"],
-                    session=session,
-                )
-                end_user = self.create_wialon_user(
-                    username=form.cleaned_data["email"],
-                    password=form.cleaned_data["wialon_password_1"],
-                    creator_id=str(super_user.id),
-                    session=session
-                )
-                group = self.create_wialon_unit_group(
-                    name=f"{form.cleaned_data["first_name"]} {form.cleaned_data["last_name"]}'s Group",
-                    creator_id=str(super_user.id),
-                    session=session,
-                )
-                group.add_unit(unit)
-                super_user.assign_unit(unit, access_mask=flag.ACCESSFLAG_FULL_ACCESS)
-                end_user.assign_unit(unit)
-                end_user.assign_email(form.cleaned_data["email"])
-                if form.cleaned_data["phone_number"]:
-                    to_number: tuple[str, str] = "to_number", form.cleaned_data["phone_number"]
-                    unit.add_afield(to_number)
-                    end_user.assign_phone(form.cleaned_data["phone_number"])
-
-        except WialonError as e:
-            if settings.DEBUG:
-                raise e
-            else:
-                form.add_error("imei_number", ValidationError(_("Something went wrong on our end. Please try again later."), code="invalid"))
-                return self.form_invalid(form)
+            self.wialon_registration_flow(form=form, customer_profile=customer_profile)
+        except WialonError:
+            form.add_error(
+                "imei_number",
+                ValidationError(
+                    _(
+                        "Whoops! Something went wrong on our end. Please try again later."
+                    )
+                ),
+            )
+        else:
+            user = authenticate(
+                self.request,
+                username=form.cleaned_data["email"],
+                password=form.cleaned_data["password1"],
+            )
+            login(self.request, user)
 
         return response
 
-    def get_wialon_unit_id(self, imei_number: str, session: WialonSession) -> str | None:
-        return session.get_id_from_iccid(imei_number)
+    def wialon_registration_flow(
+        self, form: CustomerRegistrationForm, customer_profile: CustomerProfile
+    ) -> None:
+        with WialonSession() as session:
+            # Retrieved
+            wialon_admin_user = WialonUser(id="27881459", session=session)
 
-    def get_wialon_unit(self, imei_number: str, session: WialonSession) -> WialonUnit:
-        try:
-            return WialonUnit(
-                id=self.get_wialon_unit_id(imei_number, session=session),
+            # Created
+            wialon_super_user = WialonUser(
+                owner=wialon_admin_user,
+                name=f"super_{form.cleaned_data["email"]}",
+                password=form.cleaned_data["password1"],
                 session=session,
             )
-        except WialonError as e:
-            raise e
-
-    def create_wialon_user(
-        self,
-        username: str,
-        password: str,
-        *,
-        creator_id: str = DEFAULT_OWNER_ID,
-        session: WialonSession
-    ) -> WialonUser:
-        try:
-            return WialonUser(
-                creator_id=creator_id,
-                name=username,
-                password=password,
+            # Created
+            wialon_end_user = WialonUser(
+                owner=wialon_super_user,
+                name=form.cleaned_data["email"],
+                password=form.cleaned_data["password1"],
                 session=session,
             )
-        except WialonError as e:
-            raise e
-
-    def create_wialon_unit_group(
-        self,
-        name: str,
-        *,
-        creator_id: str = DEFAULT_OWNER_ID,
-        session: WialonSession
-    ) -> WialonUnitGroup:
-        try:
-            return WialonUnitGroup(
-                creator_id=creator_id,
-                name=name,
+            # Created
+            wialon_group = WialonUnitGroup(
+                owner=wialon_super_user,
+                name=f"{form.cleaned_data["email"]}'s Group",
                 session=session,
             )
-        except WialonError as e:
-            raise e
-
-    def create_wialon_resource(
-        self,
-        name: str,
-        *,
-        creator_id: str = DEFAULT_OWNER_ID,
-        session: WialonSession
-    ) -> WialonResource:
-        try:
-            return WialonResource(
-                creator_id=creator_id,
-                name=name,
+            # Created
+            wialon_resource = WialonResource(
+                owner=wialon_super_user,
+                name=f"{form.cleaned_data["email"]} Resource",
                 session=session,
             )
-        except WialonError as e:
-            raise e
+            customer_profile.wialon_super_user_id = wialon_super_user.id
+            customer_profile.wialon_user_id = wialon_end_user.id
+            customer_profile.wialon_group_id = wialon_group.id
+            customer_profile.wialon_resource_id = wialon_resource.id
+            customer_profile.save()
+
+
+class AssetCustomizationFormView(LoginRequiredMixin, FormView):
+    form_class = AssetCustomizationForm
+    http_method_name = ["get", "post"]
+    template_name = "terminusgps_tracker/forms/form_asset_customization.html"
+    login_url = reverse_lazy("form login")
+    success_url = reverse_lazy("form success")
+    extra_context = {
+        "title": "Asset Customization",
+        "client_name": settings.CLIENT_NAME,
+    }
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["imei_number"] = self.request.GET.get("imei", None)
+        return context
+
+    def form_valid(self, form: AssetCustomizationForm) -> HttpResponse:
+        with WialonSession() as session:
+            unit_id: str | None = session.get_id_from_iccid(
+                iccid=form.cleaned_data["imei_number"]
+            )
+
+            if unit_id is not None:
+                unit = WialonUnit(id=unit_id, session=session)
+                unit.rename(form.cleaned_data["asset_name"])
+            else:
+                form.add_error(
+                    "imei_number",
+                    ValidationError(
+                        _("Invalid IMEI #: '%(value)s'. Please try a different value."),
+                        params={"value": form.cleaned_data["imei_number"]},
+                        code="invalid",
+                    ),
+                )
+        return super().form_valid(form=form)
