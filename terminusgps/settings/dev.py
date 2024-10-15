@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from django.forms.renderers import TemplatesSetting
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,6 +18,7 @@ MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
 SECRET_KEY = "po=qc@jlt0e#h6c8xv96vr%v2l^ib=f9m0!m-@bv0cz25pm$-g"
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+SERIALIZATION_MODULES = {"json": "djmoney.serializers"}
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "static/"
 TAILWIND_APP_NAME = "theme"
@@ -29,9 +29,8 @@ TWILIO_SID = os.getenv("TWILIO_SID")
 TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
 USE_I18N = True
 USE_TZ = True
-WIALON_API_TOKEN = os.getenv("WIALON_API_TOKEN")
 FORM_RENDERER = "terminusgps.renderer.TerminusFormRenderer"
-
+WIALON_API_TOKEN = os.getenv("WIALON_API_TOKEN")
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
@@ -51,6 +50,7 @@ INSTALLED_APPS = [
     "tailwind",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
     "theme",
+    "djmoney",
 ]
 
 MIDDLEWARE = [
@@ -70,7 +70,7 @@ ROOT_URLCONF = "terminusgps.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

@@ -9,14 +9,14 @@
             <h2 class="mx-6 mb-4 font-serif text-xl text-terminus-gray-600 dark:text-gray-50">Simplify, Monitor, Protect</h2>
         </div>
     </div>
-    <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-        <h2 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Are you sure you want to logout?</h2>
-        <h5 class="mb-2 text-2xl font-normal tracking-tight text-gray-900 dark:text-white">You're logged in as: {{ user.username }}</h5>
-        <form action="{% url 'form logout' %}" method="post" class="m-4 md:m-6 lg:m-8">
-            {% csrf_token %}
-            {{ form }}
-            <button class="mb-4 mt-2 min-w-full rounded-md border border-solid border-gray-800 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300" type="submit">Yes, log me out</button>
-        </form>
-    </div>
+    <form action="{% url 'form logout' %}" method="post" class="m-4 md:m-6 lg:m-8">
+        {% csrf_token %}
+        {{ form }}
+        <div class="container max-width mb-4">
+            <h2 class="text-terminus-gray-900 text-xl">Are you sure you want to logout?</h2>
+            <h3 class="text-terminus-gray-600">You're currently logged in as: <span class="text-terminus-gray-800">{{ user.username }}</span></h3>
+        </div>
+        <button class="mb-4 mt-2 min-w-full rounded-md border border-solid border-gray-800 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300" type="submit">Yes, log me out</button>
+    </form>
 </div>
 {% endblock content %}

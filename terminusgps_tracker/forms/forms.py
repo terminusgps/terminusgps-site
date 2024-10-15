@@ -1,21 +1,16 @@
 from typing import Any
 from django import forms
-from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from terminusgps_tracker.validators import (
+from terminusgps_tracker.forms.enums import CountryCode
+from terminusgps_tracker.forms.validators import (
     validate_asset_name_is_unique,
     validate_imei_number_is_available,
     validate_phone_number,
     validate_street_address,
 )
-
-
-class CountryCode(models.TextChoices):
-    UNITED_STATES = "US", _("United States")
-    CANADA = "CA", _("Canada")
-    MEXICO = "MX", _("Mexico")
+from terminusgps_tracker.forms.widgets import CustomSelectInput
 
 
 class CustomerRegistrationForm(forms.Form):
@@ -25,15 +20,6 @@ class CustomerRegistrationForm(forms.Form):
     email = forms.EmailField(label="Email Address")
     password1 = forms.CharField(label="Password", max_length=32, min_length=8)
     password2 = forms.CharField(label="Confirm Password", max_length=32, min_length=8)
-
-    address_street = forms.CharField(
-        label="Street", validators=[validate_street_address]
-    )
-    address_city = forms.CharField(label="City")
-    address_state = forms.CharField(label="State")
-    address_zip = forms.CharField(label="Zip")
-    address_country = forms.ChoiceField(label="Country", choices=CountryCode.choices)
-    address_phone = forms.CharField(label="Phone #", validators=[validate_phone_number])
 
     def clean(self, **kwargs) -> dict[str, Any] | None:
         cleaned_data: dict[str, Any] | None = super().clean(**kwargs)
@@ -81,5 +67,7 @@ class CustomerCreditCardUploadForm(forms.Form):
     address_city = forms.CharField(label="City")
     address_state = forms.CharField(label="State")
     address_zip = forms.CharField(label="Zip")
-    address_country = forms.ChoiceField(label="Country", choices=CountryCode.choices)
+    address_country = forms.ChoiceField(
+        label="Country", choices=CountryCode.choices, widget=CustomSelectInput
+    )
     address_phone = forms.CharField(label="Phone #", validators=[validate_phone_number])

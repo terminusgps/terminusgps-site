@@ -2,12 +2,13 @@ from authorizenet.apicontractsv1 import customerAddressType
 from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
+from django.contrib.auth.views import LoginView, LogoutView, RedirectURLMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView
+from django.views.generic import FormView, TemplateView
 from wialon.api import WialonError
 
 from terminusgps_tracker.authorizenetapi.profiles import AuthorizenetProfile
@@ -30,16 +31,31 @@ from terminusgps_tracker.wialonapi.items import (
 def form_success_redirect(
     request: HttpRequest, redirect_url: str = "https://hosting.terminusgps.com/"
 ) -> HttpResponse:
-    context = {"title": "Success", "redirect_url": redirect_url}
     return render(
-        request, "terminusgps_tracker/forms/form_success.html", context=context
+        request,
+        "terminusgps_tracker/forms/form_success_redirect.html",
+        context={"title": "Success!", "redirect_url": redirect_url},
     )
+
+
+class CustomerLoginView(LoginView):
+    content_type = "text/html"
+    http_method_names = ["get", "post"]
+    success_url = reverse_lazy("dashboard")
+    template_name = "terminusgps_tracker/forms/form_login.html"
+
+
+class CustomerLogoutView(LogoutView):
+    content_type = "text/html"
+    http_method_names = ["get", "post"]
+    success_url = reverse_lazy("form login")
+    template_name = "terminusgps_tracker/forms/form_logout.html"
 
 
 class CustomerRegistrationView(FormView):
     form_class = CustomerRegistrationForm
     http_method_names = ["get", "post"]
-    template_name = "terminusgps_tracker/forms/form_registration.html"
+    template_name = "terminusgps_tracker/forms/form_register.html"
     extra_context = {"title": "Registration", "client_name": settings.CLIENT_NAME}
     success_url = reverse_lazy("form asset customization")
 
@@ -165,7 +181,7 @@ class CustomerAssetCustomizationView(FormView):
 class CustomerCreditCardUploadView(FormView):
     form_class = CustomerCreditCardUploadForm
     http_method_names = ["get", "post"]
-    template_name = "terminusgps_tracker/forms/form_payment_method_upload.html"
+    template_name = "terminusgps_tracker/forms/form_cc_upload.html"
     login_url = reverse_lazy("form login")
     success_url = reverse_lazy("form success")
     extra_context = {
