@@ -1,10 +1,7 @@
-from typing import Any
-
+from authorizenet.apicontractsv1 import customerAddressType
 from django.conf import settings
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
@@ -13,14 +10,21 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from wialon.api import WialonError
 
-from terminusgps_tracker.forms import CustomerRegistrationForm, AssetCustomizationForm
-from terminusgps_tracker.forms.customer import CustomerAuthenticationForm
+from terminusgps_tracker.authorizenetapi.profiles import AuthorizenetProfile
 from terminusgps_tracker.models import CustomerProfile
-from terminusgps_tracker.wialonapi.items.resource import WialonResource
-from terminusgps_tracker.wialonapi.items.unit import WialonUnit
-from terminusgps_tracker.wialonapi.items.unit_group import WialonUnitGroup
-from terminusgps_tracker.wialonapi.items.user import WialonUser
 from terminusgps_tracker.wialonapi.session import WialonSession
+
+from terminusgps_tracker.forms import (
+    CustomerAssetCustomizationForm,
+    CustomerCreditCardUploadForm,
+    CustomerRegistrationForm,
+)
+from terminusgps_tracker.wialonapi.items import (
+    WialonResource,
+    WialonUnit,
+    WialonUnitGroup,
+    WialonUser,
+)
 
 
 def form_success_redirect(
@@ -32,30 +36,17 @@ def form_success_redirect(
     )
 
 
-class LoginFormView(LoginView):
-    authentication_form = CustomerAuthenticationForm
-    http_method_names = ["get", "post"]
-    template_name = "terminusgps_tracker/forms/form_login.html"
-    extra_context = {"title": "Login", "client_name": settings.CLIENT_NAME}
-    redirect_authenticated_user = False
-    success_url = reverse_lazy("dashboard")
-
-
-class LogoutFormView(LogoutView):
-    template_name = "terminusgps_tracker/forms/form_logout.html"
-    http_method_names = ["get", "post"]
-    extra_context = {"title": "Logout", "client_name": settings.CLIENT_NAME}
-
-    def get_success_url(self) -> str:
-        return reverse_lazy("form login")
-
-
-class RegistrationFormView(FormView):
+class CustomerRegistrationView(FormView):
     form_class = CustomerRegistrationForm
     http_method_names = ["get", "post"]
     template_name = "terminusgps_tracker/forms/form_registration.html"
     extra_context = {"title": "Registration", "client_name": settings.CLIENT_NAME}
     success_url = reverse_lazy("form asset customization")
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if not self.request.session.get("imei_number"):
+            self.request.session["imei_number"] = self.request.GET.get("imei", None)
+        return super().get(request, *args, **kwargs)
 
     def form_valid(self, form: CustomerRegistrationForm) -> HttpResponse:
         customer_profile = CustomerProfile.objects.create(
@@ -127,28 +118,32 @@ class RegistrationFormView(FormView):
             customer_profile.save()
 
 
-class AssetCustomizationFormView(LoginRequiredMixin, FormView):
-    form_class = AssetCustomizationForm
-    http_method_name = ["get", "post"]
+class CustomerAssetCustomizationView(FormView):
+    form_class = CustomerAssetCustomizationForm
+    http_method_names = ["get", "post"]
     template_name = "terminusgps_tracker/forms/form_asset_customization.html"
-    login_url = reverse_lazy("form login")
-    success_url = reverse_lazy("form success")
     extra_context = {
         "title": "Asset Customization",
         "client_name": settings.CLIENT_NAME,
     }
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["imei"] = self.request.GET.get("imei", None)
-        return context
+    def _get_unit_id(
+        self, form: CustomerAssetCustomizationForm, session: WialonSession
+    ) -> str | None:
+        if self.request.session.get("imei_number") is not None:
+            imei_number = self.request.session["imei_number"]
+        else:
+            imei_number = form.cleaned_data["imei_number"]
+        return session.get_id_from_iccid(iccid=imei_number)
 
-    def form_valid(self, form: AssetCustomizationForm) -> HttpResponse:
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if not self.request.session.get("imei_number"):
+            self.request.session["imei_number"] = self.request.GET.get("imei", None)
+        return super().get(request, *args, **kwargs)
+
+    def form_valid(self, form: CustomerAssetCustomizationForm) -> HttpResponse:
         with WialonSession() as session:
-            unit_id: str | None = session.get_id_from_iccid(
-                iccid=form.cleaned_data["imei_number"]
-            )
-
+            unit_id: str | None = self._get_unit_id(form=form, session=session)
             if unit_id is not None:
                 unit = WialonUnit(id=unit_id, session=session)
                 unit.rename(form.cleaned_data["asset_name"])
@@ -157,8 +152,47 @@ class AssetCustomizationFormView(LoginRequiredMixin, FormView):
                     "imei_number",
                     ValidationError(
                         _("Invalid IMEI #: '%(value)s'. Please try a different value."),
-                        params={"value": form.cleaned_data["imei_number"]},
+                        params={
+                            "value": self.request.session["imei_number"]
+                            or form.cleaned_data["imei_number"]
+                        },
                         code="invalid",
                     ),
                 )
+        return super().form_valid(form=form)
+
+
+class CustomerCreditCardUploadView(FormView):
+    form_class = CustomerCreditCardUploadForm
+    http_method_names = ["get", "post"]
+    template_name = "terminusgps_tracker/forms/form_payment_method_upload.html"
+    login_url = reverse_lazy("form login")
+    success_url = reverse_lazy("form success")
+    extra_context = {
+        "title": "Payment Method Upload",
+        "client_name": settings.CLIENT_NAME,
+    }
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if not self.request.session.get("imei_number"):
+            self.request.session["imei_number"] = self.request.GET.get("imei", None)
+        return super().get(request, *args, **kwargs)
+
+    def form_valid(self, form: CustomerCreditCardUploadForm) -> HttpResponse:
+        if self.request.user.is_authenticated:
+            auth_profile = AuthorizenetProfile(user=self.request.user)
+            auth_profile.create_payment_profile(
+                billing_address=customerAddressType(
+                    firstName=form.cleaned_data["first_name"],
+                    lastName=form.cleaned_data["last_name"],
+                    address=form.cleaned_data["address_street"],
+                    city=form.cleaned_data["address_city"],
+                    state=form.cleaned_data["address_state"],
+                    zip=form.cleaned_data["address_zip"],
+                    country=form.cleaned_data["address_country"],
+                    phoneNumber=form.cleaned_data["address_phone"],
+                ),
+                card_number=form.cleaned_data["cc_number"],
+                card_expiry=form.cleaned_data["cc_expiry"],
+            )
         return super().form_valid(form=form)

@@ -1,2 +1,5 @@
-from .customer import CustomerRegistrationForm, CustomerAuthenticationForm
-from .wialon import AssetCustomizationForm
+from .main import (
+    CustomerRegistrationForm,
+    CustomerAssetCustomizationForm,
+    CustomerCreditCardUploadForm,
+)

@@ -8,6 +8,27 @@ from terminusgps_tracker.wialonapi.session import WialonSession
 from terminusgps_tracker.wialonapi.items.unit_group import WialonUnitGroup
 
 
+def validate_phone_number(value: str) -> None:
+    """Raises `ValidationError` if the value does not represent a valid phone number."""
+    if not value.startswith("+"):
+        raise ValidationError(
+            _("'%(value)s' must start with '+'."),
+            code="invalid",
+            params={"value": value},
+        )
+
+
+def validate_street_address(value: str) -> None:
+    """Raises `ValidationError` if the value does not represent a valid US address."""
+    number_part: str = value.split(" ")[0]
+    if not number_part.isnumeric():
+        raise ValidationError(
+            _("'%(value)s' must start with a number."),
+            code="invalid",
+            params={"value": value},
+        )
+
+
 def validate_imei_number_exists(value: str) -> None:
     """Raises `ValidationError` if the value does not represent a unit in the Terminus GPS database."""
     with WialonSession() as session:

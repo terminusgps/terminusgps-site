@@ -99,27 +99,8 @@ class AuthorizenetProfile:
         return str(response.customerProfileId)
 
     def create_shipping_address(
-        self,
-        first_name: str,
-        last_name: str,
-        street: str,
-        city: str,
-        state: str,
-        zip: str,
-        country: str,
-        phone_number: str,
-        default: bool = True,
+        self, address: customerAddressType, default: bool = True
     ) -> None:
-        address = customerAddressType(
-            firstName=first_name,
-            lastName=last_name,
-            address=street,
-            city=city,
-            state=state,
-            zip=zip,
-            country=country,
-            phoneNumber=phone_number,
-        )
         request = createCustomerShippingAddressRequest(
             merchantAuthentication=self.merchantAuthentication,
             address=address,
