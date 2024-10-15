@@ -11,7 +11,7 @@ class CreateWialonUnitGroupKwargs(TypedDict):
 
 
 class WialonUnitGroup(WialonBase):
-    def create(self, **kwargs) -> str | None:
+    def create(self, **kwargs: CreateWialonUnitGroupKwargs) -> str | None:
         owner: WialonBase = kwargs["owner"]
         name: str = kwargs["name"]
 

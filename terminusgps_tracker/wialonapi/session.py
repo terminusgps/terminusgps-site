@@ -2,12 +2,11 @@ import logging
 from os import getenv
 from typing import Optional
 
-from wialon.api import Wialon, WialonError
+from wialon import Wialon, WialonError
 from django.conf import settings
 
 from terminusgps_tracker.wialonapi.errors import (
     WialonLoginError,
-    WialonLogoutError,
     WialonTokenNotFoundError,
 )
 import terminusgps_tracker.wialonapi.flags as flag

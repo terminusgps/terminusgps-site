@@ -14,6 +14,7 @@ class CustomerProfileModelAdmin(admin.ModelAdmin):
                     "authorizenet_profile_id",
                     "authorizenet_payment_id",
                     "authorizenet_address_id",
+                    "authorizenet_subscription_id",
                 ],
                 "classes": ["collapse"],
             },
@@ -26,7 +27,8 @@ class CustomerProfileModelAdmin(admin.ModelAdmin):
                     "wialon_user_id",
                     "wialon_group_id",
                     "wialon_resource_id",
-                ]
+                ],
+                "classes": ["collapse"],
             },
         ),
     ]

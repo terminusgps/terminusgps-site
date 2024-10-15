@@ -58,7 +58,6 @@ class RegistrationFormView(FormView):
     success_url = reverse_lazy("form asset customization")
 
     def form_valid(self, form: CustomerRegistrationForm) -> HttpResponse:
-        response = super().form_valid(form=form)
         customer_profile = CustomerProfile.objects.create(
             user=User.objects.create_user(
                 username=form.cleaned_data["email"],
@@ -86,7 +85,7 @@ class RegistrationFormView(FormView):
             )
             login(self.request, user)
 
-        return response
+        return super().form_valid(form=form)
 
     def wialon_registration_flow(
         self, form: CustomerRegistrationForm, customer_profile: CustomerProfile
@@ -141,7 +140,7 @@ class AssetCustomizationFormView(LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["imei_number"] = self.request.GET.get("imei", None)
+        context["imei"] = self.request.GET.get("imei", None)
         return context
 
     def form_valid(self, form: AssetCustomizationForm) -> HttpResponse:

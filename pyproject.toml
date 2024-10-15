@@ -1,8 +1,8 @@
 [project]
 name = "terminusgps-site"
-description = "Terminus GPS website"
+description = "Terminus GPS Website"
 readme = "README.md"
-version = "0.1.0"
+version = "1.0.0"
 requires-python = ">=3.11"
 
 authors = [
@@ -11,14 +11,34 @@ authors = [
 ]
 
 [tool.ruff]
-include = ["pyproject.toml", "terminusgps/*.py", "terminusgps/**/*.py", "terminusgps_tracker/*.py", "terminusgps_tracker/**/*.py"]
+exclude = [
+    ".git",
+    ".gitignore",
+    ".venv",
+    "venv",
+    ".vscode",
+    "__pycache__",
+    "node_modules",
+    "site-packages",
+    "dist",
+    "build",
+]
 line-length = 88
 indent-width = 4
 target-version = "py312"
-extend-exclude = ["migrations/*.py"]
 
 [tool.ruff.lint]
-logger-objects = ["terminusgps.logger"]
+select = [
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    "DJ",
+]
+ignore = ["DJ001", "F821"]
+fixable = [ "ALL" ]
+unfixable = []
+extend-per-file-ignores = {"*/migrations/*.py" = ["E501"]}
 
 [tool.ruff.format]
 quote-style = "double"
@@ -26,16 +46,3 @@ indent-style = "space"
 line-ending = "auto"
 docstring-code-format = false
 skip-magic-trailing-comma = true
-
-[tool.pyright]
-exclude = [
-    "**/**/node_modules",
-    "**/**/__pycache__",
-    "**/tests",
-    "**/migrations",
-]
-stubPath = "terminusgps_tracker/stubs"
-reportMissingImports = "error"
-reportMissingTypeStubs = true
-pythonVersion = "3.12"
-pythonPlatform = "Linux"

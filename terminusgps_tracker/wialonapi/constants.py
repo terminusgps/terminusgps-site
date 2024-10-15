@@ -1,4 +1,4 @@
-import wialonapi.flags as flag
+import terminusgps_tracker.wialonapi.flags as flag
 
 UNIT_BASIC_ACCESS_MASK = sum(
     [

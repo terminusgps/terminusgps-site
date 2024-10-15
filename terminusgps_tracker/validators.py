@@ -62,7 +62,7 @@ def validate_does_not_contain_hyphen(value: str) -> None:
     """Raises `ValidationError` if the value contains a hyphen."""
     if "-" in value:
         raise ValidationError(
-            _("Ensure '%(value)s' does not contain a hyphen: '-'."),
+            _("Ensure '%(value)s' does not contain '-'."),
             params={"value": value},
             code="invalid",
         )

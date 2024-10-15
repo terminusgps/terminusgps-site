@@ -19,16 +19,6 @@ class WialonLoginError(WialonBaseError):
         super().__init__(message=message, wialon_error=wialon_error)
 
 
-class WialonLogoutError(WialonBaseError):
-    def __init__(
-        self, session_id: str, wialon_error: Optional[WialonError] = None
-    ) -> None:
-        message = f"Failed to logout of Wialon API session '#{session_id}'."
-        if wialon_error is not None:
-            message += str(wialon_error)
-        super().__init__(message=message, wialon_error=wialon_error)
-
-
 class WialonTokenNotFoundError(WialonBaseError):
     def __init__(
         self, token: Optional[str] = None, wialon_error: Optional[WialonError] = None

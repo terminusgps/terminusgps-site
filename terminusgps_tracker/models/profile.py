@@ -28,6 +28,9 @@ class CustomerProfile(models.Model):
     authorizenet_address_id = models.PositiveBigIntegerField(
         unique=True, null=True, blank=True, default=None
     )
+    authorizenet_subscription_id = models.PositiveBigIntegerField(
+        unique=True, null=True, blank=True, default=None
+    )
     wialon_user_id = models.PositiveBigIntegerField(
         unique=True, null=True, blank=True, default=None
     )
