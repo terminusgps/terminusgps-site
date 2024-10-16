@@ -57,6 +57,7 @@ class WialonBase:
         ).get("item", {})
         self.hw_type = item.get("cls", None)
         self.name = item.get("nm", None)
+        self.uid = item.get("uid", None)
 
     def rename(self, new_name: str) -> None:
         self.session.wialon_api.item_update_name(

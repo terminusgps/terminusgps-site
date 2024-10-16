@@ -1,21 +1,9 @@
-from django.forms.widgets import Input, Select
+from typing import Any
+from django.forms.widgets import MultiWidget
 
 
-class CustomTextInput(Input):
-    input_type = "text"
-    template_name = ""
+class TerminusAddressWidget(MultiWidget):
+    def decompress(self, value: Any) -> Any | None:
+        return [None]
 
-
-class CustomPasswordInput(Input):
-    input_type = "password"
-    template_name = ""
-
-
-class CustomEmailInput(Input):
-    input_type = "email"
-    template_name = ""
-
-
-class CustomSelectInput(Select):
-    input_type = "text"
-    template_name = "terminusgps_tracker/partials/_select.html"
+    def compress(self, )

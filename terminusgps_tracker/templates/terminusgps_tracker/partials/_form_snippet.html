@@ -1,9 +1,0 @@
-{% for field in form %}
-    {% if not form.is_bound %}
-        {% include "terminusgps_tracker/partials/_field_unbound.html" with field=field %}
-    {% elif field.name in form.errors %}
-        {% include "terminusgps_tracker/partials/_field_invalid.html" with field=field %}
-    {% else %}
-        {% include "terminusgps_tracker/partials/_field_valid.html" with field=field %}
-    {% endif %}
-{% endfor %}

@@ -32,7 +32,7 @@ class WialonUnit(WialonBase):
         search = self.session.wialon_api.core_search_item(
             id=self.id, flags=flag.DATAFLAG_UNIT_ADVANCED_PROPERTIES
         )
-        self.unique_id = search.get("uid", "")
+        self.uid = search.get("uid", "")
         self.phone = search.get("ph", "")
         self.is_active = bool(search.get("act", 0))
 

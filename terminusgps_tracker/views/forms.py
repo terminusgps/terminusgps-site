@@ -1,14 +1,14 @@
 from authorizenet.apicontractsv1 import customerAddressType
 from django.conf import settings
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.models import User
-from django.contrib.auth.views import LoginView, LogoutView, RedirectURLMixin
+from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView
 from wialon.api import WialonError
 
 from terminusgps_tracker.authorizenetapi.profiles import AuthorizenetProfile
@@ -143,7 +143,7 @@ class CustomerAssetCustomizationView(FormView):
         "client_name": settings.CLIENT_NAME,
     }
 
-    def _get_unit_id(
+    def get_unit_id(
         self, form: CustomerAssetCustomizationForm, session: WialonSession
     ) -> str | None:
         if self.request.session.get("imei_number") is not None:
@@ -152,6 +152,12 @@ class CustomerAssetCustomizationView(FormView):
             imei_number = form.cleaned_data["imei_number"]
         return session.get_id_from_iccid(iccid=imei_number)
 
+    def get_unit(
+        self, unit_id: str | None, session: WialonSession
+    ) -> WialonUnit | None:
+        if unit_id:
+            return WialonUnit(id=unit_id, session=session)
+
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if not self.request.session.get("imei_number"):
             self.request.session["imei_number"] = self.request.GET.get("imei", None)
@@ -159,20 +165,23 @@ class CustomerAssetCustomizationView(FormView):
 
     def form_valid(self, form: CustomerAssetCustomizationForm) -> HttpResponse:
         with WialonSession() as session:
-            unit_id: str | None = self._get_unit_id(form=form, session=session)
-            if unit_id is not None:
-                unit = WialonUnit(id=unit_id, session=session)
+            unit_id: str | None = self.get_unit_id(form=form, session=session)
+            unit: WialonUnit | None = self.get_unit(unit_id, session=session)
+
+            if unit is not None:
+                available_units = WialonUnitGroup(id="27890571", session=session)
                 unit.rename(form.cleaned_data["asset_name"])
+                available_units.rm_item(unit)
             else:
                 form.add_error(
                     "imei_number",
                     ValidationError(
                         _("Invalid IMEI #: '%(value)s'. Please try a different value."),
+                        code="invalid",
                         params={
                             "value": self.request.session["imei_number"]
                             or form.cleaned_data["imei_number"]
                         },
-                        code="invalid",
                     ),
                 )
         return super().form_valid(form=form)

@@ -47,15 +47,6 @@ class CustomerProfile(models.Model):
     def __str__(self) -> str:
         return f"{self.user.username}'s Profile"
 
-    def grant_access(
-        self, item: WialonBase, access_mask: int, session: WialonSession
-    ) -> None:
-        user, group = self.get_wialon_user(session), self.get_wialon_group(session)
-        if user is not None and group is not None:
-            if not group.is_member(item):
-                group.add_item(item)
-                group.grant_access(user=user, access_mask=access_mask)
-
     def delete(self, using=None, keep_parents=False):
         with WialonSession() as session:
             user = self.get_wialon_user(session)
@@ -64,15 +55,14 @@ class CustomerProfile(models.Model):
             resource = self.get_wialon_resource(session)
 
             if all([super_user, user, group, resource]):
-                for obj in [user, group]:
-                    obj.delete()
+                user.delete()
+                group.delete()
                 resource.delete()
                 super_user.delete()
             else:
                 raise ValueError(
                     "Failed to properly retrieve Wialon objects for deletion."
                 )
-
         return super().delete(using=using, keep_parents=keep_parents)
 
     def get_wialon_user(self, session: WialonSession) -> WialonUser | None:
@@ -101,16 +91,11 @@ class CustomerProfile(models.Model):
         if group is not None and str(item.id) in group.items:
             group.rm_item(item)
 
-    def set_wialon_user(self, new_user: WialonUser, session: WialonSession) -> None:
-        old_user = self.get_wialon_user(session)
-        if old_user is None or old_user.id != new_user.id:
-            self.wialon_user_id = new_user.id
-            self.save()
+    def _grant_access(self, session: WialonSession) -> None:
+        group = self.get_wialon_group(session)
+        super_user = self.get_wialon_super_user(session)
+        user = self.get_wialon_user(session)
 
-    def set_wialon_super_user(
-        self, new_user: WialonUser, session: WialonSession
-    ) -> None:
-        old_user = self.get_wialon_user(session)
-        if old_user is None or old_user.id != new_user.id:
-            self.wialon_super_user_id = new_user.id
-            self.save()
+        if all([group, super_user, user]):
+            group.grant_access(super_user, access_mask=UNIT_FULL_ACCESS_MASK)
+            group.grant_access(user, access_mask=UNIT_BASIC_ACCESS_MASK)

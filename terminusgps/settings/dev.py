@@ -29,8 +29,8 @@ TWILIO_SID = os.getenv("TWILIO_SID")
 TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
 USE_I18N = True
 USE_TZ = True
-FORM_RENDERER = "terminusgps.renderer.TerminusFormRenderer"
 WIALON_API_TOKEN = os.getenv("WIALON_API_TOKEN")
+FORM_RENDERER = "terminusgps_tracker.forms.TerminusFormRenderer"
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
