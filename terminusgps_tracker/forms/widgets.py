@@ -6,4 +6,5 @@ class TerminusAddressWidget(MultiWidget):
     def decompress(self, value: Any) -> Any | None:
         return [None]
 
-    def compress(self, )
+    def compress(self, *args, **kwargs):
+        return super().compress(*args, **kwargs)
