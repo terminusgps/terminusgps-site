@@ -6,8 +6,10 @@ os.umask(0)
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = [".terminusgps.com"]
+CLIENT_NAME = "Terminus GPS"
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+FORM_RENDERER = "terminusgps_tracker.forms.TerminusFormRenderer"
 INTERNAL_IPS = ["127.0.0.1", "localhost"]
 LANGUAGE_CODE = "en-us"
 MEDIA_ROOT = BASE_DIR / "media"
