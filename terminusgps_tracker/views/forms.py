@@ -89,7 +89,7 @@ class CustomerRegistrationView(FormView):
             password=form.cleaned_data["password1"],
         )
         login(self.request, user)
-        return redirect(reverse(form.cleaned_data["next"]))
+        return redirect(reverse("form asset customization"))
 
     def wialon_registration_flow(
         self, form: CustomerRegistrationForm, customer_profile: CustomerProfile
@@ -153,7 +153,11 @@ class AssetCustomizationView(FormView):
 
     def form_valid(self, form: AssetCustomizationForm) -> HttpResponse:
         form = self.wialon_asset_customization_flow(form)
-        return super().form_valid(form=form)
+        if form.is_valid():
+            self.request.session.flush()
+            return super().form_valid(form=form)
+        else:
+            return self.form_invalid(form=form)
 
     def get_unit(
         self, form: AssetCustomizationForm, session: WialonSession

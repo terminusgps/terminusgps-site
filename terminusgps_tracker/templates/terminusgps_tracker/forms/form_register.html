@@ -12,7 +12,6 @@
     <form action="{% url 'form register' %}" method="post" class="m-4 md:m-6 lg:m-8">
         {% csrf_token %}
         {{ form }}
-        <input type="hidden" class="hidden" value="{% url 'form asset customization' %}">
         <button class="mb-4 mt-2 min-w-full rounded-md border border-solid border-gray-800 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300" type="submit">Submit</button>
     </form>
 </div>
