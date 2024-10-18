@@ -1,7 +1,7 @@
 from .forms import (
     CustomerRegistrationView,
-    CustomerAssetCustomizationView,
-    CustomerCreditCardUploadView,
+    AssetCustomizationView,
+    CreditCardUploadView,
     CustomerLoginView,
     CustomerLogoutView,
     form_success_redirect,

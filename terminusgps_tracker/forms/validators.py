@@ -5,69 +5,49 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from terminusgps_tracker.wialonapi.session import WialonSession
-from terminusgps_tracker.wialonapi.items.unit_group import WialonUnitGroup
+from terminusgps_tracker.wialonapi.utils import get_id_from_iccid, is_unique
+from terminusgps_tracker.wialonapi.items import WialonUnitGroup
 
 
-def validate_phone_number(value: str) -> None:
-    """Raises `ValidationError` if the value does not represent a valid phone number."""
-    if not value.startswith("+"):
-        raise ValidationError(
-            _("'%(value)s' must start with '+'."),
-            code="invalid",
-            params={"value": value},
-        )
-
-
-def validate_street_address(value: str) -> None:
-    """Raises `ValidationError` if the value does not represent a valid US address."""
-    number_part: str = value.split(" ")[0]
-    if not number_part.isnumeric():
-        raise ValidationError(
-            _("'%(value)s' must start with a number."),
-            code="invalid",
-            params={"value": value},
-        )
-
-
-def validate_imei_number_exists(value: str) -> None:
-    """Raises `ValidationError` if the value does not represent a unit in the Terminus GPS database."""
+def validate_wialon_imei_number(value: str) -> None:
+    """Raises `ValidationError` if the value represents an invalid Wialon IMEI #."""
     with WialonSession() as session:
-        unit_id: str | None = session.get_id_from_iccid(iccid=value.strip())
-        if not unit_id:
+        unit_id: str | None = get_id_from_iccid(iccid=value.strip(), session=session)
+        available = WialonUnitGroup(id="27890571", session=session)
+
+        if unit_id is None:
             raise ValidationError(
-                _(
-                    "'%(value)s' was not found in the Terminus GPS database. Please ensure your IMEI # is correctly input."
-                ),
-                params={"value": value.strip()},
+                _("'%(value)s' was not found in the Terminus GPS database."),
                 code="invalid",
+                params={"value": value},
+            )
+        elif unit_id not in available.items:
+            raise ValidationError(
+                _("'%(value)s' has already been registered."),
+                code="invalid",
+                params={"value": value},
             )
 
 
-def validate_asset_name_is_unique(value: str) -> None:
+def validate_wialon_unit_name(value: str) -> None:
     """Raises `ValidationError` if the value represents a non-unique asset name in Wialon."""
     with WialonSession() as session:
-        result = session.wialon_api.core_check_unique(
-            **{"type": "avl_unit", "value": value}
-        ).get("result", 1)
-        if result:
+        if not is_unique(value, session, items_type="avl_unit"):
             raise ValidationError(
-                _("'%(value)s' is taken. Please try another value."),
-                params={"value": value},
-                code="invalid",
+                _("'%(value)s' is taken."), code="invalid", params={"value": value}
             )
 
 
-def validate_starts_with_plus_one(value: str) -> None:
-    """Raises `ValidationError` if the value does not start with '+1'."""
-    if not value.startswith("+1"):
-        raise ValidationError(
-            _("Ensure '%(value)s' begins with a '+1'."),
-            params={"value": value},
-            code="invalid",
-        )
+def validate_wialon_user_name(value: str) -> None:
+    """Raises `ValidationError` if the value represents a non-unique user name in Wialon."""
+    with WialonSession() as session:
+        if not is_unique(value, session, items_type="user"):
+            raise ValidationError(
+                _("'%(value)s' is taken."), code="invalid", params={"value": value}
+            )
 
 
-def validate_django_username_is_unique(value: str) -> None:
+def validate_django_username(value: str) -> None:
     user_model = get_user_model()
     try:
         user_model.objects.get(username=value)
@@ -79,108 +59,73 @@ def validate_django_username_is_unique(value: str) -> None:
         )
 
 
-def validate_does_not_contain_hyphen(value: str) -> None:
-    """Raises `ValidationError` if the value contains a hyphen."""
-    if "-" in value:
+def validate_wialon_password(value: str) -> None:
+    """Raises `ValidationError` if the value represents an invalid Wialon password."""
+    forbidden_symbols: list[str] = [",", ":", "&", "<", ">"]
+    special_symbols: list[str] = [
+        "!",
+        "@",
+        "#",
+        "$",
+        "%",
+        "^",
+        "*",
+        "(",
+        ")",
+        "[",
+        "]",
+        "-",
+        "_",
+        "+",
+        "-",
+    ]
+    if len(value) < 4:
         raise ValidationError(
-            _("Ensure '%(value)s' does not contain '-'."),
-            params={"value": value},
+            _("Password must be at least 4 chars in length. Got '%(len)s'."),
             code="invalid",
+            params={"len": len(value)},
         )
-
-
-def validate_does_not_contain_forbidden_symbol(value: str) -> None:
-    """Raises `ValidationError` if the value contains a forbidden symbol."""
-    forbidden_symbols: str = '"<>{},\\'
-    if any(char in list(forbidden_symbols) for char in value):
+    elif len(value) > 32:
+        raise ValidationError(
+            _("Password cannot be longer than 32 chars. Got '%(len)s'."),
+            code="invalid",
+            params={"len": len(value)},
+        )
+    if value.startswith(" ") or value.endswith(" "):
+        raise ValidationError(
+            _("Password cannot start or end with a space."), code="invalid"
+        )
+    if any([char for char in value if char in forbidden_symbols]):
         raise ValidationError(
             _(
-                "Ensure this value does not contain a forbidden symbol. Forbidden symbols: '%(symbols)s'"
+                "Password cannot contain a forbidden symbol. Forbidden symbols: '%(symbols)s'."
             ),
-            params={
-                "symbols": [
-                    "less than (<)",
-                    "greater than (>)",
-                    "open curly ({)",
-                    "close curly (})",
-                    "comma (,)",
-                    "backslash (\\)",
-                ]
-            },
             code="invalid",
+            params={"symbols": forbidden_symbols},
         )
-
-
-def validate_imei_number_is_available(value: str) -> None:
-    """Raises `ValidationError` if the value represents an invalid/unavailable unit in the Terminus GPS database."""
-    with WialonSession() as session:
-        unit_id: str | None = session.get_id_from_iccid(iccid=value.strip())
-        available = WialonUnitGroup(id="27890571", session=session)
-        if not unit_id:
-            raise ValidationError(
-                _(
-                    "'%(value)s' was not found in the Terminus GPS database. Please ensure your IMEI # is correctly input."
-                ),
-                params={"value": value.strip()},
-                code="invalid",
-            )
-
-        if unit_id not in available.items:
-            raise ValidationError(
-                _("'%(value)s' is unavailable at this time. Please try again later."),
-                params={"value": value.strip()},
-                code="invalid",
-            )
-
-
-def validate_wialon_username_is_unique(value: str) -> None:
-    """Raises `ValidationError` if the value would create a non-unique user in the Terminus GPS Wialon database."""
-    with WialonSession() as session:
-        result = session.wialon_api.core_check_unique(
-            **{"type": "user", "value": value.strip()}
-        ).get("result", 1)
-        if result:
-            raise ValidationError(
-                _("'%(value)s' is taken. Please try another value."),
-                params={"value": value},
-                code="invalid",
-            )
-
-
-def validate_contains_uppercase_letter(value: str) -> None:
-    """Raises `ValidationError` if value does not contain an uppercase letter."""
-    if not any(char in string.ascii_uppercase for char in value):
-        raise ValidationError(
-            _("Ensure this value contains at least one uppercase letter."),
-            code="invalid",
-        )
-
-
-def validate_contains_lowercase_letter(value: str) -> None:
-    """Raises `ValidationError` if value does not contain a lowercase letter."""
-    if not any(char in string.ascii_lowercase for char in value):
-        raise ValidationError(
-            _("Ensure this value contains at least one lowercase letter."),
-            code="invalid",
-        )
-
-
-def validate_contains_digit(value: str) -> None:
-    """Raises `ValidationError` if value does not contain a digit."""
-    if not any(char in string.digits for char in value):
-        raise ValidationError(
-            _("Ensure this value contains at least one digit."), code="invalid"
-        )
-
-
-def validate_contains_special_symbol(value: str) -> None:
-    """Raises `ValidationError` if value does not contain a special symbol."""
-    special_symbols: str = "'/;?@!#$^-_=+|"
-    if not any(char in list(special_symbols) for char in value):
+    if not any([char for char in value if char in special_symbols]):
         raise ValidationError(
             _(
-                "Ensure this value contains at least one of these symbols: '%(symbols)s'"
+                "Password must contain at least one special symbol. Special symbols: '%(symbols)s'"
             ),
-            params={"symbols": list(special_symbols)},
             code="invalid",
+            params={"symbols": special_symbols},
+        )
+    if not any([char for char in value if char in string.ascii_lowercase]):
+        raise ValidationError(
+            _("Password must contain at least one lowercase letter."),
+            code="invalid",
+            params={"symbols": forbidden_symbols},
+        )
+    if not any([char for char in value if char in string.ascii_uppercase]):
+        raise ValidationError(
+            _("Password must contain at least one uppercase letter."),
+            code="invalid",
+            params={"symbols": forbidden_symbols},
+        )
+    if not any([char for char in value if char in string.digits]):
+        raise ValidationError(
+            _("Password must contain at least one digit."),
+            code="invalid",
+            params={"symbols": forbidden_symbols},
         )

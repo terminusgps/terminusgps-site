@@ -1,10 +1,14 @@
+{% if errors and not fields %}
+  <div class="hidden">{% for field in hidden_fields %}{{ field }}{% endfor %}</div>
+{% endif %}
 {% for field, errors in fields %}
-  <div class="mb-4">
+<div class="mb-4">
     {{ field.as_field_group }}
     {% if errors %}
-    <ul class="list-disc list-inside">
-        <span class="sr-only">{{ field.name }} errors</span>
-        {% for error in errors %}<li class="mt-4 text-sm md:text-md font-serif dark:text-terminus-gray-100">{{ error }}</li>{% endfor %}
+    <ul class="mb-4 mt-2 list-disc list-inside">
+        {% for error in errors %}
+        <li class="text-terminus-red-500 dark:text-terminus-red-200">{{ error }}</li>
+        {% endfor %}
     </ul>
     {% endif %}
     {% if forloop.last %}

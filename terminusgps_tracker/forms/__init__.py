@@ -1,6 +1,6 @@
 from .forms import (
     TerminusFormRenderer,
     CustomerRegistrationForm,
-    CustomerAssetCustomizationForm,
-    CustomerCreditCardUploadForm,
+    AssetCustomizationForm,
+    CreditCardUploadForm,
 )
