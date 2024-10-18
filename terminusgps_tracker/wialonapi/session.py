@@ -5,11 +5,6 @@ from django.conf import settings
 from wialon import Wialon
 
 from terminusgps_tracker.wialonapi.errors import WialonTokenNotFoundError
-from terminusgps_tracker.wialonapi.constants import (
-    WIALON_ITEM_TYPES,
-    WIALON_PROPERTY_TYPES,
-    WIALON_ITEM_PROPERTIES,
-)
 
 
 class WialonSession:
@@ -59,6 +54,7 @@ class WialonSession:
                 token=self.token, fl=0x1
             )
             self._deconstruct_login_response(login_response)
+            print(f"Logged into session #{self.wialon_api.sid} as '{self.username}'")
         return
 
     def logout(self) -> None:
@@ -66,9 +62,9 @@ class WialonSession:
         session_id = str(self.wialon_api.sid)
         logout_response: dict = self.wialon_api.core_logout({})
         if logout_response.get("error") == 0:
-            print(f"Logged out of session #{session_id} as {self.username}.")
+            print(f"Logged out of session #{session_id} as '{self.username}'")
         else:
-            print(f"Failed to properly destroy session #{session_id}.")
+            print(f"Failed to properly destroy session #{session_id}")
 
 
 class WialonQuery(WialonSession):

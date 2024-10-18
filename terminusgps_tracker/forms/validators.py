@@ -9,6 +9,19 @@ from terminusgps_tracker.wialonapi.utils import get_id_from_iccid, is_unique
 from terminusgps_tracker.wialonapi.items import WialonUnitGroup
 
 
+def validate_django_username(value: str) -> None:
+    """Raises `ValidationError` if the value represents an existing Django user name."""
+    User = get_user_model()
+    try:
+        User.objects.get(username__iexact=value.lower())
+    except User.DoesNotExist:
+        return
+    else:
+        raise ValidationError(
+            _("'%(value)s' is taken."), code="invalid", params={"value": value}
+        )
+
+
 def validate_wialon_imei_number(value: str) -> None:
     """Raises `ValidationError` if the value represents an invalid Wialon IMEI #."""
     with WialonSession() as session:
@@ -31,6 +44,12 @@ def validate_wialon_imei_number(value: str) -> None:
 
 def validate_wialon_unit_name(value: str) -> None:
     """Raises `ValidationError` if the value represents a non-unique asset name in Wialon."""
+    if len(value) < 4:
+        raise ValidationError(
+            _("'%(value)s' must be at least 4 characters long. Got %(len)s."),
+            code="invalid",
+            params={"value": value, "len": len(value)},
+        )
     with WialonSession() as session:
         if not is_unique(value, session, items_type="avl_unit"):
             raise ValidationError(
@@ -38,25 +57,13 @@ def validate_wialon_unit_name(value: str) -> None:
             )
 
 
-def validate_wialon_user_name(value: str) -> None:
+def validate_wialon_username(value: str) -> None:
     """Raises `ValidationError` if the value represents a non-unique user name in Wialon."""
     with WialonSession() as session:
         if not is_unique(value, session, items_type="user"):
             raise ValidationError(
                 _("'%(value)s' is taken."), code="invalid", params={"value": value}
             )
-
-
-def validate_django_username(value: str) -> None:
-    user_model = get_user_model()
-    try:
-        user_model.objects.get(username=value)
-    except user_model.DoesNotExist:
-        return
-    else:
-        raise ValidationError(
-            _("'%(value)s' is taken."), params={"value": value}, code="invalid"
-        )
 
 
 def validate_wialon_password(value: str) -> None:

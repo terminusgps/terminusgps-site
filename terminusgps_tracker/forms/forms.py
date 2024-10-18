@@ -1,13 +1,18 @@
+from typing import Any
+
 from django import forms
+from django.core.validators import validate_email
 from django.forms.renderers import TemplatesSetting
-from django.http import HttpRequest, HttpResponse
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from terminusgps_tracker.forms.fields import AddressField, CreditCardField
 from terminusgps_tracker.forms.validators import (
+    validate_django_username,
     validate_wialon_imei_number,
     validate_wialon_password,
     validate_wialon_unit_name,
-    validate_wialon_user_name,
+    validate_wialon_username,
 )
 
 
@@ -29,10 +34,13 @@ class TerminusFormRenderer(TemplatesSetting):
 
 
 class CustomerRegistrationForm(forms.Form):
-    first_name = forms.CharField(label="First Name", max_length=64)
-    last_name = forms.CharField(label="Last Name", max_length=64)
+    first_name = forms.CharField(label="First Name", min_length=4, max_length=64)
+    last_name = forms.CharField(label="Last Name", min_length=4, max_length=64)
     email = forms.EmailField(
-        label="Email Address", validators=[validate_wialon_user_name], max_length=512
+        label="Email Address",
+        validators=[validate_email, validate_wialon_username, validate_django_username],
+        min_length=4,
+        max_length=512,
     )
     password1 = forms.CharField(
         label="Password",
@@ -44,10 +52,26 @@ class CustomerRegistrationForm(forms.Form):
     password2 = forms.CharField(
         label="Confirm Password",
         widget=forms.widgets.PasswordInput(),
-        validators=[validate_wialon_password],
         min_length=4,
         max_length=32,
     )
+
+    def clean(self) -> dict[str, Any] | None:
+        cleaned_data: dict[str, Any] | None = super().clean()
+        if cleaned_data:
+            password = cleaned_data.get("password1")
+            password_confirmation = cleaned_data.get("password2")
+
+            if password and password_confirmation and password != password_confirmation:
+                self.add_error(
+                    "password1",
+                    ValidationError(_("Passwords do not match."), code="invalid"),
+                )
+                self.add_error(
+                    "password2",
+                    ValidationError(_("Passwords do not match."), code="invalid"),
+                )
+        return cleaned_data
 
 
 class CustomerLoginForm(forms.Form):
@@ -57,7 +81,7 @@ class CustomerLoginForm(forms.Form):
 
 class AssetCustomizationForm(forms.Form):
     asset_name = forms.CharField(
-        label="Asset Name", validators=[validate_wialon_unit_name]
+        label="Asset Name", validators=[validate_wialon_unit_name], min_length=4
     )
     imei_number = forms.CharField(
         label="IMEI #",

@@ -1,13 +1,12 @@
 from typing import Any
 
 from django.conf import settings
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, get_user_model, login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
-from django.urls import reverse_lazy
+from django.shortcuts import redirect, render
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from wialon.api import WialonError
@@ -58,7 +57,6 @@ class CustomerRegistrationView(FormView):
     http_method_names = ["get", "post"]
     template_name = "terminusgps_tracker/forms/form_register.html"
     extra_context = {"title": "Registration", "client_name": settings.CLIENT_NAME}
-    success_url = reverse_lazy("form asset customization")
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if not request.session.get("imei_number"):
@@ -66,14 +64,13 @@ class CustomerRegistrationView(FormView):
         return super().get(request, *args, **kwargs)
 
     def form_valid(self, form: CustomerRegistrationForm) -> HttpResponse:
-        customer_profile = CustomerProfile.objects.create(
-            user=User.objects.create_user(
-                username=form.cleaned_data["email"],
-                first_name=form.cleaned_data["first_name"],
-                last_name=form.cleaned_data["last_name"],
-                password=form.cleaned_data["password1"],
-            )
+        user = get_user_model().objects.create(
+            username=form.cleaned_data["email"],
+            password=form.cleaned_data["password1"],
+            first_name=form.cleaned_data["first_name"],
+            last_name=form.cleaned_data["last_name"],
         )
+        customer_profile = CustomerProfile.objects.create(user=user)
         try:
             self.wialon_registration_flow(form=form, customer_profile=customer_profile)
         except WialonError:
@@ -85,15 +82,14 @@ class CustomerRegistrationView(FormView):
                     )
                 ),
             )
-        else:
-            user = authenticate(
-                self.request,
-                username=form.cleaned_data["email"],
-                password=form.cleaned_data["password1"],
-            )
-            login(self.request, user)
 
-        return super().form_valid(form=form)
+        user = authenticate(
+            self.request,
+            username=form.cleaned_data["email"],
+            password=form.cleaned_data["password1"],
+        )
+        login(self.request, user)
+        return redirect(reverse(form.cleaned_data["next"]))
 
     def wialon_registration_flow(
         self, form: CustomerRegistrationForm, customer_profile: CustomerProfile
