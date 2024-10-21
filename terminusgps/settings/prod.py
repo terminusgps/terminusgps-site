@@ -7,7 +7,6 @@ os.umask(0)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-POSTGRES_USER = get_secret("rds!db-2d487bd1-0d2c-4e6b-b69c-8381cf64eae0")
 ALLOWED_HOSTS = [".terminusgps.com"]
 CLIENT_NAME = "Terminus GPS"
 CSRF_COOKIE_SECURE = True
@@ -116,7 +115,7 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "OPTIONS": {
-            "port": 5433,
+            "port": 5432,
             "user": get_secret_key(
                 "rds!db-2d487bd1-0d2c-4e6b-b69c-8381cf64eae0", "username"
             ),
@@ -124,6 +123,7 @@ DATABASES = {
                 "rds!db-2d487bd1-0d2c-4e6b-b69c-8381cf64eae0", "password"
             ),
             "dbname": "terminusgps-db-1",
+            "service": "terminusgps-db-1.cjhznikeiq6o.us-east-1.rds.amazonaws.com",
         },
     }
 }
