@@ -1,12 +1,13 @@
 import os
 from pathlib import Path
 
-from terminusgps.aws import get_secret
+from terminusgps.aws import get_secret, get_secret_key
 
 os.umask(0)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+POSTGRES_USER = get_secret("rds!db-2d487bd1-0d2c-4e6b-b69c-8381cf64eae0")
 ALLOWED_HOSTS = [".terminusgps.com"]
 CLIENT_NAME = "Terminus GPS"
 CSRF_COOKIE_SECURE = True
@@ -112,7 +113,19 @@ TEMPLATES = [
 WSGI_APPLICATION = "terminusgps.wsgi.application"
 
 DATABASES = {
-    "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "OPTIONS": {
+            "port": 5433,
+            "user": get_secret_key(
+                "rds!db-2d487bd1-0d2c-4e6b-b69c-8381cf64eae0", "username"
+            ),
+            "password": get_secret_key(
+                "rds!db-2d487bd1-0d2c-4e6b-b69c-8381cf64eae0", "password"
+            ),
+            "dbname": "terminusgps-db-1",
+        },
+    }
 }
 
 AUTH_PASSWORD_VALIDATORS = [
