@@ -24,6 +24,12 @@ from terminusgps_tracker.wialonapi.items import (
 )
 
 
+def registration_redirect(request: HttpRequest, *args, **kwargs) -> HttpResponse:
+    response = HttpResponse(status=302)
+    response["Location"] = reverse("form register")
+    return response
+
+
 def form_success_redirect(
     request: HttpRequest, redirect_url: str = "https://hosting.terminusgps.com/"
 ) -> HttpResponse:

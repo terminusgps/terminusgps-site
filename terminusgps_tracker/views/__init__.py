@@ -4,5 +4,6 @@ from .forms import (
     CustomerLoginView,
     CustomerLogoutView,
     form_success_redirect,
+    registration_redirect,
 )
 from .dashboard import DashboardView
