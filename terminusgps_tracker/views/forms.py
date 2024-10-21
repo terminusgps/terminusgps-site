@@ -15,11 +15,7 @@ from terminusgps_tracker.models import CustomerProfile
 from terminusgps_tracker.wialonapi.session import WialonSession
 from terminusgps_tracker.wialonapi.utils import get_id_from_iccid
 
-from terminusgps_tracker.forms import (
-    CustomerRegistrationForm,
-    AssetCustomizationForm,
-    CreditCardUploadForm,
-)
+from terminusgps_tracker.forms import CustomerRegistrationForm, AssetCustomizationForm
 from terminusgps_tracker.wialonapi.items import (
     WialonResource,
     WialonUnit,
@@ -147,7 +143,7 @@ class AssetCustomizationView(FormView):
         return super().get_initial()
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if request.GET.get("imei") is not None:
+        if request.GET.get("imei") is not None and not request.session["imei_number"]:
             request.session["imei_number"] = request.GET.get("imei", None)
         return super().get(request, *args, **kwargs)
 
@@ -188,38 +184,3 @@ class AssetCustomizationView(FormView):
                     ),
                 )
         return form
-
-
-class CreditCardUploadView(FormView):
-    form_class = CreditCardUploadForm
-    http_method_names = ["get", "post"]
-    template_name = "terminusgps_tracker/forms/form_cc_upload.html"
-    login_url = reverse_lazy("form login")
-    success_url = reverse_lazy("form success")
-    extra_context = {"title": "Credit Card Upload", "client_name": settings.CLIENT_NAME}
-
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not self.request.session.get("imei_number"):
-            self.request.session["imei_number"] = self.request.GET.get("imei", None)
-        return super().get(request, *args, **kwargs)
-
-    def form_valid(self, form: CreditCardUploadForm) -> HttpResponse:
-        """
-        if self.request.user.is_authenticated:
-            auth_profile = AuthorizenetProfile(user=self.request.user)
-            auth_profile.create_payment_profile(
-                billing_address=customerAddressType(
-                    firstName=form.cleaned_data["first_name"],
-                    lastName=form.cleaned_data["last_name"],
-                    address=form.cleaned_data["address_street"],
-                    city=form.cleaned_data["address_city"],
-                    state=form.cleaned_data["address_state"],
-                    zip=form.cleaned_data["address_zip"],
-                    country=form.cleaned_data["address_country"],
-                    phoneNumber=form.cleaned_data["address_phone"],
-                ),
-                card_number=form.cleaned_data["cc_number"],
-                card_expiry=form.cleaned_data["cc_expiry"],
-            )
-        """
-        return super().form_valid(form=form)

@@ -1,12 +1,10 @@
 from typing import Any
 
 from django import forms
-from django.core.validators import validate_email
 from django.forms.renderers import TemplatesSetting
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from terminusgps_tracker.forms.fields import AddressField, CreditCardField
 from terminusgps_tracker.forms.validators import (
     validate_django_username,
     validate_wialon_imei_number,
@@ -38,7 +36,7 @@ class CustomerRegistrationForm(forms.Form):
     last_name = forms.CharField(label="Last Name", min_length=4, max_length=64)
     email = forms.EmailField(
         label="Email Address",
-        validators=[validate_email, validate_wialon_username, validate_django_username],
+        validators=[validate_wialon_username, validate_django_username],
         min_length=4,
         max_length=512,
     )
@@ -88,8 +86,3 @@ class AssetCustomizationForm(forms.Form):
         validators=[validate_wialon_imei_number],
         widget=forms.widgets.NumberInput(),
     )
-
-
-class CreditCardUploadForm(forms.Form):
-    credit_card = CreditCardField(label="Credit Card")
-    address = AddressField(label="Billing Address")

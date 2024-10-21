@@ -44,12 +44,6 @@ def validate_wialon_imei_number(value: str) -> None:
 
 def validate_wialon_unit_name(value: str) -> None:
     """Raises `ValidationError` if the value represents a non-unique asset name in Wialon."""
-    if len(value) < 4:
-        raise ValidationError(
-            _("'%(value)s' must be at least 4 characters long. Got %(len)s."),
-            code="invalid",
-            params={"value": value, "len": len(value)},
-        )
     with WialonSession() as session:
         if not is_unique(value, session, items_type="avl_unit"):
             raise ValidationError(
@@ -61,6 +55,15 @@ def validate_wialon_username(value: str) -> None:
     """Raises `ValidationError` if the value represents a non-unique user name in Wialon."""
     with WialonSession() as session:
         if not is_unique(value, session, items_type="user"):
+            raise ValidationError(
+                _("'%(value)s' is taken."), code="invalid", params={"value": value}
+            )
+
+
+def validate_wialon_resource_name(value: str) -> None:
+    """Raises `ValidationError` if the value represents a non-unique user name in Wialon."""
+    with WialonSession() as session:
+        if not is_unique(value, session, items_type="avl_resource"):
             raise ValidationError(
                 _("'%(value)s' is taken."), code="invalid", params={"value": value}
             )
@@ -92,7 +95,7 @@ def validate_wialon_password(value: str) -> None:
             code="invalid",
             params={"len": len(value)},
         )
-    elif len(value) > 32:
+    if len(value) > 32:
         raise ValidationError(
             _("Password cannot be longer than 32 chars. Got '%(len)s'."),
             code="invalid",
@@ -120,19 +123,13 @@ def validate_wialon_password(value: str) -> None:
         )
     if not any([char for char in value if char in string.ascii_lowercase]):
         raise ValidationError(
-            _("Password must contain at least one lowercase letter."),
-            code="invalid",
-            params={"symbols": forbidden_symbols},
+            _("Password must contain at least one lowercase letter."), code="invalid"
         )
     if not any([char for char in value if char in string.ascii_uppercase]):
         raise ValidationError(
-            _("Password must contain at least one uppercase letter."),
-            code="invalid",
-            params={"symbols": forbidden_symbols},
+            _("Password must contain at least one uppercase letter."), code="invalid"
         )
     if not any([char for char in value if char in string.digits]):
         raise ValidationError(
-            _("Password must contain at least one digit."),
-            code="invalid",
-            params={"symbols": forbidden_symbols},
+            _("Password must contain at least one digit."), code="invalid"
         )

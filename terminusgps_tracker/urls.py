@@ -17,7 +17,4 @@ urlpatterns = [
         views.AssetCustomizationView.as_view(),
         name="form asset customization",
     ),
-    path(
-        "forms/cc_upload/", views.CreditCardUploadView.as_view(), name="form cc upload"
-    ),
 ]
