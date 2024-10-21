@@ -38,7 +38,16 @@ WIALON_API_TOKEN = os.getenv("WIALON_API_TOKEN")
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "session_profile": "Blake Nall",
+            "bucket_name": "terminusgps-bucket",
+            "location": "static/",
+            "region_name": "us-east-1",
+            "verify": False,
+        },
+    },
 }
 
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
