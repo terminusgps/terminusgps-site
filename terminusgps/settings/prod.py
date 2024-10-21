@@ -1,12 +1,15 @@
 import os
 from pathlib import Path
 
+from terminusgps.aws import get_secret
+
 os.umask(0)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = [".terminusgps.com"]
 CLIENT_NAME = "Terminus GPS"
+CSRF_COOKIE_SECURE = True
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 FORM_RENDERER = "terminusgps_tracker.forms.TerminusFormRenderer"
@@ -16,8 +19,10 @@ MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
 MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
 MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = get_secret("terminusgps-site-key")
+SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = "/var/www/terminusgps-site/static/"
