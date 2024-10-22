@@ -6,7 +6,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView
+from django.views.generic import FormView, TemplateView
 from wialon.api import WialonError
 
 from terminusgps_tracker.models import CustomerProfile
@@ -19,6 +19,27 @@ from terminusgps_tracker.wialonapi.items import (
     WialonUnitGroup,
     WialonUser,
 )
+
+
+class ValidationView(TemplateView):
+    content_type = "text/html"
+    template_name = "terminusgps_tracker/forms/field.html"
+    http_method_names = ["post"]
+
+    def setup(self, request, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.value = None
+        self.field_name = None
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        return context
+
+    def post(self, **kwargs) -> HttpResponse:
+        if not self.request.headers.get("HX-Request", False):
+            return HttpResponse(status=403)
+        print(self.request.POST)
+        return self.render_to_response(context=self.get_context_data(**kwargs))
 
 
 class CustomerRegistrationView(FormView):
