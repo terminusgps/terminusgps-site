@@ -4,9 +4,9 @@ from terminusgps_tracker.models import CustomerProfile
 
 
 class CustomerProfileModelAdmin(admin.ModelAdmin):
-    list_display = ["user", "aws_sso_id"]
+    list_display = ["user", "wialon_user_id"]
     fieldsets = [
-        (None, {"fields": ["user", "aws_sso_id"]}),
+        (None, {"fields": ["user"]}),
         (
             "Authorize.net",
             {

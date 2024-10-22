@@ -1,0 +1,20 @@
+{% extends "terminusgps_tracker/layout.html" %}
+{% load static %}
+{% block content %}
+<div class="m-8 rounded-lg border border-solid bg-terminus-gray-100 md:m-6 lg:m-4 dark:bg-terminus-gray-700">
+    <div class="flex-cols flex items-center">
+        <img class="m-6" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo" height="60" width="60">
+        <div class="mx-2 my-4 font-serif">
+            <h1 class="text-2xl text-terminus-gray-800 dark:text-terminus-gray-100">Terminus GPS</h1>
+            <h2 class="text-xl text-terminus-gray-600 dark:text-terminus-gray-300">Create a new account</h2>
+        </div>
+    </div>
+    <form action="{{ current_url }}" method="post" class="m-4">
+        {% csrf_token %}
+        {{ form }}
+        <button class="mb-4 mt-2 min-w-full rounded-md border border-solid border-gray-600 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300" type="submit">
+            Submit
+        </button>
+    </form>
+</div>
+{% endblock content %}

@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from terminusgps.aws import get_secret, get_secret_key
+from terminusgps.aws import get_secret
 
 os.umask(0)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -13,7 +13,7 @@ CSRF_COOKIE_SECURE = True
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 FORM_RENDERER = "terminusgps_tracker.forms.TerminusFormRenderer"
-INTERNAL_IPS = ["127.0.0.1", "localhost"]
+INTERNAL_IPS = ["127.0.0.1", "0.0.0.0"]
 LANGUAGE_CODE = "en-us"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
@@ -97,7 +97,7 @@ ROOT_URLCONF = "terminusgps.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "/forms/templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -114,17 +114,7 @@ WSGI_APPLICATION = "terminusgps.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "OPTIONS": {
-            "port": 5432,
-            "user": get_secret_key(
-                "rds!db-2d487bd1-0d2c-4e6b-b69c-8381cf64eae0", "username"
-            ),
-            "password": get_secret_key(
-                "rds!db-2d487bd1-0d2c-4e6b-b69c-8381cf64eae0", "password"
-            ),
-            "dbname": "terminusgps-db-1",
-            "service": "terminusgps-db-1.cjhznikeiq6o.us-east-1.rds.amazonaws.com",
-        },
+        "OPTIONS": {"port": 5432, "service": "terminusgps-db-1"},
     }
 }
 

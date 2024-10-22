@@ -67,40 +67,6 @@ class WialonSession:
             print(f"Failed to properly destroy session #{session_id}")
 
 
-class WialonQuery(WialonSession):
-    def __init__(self, query: str, wialon_api_token: Optional[str] = None) -> None:
-        super().__init__(wialon_api_token)
-        self.propValueMask = query
-
-    def clean(self) -> None:
-        return
-
-    @property
-    def propValueMask(self) -> str:
-        return self._propValueMask
-
-    @propValueMask.setter
-    def propValueMask(self, value: str) -> None:
-        if "," in value:
-            self.num_properties = len(value.split(","))
-        else:
-            self.num_properties = 1
-        self._propValueMask = value
-
-    @property
-    def itemsType(self) -> str:
-        return self._itemsType
-
-    @itemsType.setter
-    def itemsType(self, value: str) -> None:
-        if "," in value:
-            if not len(value.split(",")) == self.num_properties:
-                raise ValueError(
-                    f"Property mismatch: Query has '{self.num_properties}' properties, itemsType had '{len(value.split(","))}'."
-                )
-        self._itemsType = value
-
-
 def main() -> None:
     # Easily create and destroy Wialon sessions using Python's context managers
     ## With environment variable token. Default behavior

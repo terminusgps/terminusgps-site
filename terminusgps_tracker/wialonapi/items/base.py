@@ -14,11 +14,7 @@ class WialonBase:
             self._id = self.create(**kwargs)
         else:
             self._id = id
-
-        if self.id is None:
-            raise ValueError("Failed to properly create Wialon object.")
-        else:
-            self.populate()
+        self.populate()
 
     def __str__(self) -> str:
         return f"{self.__class__}:{self.id}"

@@ -9,16 +9,17 @@ CLIENT_NAME = "Terminus GPS"
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ENCRYPTION_KEY = "HX2qfcgHEtzd0UWUgDFUMKOeTVq5u-6DYASldb057W4="
-INTERNAL_IPS = ["127.0.0.1"]
+FORM_RENDERER = "terminusgps_tracker.forms.TerminusFormRenderer"
+INTERNAL_IPS = ["127.0.0.1", "0.0.0.0"]
 LANGUAGE_CODE = "en-us"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
 MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
 MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
 SECRET_KEY = "po=qc@jlt0e#h6c8xv96vr%v2l^ib=f9m0!m-@bv0cz25pm$-g"
+SERIALIZATION_MODULES = {"json": "djmoney.serializers"}
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
-SERIALIZATION_MODULES = {"json": "djmoney.serializers"}
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "static/"
 TAILWIND_APP_NAME = "theme"
@@ -30,7 +31,6 @@ TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
 USE_I18N = True
 USE_TZ = True
 WIALON_API_TOKEN = os.getenv("WIALON_API_TOKEN")
-FORM_RENDERER = "terminusgps_tracker.forms.TerminusFormRenderer"
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},

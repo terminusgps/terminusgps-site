@@ -1,0 +1,6 @@
+{% if errors %}<ul class="mt-4 list-disc list-inside">
+{% for error in errors %}
+    <li class="text-sm text-red-600">{{ error }}</li>
+{% empty %}
+{% endfor %}
+</ul>{% endif %}
