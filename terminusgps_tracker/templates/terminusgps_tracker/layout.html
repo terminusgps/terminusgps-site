@@ -9,11 +9,12 @@
         <script src="{% static 'terminusgps_tracker/js/htmx.min.js' %}" defer></script>
     </head>
     <body class="bg-gradient-to-tr from-terminus-red-300 via-terminus-red-900 to-terminus-red-300 dark:from-terminus-red-900 dark:via-terminus-red-300 dark:to-terminus-red-900">
-        <nav class="flex bg-terminus-white py-4 dark:bg-terminus-black">
-            <a href="https://terminusgps.com/">
+        <nav class="bg-terminus-white py-4 drop-shadow-xl dark:bg-terminus-gray-900 justify-between flex">
+            <a href="https://hosting.terminusgps.com/" class="flex items-center space-x-1">
                 <img class="size-12" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo">
+                <h2 class="text-xl font-semibold tracking-wide text-terminus-black dark:text-terminus-white">Terminus GPS Monitoring</h2>
             </a>
-            <h2 class="mt-2.5 font-serif text-lg font-semibold tracking-wider text-terminus-black dark:text-terminus-white">Terminus GPS Monitoring</h2>
+            <img class="size-8" src={% if user %}"{{ user.pfp }}"{% else %}"{% static "terminusgps_tracker/static/default_pfp.svg" %}"{% endif %} alt="User profile picture">
         </nav>
         <main>
             {% block content %}

@@ -1,12 +1,12 @@
 {% extends "terminusgps_tracker/layout.html" %}
 {% load static %}
 {% block content %}
-<div class="m-8 rounded-lg border border-solid bg-terminus-gray-100 md:m-6 lg:m-4 dark:bg-terminus-gray-700">
-    <div class="flex-cols flex items-center">
-        <img class="m-6" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo" height="60" width="60">
-        <div class="mx-2 my-4 font-serif">
+<div class="m-8 rounded-lg drop-shadow-md border border-solid bg-terminus-gray-100 md:m-6 lg:m-4 dark:bg-terminus-gray-700">
+    <div class="m-2 p-4 flex flex-row items-center">
+        <img class="size-32 rounded-lg flex-none" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo" height="60" width="60">
+        <div class="flex flex-col">
             <h1 class="text-2xl text-terminus-gray-800 dark:text-terminus-gray-100">Terminus GPS</h1>
-            <h2 class="text-xl text-terminus-gray-600 dark:text-terminus-gray-300">Create a new account</h2>
+            <h2 class="text-xl font-light text-terminus-gray-700 dark:text-terminus-gray-200">Create a new account</h2>
         </div>
     </div>
     <form action="{{ current_url }}" method="post" class="m-4">

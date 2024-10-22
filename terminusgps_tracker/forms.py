@@ -3,6 +3,7 @@ from typing import Any
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms.renderers import TemplatesSetting
+from django.template.base import Template
 from django.utils.translation import gettext_lazy as _
 
 from terminusgps_tracker.validators import (
@@ -19,8 +20,8 @@ class TerminusFormRenderer(TemplatesSetting):
     formset_template_name = "terminusgps_tracker/forms/formset.html"
     field_template_name = "terminusgps_tracker/forms/field.html"
 
-    def get_template(self, template_name: str):
-        if "django" in template_name:
+    def get_template(self, template_name: str) -> Template | None:
+        if template_name.startswith("django/"):
             template_name = template_name.replace("django", "terminusgps_tracker")
         return super().get_template(template_name)
 

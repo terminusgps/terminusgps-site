@@ -112,10 +112,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "terminusgps.wsgi.application"
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "OPTIONS": {"port": 5432, "service": "terminusgps-db-1"},
-    }
+    "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}
 }
 
 AUTH_PASSWORD_VALIDATORS = [

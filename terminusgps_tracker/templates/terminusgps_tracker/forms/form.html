@@ -2,7 +2,7 @@
   <div class="hidden">{% for field in hidden_fields %}{{ field }}{% endfor %}</div>
 {% endif %}
 {% for field, errors in fields %}
-<div class="mb-4">
+<div class="mb-4 space-y-2">
     {{ field.as_field_group }}
     {% if forloop.last %}
       {% for field in hidden_fields %}{{ field }}{% endfor %}
