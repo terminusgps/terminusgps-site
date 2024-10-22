@@ -96,7 +96,7 @@ class CustomerRegistrationView(FormView):
 class AssetCustomizationView(FormView):
     form_class = AssetCustomizationForm
     http_method_names = ["get", "post"]
-    template_name = "terminusgps_tracker/forms/asset_customization.html"
+    template_name = "terminusgps_tracker/forms/asset.html"
     extra_context = {"title": "Asset Customization"}
     success_url = reverse_lazy("form success")
 
