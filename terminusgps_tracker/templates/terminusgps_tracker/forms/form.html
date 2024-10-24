@@ -1,14 +1,15 @@
 {% if errors and not fields %}
-  <div class="hidden">{% for field in hidden_fields %}{{ field }}{% endfor %}</div>
+  <div>{% for field in hidden_fields %}{{ field }}{% endfor %}</div>
 {% endif %}
+<div class="flex flex-col">
 {% for field, errors in fields %}
-<div class="mb-4 space-y-2">
-    {{ field.as_field_group }}
+    {% if field.label %}<label for="{{ field.id_for_label }}">{{ field.label }}</label>{% endif %}
+    {{ field }}
     {% if forloop.last %}
       {% for field in hidden_fields %}{{ field }}{% endfor %}
     {% endif %}
-</div>
 {% endfor %}
+</div>
 {% if not fields and not errors %}
   {% for field in hidden_fields %}{{ field }}{% endfor %}
 {% endif %}

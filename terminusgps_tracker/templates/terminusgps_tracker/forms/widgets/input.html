@@ -1,9 +1,9 @@
 <input
-    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+    class="block w-full rounded-md"
     type="{{ widget.type }}"
     name="{{ widget.name }}"
-    hx-trigger="keyup changed delay:500ms"
-    hx-swap="outerHTML"
-    hx-target="{% url 'validate field' widget.name %}"
-    {% if widget.value != None %}value="{{ widget.value|stringformat:'s' }}"{% endif %}
-    {% include "terminusgps_tracker/forms/attrs.html" %}>
+    {% if widget.value != None %}
+    value="{{ widget.value|stringformat:'s' }}"
+    {% endif %}
+    {% include "terminusgps_tracker/forms/attrs.html" %}
+>

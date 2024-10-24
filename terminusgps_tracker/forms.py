@@ -1,6 +1,7 @@
 from typing import Any
 
 from django import forms
+from django.db import models
 from django.core.exceptions import ValidationError
 from django.forms.renderers import TemplatesSetting
 from django.template.base import Template
@@ -13,21 +14,29 @@ from terminusgps_tracker.validators import (
     validate_wialon_unit_name,
     validate_wialon_username,
 )
+from terminusgps_tracker.widgets import AddressField
 
 
 class TerminusFormRenderer(TemplatesSetting):
     form_template_name = "terminusgps_tracker/forms/form.html"
-    formset_template_name = "terminusgps_tracker/forms/formset.html"
     field_template_name = "terminusgps_tracker/forms/field.html"
 
     def get_template(self, template_name: str) -> Template | None:
-        if template_name.startswith("django/"):
-            template_name = template_name.replace("django", "terminusgps_tracker")
+        print(f"Getting template '{template_name}'...")
         return super().get_template(template_name)
 
 
+class CountryCode(models.TextChoices):
+    UNITED_STATES = "US", _("United States")
+    CANADA = "CA", _("Canada")
+    MEXICO = "MX", _("Mexico")
+
+
+class CreditCardUploadForm(forms.Form):
+    address = AddressField()
+
+
 class CustomerRegistrationForm(forms.Form):
-    default_renderer = TerminusFormRenderer
     first_name = forms.CharField(label="First Name", min_length=4, max_length=64)
     last_name = forms.CharField(label="Last Name", min_length=4, max_length=64)
     email = forms.EmailField(
@@ -75,7 +84,6 @@ class CustomerRegistrationForm(forms.Form):
 
 
 class AssetCustomizationForm(forms.Form):
-    default_renderer = TerminusFormRenderer
     asset_name = forms.CharField(
         label="Asset Name",
         validators=[validate_wialon_unit_name],

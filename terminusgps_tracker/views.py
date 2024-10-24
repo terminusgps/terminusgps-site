@@ -1,4 +1,6 @@
+import requests
 from typing import Any
+from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -6,13 +8,17 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView
 from wialon.api import WialonError
 
 from terminusgps_tracker.models import CustomerProfile
 from terminusgps_tracker.wialonapi.session import WialonSession
 from terminusgps_tracker.wialonapi.utils import get_id_from_iccid
-from terminusgps_tracker.forms import CustomerRegistrationForm, AssetCustomizationForm
+from terminusgps_tracker.forms import (
+    CustomerRegistrationForm,
+    AssetCustomizationForm,
+    CreditCardUploadForm,
+)
 from terminusgps_tracker.wialonapi.items import (
     WialonResource,
     WialonUnit,
@@ -21,25 +27,34 @@ from terminusgps_tracker.wialonapi.items import (
 )
 
 
-class ValidationView(TemplateView):
-    content_type = "text/html"
-    template_name = "terminusgps_tracker/forms/field.html"
-    http_method_names = ["post"]
+def search_address(
+    request: HttpRequest, value: str, count: int = 32, index_from: int = 0
+) -> HttpResponse:
+    if not request.headers.get("HX-Request"):
+        return HttpResponse(status=403)
+    with WialonSession() as session:
+        url = "https://search-maps.wialon.com/hst-api.wialon.com/gis_searchintelli?"
+        params = {
+            "phrase": value,
+            "count": count,
+            "indexFrom": index_from,
+            "uid": session.uid,
+        }
+        target_url = url + urlencode(params)
+        response = requests.post(target_url)
+        print(response)
+        return HttpResponse(status=200)
 
-    def setup(self, request, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        self.value = None
-        self.field_name = None
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        return context
+class CreditCardUploadView(FormView):
+    form_class = CreditCardUploadForm
+    http_method_names = ["get", "post"]
+    template_name = "terminusgps_tracker/forms/credit_card_upload.html"
+    extra_context = {"title": "Upload Credit Card"}
 
-    def post(self, **kwargs) -> HttpResponse:
-        if not self.request.headers.get("HX-Request", False):
-            return HttpResponse(status=403)
-        print(self.request.POST)
-        return self.render_to_response(context=self.get_context_data(**kwargs))
+    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        print(request.POST)
+        return super().post(request, *args, **kwargs)
 
 
 class CustomerRegistrationView(FormView):

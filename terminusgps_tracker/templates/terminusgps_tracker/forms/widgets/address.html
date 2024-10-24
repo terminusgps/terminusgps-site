@@ -1,0 +1,7 @@
+{% for widget in widget.subwidgets %}
+    {% if widget.type == "text" %}
+        {% include "terminusgps_tracker/forms/widgets/text.html" %}
+    {% elif widget.type == "number" %}
+        {% include "terminusgps_tracker/forms/widgets/number.html" %}
+    {% endif %}
+{% endfor %}

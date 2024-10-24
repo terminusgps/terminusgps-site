@@ -5,9 +5,6 @@ from . import views
 urlpatterns = [
     path("register/", views.CustomerRegistrationView.as_view(), name="register"),
     path("asset/", views.AssetCustomizationView.as_view(), name="asset"),
-    path(
-        "validate/<str:field_name>/",
-        views.ValidationView.as_view(),
-        name="validate field",
-    ),
+    path("upload/cc/", views.CreditCardUploadView.as_view(), name="upload credit card"),
+    path("search_address/", views.search_address, name="search address"),
 ]
