@@ -1,15 +1,20 @@
+{{ errors }}
 {% if errors and not fields %}
-  <div>{% for field in hidden_fields %}{{ field }}{% endfor %}</div>
+  <div class="hidden">{% for field in hidden_fields %}{{ field }}{% endfor %}</div>
 {% endif %}
-<div class="flex flex-col">
 {% for field, errors in fields %}
-    {% if field.label %}<label for="{{ field.id_for_label }}">{{ field.label }}</label>{% endif %}
+  {{ errors }}
+<div {% if field.css_classes %}class="{{ classes }}"{% else %}class="mb-4"{% endif %}>
+    {% if field.label %}{{ field.label_tag }}{% endif %}
     {{ field }}
+    {% if field.help_text %}
+      <span class="helptext"{% if field.auto_id %} id="{{ field.auto_id }}_helptext"{% endif %}>{{ field.help_text|safe }}</span>
+    {% endif %}
     {% if forloop.last %}
       {% for field in hidden_fields %}{{ field }}{% endfor %}
     {% endif %}
+  </div>
 {% endfor %}
-</div>
 {% if not fields and not errors %}
   {% for field in hidden_fields %}{{ field }}{% endfor %}
 {% endif %}

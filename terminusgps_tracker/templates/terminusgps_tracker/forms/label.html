@@ -1,3 +1,1 @@
-{% if field.label %}
-<label for="{{ field.id_for_label }}" class="text-lg {% if field.required %}text-red-800 font-bold{% endif %}">{{ field.label }}</label>
-{% endif %}
+<label class="mb-2" for="{{ field.auto_id }}">{{ field.label }}</label>
