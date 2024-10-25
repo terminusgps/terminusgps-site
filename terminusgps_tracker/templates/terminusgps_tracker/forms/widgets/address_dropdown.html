@@ -1,0 +1,12 @@
+<div id="address-results" class="mt-2">
+    {% for result in results %}
+    <button
+        class="w-full text-left p-2 hover:bg-gray-300"
+        hx-post="{% url 'fill address' %}"
+        hx-target="closest div"
+        hx-include="[name*='address_']"
+    >{{ result.formatted_path }}</button>
+    {% empty %}
+    No addresses found...
+    {% endfor %}
+</div>

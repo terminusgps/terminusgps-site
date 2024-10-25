@@ -1,3 +1,8 @@
-{% for subwidget in widget.subwidgets %}
-{% include widget.template_name %}
-{% endfor %}
+<div class="relative">
+    <div class="grid grid-cols-3 gap-4">
+    {% spaceless %}{% for widget in widget.subwidgets %}{% include widget.template_name %}{% endfor %}{% endspaceless %}
+    </div>
+    <div id="address-results" class="mt-2">
+        {# HTMX results deposited here #}
+    </div>
+</div>

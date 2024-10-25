@@ -8,7 +8,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView
+from django.views.generic import FormView, TemplateView
 from wialon.api import WialonError
 
 from terminusgps_tracker.models import CustomerProfile
@@ -27,23 +27,69 @@ from terminusgps_tracker.wialonapi.items import (
 )
 
 
-def search_address(
-    request: HttpRequest, value: str, count: int = 32, index_from: int = 0
-) -> HttpResponse:
-    if not request.headers.get("HX-Request"):
-        return HttpResponse(status=403)
-    with WialonSession() as session:
-        url = "https://search-maps.wialon.com/hst-api.wialon.com/gis_searchintelli?"
-        params = {
-            "phrase": value,
-            "count": count,
-            "indexFrom": index_from,
-            "uid": session.uid,
+class SearchAddress(TemplateView):
+    template_name = "terminusgps_tracker/forms/widgets/address_dropdown.html"
+    content_type = "text/html"
+    http_method_names = ["post"]
+
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if not request.headers.get("HX-Request"):
+            return HttpResponse(status=401)
+
+        phrase = self.get_search_phrase(request)
+        raw_results = self.search_address(phrase=phrase)
+        context: dict[str, Any] = self.get_context_data(**kwargs)
+        context["results"] = self.process_search_results(raw_results)
+        return self.render_to_response(context)
+
+    def search_address(
+        self,
+        phrase: str,
+        count: int = 16,
+        index_from: int = 0,
+        host: str = "hst-api.wialon.com",
+    ) -> list:
+        with WialonSession() as session:
+            url = f"https://search-maps.wialon.com/{host}/gis_searchintelli?"
+            params = urlencode(
+                {
+                    "phrase": phrase,
+                    "count": count,
+                    "indexFrom": index_from,
+                    "uid": session.uid,
+                }
+            )
+            response: list = requests.post(url + params).json()
+            return [item.get("items") for item in response]
+
+    def process_search_results(self, raw_results: list) -> list:
+        items = [item[0] for item in raw_results]
+        processed_results = []
+        for item in items:
+            processed_results.append(
+                {
+                    "city": item.get("city"),
+                    "country": item.get("country"),
+                    "formatted_path": item.get("formatted_path"),
+                    "house": item.get("house"),
+                    "map": item.get("map"),
+                    "region": item.get("region"),
+                    "street": item.get("street"),
+                    "lat": item.get("y"),
+                    "lon": item.get("x"),
+                }
+            )
+        return processed_results
+
+    def get_search_phrase(self, request: HttpRequest) -> str:
+        user_input = {
+            "address_street": request.POST.get("address_street"),
+            "address_city": request.POST.get("address_city"),
+            "address_state": request.POST.get("address_state"),
+            "address_zip": request.POST.get("address_zip"),
+            "address_country": request.POST.get("address_country"),
         }
-        target_url = url + urlencode(params)
-        response = requests.post(target_url)
-        print(response)
-        return HttpResponse(status=200)
+        return ", ".join([value.strip() for value in user_input.values() if value])
 
 
 class CreditCardUploadView(FormView):

@@ -31,12 +31,9 @@ class WialonSession:
         return
 
     def _deconstruct_login_response(self, login_response: dict) -> None:
-        if not login_response.get("user", {}):
-            self.username = login_response.get("au")
-        else:
-            self.username = login_response.get("user", {}).get("nm")
-            self.uid = login_response.get("user", {}).get("id")
         self.wialon_api.sid = login_response.get("eid", "")
+        self.username = login_response.get("user", {}).get("nm")
+        self.uid = login_response.get("user", {}).get("id")
         self.base_url = login_response.get("base_url", "")
         self.gis_sid = login_response.get("gis_sid", "")
         self.host = login_response.get("host", "")
@@ -51,7 +48,7 @@ class WialonSession:
             raise WialonTokenNotFoundError(token=token, wialon_error=None)
         else:
             login_response: dict[str, Any] = self.wialon_api.token_login(
-                token=self.token, fl=0x1
+                token=self.token, fl=sum([0x1, 0x2, 0x20])
             )
             self._deconstruct_login_response(login_response)
             print(f"Logged into session #{self.wialon_api.sid} as '{self.username}'")
