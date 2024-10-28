@@ -1,12 +1,14 @@
-<div id="address-results" class="mt-2">
+<div id="address-results" class="mt-2 grid grid-cols-1 space-y-2">
     {% for result in results %}
     <button
         class="w-full text-left p-2 hover:bg-gray-300"
-        hx-post="{% url 'fill address' %}"
-        hx-target="closest div"
-        hx-include="[name*='address_']"
-    >{{ result.formatted_path }}</button>
+        hx-get="{{ form_url }}"
+        hx-trigger="click"
+        hx-swap="none"
+        hx-params="not credit_card_number,credit_card_expiry_month,credit_card_expiry_year,credit_card_ccv"
+        hx-vals='{"formatted_path": "{{ result.formatted_path|escapejs }}"}'
+    ><em>{{ result.formatted_path }}</em></button>
     {% empty %}
-    No addresses found...
+    Start typing an address...
     {% endfor %}
 </div>

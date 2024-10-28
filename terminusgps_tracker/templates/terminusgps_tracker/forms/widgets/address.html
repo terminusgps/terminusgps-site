@@ -1,8 +1,9 @@
+{% load terminusgps_tracker_widgets %}
 <div class="relative">
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4" hx-swap="outerHTML" hx-target="#address-results" hx-include="this">
     {% spaceless %}{% for widget in widget.subwidgets %}{% include widget.template_name %}{% endfor %}{% endspaceless %}
     </div>
     <div id="address-results" class="mt-2">
-        {# HTMX results deposited here #}
+        {% if results %}{% address_dropdown %}{% endif %}
     </div>
 </div>

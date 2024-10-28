@@ -38,17 +38,23 @@ class TerminusFormRenderer(TemplatesSetting):
 class CustomerRegistrationForm(forms.Form):
     default_renderer = TerminusFormRenderer
     first_name = forms.CharField(
-        label="First Name", min_length=4, max_length=64, widget=TerminusTextInput()
+        label="First Name",
+        min_length=4,
+        max_length=64,
+        widget=TerminusTextInput({"placeholder": "First"}),
     )
     last_name = forms.CharField(
-        label="Last Name", min_length=4, max_length=64, widget=TerminusTextInput()
+        label="Last Name",
+        min_length=4,
+        max_length=64,
+        widget=TerminusTextInput({"placeholder": "Last"}),
     )
     email = forms.EmailField(
         label="Email Address",
         validators=[validate_wialon_username, validate_django_username],
         min_length=4,
         max_length=512,
-        widget=TerminusEmailInput(),
+        widget=TerminusEmailInput({"placeholder": "email@terminusgps.com"}),
     )
     password1 = forms.CharField(
         label="Password",
@@ -93,14 +99,14 @@ class AssetCustomizationForm(forms.Form):
     asset_name = forms.CharField(
         label="Asset Name",
         validators=[validate_wialon_unit_name],
-        widget=TerminusTextInput(),
+        widget=TerminusTextInput({"placeholder": "My Vehicle"}),
         min_length=4,
         max_length=64,
     )
     imei_number = forms.CharField(
         label="IMEI #",
         validators=[validate_wialon_imei_number],
-        widget=TerminusNumberInput(),
+        widget=TerminusNumberInput({"placeholder": "123412341234"}),
         min_length=15,
         max_length=24,
     )

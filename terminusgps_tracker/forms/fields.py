@@ -16,4 +16,4 @@ class AddressField(forms.MultiValueField):
         data_keys = ["street", "city", "state", "zip", "country", "phone"]
         if data_list:
             return dict(zip(data_keys, data_list))
-        return dict(zip(data_keys, [None] * 6))
+        return dict(zip(data_keys, [None] * len(data_keys)))

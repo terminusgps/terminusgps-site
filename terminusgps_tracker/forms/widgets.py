@@ -14,15 +14,14 @@ class TerminusTextInput(widgets.TextInput):
 
 
 class TerminusSelectInput(widgets.Select):
+    template_name = "terminusgps_tracker/forms/widgets/select.html"
+
     def __init__(self, attrs=None, choices=None) -> None:
         if choices is None:
             choices = {}
         if attrs is None:
             attrs = {}
         super().__init__(attrs, choices)
-
-
-template_name = "terminusgps_tracker/forms/widgets/select.html"
 
 
 class TerminusInput(widgets.Input):
@@ -125,7 +124,7 @@ class AddressWidget(forms.MultiWidget):
         street_attrs.update(
             {
                 "placeholder": "12345 Main St.",
-                "hx-post": reverse_lazy("search address"),
+                "hx-get": reverse_lazy("search address"),
                 "hx-trigger": "keyup changed delay:500ms",
             }
         )
@@ -133,7 +132,7 @@ class AddressWidget(forms.MultiWidget):
         city_attrs.update(
             {
                 "placeholder": "Houston",
-                "hx-post": reverse_lazy("search address"),
+                "hx-get": reverse_lazy("search address"),
                 "hx-trigger": "keyup changed delay:500ms",
             }
         )
@@ -141,7 +140,7 @@ class AddressWidget(forms.MultiWidget):
         state_attrs.update(
             {
                 "placeholder": "Texas",
-                "hx-post": reverse_lazy("search address"),
+                "hx-get": reverse_lazy("search address"),
                 "hx-trigger": "keyup changed delay:500ms",
             }
         )
@@ -149,14 +148,15 @@ class AddressWidget(forms.MultiWidget):
         zip_attrs.update(
             {
                 "placeholder": "12345-1234",
-                "hx-post": reverse_lazy("search address"),
+                "hx-get": reverse_lazy("search address"),
                 "hx-trigger": "keyup changed delay:500ms",
             }
         )
         country_attrs = base_attrs.copy()
         country_attrs.update(
             {
-                "hx-post": reverse_lazy("search address"),
+                "placeholder": "United States",
+                "hx-get": reverse_lazy("search address"),
                 "hx-trigger": "keyup changed delay:500ms",
             }
         )

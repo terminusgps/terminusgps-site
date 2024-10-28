@@ -12,9 +12,14 @@
     <form action="{{ current_url }}" method="post" class="m-4 md:m-6 lg:m-8">
         {% csrf_token %}
         {{ form }}
-        <button class="mb-4 mt-2 min-w-full rounded-md border border-solid border-gray-800 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300" type="submit">
-            Submit
-        </button>
+        <div class="flex justify-evenly gap-2">
+            <button class="grow rounded-md border border-solid border-gray-600 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300" type="button">
+                Back 
+            </button>
+            <button class="grow rounded-md border border-solid border-gray-600 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300" type="submit">
+                Next 
+            </button>
+        </div>
     </form>
 </div>
 {% endblock content %}

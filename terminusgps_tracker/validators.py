@@ -115,9 +115,10 @@ def validate_wialon_password(value: str) -> None:
         raise ValidationError(
             _("Must contain at least one special symbol."), code="invalid"
         )
-    if any([char for char in value if char in forbidden_symbols]):
-        raise ValidationError(
-            _("Cannot contain forbidden '%(char)s' character."),
-            code="invalid",
-            params={"char": ""},
-        )
+    for char in value:
+        if char in forbidden_symbols:
+            raise ValidationError(
+                _("Cannot contain forbidden '%(char)s' character."),
+                code="invalid",
+                params={"char": char},
+            )

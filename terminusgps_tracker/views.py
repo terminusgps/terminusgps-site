@@ -30,16 +30,16 @@ from terminusgps_tracker.wialonapi.items import (
 class SearchAddress(TemplateView):
     template_name = "terminusgps_tracker/forms/widgets/address_dropdown.html"
     content_type = "text/html"
-    http_method_names = ["post"]
+    http_method_names = ["get"]
 
-    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if not request.headers.get("HX-Request"):
             return HttpResponse(status=401)
-
         phrase = self.get_search_phrase(request)
-        raw_results = self.search_address(phrase=phrase)
+        raw_results = self.search_address(phrase)
         context: dict[str, Any] = self.get_context_data(**kwargs)
         context["results"] = self.process_search_results(raw_results)
+        context["form_url"] = reverse("upload credit card")
         return self.render_to_response(context)
 
     def search_address(
@@ -51,6 +51,7 @@ class SearchAddress(TemplateView):
     ) -> list:
         with WialonSession() as session:
             url = f"https://search-maps.wialon.com/{host}/gis_searchintelli?"
+            print(f"Searching Wialon with phrase: '{phrase}'...")
             params = urlencode(
                 {
                     "phrase": phrase,
@@ -83,11 +84,11 @@ class SearchAddress(TemplateView):
 
     def get_search_phrase(self, request: HttpRequest) -> str:
         user_input = {
-            "address_street": request.POST.get("address_street"),
-            "address_city": request.POST.get("address_city"),
-            "address_state": request.POST.get("address_state"),
-            "address_zip": request.POST.get("address_zip"),
-            "address_country": request.POST.get("address_country"),
+            "address_street": request.GET.get("address_street"),
+            "address_city": request.GET.get("address_city"),
+            "address_state": request.GET.get("address_state"),
+            "address_zip": request.GET.get("address_zip"),
+            "address_country": request.GET.get("address_country"),
         }
         return ", ".join([value.strip() for value in user_input.values() if value])
 
@@ -98,9 +99,30 @@ class CreditCardUploadView(FormView):
     template_name = "terminusgps_tracker/forms/credit_card_upload.html"
     extra_context = {"title": "Upload Credit Card"}
 
-    def post(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        print(request.POST)
-        return super().post(request, *args, **kwargs)
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if (
+            request.headers.get("HX-Request")
+            and request.GET.get("formatted_path") is not None
+        ):
+            formatted_path: str | None = request.GET.get("formatted_path")
+            address = self.convert_path_to_address(formatted_path)
+            context = self.get_context_data()
+            return self.render_to_response(context=context)
+        else:
+            context = self.get_context_data()
+            return self.render_to_response(context=context)
+
+    def convert_path_to_address(
+        self, formatted_path: str | None = None
+    ) -> dict[str, str]:
+        if formatted_path is None:
+            raise ValueError("No formatted path provided.")
+        addr_parts = [part.strip() for part in formatted_path.split(",")]
+        addr_keys = ["street", "city", "state_zip", "country"]
+        address = dict(zip(addr_keys, addr_parts))
+        address["state"], address["zip"] = address["state_zip"].split(" ")
+        del address["state_zip"]
+        return address
 
 
 class CustomerRegistrationView(FormView):
