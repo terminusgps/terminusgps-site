@@ -1,10 +1,10 @@
-<div id="address-results" class="mt-2 grid grid-cols-1 space-y-2">
+<div id="address-results" class="mt-2 grid grid-cols-1 space-y-2 border-md">
     {% for result in results %}
     <button
         class="w-full text-left p-2 hover:bg-gray-300"
         hx-get="{{ fill_url }}"
         hx-trigger="click"
-        hx-swap="none"
+        hx-swap="outerHTML"
         hx-params="not credit_card_number,credit_card_expiry_month,credit_card_expiry_year,credit_card_ccv"
         hx-vals='{"formatted_path": "{{ result.formatted_path|escapejs }}"}'
     ><em>{{ result.formatted_path }}</em></button>

@@ -23,19 +23,19 @@ class SearchAddress(TemplateView):
     http_method_names = ["get"]
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not request.headers.get("HX-Request"):
-            return HttpResponse(status=401)
-        phrase = self.get_search_phrase(request)
-        raw_results = self.search_address(phrase)
-        context: dict[str, Any] = self.get_context_data(**kwargs)
-        context["results"] = self.process_search_results(raw_results)
-        context["fill_url"] = reverse("upload credit card")
-        return self.render_to_response(context)
+        if request.headers.get("HX-Request"):
+            phrase = self.get_search_phrase(request)
+            raw_results = self.search_address(phrase)
+            context: dict[str, Any] = self.get_context_data(**kwargs)
+            context["results"] = self.process_search_results(raw_results)
+            context["fill_url"] = reverse("upload payment")
+            return self.render_to_response(context)
+        return super().get(request, *args, **kwargs)
 
     def search_address(
         self,
         phrase: str,
-        count: int = 16,
+        count: int = 6,
         index_from: int = 0,
         host: str = "hst-api.wialon.com",
     ) -> list:
@@ -104,6 +104,18 @@ class CreditCardUploadView(LoginRequiredMixin, FormView):
     success_url = "https://hosting.terminusgps.com/"
     template_name = "terminusgps_tracker/forms/payment.html"
 
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if request.headers.get("HX-Request") and request.GET.get("formatted_path"):
+            formatted_path: str | None = request.GET.get("formatted_path")
+            address_dict = self.convert_path_to_address(formatted_path)
+            form = self.get_form()
+            for key, value in address_dict.items():
+                form.fields["address"].fields
+            return self.render_to_response(context={"form": form})
+        else:
+            context = self.get_context_data()
+            return self.render_to_response(context=context)
+
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
         context["help_url"] = self.help_url
@@ -145,26 +157,18 @@ class CreditCardUploadView(LoginRequiredMixin, FormView):
             card_expiry=f"{form.cleaned_data["credit_card_expiry_month"]}-{form.cleaned_data["credit_card_expiry_year"]}",
         )
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if request.headers.get("HX-Request") and request.GET.get("formatted_path"):
-            formatted_path: str | None = request.GET.get("formatted_path")
-            address = self.convert_path_to_address(formatted_path)
-            self.initial = {
+    def convert_path_to_address(
+        self, formatted_path: str | None = None
+    ) -> dict[str, str | None]:
+        def create_address_dict(address: dict) -> dict[str, str | None]:
+            return {
                 "address_street": address.get("street"),
                 "address_city": address.get("city"),
                 "address_state": address.get("state"),
                 "address_zip": address.get("zip"),
                 "address_country": address.get("country"),
             }
-            context = self.get_context_data()
-            return self.render_to_response(context=context)
-        else:
-            context = self.get_context_data()
-            return self.render_to_response(context=context)
 
-    def convert_path_to_address(
-        self, formatted_path: str | None = None
-    ) -> dict[str, str]:
         if formatted_path is None:
             raise ValueError("No formatted path provided.")
         addr_parts = [part.strip() for part in formatted_path.split(",")]
@@ -172,7 +176,7 @@ class CreditCardUploadView(LoginRequiredMixin, FormView):
         address = dict(zip(addr_keys, addr_parts))
         address["state"], address["zip"] = address["state_zip"].split(" ")
         del address["state_zip"]
-        return address
+        return create_address_dict(address)
 
 
 class AssetUploadView(LoginRequiredMixin, FormView):
