@@ -9,13 +9,12 @@
             <h2 class="text-xl font-light text-terminus-gray-700 dark:text-terminus-gray-200">Upload payment method</h2>
         </div>
     </div>
-    <form action="{{ current_url }}" method="post" class="m-4" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
-        {% csrf_token %}
-        {{ form }}
-        <div class="flex justify-evenly gap-2">
-            <button class="grow rounded-md border border-solid border-gray-600 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300" type="button">Back</button>
-            <button class="grow rounded-md border border-solid border-gray-600 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300" type="submit">Submit</button>
-        </div>
-    </form>
+    <div>
+    </div>
+    <div class="m-4 flex justify-evenly gap-2">
+        <a href="{% url 'upload asset' %}" class="grow rounded-md border border-solid text-center border-gray-600 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300">
+            Back
+        </a>
+    </div>
 </div>
 {% endblock content %}

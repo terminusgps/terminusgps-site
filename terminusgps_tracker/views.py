@@ -1,30 +1,20 @@
+from authorizenet.apicontractsv1 import customerAddressType
 import requests
 from typing import Any
 from urllib.parse import urlencode
 
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
-from wialon.api import WialonError
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-from terminusgps_tracker.models import CustomerProfile
 from terminusgps_tracker.wialonapi.session import WialonSession
 from terminusgps_tracker.wialonapi.utils import get_id_from_iccid
-from terminusgps_tracker.forms import (
-    CustomerRegistrationForm,
-    AssetCustomizationForm,
-    CreditCardUploadForm,
-)
-from terminusgps_tracker.wialonapi.items import (
-    WialonResource,
-    WialonUnit,
-    WialonUnitGroup,
-    WialonUser,
-)
+from terminusgps_tracker.forms import AssetUploadForm, CreditCardUploadForm
+from terminusgps_tracker.wialonapi.items import WialonUnit, WialonUnitGroup
+from terminusgps_tracker.authorizenetapi.profiles import AuthorizenetProfile
 
 
 class SearchAddress(TemplateView):
@@ -39,7 +29,7 @@ class SearchAddress(TemplateView):
         raw_results = self.search_address(phrase)
         context: dict[str, Any] = self.get_context_data(**kwargs)
         context["results"] = self.process_search_results(raw_results)
-        context["form_url"] = reverse("upload credit card")
+        context["fill_url"] = reverse("upload credit card")
         return self.render_to_response(context)
 
     def search_address(
@@ -93,19 +83,79 @@ class SearchAddress(TemplateView):
         return ", ".join([value.strip() for value in user_input.values() if value])
 
 
-class CreditCardUploadView(FormView):
+class CreditCardHelpView(TemplateView):
+    extra_context = {"title": "Help Payment Upload"}
+    http_method_names = ["get"]
+    template_name = "terminusgps_tracker/forms/help_payment.html"
+
+
+class AssetHelpView(TemplateView):
+    extra_context = {"title": "Help Asset Upload"}
+    http_method_names = ["get"]
+    template_name = "terminusgps_tracker/forms/help_asset.html"
+
+
+class CreditCardUploadView(LoginRequiredMixin, FormView):
+    extra_context = {"title": "Upload Payment"}
     form_class = CreditCardUploadForm
+    help_url = reverse_lazy("help payment")
     http_method_names = ["get", "post"]
-    template_name = "terminusgps_tracker/forms/credit_card_upload.html"
-    extra_context = {"title": "Upload Credit Card"}
+    login_url = reverse_lazy("login")
+    success_url = "https://hosting.terminusgps.com/"
+    template_name = "terminusgps_tracker/forms/payment.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["help_url"] = self.help_url
+        return context
+
+    def form_valid(self, form: CreditCardUploadForm) -> HttpResponse:
+        try:
+            self.authorizenet_profile_creation_flow(request=self.request, form=form)
+        except ValueError:
+            form.add_error(
+                "address",
+                ValidationError(
+                    _(
+                        "Whoops! Something went wrong on our end. Please try again later."
+                    )
+                ),
+            )
+        return super().form_valid(form=form)
+
+    def authorizenet_profile_creation_flow(
+        self, request: HttpRequest, form: CreditCardUploadForm
+    ) -> None:
+        if not request.user.is_authenticated:
+            raise ValueError("No authenticated user provided.")
+
+        customer_profile = AuthorizenetProfile(user=request.user)
+        billing_address = customerAddressType(
+            firstName=request.user.first_name,
+            lastName=request.user.last_name,
+            address=form.cleaned_data["address_street"],
+            city=form.cleaned_data["address_city"],
+            state=form.cleaned_data["address_state"],
+            zip=form.cleaned_data["address_zip"],
+            country=form.cleaned_data["address_country"],
+        )
+        customer_profile.create_payment_profile(
+            billing_address=billing_address,
+            card_number=form.cleaned_data["credit_card_number"],
+            card_expiry=f"{form.cleaned_data["credit_card_expiry_month"]}-{form.cleaned_data["credit_card_expiry_year"]}",
+        )
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if (
-            request.headers.get("HX-Request")
-            and request.GET.get("formatted_path") is not None
-        ):
+        if request.headers.get("HX-Request") and request.GET.get("formatted_path"):
             formatted_path: str | None = request.GET.get("formatted_path")
             address = self.convert_path_to_address(formatted_path)
+            self.initial = {
+                "address_street": address.get("street"),
+                "address_city": address.get("city"),
+                "address_state": address.get("state"),
+                "address_zip": address.get("zip"),
+                "address_country": address.get("country"),
+            }
             context = self.get_context_data()
             return self.render_to_response(context=context)
         else:
@@ -125,84 +175,18 @@ class CreditCardUploadView(FormView):
         return address
 
 
-class CustomerRegistrationView(FormView):
-    form_class = CustomerRegistrationForm
-    http_method_names = ["get", "post"]
-    template_name = "terminusgps_tracker/forms/register.html"
-    extra_context = {"title": "Registration"}
-
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not request.session.get("imei_number"):
-            request.session["imei_number"] = request.GET.get("imei", None)
-        return super().get(request, *args, **kwargs)
-
-    def form_valid(self, form: CustomerRegistrationForm) -> HttpResponse:
-        user = get_user_model().objects.create(
-            username=form.cleaned_data["email"],
-            password=form.cleaned_data["password1"],
-            first_name=form.cleaned_data["first_name"],
-            last_name=form.cleaned_data["last_name"],
-        )
-        customer_profile = CustomerProfile.objects.create(user=user)
-        try:
-            self.wialon_registration_flow(form=form, customer_profile=customer_profile)
-        except WialonError:
-            form.add_error(
-                "imei_number",
-                ValidationError(
-                    _(
-                        "Whoops! Something went wrong on our end. Please try again later."
-                    )
-                ),
-            )
-        return redirect(reverse("asset"))
-
-    def wialon_registration_flow(
-        self, form: CustomerRegistrationForm, customer_profile: CustomerProfile
-    ) -> None:
-        with WialonSession() as session:
-            # Retrieved
-            wialon_admin_user = WialonUser(id="27881459", session=session)
-
-            # Created
-            wialon_super_user = WialonUser(
-                owner=wialon_admin_user,
-                name=f"super_{form.cleaned_data["email"]}",
-                password=form.cleaned_data["password1"],
-                session=session,
-            )
-            # Created
-            wialon_end_user = WialonUser(
-                owner=wialon_super_user,
-                name=form.cleaned_data["email"],
-                password=form.cleaned_data["password1"],
-                session=session,
-            )
-            # Created
-            wialon_group = WialonUnitGroup(
-                owner=wialon_super_user,
-                name=f"{form.cleaned_data["email"]}'s Group",
-                session=session,
-            )
-            # Created
-            wialon_resource = WialonResource(
-                owner=wialon_super_user,
-                name=f"{form.cleaned_data["email"]} Resource",
-                session=session,
-            )
-            customer_profile.wialon_super_user_id = wialon_super_user.id
-            customer_profile.wialon_user_id = wialon_end_user.id
-            customer_profile.wialon_group_id = wialon_group.id
-            customer_profile.wialon_resource_id = wialon_resource.id
-            customer_profile.save()
-
-
-class AssetCustomizationView(FormView):
-    form_class = AssetCustomizationForm
+class AssetUploadView(LoginRequiredMixin, FormView):
+    form_class = AssetUploadForm
     http_method_names = ["get", "post"]
     template_name = "terminusgps_tracker/forms/asset.html"
     extra_context = {"title": "Asset Customization"}
     success_url = reverse_lazy("form success")
+    help_url = reverse_lazy("help asset")
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["help_url"] = self.help_url
+        return context
 
     def get_initial(self) -> dict[str, Any]:
         if self.request.session.get("imei_number"):
@@ -214,7 +198,7 @@ class AssetCustomizationView(FormView):
             request.session["imei_number"] = request.GET.get("imei", None)
         return super().get(request, *args, **kwargs)
 
-    def form_valid(self, form: AssetCustomizationForm) -> HttpResponse:
+    def form_valid(self, form: AssetUploadForm) -> HttpResponse:
         form = self.wialon_asset_customization_flow(form)
         if form.is_valid():
             self.request.session.flush()
@@ -223,7 +207,7 @@ class AssetCustomizationView(FormView):
             return self.form_invalid(form=form)
 
     def get_unit(
-        self, form: AssetCustomizationForm, session: WialonSession
+        self, form: AssetUploadForm, session: WialonSession
     ) -> WialonUnit | None:
         unit_id: str | None = get_id_from_iccid(
             iccid=form.cleaned_data["imei_number"], session=session
@@ -231,9 +215,7 @@ class AssetCustomizationView(FormView):
         if unit_id:
             return WialonUnit(id=unit_id, session=session)
 
-    def wialon_asset_customization_flow(
-        self, form: AssetCustomizationForm
-    ) -> AssetCustomizationForm:
+    def wialon_asset_customization_flow(self, form: AssetUploadForm) -> AssetUploadForm:
         with WialonSession() as session:
             unit: WialonUnit | None = self.get_unit(form=form, session=session)
             if unit is not None:

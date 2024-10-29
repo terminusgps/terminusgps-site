@@ -9,21 +9,21 @@
         <script src="{% static 'terminusgps_tracker/js/htmx.min.js' %}" defer></script>
     </head>
     <body class="h-screen bg-gradient-to-tr from-terminus-red-300 via-terminus-red-900 to-terminus-red-300 dark:from-terminus-red-900 dark:via-terminus-red-300 dark:to-terminus-red-900 bg-no-repeat">
-        <nav class="bg-terminus-white py-4 drop-shadow-xl dark:bg-terminus-gray-900 justify-between flex">
+        <nav class="bg-terminus-white py-4 drop-shadow-xl dark:bg-terminus-black justify-between flex">
             <a href="https://hosting.terminusgps.com/" class="flex items-center space-x-1">
                 <img class="size-12" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo">
                 <h2 class="text-xl font-semibold tracking-wide text-terminus-black dark:text-terminus-white">Terminus GPS Monitoring</h2>
             </a>
-            <img class="size-8" src={% if user %}"{{ user.pfp }}"{% else %}"{% static "terminusgps_tracker/static/default_pfp.svg" %}"{% endif %} alt="User profile picture">
+            <img class="size-8" src="{% static 'terminusgps/static/default_pfp.svg' %}" alt="User profile picture">
         </nav>
         <main>
             {% block content %}
             {% endblock content %}
         </main>
-        <footer class="fixed bottom-0 left-0 z-20 w-full p-4 bg-white border-t border-gray-200 shadow md:flex md:items-center md:justify-between md:p-6 dark:bg-gray-800 dark:border-gray-600">
-            <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2024 <a href="https://terminusgps.com/" class="hover:underline">Terminus GPS</a>. All Rights Reserved.
+        <footer class="fixed bottom-0 left-0 z-20 w-full p-4 bg-terminus-white border-t border-gray-200 shadow md:flex md:items-center md:justify-between md:p-6 dark:bg-terminus-black dark:border-gray-600">
+            <span class="text-sm text-gray-500 sm:text-center dark:text-gray-300">© 2024 <a href="https://terminusgps.com/" class="hover:underline">Terminus GPS</a>. All Rights Reserved.
             </span>
-            <ul class="flex flex-wrap items-center mt-3 text-sm font-medium text-gray-500 dark:text-gray-400 sm:mt-0">
+            <ul class="flex flex-wrap items-center mt-3 text-sm font-medium text-gray-400 dark:text-gray-400 sm:mt-0">
                 <li>
                     <a href="https://terminusgps.com/" class="hover:underline me-4 md:me-6">About</a>
                 </li>

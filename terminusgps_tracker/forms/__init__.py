@@ -1,6 +1,6 @@
 from .main import (
     CustomerRegistrationForm,
-    AssetCustomizationForm,
+    AssetUploadForm,
     CreditCardUploadForm,
     TerminusFormRenderer,
 )

@@ -1,0 +1,51 @@
+{% extends "terminusgps/layout.html" %}
+{% load static %}
+{% block content %}
+<div class="m-8 rounded-lg drop-shadow-md border border-solid bg-terminus-gray-100 md:m-6 lg:m-4 dark:bg-terminus-black">
+    <div class="m-2 p-4 flex flex-row items-center">
+        <img class="size-32 rounded-lg flex-none" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo" height="60" width="60">
+        <div class="flex flex-col">
+            <h1 class="text-2xl text-terminus-gray-800 dark:text-terminus-gray-100">Terminus GPS</h1>
+            <h2 class="text-xl font-light text-terminus-gray-700 dark:text-terminus-gray-200">{{ user.username|default:'Terminus GPS User' }}'s Profile</h2>
+        </div>
+    </div>
+    <div class="grid grid-cols-2 gap-4 lg:gap-8 lg:grid-cols-4">
+        <div class="m-6 p-4 flex flex-col space-y-2 text-blue-500 group-hover:bg-gray-300">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">Quick links</h2>
+            <a class="hover:underline hover:text-blue-300" href="{% url 'upload asset' %}">
+                Register a new asset
+            </a>
+            <a class="hover:underline hover:text-blue-300" href="{% url 'upload payment' %}">
+                Upload a payment method
+            </a>
+        </div>
+        <div class="m-6 p-4 flex flex-col space-y-2 text-blue-500">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">Quick links</h2>
+            <a class="hover:underline hover:text-blue-300" href="{% url 'upload asset' %}">
+                Register a new asset
+            </a>
+            <a class="hover:underline hover:text-blue-300" href="{% url 'upload payment' %}">
+                Upload a payment method
+            </a>
+        </div>
+        <div class="m-6 p-4 flex flex-col space-y-2 text-blue-500">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">Quick links</h2>
+            <a class="hover:underline hover:text-blue-300" href="{% url 'upload asset' %}">
+                Register a new asset
+            </a>
+            <a class="hover:underline hover:text-blue-300" href="{% url 'upload payment' %}">
+                Upload a payment method
+            </a>
+        </div>
+        <div class="m-6 p-4 flex flex-col space-y-2 text-blue-500">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">Quick links</h2>
+            <a class="hover:underline hover:text-blue-300" href="{% url 'upload asset' %}">
+                Register a new asset
+            </a>
+            <a class="hover:underline hover:text-blue-300" href="{% url 'upload payment' %}">
+                Upload a payment method
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock content %}

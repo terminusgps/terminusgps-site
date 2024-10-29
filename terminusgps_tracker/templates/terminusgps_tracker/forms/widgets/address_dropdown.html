@@ -2,7 +2,7 @@
     {% for result in results %}
     <button
         class="w-full text-left p-2 hover:bg-gray-300"
-        hx-get="{{ form_url }}"
+        hx-get="{{ fill_url }}"
         hx-trigger="click"
         hx-swap="none"
         hx-params="not credit_card_number,credit_card_expiry_month,credit_card_expiry_year,credit_card_ccv"

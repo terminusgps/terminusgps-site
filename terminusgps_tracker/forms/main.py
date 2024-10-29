@@ -94,7 +94,7 @@ class CustomerRegistrationForm(forms.Form):
         return cleaned_data
 
 
-class AssetCustomizationForm(forms.Form):
+class AssetUploadForm(forms.Form):
     default_renderer = TerminusFormRenderer
     asset_name = forms.CharField(
         label="Asset Name",

@@ -1,0 +1,18 @@
+{% extends "terminusgps/layout.html" %}
+{% load static %}
+{% block content %}
+<div class="m-8 rounded-lg drop-shadow-md border border-solid bg-terminus-gray-100 md:m-6 lg:m-4 dark:bg-terminus-gray-700">
+    <div class="m-2 p-4 flex flex-row items-center">
+        <img class="size-32 rounded-lg flex-none" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo" height="60" width="60">
+        <div class="flex flex-col">
+            <h1 class="text-2xl text-terminus-gray-800 dark:text-terminus-gray-100">Terminus GPS</h1>
+            <h2 class="text-xl font-light text-terminus-gray-700 dark:text-terminus-gray-200">Registration Help</h2>
+        </div>
+    </div>
+    <div class="m-4 flex justify-evenly gap-2">
+        <a class="text-center grow rounded-md border border-solid border-gray-600 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300" href="{% url 'register' %}">
+            Back
+        </a>
+    </div>
+</div>
+{% endblock content %}

@@ -2,7 +2,20 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 
+from . import views
+
 urlpatterns = [
+    path("accounts/login/", views.TerminusLoginView.as_view(), name="login"),
+    path("accounts/logout/", views.TerminusLogoutView.as_view(), name="logout"),
+    path("accounts/profile/", views.TerminusProfileView.as_view(), name="profile"),
+    path(
+        "accounts/register/", views.TerminusRegistrationView.as_view(), name="register"
+    ),
+    path(
+        "accounts/register/help/",
+        views.TerminusRegistrationHelpView.as_view(),
+        name="help register",
+    ),
     path("admin/docs/", include("django.contrib.admindocs.urls")),
     path("admin/", admin.site.urls),
     path("", include("terminusgps_tracker.urls")),
