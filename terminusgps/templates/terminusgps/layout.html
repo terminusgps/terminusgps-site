@@ -10,7 +10,7 @@
     </head>
     <body class="h-screen bg-gradient-to-tr from-terminus-red-300 via-terminus-red-900 to-terminus-red-300 dark:from-terminus-red-900 dark:via-terminus-red-300 dark:to-terminus-red-900 bg-no-repeat">
         <nav class="bg-terminus-white py-4 drop-shadow-xl dark:bg-terminus-black justify-between flex">
-            <a href="https://hosting.terminusgps.com/" class="flex items-center space-x-1">
+            <a href="{% if user %}{% url 'profile' %}{% else %}https://hosting.terminusgps.com/{% endif %}" class="flex items-center space-x-1">
                 <img class="size-12" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo">
                 <h2 class="text-xl font-semibold tracking-wide text-terminus-black dark:text-terminus-white">Terminus GPS Monitoring</h2>
             </a>
@@ -25,16 +25,16 @@
             </span>
             <ul class="flex flex-wrap items-center mt-3 text-sm font-medium text-gray-400 dark:text-gray-400 sm:mt-0">
                 <li>
-                    <a href="https://terminusgps.com/" class="hover:underline me-4 md:me-6">About</a>
+                    <a href="{% url 'about' %}" class="hover:underline me-4 md:me-6">About</a>
                 </li>
                 <li>
-                    <a href="https://terminusgps.com/" class="hover:underline me-4 md:me-6">Privacy Policy</a>
+                    <a href="{% url 'privacy' %}" class="hover:underline me-4 md:me-6">Privacy Policy</a>
                 </li>
                 <li>
-                    <a href="https://terminusgps.com/" class="hover:underline me-4 md:me-6">Licensing</a>
+                    <a href="{% url 'source' %}" class="hover:underline me-4 md:me-6">Source Code</a>
                 </li>
                 <li>
-                    <a href="https://terminusgps.com/" class="hover:underline">Contact</a>
+                    <a href="{% url 'contact' %}" class="hover:underline">Contact</a>
                 </li>
             </ul>
         </footer>

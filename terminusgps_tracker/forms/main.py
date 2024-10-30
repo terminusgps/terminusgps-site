@@ -32,6 +32,8 @@ class TerminusFormRenderer(TemplatesSetting):
     def get_template(self, template_name: str) -> Template | None:
         if settings.DEBUG:
             print(f"Getting template '{template_name}'...")
+        if template_name == "django/forms/errors/list/default.html":
+            template_name = "terminusgps_tracker/forms/errors.html"
         return super().get_template(template_name)
 
 

@@ -15,6 +15,20 @@ from terminusgps_tracker.wialonapi.utils import get_id_from_iccid
 from terminusgps_tracker.forms import AssetUploadForm, CreditCardUploadForm
 from terminusgps_tracker.wialonapi.items import WialonUnit, WialonUnitGroup
 from terminusgps_tracker.authorizenetapi.profiles import AuthorizenetProfile
+from terminusgps_tracker.models import CustomerProfile
+
+
+class FormSuccessView(TemplateView):
+    template_name = "terminusgps_tracker/forms/success.html"
+    content_type = "text/html"
+    http_method_names = ["get"]
+    redirect_url = reverse_lazy("profile")
+    extra_context = {"title": "Success!"}
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["redirect_url"] = self.redirect_url
+        return context
 
 
 class SearchAddress(TemplateView):
@@ -184,7 +198,7 @@ class AssetUploadView(LoginRequiredMixin, FormView):
     http_method_names = ["get", "post"]
     template_name = "terminusgps_tracker/forms/asset.html"
     extra_context = {"title": "Asset Customization"}
-    success_url = reverse_lazy("form success")
+    success_url = reverse_lazy("profile")
     help_url = reverse_lazy("help asset")
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
@@ -192,20 +206,9 @@ class AssetUploadView(LoginRequiredMixin, FormView):
         context["help_url"] = self.help_url
         return context
 
-    def get_initial(self) -> dict[str, Any]:
-        if self.request.session.get("imei_number"):
-            return {"imei_number": self.request.session.get("imei_number")}
-        return super().get_initial()
-
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if request.GET.get("imei") is not None and not request.session["imei_number"]:
-            request.session["imei_number"] = request.GET.get("imei", None)
-        return super().get(request, *args, **kwargs)
-
     def form_valid(self, form: AssetUploadForm) -> HttpResponse:
         form = self.wialon_asset_customization_flow(form)
         if form.is_valid():
-            self.request.session.flush()
             return super().form_valid(form=form)
         else:
             return self.form_invalid(form=form)
@@ -220,18 +223,25 @@ class AssetUploadView(LoginRequiredMixin, FormView):
             return WialonUnit(id=unit_id, session=session)
 
     def wialon_asset_customization_flow(self, form: AssetUploadForm) -> AssetUploadForm:
+        profile = CustomerProfile.objects.get(user=self.request.user)
         with WialonSession() as session:
             unit: WialonUnit | None = self.get_unit(form=form, session=session)
             if unit is not None:
+                user_group = WialonUnitGroup(
+                    id=str(profile.wialon_group_id), session=session
+                )
                 available_units = WialonUnitGroup(id="27890571", session=session)
                 unit.rename(form.cleaned_data["asset_name"])
                 available_units.rm_item(unit)
+                user_group.add_item(unit)
+                profile.completed_registration = True
+                profile.save()
             else:
                 form.add_error(
                     "imei_number",
                     ValidationError(
                         _(
-                            "Whoops! Something went wrong on our end. Please try again later."
+                            "Whoops! We couldn't find the asset, please ensure your IMEI # is correctly input."
                         ),
                         code="invalid",
                     ),

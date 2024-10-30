@@ -5,12 +5,12 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView, RedirectView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from wialon import WialonError
 from django.utils.translation import gettext_lazy as _
 
-from terminusgps.forms import TerminusRegistrationForm
+from terminusgps.forms import TerminusLoginForm, TerminusRegistrationForm
 from terminusgps_tracker.models import CustomerProfile
 from terminusgps_tracker.wialonapi.session import WialonSession
 from terminusgps_tracker.wialonapi.items import (
@@ -20,20 +20,76 @@ from terminusgps_tracker.wialonapi.items import (
 )
 
 
+class TerminusAboutView(TemplateView):
+    template_name = "terminusgps/about.html"
+    content_type = "text/html"
+    extra_context = {"title": "About"}
+    http_method_names = ["get"]
+
+
+class TerminusContactView(TemplateView):
+    template_name = "terminusgps/contact.html"
+    content_type = "text/html"
+    extra_context = {"title": "Contact"}
+    http_method_names = ["get", "post"]
+
+
+class TerminusPrivacyView(TemplateView):
+    template_name = "terminusgps/privacy.html"
+    content_type = "text/html"
+    extra_context = {"title": "Privacy Policy"}
+    http_method_names = ["get"]
+
+
+class TerminusSourceView(RedirectView):
+    http_method_names = ["get"]
+    permanent = True
+    url = "https://github.com/terminus-gps/terminusgps-site"
+
+
 class TerminusLoginView(LoginView):
+    authentication_form = TerminusLoginForm
     content_type = "text/html"
     extra_context = {"title": "Login"}
     http_method_names = ["get", "post"]
     next_page = reverse_lazy("profile")
+    partial_template_name = "terminusgps/partials/_login.html"
     template_name = "terminusgps/login.html"
+
+    def render_to_response(
+        self, context: dict[str, Any], **response_kwargs: Any
+    ) -> HttpResponse:
+        if not self.request.headers.get("HX-Request"):
+            return super().render_to_response(context, **response_kwargs)
+        return self.response_class(
+            request=self.request,
+            template=self.partial_template_name,
+            context=context,
+            using=self.template_engine,
+            **response_kwargs,
+        )
 
 
 class TerminusLogoutView(LogoutView):
     content_type = "text/html"
     extra_context = {"title": "Logout"}
     http_method_names = ["get", "post"]
-    template_name = "terminusgps/logout.html"
+    partial_template_name = "terminusgps/partials/_logout.html"
     success_url = reverse_lazy("login")
+    template_name = "terminusgps/logout.html"
+
+    def render_to_response(
+        self, context: dict[str, Any], **response_kwargs: Any
+    ) -> HttpResponse:
+        if not self.request.headers.get("HX-Request"):
+            return super().render_to_response(context, **response_kwargs)
+        return self.response_class(
+            request=self.request,
+            template=self.partial_template_name,
+            context=context,
+            using=self.template_engine,
+            **response_kwargs,
+        )
 
 
 class TerminusRegistrationHelpView(TemplateView):
@@ -42,6 +98,11 @@ class TerminusRegistrationHelpView(TemplateView):
     http_method_names = ["get"]
     template_name = "terminusgps/help_register.html"
 
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["form"] = TerminusRegistrationForm
+        return context
+
 
 class TerminusRegistrationView(FormView):
     form_class = TerminusRegistrationForm
@@ -49,7 +110,21 @@ class TerminusRegistrationView(FormView):
     extra_context = {"title": "Register"}
     http_method_names = ["get", "post"]
     template_name = "terminusgps/register.html"
+    partial_template_name = "terminusgps/partials/_register.html"
     success_url = reverse_lazy("login")
+
+    def render_to_response(
+        self, context: dict[str, Any], **response_kwargs: Any
+    ) -> HttpResponse:
+        if not self.request.headers.get("HX-Request"):
+            return super().render_to_response(context, **response_kwargs)
+        return self.response_class(
+            request=self.request,
+            template=self.partial_template_name,
+            context=context,
+            using=self.template_engine,
+            **response_kwargs,
+        )
 
     def form_valid(self, form: TerminusRegistrationForm) -> HttpResponse:
         user = get_user_model().objects.create_user(
@@ -105,6 +180,7 @@ class TerminusRegistrationView(FormView):
                 name=f"{form.cleaned_data["username"]} Resource",
                 session=session,
             )
+            wialon_group.grant_access(user=wialon_end_user)
             profile.wialon_super_user_id = wialon_super_user.id
             profile.wialon_user_id = wialon_end_user.id
             profile.wialon_group_id = wialon_group.id
@@ -114,6 +190,7 @@ class TerminusRegistrationView(FormView):
 
 class TerminusProfileView(LoginRequiredMixin, TemplateView):
     template_name = "terminusgps/profile.html"
+    model = CustomerProfile
     login_url = reverse_lazy("login")
     permission_denied_message = "Please login and try again."
     raise_exception = True
@@ -121,4 +198,5 @@ class TerminusProfileView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
         context["title"] = f"{self.request.user.first_name}'s Profile"
+        context["profile"] = CustomerProfile.objects.get(user=self.request.user)
         return context

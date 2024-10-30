@@ -34,7 +34,7 @@ def validate_wialon_imei_number(value: str) -> None:
                 code="invalid",
                 params={"value": value},
             )
-        elif unit_id not in available.items:
+        elif str(unit_id) not in available.items:
             raise ValidationError(
                 _("'%(value)s' has already been registered."),
                 code="invalid",

@@ -17,8 +17,8 @@
             <h3 class="mb-2 text-xl text-center font-light">Currently logged in as <em>{{ user.username|default:'?' }}</em>.</h3>
         </div>
         <div class="flex justify-evenly gap-2">
-            <a class="text-center grow rounded-md border border-solid border-gray-600 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300" href="{{ previous_url|default:'https://hosting.terminusgps.com/' }}">
-                Go back
+            <a class="text-center grow rounded-md border border-solid border-gray-600 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300" href="{% url 'profile' %}">
+                Back
             </a>
             <button class="grow rounded-md border border-solid border-gray-600 bg-red-500 px-4 py-2 text-gray-50 hover:bg-red-300" type="submit">
                 Log out

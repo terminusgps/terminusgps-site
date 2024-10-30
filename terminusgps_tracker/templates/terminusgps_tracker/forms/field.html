@@ -4,6 +4,6 @@
 {% else %}
     {% if field.label %}{% include "terminusgps_tracker/forms/label.html" %}{% endif %}
 {% endif %}
-{% if field.help_text %}<div class="helptext"{% if field.auto_id %} id="{{ field.auto_id }}_helptext"{% endif %}>{{ field.help_text|safe }}</div>{% endif %}
+{% if field.help_text %}<div class="bg-gray-300"{% if field.auto_id %} id="{{ field.auto_id }}_helptext"{% endif %}>{{ field.help_text|safe }}</div>{% endif %}
 {{ field }}{% if field.use_fieldset %}</fieldset>{% endif %}
 {{ field.errors }}

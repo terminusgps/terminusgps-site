@@ -5,6 +5,10 @@ from django.urls import include, path
 from . import views
 
 urlpatterns = [
+    path("privacy/", views.TerminusPrivacyView.as_view(), name="privacy"),
+    path("source/", views.TerminusSourceView.as_view(), name="source"),
+    path("contact/", views.TerminusContactView.as_view(), name="contact"),
+    path("about/", views.TerminusAboutView.as_view(), name="about"),
     path("accounts/login/", views.TerminusLoginView.as_view(), name="login"),
     path("accounts/logout/", views.TerminusLogoutView.as_view(), name="logout"),
     path("accounts/profile/", views.TerminusProfileView.as_view(), name="profile"),

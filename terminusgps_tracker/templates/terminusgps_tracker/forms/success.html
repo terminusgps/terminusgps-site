@@ -4,6 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="Refresh" content="5; url='{{ redirect_url }}'">
         <title>Terminus GPS | {{ title }}</title>
         {% tailwind_css %}
         <script src="{% static 'terminusgps_tracker/js/htmx.min.js' %}" defer></script>
@@ -17,24 +18,36 @@
             <a class="p-4 rounded-full bg-gradient-to-tr from-blue-200 via-green-200 to-red-200"href="{% url 'profile' %}"><span></span></a>
         </nav>
         <main>
-            {% block content %}
-            {% endblock content %}
+            <div class="m-8 rounded-lg drop-shadow-md border border-solid bg-terminus-gray-100 md:m-6 lg:m-4 dark:bg-terminus-black">
+                <div class="m-2 p-4 flex flex-row items-center">
+                    <img class="size-32 rounded-lg flex-none" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo" height="60" width="60">
+                    <div class="flex flex-col">
+                        <h1 class="text-2xl text-terminus-gray-800 dark:text-terminus-gray-100">Terminus GPS</h1>
+                        <h2 class="text-xl font-light text-terminus-gray-700 dark:text-terminus-gray-200">{{ success_msg|default:'Successfully submitted!' }}</h2>
+                    </div>
+                </div>
+                <div class="mb-4 flex flex-col items-center space-y-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="text-green-500 size-36">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <h2 class="text-2xl">All done!</h2>
+                    <h3 class="text-md">Sending you back to your profile...</h3>
+                    <p class="text-sm">If you are not redirected after 5 seconds, please click <a class="text-blue-500 hover:text-blue-300 hover:underline" href="{{ redirect_url }}">here</a>.</p>
+                </div>
+            </div>
         </main>
         <footer class="fixed bottom-0 left-0 z-20 w-full p-4 bg-white border-t border-gray-200 shadow md:flex md:items-center md:justify-between md:p-6 dark:bg-gray-800 dark:border-gray-600">
             <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2024 <a href="https://terminusgps.com/" class="hover:underline">Terminus GPS</a>. All Rights Reserved.
             </span>
             <ul class="flex flex-wrap items-center mt-3 text-sm font-medium text-gray-500 dark:text-gray-400 sm:mt-0">
                 <li>
-                    <a href="https://terminusgps.com/" class="hover:underline me-4 md:me-6">About</a>
+                    <a href="{% url 'about' %}" class="hover:underline me-4 md:me-6">About</a>
                 </li>
                 <li>
-                    <a href="https://terminusgps.com/" class="hover:underline me-4 md:me-6">Privacy Policy</a>
+                    <a href="{% url 'privacy' %}" class="hover:underline me-4 md:me-6">Privacy Policy</a>
                 </li>
                 <li>
-                    <a href="https://terminusgps.com/" class="hover:underline me-4 md:me-6">Licensing</a>
-                </li>
-                <li>
-                    <a href="https://terminusgps.com/" class="hover:underline">Contact</a>
+                    <a href="mailto:support@terminusgps.com" class="hover:underline">Contact</a>
                 </li>
             </ul>
         </footer>

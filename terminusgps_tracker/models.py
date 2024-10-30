@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 
 class CustomerProfile(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
+    completed_registration = models.BooleanField(default=False)
     authorizenet_profile_id = models.PositiveBigIntegerField(
         unique=True, null=True, blank=True, default=None
     )
