@@ -77,5 +77,15 @@
             </div>
         </div>
     </div>
+    <div class="flex p-4 space-x-2">
+        <a href="{{ appstore_link|default:"#" }}">
+            <img href="{{ download_app_store_url|default:"#" }}" src="{% static 'terminusgps_tracker/download_app_store.svg' %}" class="size-48">
+            <span class="sr-only">Download the app from the Apple App Store</span>
+        </a>
+        <a href="{{ playstore_link|default:"#" }}">
+            <img href="{{ download_play_store_url|default:"#" }}" src="{% static 'terminusgps_tracker/download_play_store.svg' %}" class="size-48">
+            <span class="sr-only">Download the app from the Google Play Store</span>
+        </a>
+    </div>
 </div>
 {% endblock content %}

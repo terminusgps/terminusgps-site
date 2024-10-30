@@ -1,9 +1,10 @@
 from typing import Any
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import ValidationError
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import FormView, RedirectView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -190,13 +191,28 @@ class TerminusRegistrationView(FormView):
 
 class TerminusProfileView(LoginRequiredMixin, TemplateView):
     template_name = "terminusgps/profile.html"
-    model = CustomerProfile
     login_url = reverse_lazy("login")
     permission_denied_message = "Please login and try again."
     raise_exception = True
 
+    def get_profile(self, user: AbstractBaseUser) -> CustomerProfile | None:
+        return CustomerProfile.objects.get(user=user) or None
+
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
         context["title"] = f"{self.request.user.first_name}'s Profile"
-        context["profile"] = CustomerProfile.objects.get(user=self.request.user)
+        context["profile"] = self.get_profile(user=self.request.user)
         return context
+
+    def get_items(self, request: HttpRequest) -> HttpResponse:
+        profile = self.get_profile(user=request.user)
+        if not profile or not request.headers.get("HX-Request"):
+            return HttpResponse(status=400)
+
+        with WialonSession() as session:
+            customer_group = WialonUnitGroup(
+                id=str(profile.wialon_group_id), session=session
+            )
+            context = self.get_context_data()
+            context["wialon_items"] = customer_group.items
+            return self.render_to_response(context=context)
