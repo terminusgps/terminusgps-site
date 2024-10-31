@@ -1,21 +1,26 @@
-from authorizenet.apicontractsv1 import customerAddressType
 import requests
 from typing import Any
 from urllib.parse import urlencode
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
-from django.contrib.auth.mixins import LoginRequiredMixin
 
+from terminusgps_tracker.forms import AssetUploadForm, CreditCardUploadForm
+from terminusgps_tracker.models import CustomerProfile
+from terminusgps_tracker.wialonapi.items import WialonUnit, WialonUnitGroup
 from terminusgps_tracker.wialonapi.session import WialonSession
 from terminusgps_tracker.wialonapi.utils import get_id_from_iccid
-from terminusgps_tracker.forms import AssetUploadForm, CreditCardUploadForm
-from terminusgps_tracker.wialonapi.items import WialonUnit, WialonUnitGroup
-from terminusgps_tracker.authorizenetapi.profiles import AuthorizenetProfile
-from terminusgps_tracker.models import CustomerProfile
+
+
+class SubscriptionView(TemplateView, FormView):
+    template_name = "terminusgps_tracker/subscription.html"
+    content_type = "text/html"
+    http_method_names = ["get", "post"]
+    extra_context = {"title": "Subscriptions"}
 
 
 class FormSuccessView(TemplateView):
@@ -155,22 +160,6 @@ class CreditCardUploadView(LoginRequiredMixin, FormView):
         if not request.user.is_authenticated:
             raise ValueError("No authenticated user provided.")
 
-        customer_profile = AuthorizenetProfile(user=request.user)
-        billing_address = customerAddressType(
-            firstName=request.user.first_name,
-            lastName=request.user.last_name,
-            address=form.cleaned_data["address_street"],
-            city=form.cleaned_data["address_city"],
-            state=form.cleaned_data["address_state"],
-            zip=form.cleaned_data["address_zip"],
-            country=form.cleaned_data["address_country"],
-        )
-        customer_profile.create_payment_profile(
-            billing_address=billing_address,
-            card_number=form.cleaned_data["credit_card_number"],
-            card_expiry=f"{form.cleaned_data["credit_card_expiry_month"]}-{form.cleaned_data["credit_card_expiry_year"]}",
-        )
-
     def convert_path_to_address(
         self, formatted_path: str | None = None
     ) -> dict[str, str | None]:
@@ -234,8 +223,6 @@ class AssetUploadView(LoginRequiredMixin, FormView):
                 unit.rename(form.cleaned_data["asset_name"])
                 available_units.rm_item(unit)
                 user_group.add_item(unit)
-                profile.completed_registration = True
-                profile.save()
             else:
                 form.add_error(
                     "imei_number",

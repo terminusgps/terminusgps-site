@@ -10,12 +10,7 @@ class CustomerProfileModelAdmin(admin.ModelAdmin):
         (
             "Authorize.net",
             {
-                "fields": [
-                    "authorizenet_profile_id",
-                    "authorizenet_payment_id",
-                    "authorizenet_address_id",
-                    "authorizenet_subscription_id",
-                ],
+                "fields": ["authorizenet_profile_id", "payments", "addresses"],
                 "classes": ["collapse"],
             },
         ),

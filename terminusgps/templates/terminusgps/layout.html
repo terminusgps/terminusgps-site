@@ -8,7 +8,7 @@
         {% tailwind_css %}
         <script src="{% static 'terminusgps_tracker/js/htmx.min.js' %}" defer></script>
     </head>
-    <body class="h-fit bg-gradient-to-tr from-terminus-red-300 via-terminus-red-900 to-terminus-red-300 dark:from-terminus-red-900 dark:via-terminus-red-300 dark:to-terminus-red-900 bg-no-repeat">
+    <body class="h-screen bg-gradient-to-tr from-terminus-red-300 via-terminus-red-900 to-terminus-red-300 dark:from-terminus-red-900 dark:via-terminus-red-300 dark:to-terminus-red-900 bg-no-repeat">
         <nav class="bg-terminus-white py-4 drop-shadow-xl dark:bg-terminus-black justify-between flex">
             <a href="{% if user %}{% url 'profile' %}{% else %}https://hosting.terminusgps.com/{% endif %}" class="flex items-center space-x-1">
                 <img class="size-12" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo">

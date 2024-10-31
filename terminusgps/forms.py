@@ -1,4 +1,8 @@
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import (
+    AuthenticationForm,
+    PasswordResetForm,
+    UserCreationForm,
+)
 from django import forms
 from django.core.validators import validate_email
 from django.utils.translation import gettext_lazy as _
@@ -9,6 +13,10 @@ from terminusgps_tracker.forms.widgets import (
     TerminusPasswordInput,
     TerminusTextInput,
 )
+
+
+class TerminusPasswordResetForm(PasswordResetForm):
+    default_renderer = TerminusFormRenderer
 
 
 class TerminusRegistrationForm(UserCreationForm):

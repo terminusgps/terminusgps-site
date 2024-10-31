@@ -2,16 +2,20 @@ from typing import Any
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView
 from django.core.exceptions import ValidationError
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import FormView, RedirectView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from wialon import WialonError
 from django.utils.translation import gettext_lazy as _
 
-from terminusgps.forms import TerminusLoginForm, TerminusRegistrationForm
+from terminusgps.forms import (
+    TerminusLoginForm,
+    TerminusRegistrationForm,
+    TerminusPasswordResetForm,
+)
 from terminusgps_tracker.models import CustomerProfile
 from terminusgps_tracker.wialonapi.session import WialonSession
 from terminusgps_tracker.wialonapi.items import (
@@ -21,6 +25,17 @@ from terminusgps_tracker.wialonapi.items import (
 )
 
 
+class TerminusPasswordResetView(PasswordResetView):
+    form_class = TerminusPasswordResetForm
+    content_type = "text/html"
+    email_template_name = "terminusgps/emails/password_reset_email.html"
+    extra_context = {"title": "Password Reset"}
+    extra_email_context = {"subject": "Terminus GPS Password Reset"}
+    http_method_names = ["get", "post"]
+    template_name = "terminusgps/password_reset.html"
+    success_url = reverse_lazy("login")
+
+
 class TerminusAboutView(TemplateView):
     template_name = "terminusgps/about.html"
     content_type = "text/html"
@@ -28,7 +43,7 @@ class TerminusAboutView(TemplateView):
     http_method_names = ["get"]
 
 
-class TerminusContactView(TemplateView):
+class TerminusContactView(TemplateView, FormView):
     template_name = "terminusgps/contact.html"
     content_type = "text/html"
     extra_context = {"title": "Contact"}
@@ -79,19 +94,6 @@ class TerminusLogoutView(LogoutView):
     success_url = reverse_lazy("login")
     template_name = "terminusgps/logout.html"
 
-    def render_to_response(
-        self, context: dict[str, Any], **response_kwargs: Any
-    ) -> HttpResponse:
-        if not self.request.headers.get("HX-Request"):
-            return super().render_to_response(context, **response_kwargs)
-        return self.response_class(
-            request=self.request,
-            template=self.partial_template_name,
-            context=context,
-            using=self.template_engine,
-            **response_kwargs,
-        )
-
 
 class TerminusRegistrationHelpView(TemplateView):
     content_type = "text/html"
@@ -127,14 +129,23 @@ class TerminusRegistrationView(FormView):
             **response_kwargs,
         )
 
-    def form_valid(self, form: TerminusRegistrationForm) -> HttpResponse:
-        user = get_user_model().objects.create_user(
-            first_name=form.cleaned_data["first_name"],
-            last_name=form.cleaned_data["last_name"],
-            username=form.cleaned_data["username"],
-            password=form.cleaned_data["password1"],
+    def get_user(self, form: TerminusRegistrationForm) -> AbstractBaseUser:
+        user, created = get_user_model().objects.get_or_create(
+            username=form.cleaned_data["username"]
         )
-        profile = CustomerProfile.objects.create(user=user)
+        if created:
+            user.set_password(form.cleaned_data["password1"])
+            user.first_name = form.cleaned_data["first_name"]
+            user.last_name = form.cleaned_data["last_name"]
+            user.save()
+        return user
+
+    def get_profile(self, user: AbstractBaseUser) -> CustomerProfile:
+        profile, _ = CustomerProfile.objects.get_or_create(user=user)
+        return profile
+
+    def form_valid(self, form: TerminusRegistrationForm) -> HttpResponse:
+        profile = self.get_profile(user=self.get_user(form=form))
         try:
             self.wialon_registration_flow(form=form, profile=profile)
         except WialonError:
@@ -193,26 +204,28 @@ class TerminusProfileView(LoginRequiredMixin, TemplateView):
     template_name = "terminusgps/profile.html"
     login_url = reverse_lazy("login")
     permission_denied_message = "Please login and try again."
-    raise_exception = True
+    raise_exception = False
 
-    def get_profile(self, user: AbstractBaseUser) -> CustomerProfile | None:
-        return CustomerProfile.objects.get(user=user) or None
+    def get_profile(self) -> CustomerProfile | None:
+        return CustomerProfile.objects.get(user=self.request.user) or None
+
+    def get_title(self) -> str:
+        return f"{self.request.user.username}'s Profile"
+
+    def get_wialon_items(self) -> list:
+        profile = self.get_profile()
+        try:
+            with WialonSession() as session:
+                group = WialonUnitGroup(
+                    id=str(profile.wialon_group_id), session=session
+                )
+                return group.items
+        except WialonError:
+            return [None]
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["title"] = f"{self.request.user.first_name}'s Profile"
-        context["profile"] = self.get_profile(user=self.request.user)
+        context["title"] = self.get_title()
+        context["profile"] = self.get_profile()
+        context["wialon_items"] = self.get_wialon_items()
         return context
-
-    def get_items(self, request: HttpRequest) -> HttpResponse:
-        profile = self.get_profile(user=request.user)
-        if not profile or not request.headers.get("HX-Request"):
-            return HttpResponse(status=400)
-
-        with WialonSession() as session:
-            customer_group = WialonUnitGroup(
-                id=str(profile.wialon_group_id), session=session
-            )
-            context = self.get_context_data()
-            context["wialon_items"] = customer_group.items
-            return self.render_to_response(context=context)

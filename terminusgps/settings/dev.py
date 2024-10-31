@@ -9,12 +9,14 @@ CLIENT_NAME = "Terminus GPS"
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ENCRYPTION_KEY = "HX2qfcgHEtzd0UWUgDFUMKOeTVq5u-6DYASldb057W4="
+FORM_RENDERER = "terminusgps_tracker.forms.TerminusFormRenderer"
 INTERNAL_IPS = ["127.0.0.1", "0.0.0.0"]
 LANGUAGE_CODE = "en-us"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
 MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
 MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
+MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
 SECRET_KEY = "po=qc@jlt0e#h6c8xv96vr%v2l^ib=f9m0!m-@bv0cz25pm$-g"
 SERIALIZATION_MODULES = {"json": "djmoney.serializers"}
 SESSION_COOKIE_HTTPONLY = True
@@ -30,7 +32,7 @@ TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
 USE_I18N = True
 USE_TZ = True
 WIALON_API_TOKEN = os.getenv("WIALON_API_TOKEN")
-FORM_RENDERER = "terminusgps_tracker.forms.TerminusFormRenderer"
+CORS_ORIGIN_ALLOW_ALL = True
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
@@ -52,6 +54,8 @@ INSTALLED_APPS = [
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
     "theme",
     "djmoney",
+    "oauth2_provider",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -64,6 +68,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_browser_reload.middleware.BrowserReloadMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "terminusgps.urls"
