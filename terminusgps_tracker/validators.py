@@ -71,7 +71,7 @@ def validate_wialon_resource_name(value: str) -> None:
 
 def validate_wialon_password(value: str) -> None:
     """Raises `ValidationError` if the value represents an invalid Wialon password."""
-    forbidden_symbols: list[str] = [",", ":", "&", "<", ">"]
+    forbidden_symbols: list[str] = [",", ":", "&", "<", ">", "'"]
     special_symbols: list[str] = [
         "!",
         "@",
@@ -87,7 +87,6 @@ def validate_wialon_password(value: str) -> None:
         "-",
         "_",
         "+",
-        "-",
     ]
     if value.startswith(" ") or value.endswith(" "):
         raise ValidationError(_("Cannot start or end with a space."), code="invalid")

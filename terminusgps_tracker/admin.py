@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from terminusgps_tracker.models import CustomerProfile
+from terminusgps_tracker.models.customer import CustomerProfile
 
 
 class CustomerProfileModelAdmin(admin.ModelAdmin):

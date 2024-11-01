@@ -1,6 +1,7 @@
-from .main import (
-    CustomerRegistrationForm,
+from .forms import (
+    TerminusPasswordResetForm,
+    TerminusRegistrationForm,
+    TerminusLoginForm,
     AssetUploadForm,
     CreditCardUploadForm,
-    TerminusFormRenderer,
 )

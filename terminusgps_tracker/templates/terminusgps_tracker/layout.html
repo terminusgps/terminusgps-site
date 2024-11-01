@@ -8,33 +8,41 @@
         {% tailwind_css %}
         <script src="{% static 'terminusgps_tracker/js/htmx.min.js' %}" defer></script>
     </head>
-    <body class="h-screen bg-gradient-to-tr from-terminus-red-300 via-terminus-red-900 to-terminus-red-300 dark:from-terminus-red-900 dark:via-terminus-red-300 dark:to-terminus-red-900 bg-no-repeat">
-        <nav class="bg-terminus-white py-4 drop-shadow-xl dark:bg-terminus-gray-900 justify-between flex">
-            <a href="{% if user %}{% url 'profile' %}{% else %}https://hosting.terminusgps.com/{% endif %}" class="flex items-center space-x-1">
+    <body class="h-fit bg-gradient-to-tr from-terminus-red-300 via-terminus-red-900 to-terminus-red-300 dark:from-terminus-red-900 dark:via-terminus-red-300 dark:to-terminus-red-900 bg-no-repeat">
+        <nav class="bg-terminus-white py-4 drop-shadow-xl dark:bg-terminus-black justify-between flex">
+            <a href="{% url 'profile' %}" class="flex items-center space-x-1">
                 <img class="size-12" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo">
-                <h2 class="text-xl font-semibold tracking-wide text-terminus-black dark:text-terminus-white">Terminus GPS Monitoring</h2>
+                <h2 class="text-xl font-semibold tracking-wide text-terminus-black dark:text-terminus-white">Terminus GPS Tracker</h2>
             </a>
-            <a class="p-4 rounded-full bg-gradient-to-tr from-blue-200 via-green-200 to-red-200"href="{% url 'profile' %}"><span></span></a>
         </nav>
         <main>
-            {% block content %}
-            {% endblock content %}
+            <div class="m-8 rounded-lg drop-shadow-md border border-solid bg-terminus-gray-100 md:m-6 lg:m-4 dark:bg-terminus-black">
+                <div class="m-2 p-4 flex flex-row items-center">
+                    <img class="size-32 rounded-lg flex-none" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo" height="60" width="60">
+                    <div class="flex flex-col">
+                        <h1 class="text-2xl text-terminus-gray-800 dark:text-terminus-gray-100">{{ title }}</h1>
+                        {% if subtitle %}<h2 class="text-xl font-light text-terminus-gray-700 dark:text-terminus-gray-200">{{ subtitle }}</h2>{% endif %}
+                    </div>
+                </div>
+                {% block content %}
+                {% endblock content %}
+            </div>
         </main>
-        <footer class="fixed bottom-0 left-0 z-20 w-full p-4 bg-white border-t border-gray-200 shadow md:flex md:items-center md:justify-between md:p-6 dark:bg-gray-800 dark:border-gray-600">
-            <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2024 <a href="https://terminusgps.com/" class="hover:underline">Terminus GPS</a>. All Rights Reserved.
+        <footer class="w-full p-4 bg-terminus-white border-t border-gray-200 shadow md:flex md:items-center md:justify-between md:p-6 dark:bg-terminus-black dark:border-gray-600">
+            <span class="text-sm text-gray-500 sm:text-center dark:text-gray-300">© 2024 <a href="https://terminusgps.com/" class="hover:underline">Terminus GPS</a>. All Rights Reserved.
             </span>
-            <ul class="flex flex-wrap items-center mt-3 text-sm font-medium text-gray-500 dark:text-gray-400 sm:mt-0">
+            <ul class="flex flex-wrap items-center mt-3 text-sm font-medium text-gray-400 dark:text-gray-400 sm:mt-0">
                 <li>
-                    <a href="https://terminusgps.com/" class="hover:underline me-4 md:me-6">About</a>
+                    <a href="{% url 'about' %}" class="hover:underline me-4 md:me-6">About</a>
                 </li>
                 <li>
-                    <a href="https://terminusgps.com/" class="hover:underline me-4 md:me-6">Privacy Policy</a>
+                    <a href="{% url 'contact' %}" class="hover:underline me-4 md:me-6">Contact Us</a>
                 </li>
                 <li>
-                    <a href="https://terminusgps.com/" class="hover:underline me-4 md:me-6">Licensing</a>
+                    <a href="{% url 'privacy' %}" class="hover:underline me-4 md:me-6">Privacy Policy</a>
                 </li>
                 <li>
-                    <a href="https://terminusgps.com/" class="hover:underline">Contact</a>
+                    <a href="{% url 'source' %}" class="hover:underline me-4 md:me-6">Source Code</a>
                 </li>
             </ul>
         </footer>
