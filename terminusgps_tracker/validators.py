@@ -1,25 +1,11 @@
 import string
 
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from terminusgps_tracker.wialonapi.session import WialonSession
 from terminusgps_tracker.wialonapi.utils import get_id_from_iccid, is_unique
 from terminusgps_tracker.wialonapi.items import WialonUnitGroup
-
-
-def validate_django_username(value: str) -> None:
-    """Raises `ValidationError` if the value represents an existing Django user name."""
-    User = get_user_model()
-    try:
-        User.objects.get(username__iexact=value.lower())
-    except User.DoesNotExist:
-        return
-    else:
-        raise ValidationError(
-            _("'%(value)s' is taken."), code="invalid", params={"value": value}
-        )
 
 
 def validate_wialon_imei_number(value: str) -> None:
