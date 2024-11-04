@@ -4,16 +4,10 @@ from django.urls import include, path
 
 import oauth2_provider.urls as oauth2_urls
 
-from . import views
-
 urlpatterns = [
-    path("o/", include(oauth2_urls)),
-    path("privacy/", views.TerminusPrivacyView.as_view(), name="privacy"),
-    path("source/", views.TerminusSourceView.as_view(), name="source"),
-    path("contact/", views.TerminusContactView.as_view(), name="contact"),
-    path("about/", views.TerminusAboutView.as_view(), name="about"),
     path("admin/docs/", include("django.contrib.admindocs.urls")),
     path("admin/", admin.site.urls),
+    path("o/", include(oauth2_urls)),
     path("", include("terminusgps_tracker.urls")),
 ]
 

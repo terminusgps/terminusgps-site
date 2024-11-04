@@ -11,7 +11,7 @@ class TerminusSubscription(models.Model):
 
     name = models.CharField(max_length=64)
     profile = models.ForeignKey(
-        "CustomerProfile", on_delete=models.CASCADE, related_name="subscriptions"
+        "TrackerProfile", on_delete=models.CASCADE, related_name="subscriptions"
     )
     tier = models.CharField(
         max_length=2,

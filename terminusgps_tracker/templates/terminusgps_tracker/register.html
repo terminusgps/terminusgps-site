@@ -1,7 +1,7 @@
-{% extends "terminusgps/layout.html" %}
+{% extends "terminusgps_tracker/layout.html" %}
 {% load static %}
 {% block content %}
-<form action="{{ current_url }}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
+<form action="{% url 'tracker register' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
     {% csrf_token %}
     {{ form }}
     <div class="flex justify-evenly gap-2">
@@ -9,6 +9,6 @@
             Register
         </button>
     </div>
-    <p class="mt-2 -mb-2 text-sm text-center">Already have an account? <a class="text-blue-500 hover:text-blue-300 hover:underline" href="{% url 'login' %}">Click here</a> to login.</p>
+    <p class="mt-2 -mb-2 text-sm text-center">Already have an account? <a class="text-blue-500 hover:text-blue-300 hover:underline" href="{% url 'tracker login' %}">Click here</a> to login.</p>
 </form>
 {% endblock content %}

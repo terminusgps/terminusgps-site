@@ -1,7 +1,7 @@
 from .forms import (
-    TerminusPasswordResetForm,
-    TerminusRegistrationForm,
-    TerminusLoginForm,
+    TrackerPasswordResetForm,
+    TrackerRegistrationForm,
+    TrackerAuthenticationForm,
     AssetUploadForm,
     CreditCardUploadForm,
 )

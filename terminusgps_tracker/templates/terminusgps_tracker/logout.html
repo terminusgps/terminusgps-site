@@ -1,4 +1,4 @@
-{% extends "terminusgps/layout.html" %}
+{% extends "terminusgps_tracker/layout.html" %}
 {% load static %}
 {% block content %}
 <form action="{{ current_url }}" method="post" class="m-4" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">

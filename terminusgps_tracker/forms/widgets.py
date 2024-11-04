@@ -8,12 +8,12 @@ from django.urls import reverse_lazy
 from terminusgps_tracker.forms.choices import CountryCode
 
 
-class TerminusTextInput(widgets.TextInput):
+class TrackerTextInput(widgets.TextInput):
     input_type = "text"
     template_name = "terminusgps_tracker/forms/widgets/text.html"
 
 
-class TerminusSelectInput(widgets.Select):
+class TrackerSelectInput(widgets.Select):
     template_name = "terminusgps_tracker/forms/widgets/select.html"
 
     def __init__(self, attrs=None, choices=None) -> None:
@@ -24,26 +24,26 @@ class TerminusSelectInput(widgets.Select):
         super().__init__(attrs, choices)
 
 
-class TerminusInput(widgets.Input):
+class TrackerInput(widgets.Input):
     template_name = "terminusgps_tracker/forms/widgets/input.html"
 
 
-class TerminusPasswordInput(widgets.Input):
+class TrackerPasswordInput(widgets.Input):
     input_type = "password"
     template_name = "terminusgps_tracker/forms/widgets/password.html"
 
 
-class TerminusDateInput(widgets.DateInput):
+class TrackerDateInput(widgets.DateInput):
     input_type = "date"
     template_name = "terminusgps_tracker/forms/widgets/date.html"
 
 
-class TerminusNumberInput(widgets.NumberInput):
+class TrackerNumberInput(widgets.NumberInput):
     input_type = "number"
     template_name = "terminusgps_tracker/forms/widgets/number.html"
 
 
-class TerminusEmailInput(widgets.EmailInput):
+class TrackerEmailInput(widgets.EmailInput):
     input_type = "email"
     template_name = "terminusgps_tracker/forms/widgets/email.html"
 
@@ -60,8 +60,8 @@ class ExpirationDateWidget(forms.MultiWidget):
         year_attrs = attrs.copy()
         year_attrs.update({"placeholder": "YY"})
         widgets = {
-            "month": TerminusTextInput(attrs=month_attrs),
-            "year": TerminusTextInput(attrs=year_attrs),
+            "month": TrackerTextInput(attrs=month_attrs),
+            "year": TrackerTextInput(attrs=year_attrs),
         }
         super().__init__(widgets=widgets, attrs=attrs)
 
@@ -93,9 +93,9 @@ class CreditCardWidget(forms.MultiWidget):
         cc_ccv_attrs = base_attrs.copy()
         cc_ccv_attrs.update({"maxlength": "4", "placeholder": "123"})
         widgets = {
-            "number": TerminusTextInput(attrs=cc_number_attrs),
+            "number": TrackerTextInput(attrs=cc_number_attrs),
             "expiry": ExpirationDateWidget(attrs=cc_expiry_attrs),
-            "ccv": TerminusTextInput(attrs=cc_ccv_attrs),
+            "ccv": TrackerTextInput(attrs=cc_ccv_attrs),
         }
 
         return super().__init__(widgets=widgets, attrs=attrs)
@@ -163,13 +163,13 @@ class AddressWidget(forms.MultiWidget):
         phone_attrs = base_attrs.copy()
         phone_attrs.update({"placeholder": "+12815555555"})
         widgets = {
-            "street": TerminusTextInput(attrs=street_attrs),
-            "city": TerminusTextInput(attrs=city_attrs),
-            "state": TerminusTextInput(attrs=state_attrs),
-            "zip": TerminusNumberInput(attrs=zip_attrs),
-            "country": TerminusSelectInput(
+            "street": TrackerTextInput(attrs=street_attrs),
+            "city": TrackerTextInput(attrs=city_attrs),
+            "state": TrackerTextInput(attrs=state_attrs),
+            "zip": TrackerNumberInput(attrs=zip_attrs),
+            "country": TrackerSelectInput(
                 attrs=country_attrs, choices=CountryCode.choices
             ),
-            "phone": TerminusTextInput(attrs=phone_attrs),
+            "phone": TrackerTextInput(attrs=phone_attrs),
         }
         super().__init__(widgets=widgets, attrs=attrs)

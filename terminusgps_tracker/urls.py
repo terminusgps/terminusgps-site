@@ -3,21 +3,23 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("accounts/profile/", views.TerminusProfileView.as_view(), name="profile"),
+    path("profile/", views.TrackerProfileView.as_view(), name="tracker profile"),
     path(
-        "accounts/password-reset/",
-        views.TerminusPasswordResetView.as_view(),
-        name="password reset",
+        "password-reset/",
+        views.TrackerProfileView.as_view(),
+        name="tracker password reset",
     ),
-    path("accounts/login/", views.TerminusLoginView.as_view(), name="login"),
-    path("accounts/logout/", views.TerminusLogoutView.as_view(), name="logout"),
-    path(
-        "accounts/register/", views.TerminusRegistrationView.as_view(), name="register"
-    ),
+    path("login/", views.TrackerLoginView.as_view(), name="tracker login"),
+    path("logout/", views.TrackerLogoutView.as_view(), name="tracker logout"),
+    path("register/", views.TrackerRegistrationView.as_view(), name="tracker register"),
+    path("about/", views.TrackerAboutView.as_view(), name="tracker about"),
+    path("contact/", views.TrackerContactView.as_view(), name="tracker contact"),
+    path("source/", views.TrackerSourceView.as_view(), name="tracker source"),
+    path("privacy/", views.TrackerPrivacyView.as_view(), name="tracker privacy"),
     path("forms/success/", views.FormSuccessView.as_view(), name="form success"),
     path("upload/asset/", views.AssetUploadView.as_view(), name="upload asset"),
     path(
         "upload/payment/", views.CreditCardUploadView.as_view(), name="upload payment"
     ),
-    path("search_address/", views.SearchAddress.as_view(), name="search address"),
+    path("search_address/", views.SearchAddressView.as_view(), name="search address"),
 ]

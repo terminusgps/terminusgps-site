@@ -9,7 +9,7 @@ CLIENT_NAME = "Terminus GPS"
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ENCRYPTION_KEY = "HX2qfcgHEtzd0UWUgDFUMKOeTVq5u-6DYASldb057W4="
-FORM_RENDERER = "terminusgps_tracker.forms.renderer.TerminusFormRenderer"
+FORM_RENDERER = "terminusgps_tracker.forms.renderer.TrackerFormRenderer"
 INTERNAL_IPS = ["127.0.0.1", "0.0.0.0"]
 LANGUAGE_CODE = "en-us"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -33,6 +33,7 @@ USE_I18N = True
 USE_TZ = True
 WIALON_API_TOKEN = os.getenv("WIALON_API_TOKEN")
 CORS_ORIGIN_ALLOW_ALL = True
+TRACKER_SOURCE_URL = "https://github.com/terminus-gps/terminusgps-site/"
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},

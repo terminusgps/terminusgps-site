@@ -22,9 +22,9 @@ class TodoItem(models.Model):
         return self.label
 
 
-class CustomerTodoList(models.Model):
+class TodoList(models.Model):
     profile = models.OneToOneField(
-        "CustomerProfile", on_delete=models.CASCADE, related_name="todo_list"
+        "TrackerProfile", on_delete=models.CASCADE, related_name="todo_list"
     )
     items = models.ManyToManyField(TodoItem)
 
@@ -32,7 +32,7 @@ class CustomerTodoList(models.Model):
         return f"{self.profile.user.username}'s To-Do List"
 
 
-class CustomerProfile(models.Model):
+class TrackerProfile(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
     authorizenet_profile_id = models.PositiveBigIntegerField(
         unique=True, null=True, blank=True, default=None

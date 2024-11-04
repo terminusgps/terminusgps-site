@@ -3,7 +3,7 @@ from django.template.base import Template
 from django.conf import settings
 
 
-class TerminusFormRenderer(TemplatesSetting):
+class TrackerFormRenderer(TemplatesSetting):
     form_template_name = "terminusgps_tracker/forms/form.html"
     field_template_name = "terminusgps_tracker/forms/field.html"
 

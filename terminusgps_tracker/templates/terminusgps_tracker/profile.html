@@ -3,7 +3,7 @@
 {% block content %}
 <div class="">
     <div class="">
-        <h2 class="text-2xl font-semibold dark:text-terminus-white">Hello, {{ user.first_name }}. <a href="{% url 'logout' %}" class="text-sm text-blue-500 hover:text-blue-300 hover:underline font-normal">Not you?</a></h2>
+        <h2 class="text-2xl font-semibold dark:text-terminus-white">Hello, {{ user.first_name }}. <a href="{% url 'tracker logout' %}" class="text-sm text-blue-500 hover:text-blue-300 hover:underline font-normal">Not you?</a></h2>
         <h3 class="text-lg font-light dark:text-gray-200">It's {% now "l, F jS, Y" %}</h3>
     </div>
     <div class="text-blue-500">

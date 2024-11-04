@@ -1,9 +1,0 @@
-{% extends "terminusgps_tracker/layout.html" %}
-{% load static %}
-{% block content %}
-<div class="m-4 flex justify-evenly gap-2">
-    <a hx-swap="outerHTML" hx-target="#content" class="text-center grow rounded-md border border-solid border-gray-600 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300" href="{% url 'register' %}">
-        Back
-    </a>
-</div>
-{% endblock content %}

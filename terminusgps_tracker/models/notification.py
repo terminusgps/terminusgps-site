@@ -13,7 +13,7 @@ class TerminusNotification(models.Model):
     name = models.CharField(max_length=64)
     body = models.CharField(max_length=256)
     profile = models.ForeignKey(
-        "CustomerProfile", on_delete=models.CASCADE, related_name="notifications"
+        "TrackerProfile", on_delete=models.CASCADE, related_name="notifications"
     )
     method = models.CharField(
         max_length=4, choices=NotificationMethod.choices, default=NotificationMethod.SMS

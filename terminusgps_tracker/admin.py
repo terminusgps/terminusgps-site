@@ -1,9 +1,10 @@
 from django.contrib import admin
 
-from terminusgps_tracker.models.customer import CustomerProfile
+from terminusgps_tracker.models.customer import TrackerProfile
 
 
-class CustomerProfileModelAdmin(admin.ModelAdmin):
+@admin.register(TrackerProfile)
+class TrackerProfileAdmin(admin.ModelAdmin):
     list_display = ["user", "wialon_user_id"]
     fieldsets = [
         (None, {"fields": ["user"]}),
@@ -27,6 +28,3 @@ class CustomerProfileModelAdmin(admin.ModelAdmin):
             },
         ),
     ]
-
-
-admin.site.register(CustomerProfile, CustomerProfileModelAdmin)
