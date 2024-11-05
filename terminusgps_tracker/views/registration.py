@@ -47,6 +47,7 @@ class TrackerLoginView(LoginView):
 class TrackerLogoutView(LogoutView):
     content_type = "text/html"
     http_method_names = ["get", "post"]
+    extra_context = {"title": "Logout"}
     partial_template_name = "terminusgps_tracker/partials/_logout.html"
     success_url = reverse_lazy("tracker login")
     template_name = "terminusgps_tracker/logout.html"

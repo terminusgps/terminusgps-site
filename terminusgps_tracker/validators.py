@@ -107,3 +107,36 @@ def validate_wialon_password(value: str) -> None:
                 code="invalid",
                 params={"char": char},
             )
+
+
+def validate_credit_card_number(value: str) -> None:
+    def calculate_luhn_checksum(card_number: str) -> int:
+        digits = list(map(int, card_number))
+        even_digits = digits[-2::-2]
+        odd_digits = digits[-1::-2]
+        checksum = sum(odd_digits)
+
+        for digit in even_digits:
+            product = digit * 2
+            if product > 9:
+                product -= 9
+            checksum += product
+        return checksum
+
+    card_number = "".join([char for char in value if char.isdigit()])
+
+    if not card_number.isdigit():
+        raise ValidationError(
+            _("'%(value)s' has an invalid character."), params={"value": value}
+        )
+
+    if len(card_number) < 13 or len(card_number) > 19:
+        raise ValidationError(
+            _("'%(value)s' must be between 13-19 digits in length. Got %(len)s."),
+            params={"value": value, "len": len(value)},
+        )
+
+    if calculate_luhn_checksum(card_number) != 0:
+        raise ValidationError(
+            _("'%(value)s' is not a valid credit card number."), params={"value": value}
+        )

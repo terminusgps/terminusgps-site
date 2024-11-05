@@ -1,10 +1,8 @@
 from .profile import (
     TrackerProfileView,
-    TrackerAboutView,
-    TrackerSourceView,
-    TrackerContactView,
-    TrackerPrivacyView,
-    TrackerSubscriptionView,
+    TrackerProfileSubscriptionView,
+    TrackerProfilePaymentsView,
+    TrackerProfileAssetsView,
 )
 from .forms import (
     FormSuccessView,
@@ -13,3 +11,10 @@ from .forms import (
     SearchAddressView,
 )
 from .registration import TrackerLoginView, TrackerLogoutView, TrackerRegistrationView
+from .generic import (
+    TrackerAboutView,
+    TrackerSourceView,
+    TrackerContactView,
+    TrackerPrivacyView,
+    TrackerSubscriptionView,
+)

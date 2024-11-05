@@ -58,7 +58,6 @@ class TrackerRegistrationForm(UserCreationForm):
         max_length=150,
         validators=[validate_email, validate_wialon_username],
         widget=TrackerEmailInput(attrs={"placeholder": "email@terminusgps.com"}),
-        help_text=_("Please provide a valid email address for us to contact you at."),
     )
     password1 = forms.CharField(
         label="Password",
