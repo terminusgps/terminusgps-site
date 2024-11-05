@@ -11,6 +11,7 @@ from django.views.generic import TemplateView, FormView
 
 from terminusgps_tracker.forms import CreditCardUploadForm, AssetUploadForm
 from terminusgps_tracker.models import TrackerProfile
+from terminusgps_tracker.models.customer import TodoItem
 from terminusgps_tracker.wialonapi.items import WialonUnitGroup, WialonUnit
 from terminusgps_tracker.wialonapi.session import WialonSession
 from terminusgps_tracker.wialonapi.utils import get_id_from_iccid
@@ -104,6 +105,14 @@ class CreditCardUploadView(LoginRequiredMixin, FormView):
     success_url = "https://hosting.terminusgps.com/"
     template_name = "terminusgps_tracker/forms/payment.html"
 
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.profile = (
+            TrackerProfile.objects.get(user=self.request.user)
+            if self.request.user.is_authenticated
+            else None
+        )
+
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if request.headers.get("HX-Request") and request.GET.get("formatted_path"):
             formatted_path: str | None = request.GET.get("formatted_path")
@@ -118,7 +127,7 @@ class CreditCardUploadView(LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["help_url"] = self.help_url
+        context["profile"] = self.profile
         return context
 
     def form_valid(self, form: CreditCardUploadForm) -> HttpResponse:
@@ -133,6 +142,14 @@ class CreditCardUploadView(LoginRequiredMixin, FormView):
                     )
                 ),
             )
+
+        if self.profile and form.is_valid():
+            if self.profile.todo_list.items.filter(
+                view__exact="upload payment"
+            ).exists():
+                todo = self.profile.todo_list.items.get(view__exact="upload payment")
+                todo.complete = True
+                todo.save()
         return super().form_valid(form=form)
 
     def authorizenet_profile_creation_flow(
@@ -171,14 +188,25 @@ class AssetUploadView(LoginRequiredMixin, FormView):
     success_url = reverse_lazy("tracker profile")
     help_url = reverse_lazy("help asset")
 
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        if request.user.is_authenticated:
+            try:
+                self.profile = TrackerProfile.objects.get(user=request.user)
+            except TrackerProfile.DoesNotExist:
+                self.profile = None
+
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["help_url"] = self.help_url
         return context
 
     def form_valid(self, form: AssetUploadForm) -> HttpResponse:
         form = self.wialon_asset_customization_flow(form)
         if form.is_valid():
+            if self.profile.todo_list.items.filter(view__exact="upload asset").exists():
+                todo = self.profile.todo_list.items.get(view__exact="upload asset")
+                todo.complete = True
+                todo.save()
             return super().form_valid(form=form)
         else:
             return self.form_invalid(form=form)
@@ -193,12 +221,11 @@ class AssetUploadView(LoginRequiredMixin, FormView):
             return WialonUnit(id=unit_id, session=session)
 
     def wialon_asset_customization_flow(self, form: AssetUploadForm) -> AssetUploadForm:
-        profile = TrackerProfile.objects.get(user=self.request.user)
         with WialonSession() as session:
             unit: WialonUnit | None = self.get_unit(form=form, session=session)
             if unit is not None:
                 user_group = WialonUnitGroup(
-                    id=str(profile.wialon_group_id), session=session
+                    id=str(self.profile.wialon_group_id), session=session
                 )
                 available_units = WialonUnitGroup(id="27890571", session=session)
                 unit.rename(form.cleaned_data["asset_name"])

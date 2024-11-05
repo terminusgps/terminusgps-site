@@ -5,10 +5,10 @@
     {% csrf_token %}
     {{ form }}
     <div class="flex justify-evenly gap-2">
-        <button class="grow rounded-md border border-solid border-gray-600 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300" type="submit">
+        <button class="grow rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-gray-50 hover:from-terminus-red-300 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
             Register
         </button>
     </div>
-    <p class="mt-2 -mb-2 text-sm text-center">Already have an account? <a class="text-blue-500 hover:text-blue-300 hover:underline" href="{% url 'tracker login' %}">Click here</a> to login.</p>
+    <p class="mt-2 -mb-2 text-sm text-center">Already have an account? <a class="text-transparent bg-gradient-to-r from-terminus-red-800 via-terminus-red-400 to-terminus-red-800 dark:from-terminus-red-300 dark:via-terminus-red-100 dark:to-terminus-red-300 bg-clip-text font-semibold underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:decoration-dotted" href="{% url 'tracker login' %}">Click here</a> to login.</p>
 </form>
 {% endblock content %}

@@ -4,14 +4,11 @@
 <form action="{% url 'tracker login' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
     {% csrf_token %}
     {{ form }}
-    <div class="flex justify-between gap-2">
-        <a href="{% url 'tracker password reset' %}" class="initial-0 rounded-md border border-solid border-gray-600 bg-terminus-red-600 px-4 py-2 text-gray-50 hover:bg-terminus-red-300 text-center hover:cursor-pointer">
-            Forgot Password?
-        </a>
-        <button class="grow rounded-md border border-solid border-gray-600 bg-blue-500 px-4 py-2 text-gray-50 hover:bg-blue-300" type="submit">
+    <div class="flex justify-evenly gap-2">
+        <button class="grow rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-gray-50 hover:from-terminus-red-400 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
             Login
         </button>
     </div>
-    <p class="mt-2 -mb-2 text-sm text-center">Don't have an account? <a class="text-blue-500 hover:text-blue-300 hover:underline" href="{% url 'tracker register' %}">Click here</a> to register.</p>
+    <p class="-mb-2 mt-2 text-center text-sm">Don't have an account? <a class="text-transparent bg-gradient-to-r from-terminus-red-800 via-terminus-red-400 to-terminus-red-800 dark:from-terminus-red-300 dark:via-terminus-red-100 dark:to-terminus-red-300 bg-clip-text font-semibold underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:decoration-dotted" href="{% url 'tracker register' %}">Click here</a> to register.</p>
 </form>
 {% endblock content %}

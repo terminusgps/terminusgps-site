@@ -1,3 +1,3 @@
 from .customer import TrackerProfile, TodoList, TodoItem
-from .notification import TerminusNotification
-from .subscription import TerminusSubscription
+from .notification import TrackerNotification
+from .subscription import TrackerSubscription

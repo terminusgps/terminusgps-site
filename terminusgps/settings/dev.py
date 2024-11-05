@@ -34,6 +34,7 @@ USE_TZ = True
 WIALON_API_TOKEN = os.getenv("WIALON_API_TOKEN")
 CORS_ORIGIN_ALLOW_ALL = True
 TRACKER_SOURCE_URL = "https://github.com/terminus-gps/terminusgps-site/"
+TRACKER_MOTD = "Check out the Terminus GPS mobile app!"
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},

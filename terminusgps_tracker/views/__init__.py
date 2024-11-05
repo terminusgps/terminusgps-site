@@ -4,6 +4,7 @@ from .profile import (
     TrackerSourceView,
     TrackerContactView,
     TrackerPrivacyView,
+    TrackerSubscriptionView,
 )
 from .forms import (
     FormSuccessView,
@@ -11,9 +12,4 @@ from .forms import (
     CreditCardUploadView,
     SearchAddressView,
 )
-from .registration import (
-    TrackerLoginView,
-    TrackerLogoutView,
-    TrackerRegistrationView,
-    TrackerPasswordResetView,
-)
+from .registration import TrackerLoginView, TrackerLogoutView, TrackerRegistrationView

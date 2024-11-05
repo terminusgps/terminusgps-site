@@ -2,7 +2,7 @@ from typing import Any
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser
-from django.contrib.auth.views import LoginView, LogoutView, PasswordResetView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.urls import reverse_lazy
@@ -10,12 +10,9 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from wialon import WialonError
 
-from terminusgps_tracker.forms import (
-    TrackerAuthenticationForm,
-    TrackerPasswordResetForm,
-    TrackerRegistrationForm,
-)
+from terminusgps_tracker.forms import TrackerAuthenticationForm, TrackerRegistrationForm
 from terminusgps_tracker.models import TrackerProfile
+from terminusgps_tracker.models.customer import TodoItem, TodoList
 from terminusgps_tracker.wialonapi.session import WialonSession
 from terminusgps_tracker.wialonapi.items import (
     WialonUser,
@@ -148,15 +145,13 @@ class TrackerRegistrationView(FormView):
             profile.wialon_user_id = wialon_end_user.id
             profile.wialon_group_id = wialon_group.id
             profile.wialon_resource_id = wialon_resource.id
+            todos = (
+                TodoItem.objects.create(
+                    label="Register your first asset", view="upload asset"
+                ),
+                TodoItem.objects.create(
+                    label="Upload a payment method", view="upload payment"
+                ),
+            )
+            TodoList.objects.create(profile=profile, items=[todos])
             profile.save()
-
-
-class TrackerPasswordResetView(PasswordResetView):
-    form_class = TrackerPasswordResetForm
-    content_type = "text/html"
-    email_template_name = "terminusgps/emails/password_reset_email.html"
-    extra_context = {"title": "Password Reset"}
-    extra_email_context = {"subject": "Terminus GPS Password Reset"}
-    http_method_names = ["get", "post"]
-    template_name = "terminusgps/password_reset.html"
-    success_url = reverse_lazy("tracker login")

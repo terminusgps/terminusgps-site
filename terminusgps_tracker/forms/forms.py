@@ -78,15 +78,10 @@ class TrackerAuthenticationForm(AuthenticationForm):
         min_length=4,
         max_length=150,
         validators=[validate_email],
-        widget=TrackerEmailInput(),
-        help_text=_("Your Tracker GPS account's email address."),
+        widget=TrackerEmailInput(attrs={"placeholder": "email@terminusgps.com"}),
     )
     password = forms.CharField(
-        label="Password",
-        min_length=8,
-        max_length=32,
-        widget=TrackerPasswordInput(),
-        help_text=_("Your Tracker GPS account's password."),
+        label="Password", min_length=8, max_length=32, widget=TrackerPasswordInput()
     )
 
 

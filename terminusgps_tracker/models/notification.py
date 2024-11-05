@@ -5,13 +5,14 @@ from terminusgps_tracker.wialonapi.session import WialonSession
 from terminusgps_tracker.wialonapi.items import WialonUnitGroup, WialonResource
 
 
-class TerminusNotification(models.Model):
+class TrackerNotification(models.Model):
     class NotificationMethod(models.TextChoices):
         PHONE = "call", _("Notification via phone call")
         SMS = "sms", _("Notification via sms")
 
+    id = models.PositiveIntegerField(primary_key=True)
     name = models.CharField(max_length=64)
-    body = models.CharField(max_length=256)
+    body = models.CharField(max_length=512)
     profile = models.ForeignKey(
         "TrackerProfile", on_delete=models.CASCADE, related_name="notifications"
     )
@@ -19,7 +20,6 @@ class TerminusNotification(models.Model):
         max_length=4, choices=NotificationMethod.choices, default=NotificationMethod.SMS
     )
     phone = models.CharField(max_length=15)
-    wialon_id = models.PositiveIntegerField(null=True, blank=True, default=None)
 
     def __str__(self) -> str:
         return f"'{self.name}' for {self.profile.user.username}"
@@ -33,7 +33,11 @@ class TerminusNotification(models.Model):
         if resource_id and group_id:
             wialon_group = WialonUnitGroup(id=group_id, session=session)
             wialon_resource = WialonResource(id=resource_id, session=session)
-            self.wialon_id = wialon_resource.create_notification(
+            self.id = wialon_resource.create_notification(
                 method=self.method, name=self.name, body=self.body, group=wialon_group
             )
+
+        if self.profile is not None and self.name is None:
+            self.name = f"notification_{self.id}_{self.profile.user.username}"
+
         return super().save(**kwargs)
