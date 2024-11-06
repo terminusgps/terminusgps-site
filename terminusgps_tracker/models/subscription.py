@@ -17,7 +17,7 @@ from authorizenet.apicontrollers import (
     createCustomerShippingAddressController,
 )
 
-from terminusgps_tracker.authorizenetapi.auth import get_merchant_auth
+from terminusgps_tracker.integrations.authorizenet.auth import get_merchant_auth
 
 
 class TrackerSubscription(models.Model):

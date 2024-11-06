@@ -3,9 +3,9 @@ import string
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from terminusgps_tracker.wialonapi.session import WialonSession
-from terminusgps_tracker.wialonapi.utils import get_id_from_iccid, is_unique
-from terminusgps_tracker.wialonapi.items import WialonUnitGroup
+from terminusgps_tracker.integrations.wialon.session import WialonSession
+from terminusgps_tracker.integrations.wialon.utils import get_id_from_iccid, is_unique
+from terminusgps_tracker.integrations.wialon.items import WialonUnitGroup
 
 
 def validate_wialon_imei_number(value: str) -> None:

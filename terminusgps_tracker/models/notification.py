@@ -1,8 +1,11 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from terminusgps_tracker.wialonapi.session import WialonSession
-from terminusgps_tracker.wialonapi.items import WialonUnitGroup, WialonResource
+from terminusgps_tracker.integrations.wialon.session import WialonSession
+from terminusgps_tracker.integrations.wialon.items import (
+    WialonUnitGroup,
+    WialonResource,
+)
 
 
 class TrackerNotification(models.Model):

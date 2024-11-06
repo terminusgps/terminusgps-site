@@ -1,13 +1,12 @@
-<div id="address-results" class="p-8 divide-y-2 mt-2 grid grid-cols-1 space-y-2 border-md">
+<div id="address-results" class="p-8 divide-y-2 mt-2 grid grid-cols-1 space-y-2 border-md"> 
     <h3 class="p-4 text-xl">Address Suggestions</h3>
     {% for result in results %}
     <button
         class="w-full text-left p-2 hover:bg-gray-300"
-        hx-get="{{ fill_url }}"
         hx-trigger="click"
+        hx-get="{{ fill_url }}"
         hx-swap="outerHTML"
         hx-params="not credit_card_number,credit_card_expiry_month,credit_card_expiry_year,credit_card_ccv"
-        hx-vals='{"formatted_path": "{{ result.formatted_path|escapejs }}"}'
     ><em>{{ result.formatted_path }}</em></button>
     {% empty %}
     Start typing an address...

@@ -1,7 +1,7 @@
 from typing import Optional
 
-import terminusgps_tracker.wialonapi.flags as flag
-from terminusgps_tracker.wialonapi.session import WialonSession
+import terminusgps_tracker.integrations.wialon.flags as flag
+from terminusgps_tracker.integrations.wialon.session import WialonSession
 
 
 class WialonBase:

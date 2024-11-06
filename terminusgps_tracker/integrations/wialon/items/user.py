@@ -1,8 +1,8 @@
 from typing import TypedDict
 from urllib.parse import quote_plus
 
-import terminusgps_tracker.wialonapi.flags as flag
-from terminusgps_tracker.wialonapi.items.base import WialonBase
+import terminusgps_tracker.integrations.wialon.flags as flag
+from terminusgps_tracker.integrations.wialon.items.base import WialonBase
 
 DEFAULT_ACCESS_MASK: int = sum(
     [

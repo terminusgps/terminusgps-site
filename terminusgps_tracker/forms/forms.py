@@ -1,42 +1,22 @@
 from django import forms
 from django.core.validators import validate_email
-from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.forms import (
-    AuthenticationForm,
-    UserCreationForm,
-    PasswordResetForm,
-)
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
-from terminusgps_tracker.forms.renderer import TrackerFormRenderer
-from terminusgps_tracker.forms.fields import CreditCardField, AddressField
+from terminusgps_tracker.forms.fields import AddressField, CreditCardField
 from terminusgps_tracker.forms.widgets import (
-    CreditCardWidget,
-    AddressWidget,
+    TrackerDateInput,
     TrackerTextInput,
     TrackerEmailInput,
     TrackerPasswordInput,
     TrackerNumberInput,
 )
+from terminusgps_tracker.forms.multiwidgets import AddressWidget, CreditCardWidget
 from terminusgps_tracker.validators import (
     validate_wialon_imei_number,
     validate_wialon_password,
     validate_wialon_unit_name,
     validate_wialon_username,
 )
-
-
-class TrackerPasswordResetForm(PasswordResetForm):
-    default_renderer = TrackerFormRenderer
-    email = forms.CharField(
-        label="Email Address",
-        min_length=4,
-        max_length=150,
-        validators=[validate_email],
-        widget=TrackerEmailInput(attrs={"placeholder": "email@terminusgps.com"}),
-        help_text=_(
-            "Enter the email address associated with your Tracker GPS account."
-        ),
-    )
 
 
 class TrackerRegistrationForm(UserCreationForm):
@@ -104,24 +84,37 @@ class AssetUploadForm(forms.Form):
 class CreditCardUploadForm(forms.Form):
     credit_card = CreditCardField(
         label="Credit Card",
-        require_all_fields=True,
         fields=(
-            forms.CharField(label="Card Number"),
-            forms.CharField(label="Card Expiration"),
-            forms.CharField(label="Card CCV #"),
+            forms.CharField(label="Number"),
+            forms.CharField(label="Expiration"),
+            forms.CharField(label="CCV"),
         ),
-        widget=CreditCardWidget(),
+        widget=CreditCardWidget(
+            widgets={
+                "number": TrackerTextInput(),
+                "expiry": TrackerTextInput(),
+                "ccv": TrackerTextInput(),
+            }
+        ),
     )
     address = AddressField(
         label="Address",
-        require_all_fields=False,
         fields=(
             forms.CharField(label="Street"),
             forms.CharField(label="City"),
             forms.CharField(label="State"),
             forms.CharField(label="Zip"),
-            forms.ChoiceField(label="Country"),
+            forms.CharField(label="Country"),
             forms.CharField(label="Phone #"),
         ),
-        widget=AddressWidget(),
+        widget=AddressWidget(
+            widgets={
+                "street": TrackerTextInput(),
+                "city": TrackerTextInput(),
+                "state": TrackerTextInput(),
+                "zip": TrackerTextInput(),
+                "country": TrackerTextInput(),
+                "phone": TrackerTextInput(),
+            }
+        ),
     )

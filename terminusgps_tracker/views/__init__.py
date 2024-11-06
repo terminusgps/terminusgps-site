@@ -1,14 +1,9 @@
-from .profile import (
-    TrackerProfileView,
-    TrackerProfileSubscriptionView,
-    TrackerProfilePaymentsView,
-    TrackerProfileAssetsView,
-)
+from .profile import TrackerProfileView
 from .forms import (
-    FormSuccessView,
     AssetUploadView,
     CreditCardUploadView,
-    SearchAddressView,
+    SubscriptionSelectView,
+    AddressDropdownView,
 )
 from .registration import TrackerLoginView, TrackerLogoutView, TrackerRegistrationView
 from .generic import (

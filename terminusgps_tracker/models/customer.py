@@ -3,8 +3,8 @@ from django.contrib.auth import get_user_model
 
 from django.urls import reverse
 
-from terminusgps_tracker.wialonapi.session import WialonSession
-from terminusgps_tracker.wialonapi.items import (
+from terminusgps_tracker.integrations.wialon.session import WialonSession
+from terminusgps_tracker.integrations.wialon.items import (
     WialonUser,
     WialonUnitGroup,
     WialonResource,

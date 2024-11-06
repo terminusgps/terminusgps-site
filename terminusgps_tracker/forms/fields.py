@@ -1,6 +1,9 @@
-from typing import Any, Collection
+from typing import Any, Collection, Sequence
 
 from django import forms
+
+from terminusgps_tracker.forms.multiwidgets import AddressWidget
+from terminusgps_tracker.forms.widgets import TrackerTextInput
 
 
 class CreditCardField(forms.MultiValueField):
@@ -12,8 +15,17 @@ class CreditCardField(forms.MultiValueField):
 
 
 class AddressField(forms.MultiValueField):
+    def __init__(
+        self, fields: Sequence[forms.Field], widget: forms.widgets.MultiWidget, **kwargs
+    ) -> None:
+        self.field_keys = ["street", "city", "state", "zip", "country", "phone"]
+        print(fields)
+        for field in fields:
+            print(field.__dir__())
+        print(widget)
+        return super().__init__(fields=fields, widget=widget, **kwargs)
+
     def compress(self, data_list: Collection) -> dict[str, Any]:
-        data_keys = ["street", "city", "state", "zip", "country", "phone"]
         if data_list:
-            return dict(zip(data_keys, data_list))
-        return dict(zip(data_keys, [None] * len(data_keys)))
+            return dict(zip(self.field_keys, data_list))
+        return dict(zip(self.field_keys, [None] * len(self.field_keys)))

@@ -13,8 +13,8 @@ from wialon import WialonError
 from terminusgps_tracker.forms import TrackerAuthenticationForm, TrackerRegistrationForm
 from terminusgps_tracker.models import TrackerProfile
 from terminusgps_tracker.models.customer import TodoItem, TodoList
-from terminusgps_tracker.wialonapi.session import WialonSession
-from terminusgps_tracker.wialonapi.items import (
+from terminusgps_tracker.integrations.wialon.session import WialonSession
+from terminusgps_tracker.integrations.wialon.items import (
     WialonUser,
     WialonUnitGroup,
     WialonResource,

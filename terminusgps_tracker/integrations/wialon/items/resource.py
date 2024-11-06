@@ -1,8 +1,8 @@
 from typing import TypedDict
 
-import terminusgps_tracker.wialonapi.flags as flag
-from terminusgps_tracker.wialonapi.items.base import WialonBase
-from terminusgps_tracker.wialonapi.items.unit_group import WialonUnitGroup
+import terminusgps_tracker.integrations.wialon.flags as flag
+from terminusgps_tracker.integrations.wialon.items.base import WialonBase
+from terminusgps_tracker.integrations.wialon.items.unit_group import WialonUnitGroup
 
 
 class CreateWialonResourceKwargs(TypedDict):

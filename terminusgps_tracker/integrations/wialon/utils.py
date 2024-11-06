@@ -1,6 +1,6 @@
-import terminusgps_tracker.wialonapi.flags as flag
-from terminusgps_tracker.wialonapi.session import WialonSession
-from terminusgps_tracker.wialonapi.constants import WIALON_ITEM_TYPES
+import terminusgps_tracker.integrations.wialon.flags as flag
+from terminusgps_tracker.integrations.wialon.session import WialonSession
+from terminusgps_tracker.integrations.wialon.constants import WIALON_ITEM_TYPES
 
 
 def get_id_from_iccid(iccid: str, session: WialonSession) -> str | None:

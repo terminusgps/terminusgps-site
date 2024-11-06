@@ -4,7 +4,7 @@ from typing import Optional, Any
 from django.conf import settings
 from wialon import Wialon
 
-from terminusgps_tracker.wialonapi.errors import WialonTokenNotFoundError
+from terminusgps_tracker.integrations.wialon.errors import WialonTokenNotFoundError
 
 
 class WialonSession:
