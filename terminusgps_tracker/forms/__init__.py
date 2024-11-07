@@ -3,4 +3,5 @@ from .forms import (
     TrackerAuthenticationForm,
     CreditCardUploadForm,
     AssetUploadForm,
+    SubscriptionSelectForm,
 )

@@ -126,17 +126,15 @@ def validate_credit_card_number(value: str) -> None:
     card_number = "".join([char for char in value if char.isdigit()])
 
     if not card_number.isdigit():
-        raise ValidationError(
-            _("'%(value)s' has an invalid character."), params={"value": value}
-        )
+        raise ValidationError(_("Card # has an invalid character."))
 
     if len(card_number) < 13 or len(card_number) > 19:
         raise ValidationError(
-            _("'%(value)s' must be between 13-19 digits in length. Got %(len)s."),
-            params={"value": value, "len": len(value)},
+            _("Card # must be between 13-19 digits in length. Got %(len)s."),
+            params={"len": len(value)},
         )
 
-    if calculate_luhn_checksum(card_number) != 0:
+    if calculate_luhn_checksum(card_number) % 10 != 0:
         raise ValidationError(
-            _("'%(value)s' is not a valid credit card number."), params={"value": value}
+            _("Card # is not a valid credit card number."), params={"value": value}
         )

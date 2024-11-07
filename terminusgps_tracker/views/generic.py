@@ -1,6 +1,19 @@
 from django.views.generic import TemplateView, RedirectView
 from django.conf import settings
 
+from terminusgps_tracker.http import HttpRequest, HttpResponse
+
+
+class TrackerValidationView(TemplateView):
+    template_name = "terminusgps_tracker/forms/field.html"
+    content_type = "text/html"
+    http_method_names = ["post"]
+
+    def post(self, request: HttpRequest, **kwargs) -> HttpResponse:
+        if not request.htmx:
+            return HttpResponse(status=401)
+        return self.render_to_response(context=self.get_context_data(), **kwargs)
+
 
 class TrackerSubscriptionView(TemplateView):
     template_name = "terminusgps_tracker/subscriptions.html"

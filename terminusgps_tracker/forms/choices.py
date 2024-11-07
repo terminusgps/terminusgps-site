@@ -2,14 +2,61 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class CountryCode(models.TextChoices):
+class CountryChoice(models.TextChoices):
     US = "USA", _("United States")
-    BR = "Brazil", _("Brazil")
     CA = "Canada", _("Canada")
-    MX = "Mexico", _("Mexico")
+    MX = "Mexico", _("México")
 
 
-class USState(models.TextChoices):
+class CanadaStateChoice(models.TextChoices):
+    AB = "Alberta", _("Alberta")
+    BC = "British Columbia", _("British Columbia")
+    MB = "Manitoba", _("Manitoba")
+    NB = "New Brunswick", _("New Brunswick")
+    NL = "Newfoundland and Labrador", _("Newfoundland & Labrador")
+    NS = "Nova Scotia", _("Nova Scotia")
+    ON = "Ontario", _("Ontario")
+    PE = "Prince Edward Island", _("Prince Edward Island")
+    QC = "Quebec", _("Quebec")
+    SK = "Saskatchewan", _("Saskatchewan")
+
+
+class MexicoStateChoice(models.TextChoices):
+    AG = "Aguascalientes", _("Aguascalientes")
+    BN = "Baja California", _("Baja California")
+    BS = "Baja California Sur", _("Baja California Sur")
+    CP = "Campeche", _("Campeche")
+    CS = "Chiapas", _("Chiapas")
+    CI = "Chihuahua", _("Chihuahua")
+    CH = "Coahuila", _("Coahuila")
+    CL = "Colima", _("Colima")
+    DF = "Mexico City", _("Mexico City")
+    DG = "Durango", _("Durango")
+    GJ = "Guanajuato", _("Guanajuato")
+    GE = "Guerrero", _("Guerrero")
+    HD = "Hidalgo", _("Hidalgo")
+    JA = "Jalisco", _("Jalisco")
+    MX = "Mexico", _("México")
+    MC = "Michoacan", _("Michoacán")
+    MR = "Morelos", _("Morelos")
+    NA = "Nayarit", _("Nayarit")
+    NL = "Nuevo Leon", _("Nuevo León")
+    OA = "Oaxaca", _("Oaxaca")
+    PU = "Puebla", _("Puebla")
+    QE = "Queretaro", _("Querétaro")
+    QI = "Quintana Roo", _("Quintana Roo")
+    SL = "San Luis Potosi", _("San Luis Potosí")
+    SI = "Sinaloa", _("Sinaloa")
+    SO = "Sonora", _("Sonora")
+    TB = "Tabasco", _("Tabasco")
+    TA = "Tamaulipas", _("Tamaulipas")
+    TL = "Tlaxcala", _("Tlaxcala")
+    VC = "Veracruz", _("Veracruz")
+    YU = "Yucatan", _("Yucatán")
+    ZA = "Zacatecas", _("Zacatecas")
+
+
+class USStateChoice(models.TextChoices):
     AL = "Alabama", _("Alabama")
     AK = "Alaska", _("Alaska")
     AZ = "Arizona", _("Arizona")

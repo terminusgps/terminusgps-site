@@ -5,7 +5,7 @@
 {% for field, errors in fields %}
   {{ errors }}
 <div {% if field.css_classes %}class="{{ classes }}"{% else %}class="mb-4"{% endif %}>
-    {% if field.label %}{{ field.label_tag }}{% endif %}
+    {% if field.label %}{% include 'terminusgps_tracker/forms/label.html' %}{% endif %}
     {{ field }}
     {% if field.help_text %}
       <p class="mt-2 text-center rounded-md font-light bg-gray-400 p-4"{% if field.auto_id %} id="{{ field.auto_id }}_helptext"{% endif %}>{{ field.help_text|safe }}</p>
