@@ -5,11 +5,10 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
-CLIENT_NAME = "Terminus GPS"
+CORS_ORIGIN_ALLOW_ALL = True
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ENCRYPTION_KEY = "HX2qfcgHEtzd0UWUgDFUMKOeTVq5u-6DYASldb057W4="
-FORM_RENDERER = "terminusgps_tracker.forms.renderer.TrackerFormRenderer"
 INTERNAL_IPS = ["127.0.0.1", "0.0.0.0"]
 LANGUAGE_CODE = "en-us"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -25,6 +24,8 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "static/"
 TAILWIND_APP_NAME = "theme"
 TIME_ZONE = "America/Chicago"
+TRACKER_MOTD = ""
+TRACKER_SOURCE_URL = ""
 TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER")
 TWILIO_MESSAGING_SID = os.getenv("TWILIO_MESSAGING_SID")
 TWILIO_SID = os.getenv("TWILIO_SID")
@@ -32,9 +33,61 @@ TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
 USE_I18N = True
 USE_TZ = True
 WIALON_API_TOKEN = os.getenv("WIALON_API_TOKEN")
-CORS_ORIGIN_ALLOW_ALL = True
-TRACKER_SOURCE_URL = "https://github.com/terminus-gps/terminusgps-site/"
-TRACKER_MOTD = "Check out the Terminus GPS mobile app!"
+
+TRACKER_PROFILE = {
+    "DISPLAY_NAME": "Terminus GPS",
+    "EMAIL": {"SUPPORT": "support@terminusgps.com", "SALES": "sales@terminusgps.com"},
+    "GITHUB": "https://github.com/terminus-gps/terminusgps-site/",
+    "MOTD": "Check out the Terminus GPS mobile app!",
+    "LEGAL_NAME": "Terminus GPS, LLC",
+    "PHONE": {"OFFICE": "+17139045262", "SALES": ""},
+    "ADDRESS": {
+        "STREET": "17240 Huffmeister Road, Suite 103",
+        "CITY": "Cypress",
+        "STATE": "Texas",
+        "ZIP": "77429",
+        "COUNTRY": "USA",
+    },
+    "SOCIALS": {
+        "FACEBOOK": {
+            "display_name": "Terminus GPS",
+            "profile_link": "",
+            "username": "Terminus GPS",
+        },
+        "YOUTUBE": {
+            "display_name": "Terminus GPS",
+            "profile_link": "",
+            "username": "Terminus GPS",
+        },
+        "INSTAGRAM": {
+            "display_name": "Terminus GPS",
+            "profile_link": "",
+            "username": "Terminus GPS",
+        },
+        "TIKTOK": {
+            "display_name": "Terminus GPS",
+            "profile_link": "",
+            "username": "Terminus GPS",
+        },
+        "TWITTER": {
+            "display_name": "Terminus GPS",
+            "profile_link": "",
+            "username": "Terminus GPS",
+        },
+        "REDDIT": {
+            "display_name": "Terminus GPS",
+            "profile_link": "",
+            "username": "Terminus GPS",
+        },
+    },
+}
+
+QUICKBOOKS = {
+    "CLIENT_ID": "",
+    "CLIENT_SECRET": "",
+    "REDIRECT_URI": "",
+    "ENVIRONMENT": "sandbox",
+}
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},

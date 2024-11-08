@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.views import LoginView, LogoutView
@@ -27,28 +25,13 @@ class TrackerLoginView(LoginView):
     extra_context = {"title": "Login"}
     http_method_names = ["get", "post"]
     next_page = reverse_lazy("tracker profile")
-    partial_template_name = "terminusgps_tracker/partials/_login.html"
     template_name = "terminusgps_tracker/login.html"
-
-    def render_to_response(
-        self, context: dict[str, Any], **response_kwargs: Any
-    ) -> HttpResponse:
-        if not self.request.headers.get("HX-Request"):
-            return super().render_to_response(context, **response_kwargs)
-        return self.response_class(
-            request=self.request,
-            template=self.partial_template_name,
-            context=context,
-            using=self.template_engine,
-            **response_kwargs,
-        )
 
 
 class TrackerLogoutView(LogoutView):
     content_type = "text/html"
-    http_method_names = ["get", "post"]
     extra_context = {"title": "Logout"}
-    partial_template_name = "terminusgps_tracker/partials/_logout.html"
+    http_method_names = ["get", "post"]
     success_url = reverse_lazy("tracker login")
     template_name = "terminusgps_tracker/logout.html"
 
@@ -62,21 +45,7 @@ class TrackerRegistrationView(FormView):
     }
     http_method_names = ["get", "post"]
     template_name = "terminusgps_tracker/register.html"
-    partial_template_name = "terminusgps_tracker/partials/_register.html"
     success_url = reverse_lazy("tracker login")
-
-    def render_to_response(
-        self, context: dict[str, Any], **response_kwargs: Any
-    ) -> HttpResponse:
-        if self.request.headers.get("HX-Request"):
-            return self.response_class(
-                request=self.request,
-                template=self.partial_template_name,
-                context=context,
-                using=self.template_engine,
-                **response_kwargs,
-            )
-        return super().render_to_response(context, **response_kwargs)
 
     def get_user(self, form: TrackerRegistrationForm) -> AbstractBaseUser:
         user, created = get_user_model().objects.get_or_create(
@@ -152,6 +121,9 @@ class TrackerRegistrationView(FormView):
                 ),
                 TodoItem.objects.create(
                     label="Upload a payment method", view="upload payment"
+                ),
+                TodoItem.objects.create(
+                    label="Select a subscription", view="select subscription"
                 ),
             )
             TodoList.objects.create(profile=profile, items=[todos])

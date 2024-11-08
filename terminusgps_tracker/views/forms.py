@@ -6,34 +6,13 @@ from urllib.parse import urlencode
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, TemplateView
+from authorizenet.apicontractsv1 import customerAddressType, paymentType, creditCardType
 
-from terminusgps_tracker.forms import (
-    CreditCardUploadForm,
-    AssetUploadForm,
-    SubscriptionSelectForm,
-)
+from terminusgps_tracker.forms import CreditCardUploadForm, AssetUploadForm
 from terminusgps_tracker.http import HttpRequest, HttpResponse
 from terminusgps_tracker.integrations.wialon.session import WialonSession
 from terminusgps_tracker.models import TrackerProfile
-
-
-class SubscriptionSelectView(LoginRequiredMixin, FormView):
-    template_name = "terminusgps_tracker/forms/subscription_select.html"
-    http_method_names = ["get", "post"]
-    form_class = SubscriptionSelectForm
-    extra_context = {"title": "Your Subscription"}
-    success_url = reverse_lazy("tracker profile")
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        self.profile = TrackerProfile.objects.get(user=request.user)
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["profile"] = self.profile
-        context["default_subscription"] = self.profile.subscriptions.all()
-        context["subtitle"] = f"You're currently on our {self.profile.user} plan!"
-        return context
+from terminusgps_tracker.models.subscription import TrackerPaymentMethod
 
 
 class AddressDropdownView(TemplateView):
@@ -120,11 +99,42 @@ class AddressDropdownView(TemplateView):
         return [item.get("items")[0] for item in response]
 
 
-class CreditCardUploadView(FormView):
+class CreditCardUploadView(LoginRequiredMixin, FormView):
     form_class = CreditCardUploadForm
     http_method_names = ["get", "post"]
     extra_context = {"title": "Upload Credit Card"}
     template_name = "terminusgps_tracker/forms/credit_card.html"
+    login_url = reverse_lazy("tracker login")
+
+    def setup(self, *args, **kwargs) -> None:
+        super().setup(*args, **kwargs)
+        self.profile = TrackerProfile.objects.get(user=self.request.user) or None
+
+    def form_valid(self, form: CreditCardUploadForm) -> HttpResponse:
+        payment = paymentType(
+            creditCard=creditCardType(
+                cardNumber=form.cleaned_data["credit_card_number"],
+                expirationDate=form.cleaned_data["credit_card_expiry_month"]
+                + "-"
+                + form.cleaned_data["credit_card_expiry_year"],
+                cardCode=form.cleaned_data["credit_card_ccv"],
+            )
+        )
+        if self.profile:
+            payment_method = TrackerPaymentMethod.objects.create(profile=self.profile)
+            billing_address = customerAddressType(
+                firstName=self.profile.first_name,
+                lastName=self.profile.last_name,
+                address=form.cleaned_data["address_street"],
+                city=form.cleaned_data["address_city"],
+                state=form.cleaned_data["address_state"],
+                zip=form.cleaned_data["address_zip"],
+                country=form.cleaned_data["address_country"],
+            )
+            payment_method.save(
+                payment=payment, billing_address=billing_address, default=True
+            )
+        return super().form_valid(form=form)
 
 
 class AssetUploadView(FormView):

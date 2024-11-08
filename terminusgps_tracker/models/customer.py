@@ -78,3 +78,7 @@ class TrackerProfile(models.Model):
     @property
     def merchantCustomerId(self) -> str:
         return str(self.user.pk)
+
+    @property
+    def customerProfileId(self) -> str:
+        return str(self.authorizenet_profile_id)

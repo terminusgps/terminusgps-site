@@ -3,50 +3,110 @@ from typing import Any
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView
+from django.views.generic import FormView, TemplateView
 
+from terminusgps_tracker.forms.forms import SubscriptionSelectForm
 from terminusgps_tracker.models.customer import TrackerProfile
-from terminusgps_tracker.integrations.wialon.session import WialonSession
-from terminusgps_tracker.integrations.wialon.items import WialonUnitGroup
-from terminusgps_tracker.http import HttpRequest, HttpResponse
+from terminusgps_tracker.http import HttpRequest
+
+
+class TrackerProfilePaymentMethodsView(LoginRequiredMixin, TemplateView):
+    template_name = "terminusgps_tracker/forms/profile_payments.html"
+    extra_context = {
+        "subtitle": "Select a payment method",
+        "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
+    }
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+    success_url = reverse_lazy("tracker profile")
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        try:
+            self.profile = TrackerProfile.objects.get(user=self.request.user)
+        except TrackerProfile.DoesNotExist:
+            self.profile = None
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["title"] = f"{self.profile.user.first_name}'s Payment Methods"
+        return context
+
+
+class TrackerProfileAssetsView(LoginRequiredMixin, TemplateView):
+    template_name = "terminusgps_tracker/forms/profile_assets.html"
+    extra_context = {
+        "subtitle": "Your Terminus GPS assets",
+        "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
+    }
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+    success_url = reverse_lazy("tracker profile")
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        try:
+            self.profile = TrackerProfile.objects.get(user=self.request.user)
+        except TrackerProfile.DoesNotExist:
+            self.profile = None
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["title"] = f"{self.profile.user.first_name}'s Assets"
+        return context
+
+
+class TrackerProfileSubscriptionView(LoginRequiredMixin, FormView):
+    form_class = SubscriptionSelectForm
+    template_name = "terminusgps_tracker/forms/profile_subscription.html"
+    extra_context = {
+        "subtitle": "Your Terminus GPS subscription",
+        "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
+    }
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+    success_url = reverse_lazy("tracker profile")
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        try:
+            self.profile = TrackerProfile.objects.get(user=self.request.user)
+        except TrackerProfile.DoesNotExist:
+            self.profile = None
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["title"] = f"{self.profile.user.first_name}'s Subscription"
+        return context
 
 
 class TrackerProfileView(LoginRequiredMixin, TemplateView):
     template_name = "terminusgps_tracker/profile.html"
-    extra_context = {"subtitle": settings.TRACKER_MOTD}
+    extra_context = {
+        "subtitle": settings.TRACKER_PROFILE["MOTD"],
+        "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
+    }
     login_url = reverse_lazy("tracker login")
     permission_denied_message = "Please login and try again."
     raise_exception = False
     http_method_names = ["get", "post"]
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if request.htmx:
-            with WialonSession() as session:
-                return self.render_to_response(
-                    context=self.get_context_data(session=session), **kwargs
-                )
-        return super().get(request, *args, **kwargs)
-
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
-        if (
-            self.request.user.is_authenticated
-            and TrackerProfile.objects.filter(user=self.request.user).exists()
-        ):
+        try:
             self.profile = TrackerProfile.objects.get(user=self.request.user)
-        else:
+        except TrackerProfile.DoesNotExist:
             self.profile = None
 
-    def get_context_data(
-        self, session: WialonSession | None = None, **kwargs
-    ) -> dict[str, Any]:
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
         context["profile"] = self.profile
         if self.profile:
             context["title"] = f"{self.profile.user.first_name}'s Profile"
-            if session:
-                unit_group = WialonUnitGroup(
-                    id=str(self.profile.wialon_group_id), session=session
-                )
-                context["wialon_units"] = unit_group.items
         return context

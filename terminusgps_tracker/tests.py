@@ -2,8 +2,8 @@ from uuid import uuid4
 
 from django.test import TestCase
 
-from terminusgps_tracker.wialonapi.session import WialonSession
-from terminusgps_tracker.wialonapi.items import (
+from terminusgps_tracker.integrations.wialon.session import WialonSession
+from terminusgps_tracker.integrations.wialon.items import (
     WialonResource,
     WialonUser,
     WialonUnit,

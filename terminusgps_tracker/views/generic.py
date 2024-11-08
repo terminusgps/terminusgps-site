@@ -1,19 +1,6 @@
 from django.views.generic import TemplateView, RedirectView
 from django.conf import settings
 
-from terminusgps_tracker.http import HttpRequest, HttpResponse
-
-
-class TrackerValidationView(TemplateView):
-    template_name = "terminusgps_tracker/forms/field.html"
-    content_type = "text/html"
-    http_method_names = ["post"]
-
-    def post(self, request: HttpRequest, **kwargs) -> HttpResponse:
-        if not request.htmx:
-            return HttpResponse(status=401)
-        return self.render_to_response(context=self.get_context_data(), **kwargs)
-
 
 class TrackerSubscriptionView(TemplateView):
     template_name = "terminusgps_tracker/subscriptions.html"
@@ -25,7 +12,7 @@ class TrackerSubscriptionView(TemplateView):
 class TrackerAboutView(TemplateView):
     template_name = "terminusgps_tracker/about.html"
     content_type = "text/html"
-    extra_context = {"title": "About", "subtitle": "Why are we even doing this?"}
+    extra_context = {"title": "About", "subtitle": "We know where ours are... do you?"}
     http_method_names = ["get"]
 
 
@@ -46,4 +33,4 @@ class TrackerPrivacyView(TemplateView):
 class TrackerSourceView(RedirectView):
     http_method_names = ["get"]
     permanent = True
-    url = settings.TRACKER_SOURCE_URL
+    url = settings.TRACKER_PROFILE["GITHUB"]

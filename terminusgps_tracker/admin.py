@@ -1,6 +1,12 @@
 from django.contrib import admin
 
 from terminusgps_tracker.models.customer import TrackerProfile, TodoItem, TodoList
+from terminusgps_tracker.models.subscription import TrackerSubscription
+
+
+@admin.register(TrackerSubscription)
+class TrackerSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ["profile__user", "tier"]
 
 
 @admin.register(TodoItem)

@@ -13,8 +13,8 @@ urlpatterns = [
         views.TrackerSubscriptionView.as_view(),
         name="tracker subscriptions",
     ),
-    path("forms/login/", views.TrackerLoginView.as_view(), name="tracker login"),
-    path("forms/logout/", views.TrackerLogoutView.as_view(), name="tracker logout"),
+    path("login/", views.TrackerLoginView.as_view(), name="tracker login"),
+    path("logout/", views.TrackerLogoutView.as_view(), name="tracker logout"),
     path(
         "forms/register/",
         views.TrackerRegistrationView.as_view(),
@@ -27,9 +27,18 @@ urlpatterns = [
     ),
     path("forms/asset/", views.AssetUploadView.as_view(), name="upload asset"),
     path(
-        "forms/subscription/",
-        views.SubscriptionSelectView.as_view(),
-        name="select subscription",
+        "profile/assets/",
+        views.TrackerProfileAssetsView.as_view(),
+        name="profile assets",
     ),
-    path("search-address/", views.AddressDropdownView.as_view(), name="search address"),
+    path(
+        "profile/payments/",
+        views.TrackerProfilePaymentMethodsView.as_view(),
+        name="profile payments",
+    ),
+    path(
+        "profile/subscription/",
+        views.TrackerProfileSubscriptionView.as_view(),
+        name="profile subscription",
+    ),
 ]

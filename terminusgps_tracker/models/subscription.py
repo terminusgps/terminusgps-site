@@ -1,16 +1,23 @@
+from decimal import Decimal
+
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from djmoney.models.fields import MoneyField
-from djmoney.money import Money
+from djmoney.money import Money, Currency
 
 from authorizenet.apicontractsv1 import (
+    ARBSubscriptionUnitEnum,
     createCustomerPaymentProfileRequest,
     createCustomerPaymentProfileResponse,
     createCustomerShippingAddressRequest,
     createCustomerShippingAddressResponse,
     customerAddressType,
+    customerProfileType,
     paymentProfile,
+    paymentScheduleType,
+    paymentScheduleTypeInterval,
     paymentType,
+    subscriptionPaymentType,
 )
 from authorizenet.apicontrollers import (
     createCustomerPaymentProfileController,
@@ -26,36 +33,59 @@ class TrackerSubscription(models.Model):
         SILVER = "Ag", _("Silver")
         GOLD = "Au", _("Gold")
 
-    name = models.CharField(max_length=64)
     profile = models.ForeignKey(
-        "TrackerProfile", on_delete=models.CASCADE, related_name="subscriptions"
+        "TrackerProfile", on_delete=models.CASCADE, related_name="subscription"
     )
     tier = models.CharField(
         max_length=2, choices=SubscriptionTier.choices, default=SubscriptionTier.COPPER
     )
-    amount = MoneyField(
-        default=Money("0.00", "USD"),
-        max_digits=15,
-        decimal_places=2,
-        default_currency="USD",
-    )
     months = models.PositiveIntegerField(default=12)
+    start_date = models.DateField(default=timezone.now)
 
     def __str__(self) -> str:
-        return self.name
+        return f"{self.profile.user.first_name}'s {self.tier} Subscription"
 
-    def save(self, **kwargs) -> None:
-        match self.tier:
-            case self.SubscriptionTier.COPPER:
-                rate = Money("19.99")
-            case self.SubscriptionTier.SILVER:
-                rate = Money("29.99")
-            case self.SubscriptionTier.GOLD:
-                rate = Money("39.99")
-            case _:
-                raise ValueError(f"Invalid tier: {self.tier}")
-        self.amount = rate * self.months
-        super().save(**kwargs)
+    def __len__(self) -> int:
+        return self.months
+
+    @classmethod
+    def get_rate(cls, tier: SubscriptionTier) -> Money:
+        match tier:
+            case cls.SubscriptionTier.COPPER:
+                return Money(Decimal("19.99"), Currency("USD"))
+            case cls.SubscriptionTier.SILVER:
+                return Money(Decimal("29.99"), Currency("USD"))
+            case cls.SubscriptionTier.GOLD:
+                return Money(Decimal("39.99"), Currency("USD"))
+
+    @property
+    def paymentSchedule(self) -> paymentScheduleType:
+        return paymentScheduleType(
+            interval=paymentScheduleTypeInterval(
+                length=str(1), unit=ARBSubscriptionUnitEnum.months
+            ),
+            startDate=f"{self.start_date:%Y-%m-%d}",
+            totalOccurrences=str(len(self)),
+        )
+
+    @property
+    def amount(self) -> Money:
+        rate = TrackerSubscription.get_rate(tier=self.tier)
+        return rate * Decimal(str(self.months))
+
+    @property
+    def subscriptionPaymentType(self) -> subscriptionPaymentType:
+        return subscriptionPaymentType(
+            name=self.get_tier_display(),
+            paymentSchedule=self.paymentSchedule,
+            amount=str(self.amount),
+            profile=customerProfileType(
+                customerProfileId=str(self.profile.authorizenet_profile_id),
+                customerPaymentProfileId=str(
+                    self.profile.payments.filter(default__exact=True).first()
+                ),
+            ),
+        )
 
 
 class TrackerPaymentMethod(models.Model):
@@ -79,7 +109,7 @@ class TrackerPaymentMethod(models.Model):
 
         request = createCustomerPaymentProfileRequest(
             merchantAuthentication=get_merchant_auth(),
-            customerProfileId=str(self.profile.authorizenet_profile_id),
+            customerProfileId=str(self.profile.customerProfileId),
             paymentProfile=paymentProfile(billTo=billing_address, payment=payment),
             defaultPaymentProfile=default,
         )
