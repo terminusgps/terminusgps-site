@@ -41,4 +41,9 @@ urlpatterns = [
         views.TrackerProfileSubscriptionView.as_view(),
         name="profile subscription",
     ),
+    path(
+        "profile/notifications/",
+        views.TrackerProfileNotificationsView.as_view(),
+        name="profile notifications",
+    ),
 ]

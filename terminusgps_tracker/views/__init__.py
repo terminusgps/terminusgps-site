@@ -3,6 +3,7 @@ from .profile import (
     TrackerProfileAssetsView,
     TrackerProfileSubscriptionView,
     TrackerProfilePaymentMethodsView,
+    TrackerProfileNotificationsView,
 )
 from .forms import AssetUploadView, CreditCardUploadView, AddressDropdownView
 from .registration import TrackerLoginView, TrackerLogoutView, TrackerRegistrationView

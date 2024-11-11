@@ -1,16 +1,21 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 import requests
+from wialon.api import WialonError
 from typing import Any
 from urllib.parse import urlencode
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
-from authorizenet.apicontractsv1 import customerAddressType, paymentType, creditCardType
 
+from authorizenet.apicontractsv1 import customerAddressType, paymentType, creditCardType
 from terminusgps_tracker.forms import CreditCardUploadForm, AssetUploadForm
 from terminusgps_tracker.http import HttpRequest, HttpResponse
+from terminusgps_tracker.integrations.wialon.items import WialonUnitGroup, WialonUnit
 from terminusgps_tracker.integrations.wialon.session import WialonSession
+from terminusgps_tracker.integrations.wialon.utils import get_id_from_iccid
 from terminusgps_tracker.models import TrackerProfile
 from terminusgps_tracker.models.subscription import TrackerPaymentMethod
 
@@ -145,3 +150,58 @@ class AssetUploadView(FormView):
         "subtitle": "Fill in the IMEI # of your asset and give it a good name",
     }
     template_name = "terminusgps_tracker/forms/asset.html"
+    success_url = reverse_lazy("tracker profile")
+
+    def setup(self, *args, **kwargs) -> None:
+        super().setup(*args, **kwargs)
+        try:
+            self.profile = TrackerProfile.objects.get(user=self.request.user)
+        except TrackerProfile.DoesNotExist:
+            self.profile = None
+
+    def get_unit(self, form: AssetUploadForm, session: WialonSession) -> WialonUnit:
+        unit_id: str | None = get_id_from_iccid(
+            iccid=form.cleaned_data["imei_number"], session=session
+        )
+        if not unit_id:
+            raise ValueError(
+                f"Could not locate unit by imei: '{form.cleaned_data["imei_number"]}'"
+            )
+        return WialonUnit(id=unit_id, session=session)
+
+    def wialon_asset_assignment_flow(self, form: AssetUploadForm) -> None:
+        with WialonSession() as session:
+            unit = self.get_unit(form, session=session)
+            available_group = WialonUnitGroup(id="27890571", session=session)
+            user_group = WialonUnitGroup(
+                id=str(self.profile.wialon_group_id), session=session
+            )
+
+            unit.rename(form.cleaned_data["asset_name"])
+            user_group.add_item(unit)
+            available_group.rm_item(unit)
+
+    def form_valid(self, form: AssetUploadForm) -> HttpResponse:
+        try:
+            self.wialon_asset_assignment_flow(form)
+        except WialonError:
+            form.add_error(
+                "imei_number",
+                ValidationError(
+                    _(
+                        "'%(value)s' cannot be registered at this time. Please try again later!"
+                    ),
+                    params={"value": form.cleaned_data["imei_number"]},
+                ),
+            )
+            return self.form_invalid(form=form)
+        except ValueError:
+            form.add_error(
+                "imei_number",
+                ValidationError(
+                    _("'%(value)s' could not be found in the Terminus GPS database."),
+                    params={"value": form.cleaned_data["imei_number"]},
+                ),
+            )
+            return self.form_invalid(form=form)
+        return super().form_valid(form=form)

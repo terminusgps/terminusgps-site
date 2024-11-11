@@ -13,7 +13,7 @@ from terminusgps_tracker.http import HttpRequest, HttpResponse
 class TrackerProfilePaymentMethodsView(LoginRequiredMixin, TemplateView):
     template_name = "terminusgps_tracker/forms/profile_payments.html"
     extra_context = {
-        "subtitle": "Select a payment method",
+        "subtitle": "Create, update, or delete your payment methods",
         "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
     }
     login_url = reverse_lazy("tracker login")
@@ -38,7 +38,7 @@ class TrackerProfilePaymentMethodsView(LoginRequiredMixin, TemplateView):
 class TrackerProfileAssetsView(LoginRequiredMixin, TemplateView):
     template_name = "terminusgps_tracker/forms/profile_assets.html"
     extra_context = {
-        "subtitle": "Your Terminus GPS assets",
+        "subtitle": "Register, modify, or delete your assets",
         "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
     }
     login_url = reverse_lazy("tracker login")
@@ -88,6 +88,30 @@ class TrackerProfileSubscriptionView(LoginRequiredMixin, FormView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
         context["title"] = f"{self.profile.user.first_name}'s Subscription"
+        return context
+
+
+class TrackerProfileNotificationsView(LoginRequiredMixin, TemplateView):
+    template_name = "terminusgps_tracker/forms/profile_notifications.html"
+    extra_context = {
+        "subtitle": "Create, update, or delete your notifications",
+        "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
+    }
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        try:
+            self.profile = TrackerProfile.objects.get(user=self.request.user)
+        except TrackerProfile.DoesNotExist:
+            self.profile = None
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["title"] = f"{self.profile.user.first_name}'s Notifications"
         return context
 
 
