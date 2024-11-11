@@ -7,7 +7,7 @@ from django.views.generic import FormView, TemplateView
 
 from terminusgps_tracker.forms.forms import SubscriptionSelectForm
 from terminusgps_tracker.models.customer import TrackerProfile
-from terminusgps_tracker.http import HttpRequest
+from terminusgps_tracker.http import HttpRequest, HttpResponse
 
 
 class TrackerProfilePaymentMethodsView(LoginRequiredMixin, TemplateView):
@@ -72,6 +72,11 @@ class TrackerProfileSubscriptionView(LoginRequiredMixin, FormView):
     raise_exception = False
     http_method_names = ["get", "post"]
     success_url = reverse_lazy("tracker profile")
+
+    def get_initial(self, **kwargs) -> dict[str, Any]:
+        initial: dict[str, Any] = super().get_initial(**kwargs)
+        initial["subscription"] = self.request.GET.get("tier", "Cu")
+        return initial
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)

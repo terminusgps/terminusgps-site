@@ -8,42 +8,42 @@
         {% tailwind_css %}
         <script src="{% static 'terminusgps_tracker/js/htmx.min.js' %}" defer></script>
     </head>
-    <body class="h-fit bg-gradient-to-tr from-terminus-red-300 via-terminus-red-900 to-terminus-red-300 dark:from-terminus-red-900 dark:via-terminus-red-300 dark:to-terminus-red-900 bg-no-repeat">
-        <nav class="bg-terminus-white py-4 drop-shadow-xl dark:bg-terminus-gray-900 justify-between flex">
+    <body class="h-fit bg-gradient-to-tr from-terminus-red-300 via-terminus-red-900 to-terminus-red-300 bg-no-repeat dark:from-terminus-red-900 dark:via-terminus-red-300 dark:to-terminus-red-900">
+        <nav class="flex justify-between bg-terminus-white py-4 drop-shadow-xl dark:bg-terminus-gray-900">
             <a href="{% url 'tracker profile' %}" class="flex items-center space-x-1">
                 <img class="size-12" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo">
                 <h2 class="text-xl font-semibold tracking-wide text-terminus-black dark:text-terminus-white">Terminus GPS Tracker</h2>
             </a>
         </nav>
         <main>
-            <div class="m-8 rounded-lg drop-shadow-md border border-solid bg-terminus-gray-100 md:m-6 lg:m-4 dark:bg-terminus-gray-900">
-                <div class="m-2 p-4 flex flex-row items-center">
-                    <img class="size-32 rounded-lg flex-none" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo" height="60" width="60">
+            <div class="m-8 rounded-lg border border-solid bg-terminus-gray-100 drop-shadow-md md:m-6 lg:m-4 dark:bg-terminus-gray-900">
+                <div class="m-2 flex flex-row items-center p-4">
+                    <img class="size-32 flex-none rounded-lg" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo" height="60" width="60">
                     <div class="flex flex-col">
                         <h1 class="text-2xl text-terminus-gray-800 dark:text-terminus-gray-100">{{ title }}</h1>
-                        {% if subtitle %}<h2 class="text-xl font-light text-terminus-gray-700 dark:text-terminus-gray-200">{{ subtitle }}</h2>{% endif %}
+                        {% if subtitle %}<h2 class="text-md font-light text-terminus-gray-700 md:text-xl md:tracking-wide dark:text-terminus-gray-200">{{ subtitle }}</h2>{% endif %}
                     </div>
                 </div>
-                <div class="flex flex-col p-8 gap-8">
+                <div class="flex flex-col gap-8 p-8">
                 {% block content %}
                 {% endblock content %}
                 </div>
             </div>
         </main>
-        <footer class="w-full p-4 bg-terminus-white border-t border-gray-200 shadow md:flex md:items-center md:justify-between md:p-6 dark:bg-terminus-gray-900 dark:border-gray-600">
+        <footer class="w-full border-t border-gray-200 bg-terminus-white p-4 shadow md:flex md:items-center md:justify-between md:p-6 dark:border-gray-600 dark:bg-terminus-gray-900">
             <span class="text-sm text-gray-500 sm:text-center dark:text-gray-300">© 2024 <a href="{% url 'tracker about' %}" class="hover:underline">{{ legal_name|default:'Terminus GPS, LLC' }}</a>. All Rights Reserved.</span>
-            <ul class="flex flex-wrap items-center mt-3 text-sm font-medium text-gray-400 dark:text-gray-400 sm:mt-0">
+            <ul class="mt-3 flex flex-wrap items-center text-sm font-medium text-gray-400 sm:mt-0 dark:text-gray-400">
                 <li>
-                    <a href="{% url 'tracker about' %}" class="hover:underline me-4 md:me-6">About</a>
+                    <a href="{% url 'tracker about' %}" class="me-4 hover:underline md:me-6">About</a>
                 </li>
                 <li>
-                    <a href="{% url 'tracker contact' %}" class="hover:underline me-4 md:me-6">Contact</a>
+                    <a href="{% url 'tracker contact' %}" class="me-4 hover:underline md:me-6">Contact</a>
                 </li>
                 <li>
-                    <a href="{% url 'tracker privacy' %}" class="hover:underline me-4 md:me-6">Privacy Policy</a>
+                    <a href="{% url 'tracker privacy' %}" class="me-4 hover:underline md:me-6">Privacy Policy</a>
                 </li>
                 <li>
-                    <a href="{% url 'tracker subscriptions' %}" class="hover:underline me-4 md:me-6">Subscriptions</a>
+                    <a href="{% url 'tracker subscriptions' %}" class="me-4 hover:underline md:me-6">Subscriptions</a>
                 </li>
             </ul>
         </footer>

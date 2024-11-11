@@ -4,11 +4,11 @@
 <form action="{% url 'tracker login' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
     {% csrf_token %}
     {{ form }}
-    <div class="flex justify-evenly gap-2">
+    <div class="flex flex-col gap-4">
         <button class="grow rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-gray-50 hover:from-terminus-red-400 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
             Login
         </button>
+    <p class="-mb-4 mt-2 text-center text-sm">Don't have an account? <a class="text-transparent bg-gradient-to-r from-terminus-red-800 via-terminus-red-400 to-terminus-red-800 dark:from-terminus-red-300 dark:via-terminus-red-100 dark:to-terminus-red-300 bg-clip-text font-semibold underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:decoration-dotted" href="{% url 'tracker register' %}">Click here</a> to register.</p>
     </div>
-    <p class="-mb-2 mt-2 text-center text-sm">Don't have an account? <a class="text-transparent bg-gradient-to-r from-terminus-red-800 via-terminus-red-400 to-terminus-red-800 dark:from-terminus-red-300 dark:via-terminus-red-100 dark:to-terminus-red-300 bg-clip-text font-semibold underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:decoration-dotted" href="{% url 'tracker register' %}">Click here</a> to register.</p>
 </form>
 {% endblock content %}
