@@ -5,7 +5,6 @@ from .profile import (
     TrackerProfilePaymentMethodsView,
     TrackerProfileNotificationsView,
 )
-from .forms import AssetUploadView, CreditCardUploadView, AddressDropdownView
 from .registration import TrackerLoginView, TrackerLogoutView, TrackerRegistrationView
 from .generic import (
     TrackerAboutView,

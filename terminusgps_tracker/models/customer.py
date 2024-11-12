@@ -13,11 +13,8 @@ from terminusgps_tracker.integrations.wialon.items import (
 
 class TodoItem(models.Model):
     label = models.CharField(max_length=64)
-    view = models.CharField(max_length=512, default="tracker profile")
+    view = models.CharField(max_length=512)
     is_complete = models.BooleanField(default=False)
-    todo_list = models.ForeignKey(
-        "TodoList", on_delete=models.CASCADE, default=None, blank=True, null=True
-    )
 
     def __str__(self) -> str:
         return self.label
@@ -28,13 +25,10 @@ class TodoItem(models.Model):
 
 
 class TodoList(models.Model):
-    profile = models.OneToOneField(
-        "TrackerProfile", on_delete=models.CASCADE, related_name="todo_list"
-    )
     items = models.ManyToManyField(TodoItem)
 
     def __str__(self) -> str:
-        return f"{self.profile.user.username}'s To-Do List"
+        return f"To-Do List #{self.pk}"
 
 
 class TrackerProfile(models.Model):
@@ -45,6 +39,9 @@ class TrackerProfile(models.Model):
         default=None,
         blank=True,
         null=True,
+    )
+    todo_list = models.OneToOneField(
+        "TodoList", on_delete=models.CASCADE, default=None, blank=True, null=True
     )
     notifications = models.ManyToManyField("TrackerNotification")
     authorizenet_profile_id = models.PositiveBigIntegerField(
@@ -65,6 +62,24 @@ class TrackerProfile(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user.username}'s Profile"
+
+    def save(self, **kwargs) -> None:
+        if not self.todo_list:
+            todos = (
+                TodoItem.objects.create(
+                    label="Register your first asset", view="profile assets"
+                ),
+                TodoItem.objects.create(
+                    label="Upload a payment method", view="profile payments"
+                ),
+                TodoItem.objects.create(
+                    label="Select a subscription", view="profile subscription"
+                ),
+            )
+            todo_list = TodoList.objects.create()
+            todo_list.items.set(todos)
+            self.todo_list = todo_list
+        super().save(**kwargs)
 
     def delete(
         self,

@@ -83,7 +83,6 @@ class TrackerRegistrationView(SuccessMessageMixin, FormView):
                 password=form.cleaned_data["password1"],
                 profile=profile,
             )
-            self.create_todo_list(profile=profile)
         except WialonError:
             form.add_error(
                 "username",
@@ -94,22 +93,6 @@ class TrackerRegistrationView(SuccessMessageMixin, FormView):
                 ),
             )
         return super().form_valid(form=form)
-
-    def create_todo_list(self, profile: TrackerProfile) -> None:
-        todos = (
-            TodoItem.objects.create(
-                label="Register your first asset", view="upload asset"
-            ),
-            TodoItem.objects.create(
-                label="Upload a payment method", view="upload credit card"
-            ),
-            TodoItem.objects.create(
-                label="Select a subscription", view="tracker subscriptions"
-            ),
-        )
-        todo_list, _ = TodoList.objects.get_or_create(profile=profile)
-        todo_list.items.set(todos)
-        todo_list.save()
 
     def wialon_registration_flow(
         self, username: str, password: str, profile: TrackerProfile

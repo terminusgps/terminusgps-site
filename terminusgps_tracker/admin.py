@@ -16,7 +16,7 @@ class TodoItemAdmin(admin.ModelAdmin):
 
 @admin.register(TodoList)
 class TodoListAdmin(admin.ModelAdmin):
-    fieldsets = [(None, {"fields": ["profile", "items"]})]
+    fieldsets = [(None, {"fields": ["items"]})]
 
 
 @admin.register(TrackerProfile)
