@@ -117,10 +117,7 @@ class TrackerProfileAssetsView(LoginRequiredMixin, FormView):
 class TrackerProfileSubscriptionView(LoginRequiredMixin, FormView):
     form_class = SubscriptionSelectForm
     template_name = "terminusgps_tracker/forms/profile_subscription.html"
-    extra_context = {
-        "title": "Your Terminus GPS Subscription",
-        "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
-    }
+    extra_context = {"legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"]}
     login_url = reverse_lazy("tracker login")
     permission_denied_message = "Please login and try again."
     raise_exception = False
@@ -157,11 +154,23 @@ class TrackerProfileSubscriptionView(LoginRequiredMixin, FormView):
             self.profile.save()
         return super().form_valid(form=form)
 
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        if self.profile:
+            context["title"] = f"{self.profile.user.first_name}'s Subscription"
+
+        if not self.profile or not self.profile.subscription:
+            context["subtitle"] = "You haven't selected a subscription yet"
+        else:
+            context["subtitle"] = (
+                f"You're currently on our {self.profile.subscription.get_tier_display()} plan"
+            )
+        return context
+
 
 class TrackerProfileNotificationsView(LoginRequiredMixin, TemplateView):
     template_name = "terminusgps_tracker/forms/profile_notifications.html"
     extra_context = {
-        "title": "Your notifications",
         "subtitle": "Create, update, or delete your notifications",
         "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
     }
@@ -176,6 +185,14 @@ class TrackerProfileNotificationsView(LoginRequiredMixin, TemplateView):
             self.profile = TrackerProfile.objects.get(user=self.request.user)
         except TrackerProfile.DoesNotExist:
             self.profile = None
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        if self.profile:
+            context["profile"] = self.profile
+            context["title"] = f"{self.profile.user.first_name}'s Notifications"
+            context["notifications"] = self.profile.notifications.all()
+        return context
 
 
 class TrackerProfileView(LoginRequiredMixin, TemplateView):
@@ -202,4 +219,7 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
             context["profile"] = self.profile
             context["todos"] = self.profile.todo_list.items.all()
             context["title"] = f"{self.profile.user.first_name}'s Profile"
+            context["subscription"] = (
+                self.profile.subscription.get_tier_display() or None
+            )
         return context
