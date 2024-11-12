@@ -3,7 +3,6 @@
     <button
         class="w-full text-left p-2 hover:bg-gray-300"
         hx-trigger="click"
-        hx-post="{% url 'search address' %}"
         hx-params="not credit_card_number,credit_card_expiry_month,credit_card_expiry_year,credit_card_ccv"
         hx-vals='{"formatted_path": "{{ result.formatted_path }}"}'
     ><em>{{ result.formatted_path }}</em></button>

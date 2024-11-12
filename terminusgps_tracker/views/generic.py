@@ -1,12 +1,30 @@
+from typing import Any
+
 from django.views.generic import TemplateView, RedirectView
 from django.conf import settings
+
+from terminusgps_tracker.http import HttpRequest
+from terminusgps_tracker.models import TrackerProfile
 
 
 class TrackerSubscriptionView(TemplateView):
     template_name = "terminusgps_tracker/subscriptions.html"
     content_type = "text/html"
-    extra_context = {"title": "Subscriptions", "subtitle": "Our subscription options"}
+    extra_context = {"title": "Subscriptions"}
     http_method_names = ["get"]
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        if request.user:
+            try:
+                self.profile = TrackerProfile.objects.get(user=request.user)
+            except TrackerProfile.DoesNotExist:
+                self.profile = None
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["profile"] = self.profile
+        return context
 
 
 class TrackerAboutView(TemplateView):
@@ -20,7 +38,7 @@ class TrackerContactView(TemplateView):
     template_name = "terminusgps_tracker/contact.html"
     content_type = "text/html"
     extra_context = {"title": "Contact", "subtitle": "Get in touch with us"}
-    http_method_names = ["get", "post"]
+    http_method_names = ["get"]
 
 
 class TrackerPrivacyView(TemplateView):

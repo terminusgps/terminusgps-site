@@ -1,6 +1,9 @@
 from typing import Any
 
+from django.db.models import QuerySet
 from django.template import Library
+
+from terminusgps_tracker.models.customer import TodoList
 
 register = Library()
 
@@ -15,5 +18,5 @@ def address_dropdown(context: dict[str, Any]) -> dict[str, Any]:
 @register.inclusion_tag(
     "terminusgps_tracker/forms/widgets/todo_list.html", takes_context=True
 )
-def display_todo_list(context: dict[str, Any]) -> dict[str, Any]:
-    return {"todos": context["profile"].todo_list.items.all()}
+def display_todos(todo_list: TodoList) -> dict[str, Any]:
+    return {}

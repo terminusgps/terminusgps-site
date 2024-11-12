@@ -1,5 +1,5 @@
 {% extends "terminusgps_tracker/layout.html" %}
-{% load static terminusgps_tracker_widgets %}
+{% load static terminusgps_tracker_display %}
 {% block content %}
 <div class="mb-4 flex flex-col gap-4">
     <h2 class="text-2xl font-semibold dark:text-terminus-white">Hello, {{ user.first_name }}.</h2>
@@ -14,7 +14,7 @@
             <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200">To-do List</h2>
         </div>
         <div id="id-todo-list" name="todo-list" class="flex gap-2">
-            {% display_todo_list %}
+            {% display_todos todos %}
         </div>
     </div>
     <div class="mb-4 flex flex-col gap-4">

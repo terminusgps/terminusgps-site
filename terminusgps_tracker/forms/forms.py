@@ -27,7 +27,7 @@ from terminusgps_tracker.validators import (
 
 
 class SubscriptionSelectForm(forms.Form):
-    subscription = forms.ChoiceField(
+    subscription_tier = forms.ChoiceField(
         choices=TrackerSubscription.SubscriptionTier.choices,
         widget=TrackerSelectInput(attrs={"class": "bg-gray-500"}),
     )

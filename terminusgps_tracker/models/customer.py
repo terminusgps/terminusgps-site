@@ -15,6 +15,9 @@ class TodoItem(models.Model):
     label = models.CharField(max_length=64)
     view = models.CharField(max_length=512, default="tracker profile")
     is_complete = models.BooleanField(default=False)
+    todo_list = models.ForeignKey(
+        "TodoList", on_delete=models.CASCADE, default=None, blank=True, null=True
+    )
 
     def __str__(self) -> str:
         return self.label
@@ -36,6 +39,14 @@ class TodoList(models.Model):
 
 class TrackerProfile(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
+    subscription = models.OneToOneField(
+        "TrackerSubscription",
+        on_delete=models.CASCADE,
+        default=None,
+        blank=True,
+        null=True,
+    )
+    notifications = models.ManyToManyField("TrackerNotification")
     authorizenet_profile_id = models.PositiveBigIntegerField(
         unique=True, null=True, blank=True, default=None
     )

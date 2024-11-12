@@ -55,11 +55,7 @@ class CreditCardWidget(forms.MultiWidget):
 
 class AddressWidget(forms.MultiWidget):
     template_name = "terminusgps_tracker/forms/widgets/address.html"
-    attrs = {
-        "hx-trigger": "keyup changed",
-        "hx-target": "#address-results",
-        "hx-get": reverse_lazy("search address"),
-    }
+    attrs = {"hx-trigger": "keyup changed", "hx-target": "#address-results"}
 
     def __init__(self, widgets, attrs: dict[str, str] | None = None, **kwargs) -> None:
         if not attrs:

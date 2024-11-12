@@ -33,9 +33,6 @@ class TrackerSubscription(models.Model):
         SILVER = "Ag", _("Silver")
         GOLD = "Au", _("Gold")
 
-    profile = models.ForeignKey(
-        "TrackerProfile", on_delete=models.CASCADE, related_name="subscription"
-    )
     tier = models.CharField(
         max_length=2, choices=SubscriptionTier.choices, default=SubscriptionTier.COPPER
     )
@@ -43,7 +40,7 @@ class TrackerSubscription(models.Model):
     start_date = models.DateField(default=timezone.now)
 
     def __str__(self) -> str:
-        return f"{self.profile.user.first_name}'s {self.tier} Subscription"
+        return f"{self.pk}-{self.tier} Subscription"
 
     def __len__(self) -> int:
         return self.months

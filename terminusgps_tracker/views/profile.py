@@ -4,10 +4,12 @@ from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import FormView, TemplateView
+from django.views.generic.dates import timezone_today
 
 from terminusgps_tracker.forms.forms import SubscriptionSelectForm
 from terminusgps_tracker.models.customer import TrackerProfile
 from terminusgps_tracker.http import HttpRequest, HttpResponse
+from terminusgps_tracker.models.subscription import TrackerSubscription
 
 
 class TrackerProfilePaymentMethodsView(LoginRequiredMixin, TemplateView):
@@ -64,7 +66,7 @@ class TrackerProfileSubscriptionView(LoginRequiredMixin, FormView):
     form_class = SubscriptionSelectForm
     template_name = "terminusgps_tracker/forms/profile_subscription.html"
     extra_context = {
-        "subtitle": "Your Terminus GPS subscription",
+        "title": "Your Terminus GPS Subscription",
         "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
     }
     login_url = reverse_lazy("tracker login")
@@ -73,11 +75,6 @@ class TrackerProfileSubscriptionView(LoginRequiredMixin, FormView):
     http_method_names = ["get", "post"]
     success_url = reverse_lazy("tracker profile")
 
-    def get_initial(self, **kwargs) -> dict[str, Any]:
-        initial: dict[str, Any] = super().get_initial(**kwargs)
-        initial["subscription"] = self.request.GET.get("tier", "Cu")
-        return initial
-
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         try:
@@ -85,15 +82,26 @@ class TrackerProfileSubscriptionView(LoginRequiredMixin, FormView):
         except TrackerProfile.DoesNotExist:
             self.profile = None
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["title"] = f"{self.profile.user.first_name}'s Subscription"
-        return context
+    def get_initial(self, **kwargs) -> dict[str, Any]:
+        initial: dict[str, Any] = super().get_initial(**kwargs)
+        initial["subscription"] = self.request.GET.get("tier", "Cu")
+        return initial
+
+    def form_valid(self, form: SubscriptionSelectForm) -> HttpResponse:
+        if self.profile:
+            new_subscription = TrackerSubscription.objects.get(
+                tier=form.cleaned_data["subscription_tier"]
+            )
+            self.profile.subscription = new_subscription
+            self.profile.save()
+            print(self.profile.subscription)
+        return super().form_valid(form=form)
 
 
 class TrackerProfileNotificationsView(LoginRequiredMixin, TemplateView):
     template_name = "terminusgps_tracker/forms/profile_notifications.html"
     extra_context = {
+        "title": "Your notifications",
         "subtitle": "Create, update, or delete your notifications",
         "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
     }
@@ -109,15 +117,11 @@ class TrackerProfileNotificationsView(LoginRequiredMixin, TemplateView):
         except TrackerProfile.DoesNotExist:
             self.profile = None
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["title"] = f"{self.profile.user.first_name}'s Notifications"
-        return context
-
 
 class TrackerProfileView(LoginRequiredMixin, TemplateView):
     template_name = "terminusgps_tracker/profile.html"
     extra_context = {
+        "title": "Your Profile",
         "subtitle": settings.TRACKER_PROFILE["MOTD"],
         "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
     }
@@ -136,6 +140,5 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
         context["profile"] = self.profile
-        if self.profile:
-            context["title"] = f"{self.profile.user.first_name}'s Profile"
+        context["todos"] = self.profile.todo_list.items.all()
         return context
