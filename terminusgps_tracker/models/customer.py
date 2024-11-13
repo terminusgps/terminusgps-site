@@ -1,10 +1,10 @@
-from authorizenet.apicontractsv1 import customerProfileType, merchantAuthenticationType
-from django.db import models
 from django.contrib.auth import get_user_model
-
+from django.db import models
 from django.urls import reverse
 
 from authorizenet.apicontractsv1 import (
+    customerProfileType,
+    merchantAuthenticationType,
     createCustomerProfileRequest,
     createCustomerProfileResponse,
     deleteCustomerProfileRequest,
@@ -46,6 +46,10 @@ class TodoList(models.Model):
 
 class TrackerProfile(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
+    todo_list = models.OneToOneField(
+        "TodoList", on_delete=models.CASCADE, null=True, blank=True, default=None
+    )
+    notifications = models.ManyToManyField("TrackerNotification")
     subscription = models.OneToOneField(
         "TrackerSubscription",
         on_delete=models.CASCADE,
@@ -53,10 +57,7 @@ class TrackerProfile(models.Model):
         blank=True,
         null=True,
     )
-    todo_list = models.OneToOneField(
-        "TodoList", on_delete=models.CASCADE, default=None, blank=True, null=True
-    )
-    notifications = models.ManyToManyField("TrackerNotification")
+
     authorizenet_profile_id = models.PositiveBigIntegerField(
         unique=True, null=True, blank=True, default=None
     )
@@ -77,31 +78,17 @@ class TrackerProfile(models.Model):
         return f"{self.user.username}'s Profile"
 
     def save(self, **kwargs) -> None:
-        if not self.todo_list:
-            todos = (
-                TodoItem.objects.create(
-                    label="Register your first asset", view="profile assets"
-                ),
-                TodoItem.objects.create(
-                    label="Upload a payment method", view="profile payments"
-                ),
-                TodoItem.objects.create(
-                    label="Select a subscription", view="profile subscription"
-                ),
-            )
-            todo_list = TodoList.objects.create()
-            todo_list.items.set(todos)
-            self.todo_list = todo_list
         if not self.authorizenet_profile_id:
-            request = self._generate_create_customer_profile_request(
-                merchantAuthentication=get_merchant_auth(), live_mode=False
+            create_request = self._generate_create_customer_profile_request(
+                merchantAuthentication=get_merchant_auth()
             )
-            self.authorizenet_profile_id = self._create_authorizenet_profile(request)
+            self.authorizenet_profile_id = self._create_authorizenet_profile(
+                create_request
+            )
+
         super().save(**kwargs)
 
-    def delete(
-        self, using=None, keep_parents: bool = False, **kwargs
-    ) -> tuple[int, dict[str, int]]:
+    def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
         with WialonSession() as session:
             WialonUser(id=str(self.wialon_user_id), session=session).delete()
             WialonUnitGroup(id=str(self.wialon_group_id), session=session).delete()
@@ -112,7 +99,7 @@ class TrackerProfile(models.Model):
             merchantAuthentication=get_merchant_auth()
         )
         self._delete_authorizenet_profile(delete_request)
-        return super().delete(using=using, keep_parents=keep_parents, **kwargs)
+        return super().delete(*args, **kwargs)
 
     @property
     def merchantCustomerId(self) -> str:
@@ -150,7 +137,7 @@ class TrackerProfile(models.Model):
     ) -> dict:
         return deleteCustomerProfileRequest(
             merchantAuthentication=merchantAuthentication,
-            customerProfileId=self.authorizenet_profile_id,
+            customerProfileId=self.customerProfileId,
         )
 
     def _generate_create_customer_profile_request(
@@ -158,7 +145,5 @@ class TrackerProfile(models.Model):
     ) -> dict:
         return createCustomerProfileRequest(
             merchantAuthentication=merchantAuthentication,
-            profile=customerProfileType(
-                merchantCustomerId=self.merchantCustomerId, email=self.user.username
-            ),
+            profile=customerProfileType(merchantCustomerId=self.merchantCustomerId),
         )

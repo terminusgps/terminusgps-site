@@ -15,11 +15,13 @@ class TrackerSubscriptionView(TemplateView):
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
-        if request.user:
+        if request.user and request.user.is_authenticated:
             try:
                 self.profile = TrackerProfile.objects.get(user=request.user)
             except TrackerProfile.DoesNotExist:
                 self.profile = None
+        else:
+            self.profile = None
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)

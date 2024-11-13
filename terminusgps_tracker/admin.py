@@ -6,7 +6,11 @@ from terminusgps_tracker.models.subscription import TrackerSubscription
 
 @admin.register(TrackerSubscription)
 class TrackerSubscriptionAdmin(admin.ModelAdmin):
-    list_display = ["tier"]
+    list_display = ["name", "rate", "tier"]
+    fieldsets = [
+        (None, {"fields": ["name", "tier", "duration"]}),
+        ("readonly", {"fields": ["rate", "gradient"]}),
+    ]
 
 
 @admin.register(TodoItem)

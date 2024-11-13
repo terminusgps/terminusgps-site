@@ -1,18 +1,13 @@
 from typing import Any
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
-from wialon import WialonError
 
 from terminusgps_tracker.forms import TrackerAuthenticationForm, TrackerRegistrationForm
-from terminusgps_tracker.http import HttpRequest
 from terminusgps_tracker.models import TrackerProfile
 from terminusgps_tracker.integrations.wialon import constants
 from terminusgps_tracker.integrations.wialon.session import WialonSession
@@ -21,6 +16,7 @@ from terminusgps_tracker.integrations.wialon.items import (
     WialonUnitGroup,
     WialonResource,
 )
+from terminusgps_tracker.models.customer import TodoItem, TodoList
 
 
 class TrackerLoginView(LoginView):
@@ -29,7 +25,7 @@ class TrackerLoginView(LoginView):
     extra_context = {"title": "Login"}
     http_method_names = ["get", "post"]
     next_page = reverse_lazy("tracker profile")
-    template_name = "terminusgps_tracker/login.html"
+    template_name = "terminusgps_tracker/forms/login.html"
 
 
 class TrackerLogoutView(LogoutView):
@@ -37,7 +33,7 @@ class TrackerLogoutView(LogoutView):
     extra_context = {"title": "Logout"}
     http_method_names = ["get", "post"]
     success_url = reverse_lazy("tracker login")
-    template_name = "terminusgps_tracker/logout.html"
+    template_name = "terminusgps_tracker/forms/logout.html"
 
 
 class TrackerRegistrationView(SuccessMessageMixin, FormView):
@@ -48,53 +44,48 @@ class TrackerRegistrationView(SuccessMessageMixin, FormView):
         "subtitle": "Start tracking your vehicles with the Terminus GPS Tracker",
     }
     http_method_names = ["get", "post"]
-    template_name = "terminusgps_tracker/register.html"
+    template_name = "terminusgps_tracker/forms/register.html"
     success_url = reverse_lazy("tracker login")
     success_message = "%(username)s's profile was created succesfully"
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        self.user = request.user or None
 
     def get_success_message(self, cleaned_data: dict[str, Any]) -> str:
         return self.success_message % dict(
             cleaned_data, username=cleaned_data.get("username", "")
         )
 
-    def get_user(self, form: TrackerRegistrationForm) -> AbstractBaseUser:
-        user, created = get_user_model().objects.get_or_create(
-            username=form.cleaned_data["username"]
-        )
-        if created:
-            user.set_password(form.cleaned_data["password1"])
-            user.first_name = form.cleaned_data["first_name"]
-            user.last_name = form.cleaned_data["last_name"]
-            user.save()
-        return user
-
     def form_valid(self, form: TrackerRegistrationForm) -> HttpResponse:
-        user = self.get_user(form)
-        profile, created = TrackerProfile.objects.get_or_create(user=user)
-        try:
-            self.wialon_registration_flow(
-                username=form.cleaned_data["username"],
-                password=form.cleaned_data["password1"],
-                profile=profile,
-            )
-        except WialonError:
-            form.add_error(
-                "username",
-                ValidationError(
-                    _(
-                        "Whoops! Something went wrong on our end. Please try again later."
-                    )
+        user = get_user_model().objects.create_user(
+            first_name=form.cleaned_data["first_name"],
+            last_name=form.cleaned_data["last_name"],
+            username=form.cleaned_data["username"],
+            password=form.cleaned_data["password1"],
+        )
+        profile = self.wialon_registration_flow(
+            username=form.cleaned_data["username"],
+            password=form.cleaned_data["password1"],
+            profile=TrackerProfile.objects.create(user=user),
+        )
+        profile.todo_list = TodoList.objects.create()
+        profile.todo_list.items.set(
+            [
+                TodoItem.objects.create(
+                    label="Register your first asset", view="profile create asset"
                 ),
-            )
+                TodoItem.objects.create(
+                    label="Upload a payment method", view="profile create payment"
+                ),
+                TodoItem.objects.create(
+                    label="Select a subscription plan",
+                    view="profile create subscription",
+                ),
+            ]
+        )
+        profile.save()
         return super().form_valid(form=form)
 
     def wialon_registration_flow(
         self, username: str, password: str, profile: TrackerProfile
-    ) -> None:
+    ) -> TrackerProfile:
         with WialonSession() as session:
             # Retrieved
             wialon_admin_user = WialonUser(id="27881459", session=session)
@@ -134,3 +125,4 @@ class TrackerRegistrationView(SuccessMessageMixin, FormView):
             profile.wialon_group_id = wialon_group.id
             profile.wialon_resource_id = wialon_resource.id
             profile.save()
+            return profile

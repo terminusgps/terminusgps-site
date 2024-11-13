@@ -2,198 +2,24 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ValidationError
 from django.urls import reverse_lazy
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
-from wialon.api import WialonError
 
-from terminusgps_tracker.forms.forms import AssetUploadForm, SubscriptionSelectForm
-from terminusgps_tracker.http import HttpRequest, HttpResponse
-from terminusgps_tracker.integrations.wialon.items import WialonUnit, WialonUnitGroup
-from terminusgps_tracker.integrations.wialon.session import WialonSession
-from terminusgps_tracker.integrations.wialon.utils import get_id_from_iccid
-from terminusgps_tracker.models.customer import TodoItem, TrackerProfile
-from terminusgps_tracker.models.subscription import TrackerSubscription
-
-
-class TrackerProfilePaymentMethodsView(LoginRequiredMixin, TemplateView):
-    template_name = "terminusgps_tracker/forms/profile_payments.html"
-    extra_context = {
-        "subtitle": "Create, update, or delete your payment methods",
-        "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
-    }
-    login_url = reverse_lazy("tracker login")
-    permission_denied_message = "Please login and try again."
-    raise_exception = False
-    http_method_names = ["get", "post"]
-    success_url = reverse_lazy("tracker profile")
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        try:
-            self.profile = TrackerProfile.objects.get(user=self.request.user)
-        except TrackerProfile.DoesNotExist:
-            self.profile = None
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["title"] = f"{self.profile.user.first_name}'s Payment Methods"
-        return context
-
-
-class TrackerProfileAssetsView(LoginRequiredMixin, FormView):
-    form_class = AssetUploadForm
-    template_name = "terminusgps_tracker/forms/asset.html"
-    extra_context = {
-        "subtitle": "Register, modify, or delete your assets",
-        "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
-    }
-    login_url = reverse_lazy("tracker login")
-    permission_denied_message = "Please login and try again."
-    raise_exception = False
-    http_method_names = ["get", "post"]
-    success_url = reverse_lazy("tracker profile")
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        try:
-            self.profile = TrackerProfile.objects.get(user=self.request.user)
-        except TrackerProfile.DoesNotExist:
-            self.profile = None
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        if self.profile:
-            context["title"] = f"{self.profile.user.first_name}'s Assets"
-        return context
-
-    def form_valid(self, form: AssetUploadForm) -> HttpResponse:
-        try:
-            self.asset_upload_flow(form)
-        except WialonError:
-            form.add_error(
-                "imei_number",
-                ValidationError(
-                    _("Oops! Something went wrong on our end. Please try again later.")
-                ),
-            )
-        except ValueError:
-            form.add_error(
-                "imei_number",
-                ValidationError(
-                    _("Oops! Something went wrong on our end. Please try again later.")
-                ),
-            )
-        if self.profile.todo_list.items.filter(view__exact="profile assets").exists():
-            todo = self.profile.todo_list.items.get(view__exact="profile assets")
-            todo.is_complete = True
-            todo.save()
-        return super().form_valid(form=form)
-
-    def get_unit(self, form: AssetUploadForm, session: WialonSession) -> WialonUnit:
-        unit_id: str | None = get_id_from_iccid(
-            form.cleaned_data["imei_number"], session=session
-        )
-        if not unit_id:
-            raise ValueError(
-                f"Could not locate unit by imei '{form.cleaned_data["imei_number"]}'"
-            )
-        return WialonUnit(id=unit_id, session=session)
-
-    def asset_upload_flow(self, form: AssetUploadForm) -> None:
-        with WialonSession() as session:
-            unit = self.get_unit(form, session=session)
-            available_group = WialonUnitGroup(id="27890571", session=session)
-            user_group = WialonUnitGroup(
-                id=str(self.profile.wialon_group_id), session=session
-            )
-
-            unit.rename(form.cleaned_data["asset_name"])
-            user_group.add_item(unit)
-            available_group.rm_item(unit)
-
-
-class TrackerProfileSubscriptionView(LoginRequiredMixin, FormView):
-    form_class = SubscriptionSelectForm
-    template_name = "terminusgps_tracker/forms/profile_subscription.html"
-    extra_context = {"legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"]}
-    login_url = reverse_lazy("tracker login")
-    permission_denied_message = "Please login and try again."
-    raise_exception = False
-    http_method_names = ["get", "post"]
-    success_url = reverse_lazy("tracker profile")
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        if request.user:
-            try:
-                self.profile = TrackerProfile.objects.get(user=request.user)
-            except TrackerProfile.DoesNotExist:
-                self.profile = None
-
-    def get_initial(self, **kwargs) -> dict[str, Any]:
-        initial: dict[str, Any] = super().get_initial(**kwargs)
-        initial["subscription"] = self.request.GET.get("tier", "Cu")
-        return initial
-
-    def form_valid(self, form: SubscriptionSelectForm) -> HttpResponse:
-        if self.profile:
-            tier = form.cleaned_data["subscription_tier"]
-            new_subscription = TrackerSubscription.objects.create(
-                name=f"{self.profile.user.username}'s {tier} Subscription", tier=tier
-            )
-            self.profile.subscription = new_subscription
-            if self.profile.todo_list.items.filter(
-                view__exact="tracker subscriptions"
-            ).exists():
-                todo = self.profile.todo_list.items.get(
-                    view__exact="tracker subscriptions"
-                )
-                todo.is_complete = True
-                todo.save()
-            self.profile.save()
-        return super().form_valid(form=form)
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        if self.profile:
-            context["title"] = f"{self.profile.user.first_name}'s Subscription"
-
-        if not self.profile or not self.profile.subscription:
-            context["subtitle"] = "You haven't selected a subscription yet"
-        else:
-            context["subtitle"] = (
-                f"You're currently on our {self.profile.subscription.tier_display} plan"
-            )
-        return context
-
-
-class TrackerProfileNotificationsView(LoginRequiredMixin, TemplateView):
-    template_name = "terminusgps_tracker/forms/profile_notifications.html"
-    extra_context = {
-        "subtitle": "Create, update, or delete your notifications",
-        "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
-    }
-    login_url = reverse_lazy("tracker login")
-    permission_denied_message = "Please login and try again."
-    raise_exception = False
-    http_method_names = ["get", "post"]
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        try:
-            self.profile = TrackerProfile.objects.get(user=self.request.user)
-        except TrackerProfile.DoesNotExist:
-            self.profile = None
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        if self.profile:
-            context["profile"] = self.profile
-            context["title"] = f"{self.profile.user.first_name}'s Notifications"
-            context["notifications"] = self.profile.notifications.all()
-        return context
+from terminusgps_tracker.http import HttpRequest
+from terminusgps_tracker.models.customer import TrackerProfile
+from terminusgps_tracker.forms import (
+    AssetCreationForm,
+    AssetDeletionForm,
+    AssetModificationForm,
+    SubscriptionCreationForm,
+    SubscriptionDeletionForm,
+    SubscriptionModificationForm,
+    NotificationCreationForm,
+    NotificationDeletionForm,
+    NotificationModificationForm,
+    PaymentMethodCreationForm,
+    PaymentMethodDeletionForm,
+)
 
 
 class TrackerProfileView(LoginRequiredMixin, TemplateView):
@@ -219,7 +45,238 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
         if self.profile:
             context["title"] = f"{self.profile.user.first_name}'s Profile"
             context["profile"] = self.profile
+            context["todo_list"] = self.profile.todo_list
             context["todos"] = self.profile.todo_list.items.all()
-            context["subscription_tier"] = self.profile.subscription.tier_display
-            context["subscription_gradient"] = self.profile.subscription.tier_gradient
+        if self.profile and self.profile.subscription:
+            context["subscription"] = self.profile.subscription
+            context["subscription_tier"] = self.profile.subscription.get_tier_display()
+            context["subscription_gradient"] = (
+                self.profile.subscription.tier_display_gradient
+            )
         return context
+
+
+class TrackerProfileAssetView(LoginRequiredMixin, TemplateView):
+    template_name = "terminusgps_tracker/profile_assets.html"
+    extra_context = {
+        "title": "Your Assets",
+        "subtitle": "Register, modify, or delete your assets",
+    }
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get"]
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        try:
+            self.profile = TrackerProfile.objects.get(user=request.user)
+        except TrackerProfile.DoesNotExist:
+            self.profile = None
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        if self.profile:
+            context["title"] = f"{self.profile.user.first_name}'s Assets"
+        return context
+
+
+class TrackerProfileSubscriptionView(LoginRequiredMixin, TemplateView):
+    template_name = "terminusgps_tracker/profile_subscription.html"
+    extra_context = {"title": "Your Subscription"}
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get"]
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        try:
+            self.profile = TrackerProfile.objects.get(user=request.user)
+        except TrackerProfile.DoesNotExist:
+            self.profile = None
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        if self.profile:
+            context["subtitle"] = "You have not selected a subscription yet."
+        elif self.profile and self.profile.subscription:
+            context["subtitle"] = (
+                f"Thanks for subscribing! You're on the {self.profile.subscription.tier_display_gradient} plan."
+            )
+        return context
+
+
+class TrackerProfileNotificationView(LoginRequiredMixin, TemplateView):
+    template_name = "terminusgps_tracker/profile_notifications.html"
+    extra_context = {
+        "title": "Your Notifications",
+        "subtitle": "Register, modify, or delete your notifications",
+    }
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get"]
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        try:
+            self.profile = TrackerProfile.objects.get(user=request.user)
+        except TrackerProfile.DoesNotExist:
+            self.profile = None
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        if self.profile:
+            context["title"] = f"{self.profile.user.first_name}'s Notifications"
+        return context
+
+
+class TrackerProfilePaymentMethodView(LoginRequiredMixin, TemplateView):
+    template_name = "terminusgps_tracker/profile_payments.html"
+    extra_context = {
+        "title": "Your payment methods",
+        "subtitle": "Register, modify, or delete your payment methods",
+    }
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get"]
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        try:
+            self.profile = TrackerProfile.objects.get(user=request.user)
+        except TrackerProfile.DoesNotExist:
+            self.profile = None
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        if self.profile:
+            context["title"] = f"{self.profile.user.first_name}'s Payment Methods"
+        return context
+
+
+class TrackerProfileAssetCreationView(LoginRequiredMixin, FormView):
+    form_class = AssetCreationForm
+    template_name = "terminusgps_tracker/forms/profile/create_asset.html"
+    extra_context = {"title": "New asset", "subtitle": "Register a new asset by IMEI #"}
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+
+
+class TrackerProfileAssetDeletionView(LoginRequiredMixin, FormView):
+    form_class = AssetDeletionForm
+    template_name = "terminusgps_tracker/forms/profile/delete_asset.html"
+    extra_context = {"title": "New asset", "subtitle": "Register a new asset by IMEI #"}
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+
+
+class TrackerProfileAssetModificationView(LoginRequiredMixin, FormView):
+    form_class = AssetModificationForm
+    template_name = "terminusgps_tracker/forms/profile/modify_asset.html"
+    extra_context = {"title": "New asset", "subtitle": "Register a new asset by IMEI #"}
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+
+
+class TrackerProfileSubscriptionCreationView(LoginRequiredMixin, FormView):
+    form_class = SubscriptionCreationForm
+    template_name = "terminusgps_tracker/forms/profile/create_subscription.html"
+    extra_context = {"title": "New asset", "subtitle": "Register a new asset by IMEI #"}
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+
+
+class TrackerProfileSubscriptionDeletionView(LoginRequiredMixin, FormView):
+    form_class = SubscriptionDeletionForm
+    template_name = "terminusgps_tracker/forms/profile/delete_subscription.html"
+    extra_context = {"title": "Delete Asset", "subtitle": "Delete an asset by IMEI #"}
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+
+
+class TrackerProfileSubscriptionModificationView(LoginRequiredMixin, FormView):
+    form_class = SubscriptionModificationForm
+    template_name = "terminusgps_tracker/forms/profile/modify_subscription.html"
+    extra_context = {"title": "Modify Asset", "subtitle": "Modify an asset by IMEI #"}
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+
+
+class TrackerProfileNotificationCreationView(LoginRequiredMixin, FormView):
+    form_class = NotificationCreationForm
+    template_name = "terminusgps_tracker/forms/profile/create_notification.html"
+    extra_context = {
+        "title": "New Notification",
+        "subtitle": "Create a new notification",
+    }
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+
+
+class TrackerProfileNotificationDeletionView(LoginRequiredMixin, FormView):
+    form_class = NotificationDeletionForm
+    template_name = "terminusgps_tracker/forms/profile/delete_notification.html"
+    extra_context = {
+        "title": "Delete Notification",
+        "subtitle": "Delete a notification",
+    }
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+
+
+class TrackerProfileNotificationModificationView(LoginRequiredMixin, FormView):
+    form_class = NotificationModificationForm
+    template_name = "terminusgps_tracker/forms/profile/modify_notification.html"
+    extra_context = {
+        "title": "Modify Notification",
+        "subtitle": "Modify a notification",
+    }
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+
+
+class TrackerProfilePaymentMethodCreationView(LoginRequiredMixin, FormView):
+    form_class = PaymentMethodCreationForm
+    template_name = "terminusgps_tracker/forms/profile/create_payment.html"
+    extra_context = {
+        "title": "New Payment Method",
+        "subtitle": "Add a new payment method",
+    }
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+
+
+class TrackerProfilePaymentMethodDeletionView(LoginRequiredMixin, FormView):
+    form_class = PaymentMethodDeletionForm
+    template_name = "terminusgps_tracker/forms/profile/delete_payment.html"
+    extra_context = {
+        "title": "Delete Payment Method",
+        "subtitle": "Delete a payment method",
+    }
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
