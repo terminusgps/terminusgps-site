@@ -1,8 +1,21 @@
+from authorizenet.apicontractsv1 import customerProfileType, merchantAuthenticationType
 from django.db import models
 from django.contrib.auth import get_user_model
 
 from django.urls import reverse
 
+from authorizenet.apicontractsv1 import (
+    createCustomerProfileRequest,
+    createCustomerProfileResponse,
+    deleteCustomerProfileRequest,
+    deleteCustomerProfileResponse,
+)
+from authorizenet.apicontrollers import (
+    createCustomerProfileController,
+    deleteCustomerProfileController,
+)
+
+from terminusgps_tracker.integrations.authorizenet.auth import get_merchant_auth
 from terminusgps_tracker.integrations.wialon.session import WialonSession
 from terminusgps_tracker.integrations.wialon.items import (
     WialonUser,
@@ -79,26 +92,26 @@ class TrackerProfile(models.Model):
             todo_list = TodoList.objects.create()
             todo_list.items.set(todos)
             self.todo_list = todo_list
+        if not self.authorizenet_profile_id:
+            request = self._generate_create_customer_profile_request(
+                merchantAuthentication=get_merchant_auth(), live_mode=False
+            )
+            self.authorizenet_profile_id = self._create_authorizenet_profile(request)
         super().save(**kwargs)
 
     def delete(
-        self,
-        delete_wialon_objs: bool = False,
-        delete_authorizenet_objs: bool = False,
-        using=None,
-        keep_parents: bool = False,
-        **kwargs,
+        self, using=None, keep_parents: bool = False, **kwargs
     ) -> tuple[int, dict[str, int]]:
-        if delete_wialon_objs:
-            with WialonSession() as session:
-                WialonUser(id=str(self.wialon_user_id), session=session).delete()
-                WialonUnitGroup(id=str(self.wialon_group_id), session=session).delete()
-                WialonResource(
-                    id=str(self.wialon_resource_id), session=session
-                ).delete()
-                WialonUser(id=str(self.wialon_super_user_id), session=session).delete()
-        if delete_authorizenet_objs:
-            ...
+        with WialonSession() as session:
+            WialonUser(id=str(self.wialon_user_id), session=session).delete()
+            WialonUnitGroup(id=str(self.wialon_group_id), session=session).delete()
+            WialonResource(id=str(self.wialon_resource_id), session=session).delete()
+            WialonUser(id=str(self.wialon_super_user_id), session=session).delete()
+
+        delete_request = self._generate_delete_customer_profile_request(
+            merchantAuthentication=get_merchant_auth()
+        )
+        self._delete_authorizenet_profile(delete_request)
         return super().delete(using=using, keep_parents=keep_parents, **kwargs)
 
     @property
@@ -108,3 +121,44 @@ class TrackerProfile(models.Model):
     @property
     def customerProfileId(self) -> str:
         return str(self.authorizenet_profile_id)
+
+    def _create_authorizenet_profile(
+        self, request: createCustomerProfileRequest
+    ) -> str:
+        controller = createCustomerProfileController(request)
+        controller.execute()
+        response: createCustomerProfileResponse = controller.getresponse()
+        if response.messages.resultCode != "Ok":
+            raise ValueError(
+                f"Failed to properly create Authorize.NET customer profile: {response.messages.message[0]["text"].text}"
+            )
+        return response.customerProfileId
+
+    def _delete_authorizenet_profile(
+        self, request: deleteCustomerProfileRequest
+    ) -> None:
+        controller = deleteCustomerProfileController(request)
+        controller.execute()
+        response: deleteCustomerProfileResponse = controller.getresponse()
+        if response.messages.resultCode != "Ok":
+            raise ValueError(
+                f"Failed to properly delete Authorize.NET customer profile: {response.messages.message[0]["text"].text}"
+            )
+
+    def _generate_delete_customer_profile_request(
+        self, merchantAuthentication: merchantAuthenticationType
+    ) -> dict:
+        return deleteCustomerProfileRequest(
+            merchantAuthentication=merchantAuthentication,
+            customerProfileId=self.authorizenet_profile_id,
+        )
+
+    def _generate_create_customer_profile_request(
+        self, merchantAuthentication: merchantAuthenticationType
+    ) -> dict:
+        return createCustomerProfileRequest(
+            merchantAuthentication=merchantAuthentication,
+            profile=customerProfileType(
+                merchantCustomerId=self.merchantCustomerId, email=self.user.username
+            ),
+        )

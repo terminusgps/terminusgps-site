@@ -21,7 +21,7 @@
                     <img class="size-32 flex-none rounded-lg" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo" height="60" width="60">
                     <div class="flex flex-col">
                         <h1 class="text-2xl text-terminus-gray-800 dark:text-terminus-gray-100">{{ title }}</h1>
-                        {% if subtitle %}<h2 class="text-md font-light text-terminus-gray-700 md:text-xl md:tracking-wide dark:text-terminus-gray-200">{{ subtitle }}</h2>{% endif %}
+                        {% if subtitle %}<h2 class="text-md font-light text-terminus-gray-700 md:text-xl md:tracking-wide dark:text-terminus-gray-200">{{ subtitle|safe }}</h2>{% endif %}
                     </div>
                 </div>
                 {% if messages %}

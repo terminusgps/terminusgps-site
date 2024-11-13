@@ -5,7 +5,6 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
-from django.db import transaction
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
@@ -15,7 +14,6 @@ from wialon import WialonError
 from terminusgps_tracker.forms import TrackerAuthenticationForm, TrackerRegistrationForm
 from terminusgps_tracker.http import HttpRequest
 from terminusgps_tracker.models import TrackerProfile
-from terminusgps_tracker.models.customer import TodoItem, TodoList
 from terminusgps_tracker.integrations.wialon import constants
 from terminusgps_tracker.integrations.wialon.session import WialonSession
 from terminusgps_tracker.integrations.wialon.items import (

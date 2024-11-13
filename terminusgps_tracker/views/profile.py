@@ -139,8 +139,9 @@ class TrackerProfileSubscriptionView(LoginRequiredMixin, FormView):
 
     def form_valid(self, form: SubscriptionSelectForm) -> HttpResponse:
         if self.profile:
-            new_subscription = TrackerSubscription.objects.get(
-                tier=form.cleaned_data["subscription_tier"]
+            tier = form.cleaned_data["subscription_tier"]
+            new_subscription = TrackerSubscription.objects.create(
+                name=f"{self.profile.user.username}'s {tier} Subscription", tier=tier
             )
             self.profile.subscription = new_subscription
             if self.profile.todo_list.items.filter(
@@ -163,7 +164,7 @@ class TrackerProfileSubscriptionView(LoginRequiredMixin, FormView):
             context["subtitle"] = "You haven't selected a subscription yet"
         else:
             context["subtitle"] = (
-                f"You're currently on our {self.profile.subscription.get_tier_display()} plan"
+                f"You're currently on our {self.profile.subscription.tier_display} plan"
             )
         return context
 
@@ -216,10 +217,9 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
         if self.profile:
+            context["title"] = f"{self.profile.user.first_name}'s Profile"
             context["profile"] = self.profile
             context["todos"] = self.profile.todo_list.items.all()
-            context["title"] = f"{self.profile.user.first_name}'s Profile"
-            context["subscription"] = (
-                self.profile.subscription.get_tier_display() or None
-            )
+            context["subscription_tier"] = self.profile.subscription.tier_display
+            context["subscription_gradient"] = self.profile.subscription.tier_gradient
         return context
