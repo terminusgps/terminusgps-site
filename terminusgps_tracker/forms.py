@@ -131,7 +131,57 @@ class AssetDeletionForm(forms.Form):
     )
 
 
-class PaymentMethodCreationForm(forms.Form): ...
+class PaymentMethodCreationForm(forms.Form):
+    credit_card_number = forms.CharField(
+        min_length=12,
+        max_length=16,
+        widget=widgets.TextInput(attrs={"class": "w-full bg-white"}),
+    )
+    credit_card_expiry_month = forms.CharField(
+        min_length=2,
+        max_length=2,
+        widget=widgets.TextInput(attrs={"class": "w-full bg-white"}),
+    )
+    credit_card_expiry_year = forms.CharField(
+        min_length=2,
+        max_length=2,
+        widget=widgets.TextInput(attrs={"class": "w-full bg-white"}),
+    )
+    credit_card_ccv = forms.CharField(
+        min_length=3,
+        max_length=4,
+        widget=widgets.TextInput(attrs={"class": "w-full bg-white"}),
+    )
+    address_street = forms.CharField(
+        min_length=12,
+        max_length=16,
+        widget=widgets.TextInput(attrs={"class": "w-full bg-white"}),
+    )
+    address_city = forms.CharField(
+        min_length=12,
+        max_length=16,
+        widget=widgets.TextInput(attrs={"class": "w-full bg-white"}),
+    )
+    address_state = forms.CharField(
+        min_length=12,
+        max_length=16,
+        widget=widgets.TextInput(attrs={"class": "w-full bg-white"}),
+    )
+    address_zip = forms.CharField(
+        min_length=12,
+        max_length=16,
+        widget=widgets.TextInput(attrs={"class": "w-full bg-white"}),
+    )
+    address_country = forms.CharField(
+        min_length=12,
+        max_length=16,
+        widget=widgets.TextInput(attrs={"class": "w-full bg-white"}),
+    )
+    address_phone = forms.CharField(
+        min_length=12,
+        max_length=16,
+        widget=widgets.TextInput(attrs={"class": "w-full bg-white"}),
+    )
 
 
 class PaymentMethodDeletionForm(forms.Form): ...

@@ -47,12 +47,7 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
             context["profile"] = self.profile
             context["todo_list"] = self.profile.todo_list
             context["todos"] = self.profile.todo_list.items.all()
-        if self.profile and self.profile.subscription:
-            context["subscription"] = self.profile.subscription
-            context["subscription_tier"] = self.profile.subscription.get_tier_display()
-            context["subscription_gradient"] = (
-                self.profile.subscription.tier_display_gradient
-            )
+            context["subscription"] = self.profile.subscription or None
         return context
 
 
@@ -98,11 +93,11 @@ class TrackerProfileSubscriptionView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        if self.profile:
-            context["subtitle"] = "You have not selected a subscription yet."
-        elif self.profile and self.profile.subscription:
+        if self.profile and not self.profile.subscription:
+            context["subtitle"] = "You have not selected a subscription yet"
+        elif self.profile:
             context["subtitle"] = (
-                f"Thanks for subscribing! You're on the {self.profile.subscription.tier_display_gradient} plan."
+                f"Thanks for subscribing! You're on the {self.profile.subscription.tier_display_gradient} plan"
             )
         return context
 
