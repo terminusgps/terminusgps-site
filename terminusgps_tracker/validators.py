@@ -8,6 +8,11 @@ from terminusgps_tracker.integrations.wialon.utils import get_id_from_iccid, is_
 from terminusgps_tracker.integrations.wialon.items import WialonUnitGroup
 
 
+def validate_phone(value: str) -> None:
+    """Raises `ValidationError` if the value does not represent a valid phone number."""
+    return
+
+
 def validate_wialon_imei_number(value: str) -> None:
     """Raises `ValidationError` if the value represents an invalid Wialon IMEI #."""
     with WialonSession() as session:

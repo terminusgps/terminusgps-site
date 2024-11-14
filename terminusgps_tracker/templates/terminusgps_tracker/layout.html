@@ -14,6 +14,14 @@
                 <img class="size-12" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo">
                 <h2 class="text-xl font-semibold tracking-wide text-terminus-black dark:text-terminus-white">Terminus GPS Tracker</h2>
             </a>
+            {% if user and user.is_authenticated %}
+            <a href="{% url 'tracker logout' %}" class="flex-inline gap-2 hover:bg-gray-300 p-4 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                </svg>
+                <span class="text-md">Logout</span>
+            </a>
+            {% endif %}
         </nav>
         <main>
             <div class="m-8 border border-solid bg-stone-100 dark:bg-terminus-gray-900">
@@ -25,7 +33,7 @@
                     </div>
                 </div>
                 {% if messages %}
-                <div class="w-full block bg-green-200/80 border-green-300 text-green-700">
+                <div class="p-4 w-full block bg-green-200/80 border-green-300 text-green-700">
                     <ul class="list-none list-inside">
                         {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
                     </ul>

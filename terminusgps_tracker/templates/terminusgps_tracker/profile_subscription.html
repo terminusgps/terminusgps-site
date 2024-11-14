@@ -1,16 +1,22 @@
 {% extends "terminusgps_tracker/layout.html" %}
 {% load static %}
 {% block content %}
-<div class="flex mx-auto">
-    <div class="flex space-x-2 p-4">
-        <a href="https://apps.apple.com/us/app/terminus-gps-mobile/id1419439009">
-            <img src="{% static 'terminusgps_tracker/download_app_store.svg' %}" class="size-48">
-            <span class="sr-only">Download the app from the Apple App Store</span>
-        </a>
-        <a href="https://play.google.com/store/apps/details?id=com.terminusgps.track&pcampaignid=web_share">
-            <img src="{% static 'terminusgps_tracker/download_play_store.svg' %}" class="size-48">
-            <span class="sr-only">Download the app from the Google Play Store</span>
-        </a>
-    </div>
+{% if subscription %}
+<div class="">
+    <h2>You're on the {{ subscription.tier_display_gradient }} plan!</h2>
 </div>
+{% else %}
+<form action="{% url 'profile create subscription' %}" method="post" class="m-4" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
+    {% csrf_token %}
+    {{ form }}
+    <div class="flex justify-between gap-2">
+        <a href="{% url 'tracker subscriptions' %}" class="text-center w-full rounded-md border border-solid border-gray-600 bg-gray-500 px-4 py-2 text-gray-50 hover:bg-gray-300 hover:text-black">
+            Back
+        </a>
+        <button class="w-full rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-gray-50 hover:from-terminus-red-300 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
+            Create
+        </button>
+    </div>
+</form>
+{% endif %}
 {% endblock content %}

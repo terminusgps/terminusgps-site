@@ -3,13 +3,35 @@
 {% block content %}
 <form action="{% url 'profile create payment' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
     {% csrf_token %}
-    <div class="grid grid-cols-2 gap-8">
-        <h2>Credit Card</h2>
+    <div class="grid grid-cols-2 gap-8 mb-8">
+        <div class="flex flex-col gap-4">
+            <h2 class="text-lg">Credit Card</h2>
+            <p class="text-sm"><em>NOTE:</em> Your selected payment method will be charged at the first of every month according to your selected subscription.<br><br>If you do not have a subscription yet, you will be charged after selection.</p>
+        </div>
         <div class="flex flex-col gap-4">
             {{ form.credit_card_number }}
-            {{ form.credit_card_expiry_month }}
-            {{ form.credit_card_expiry_year }}
+            <div class="flex gap-2">
+                {{ form.credit_card_expiry_month }}
+                {{ form.credit_card_expiry_year }}
+            </div>
             {{ form.credit_card_ccv }}
+        </div>
+    </div>
+    <div class="grid grid-cols-2 gap-8 mb-8">
+        <div class="flex flex-col gap-4">
+            <h2 class="text-lg">Billing Address</h2>
+        </div>
+        <div class="flex flex-col gap-4">
+            {{ form.address_street }}
+            {{ form.address_city }}
+            <div class="flex gap-2">
+                {{ form.address_state }}
+                {{ form.address_country }}
+            </div>
+            <div class="flex gap-2">
+                {{ form.address_zip }}
+                {{ form.address_phone }}
+            </div>
         </div>
     </div>
     <div class="flex justify-evenly gap-2">
