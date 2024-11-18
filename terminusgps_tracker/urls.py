@@ -86,4 +86,5 @@ urlpatterns = [
         views.TrackerProfileNotificationModificationView.as_view(),
         name="profile update notification",
     ),
+    path("test_template/", views.TestTemplateView.as_view(), name="test template"),
 ]

@@ -12,6 +12,9 @@ class TrackerNotification(models.Model):
     method = models.CharField(
         max_length=4, choices=NotificationMethod.choices, default=NotificationMethod.SMS
     )
+    profile = models.OneToOneField(
+        "terminusgps_tracker.TrackerProfile", on_delete=models.CASCADE
+    )
 
     def __str__(self) -> str:
         return self.name

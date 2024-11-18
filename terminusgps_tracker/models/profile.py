@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.urls import reverse
 
 from authorizenet.apicontractsv1 import (
     customerProfileType,
@@ -24,40 +23,8 @@ from terminusgps_tracker.integrations.wialon.items import (
 )
 
 
-class TodoItem(models.Model):
-    label = models.CharField(max_length=64)
-    view = models.CharField(max_length=512)
-    is_complete = models.BooleanField(default=False)
-
-    def __str__(self) -> str:
-        return self.label
-
-    @property
-    def url(self) -> str:
-        return reverse(self.view)
-
-
-class TodoList(models.Model):
-    items = models.ManyToManyField(TodoItem)
-
-    def __str__(self) -> str:
-        return f"To-Do List #{self.pk}"
-
-
 class TrackerProfile(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
-    todo_list = models.OneToOneField(
-        "TodoList", on_delete=models.CASCADE, null=True, blank=True, default=None
-    )
-    notifications = models.ManyToManyField("TrackerNotification")
-    subscription = models.OneToOneField(
-        "TrackerSubscription",
-        on_delete=models.CASCADE,
-        default=None,
-        blank=True,
-        null=True,
-    )
-
     authorizenet_profile_id = models.PositiveBigIntegerField(
         unique=True, null=True, blank=True, default=None
     )
@@ -78,11 +45,6 @@ class TrackerProfile(models.Model):
         return f"{self.user.username}'s Profile"
 
     def save(self, **kwargs) -> None:
-        if not self.todo_list:
-            todos: list[TodoItem] = self._create_starter_todos()
-            self.todo_list = TodoList.objects.create()
-            self.todo_list.items.set(todos)
-
         if not self.authorizenet_profile_id:
             create_request = self._generate_create_customer_profile_request(
                 merchantAuthentication=get_merchant_auth()
@@ -104,19 +66,6 @@ class TrackerProfile(models.Model):
         self._delete_authorizenet_profile(delete_request)
         self._delete_wialon_objects()
         return super().delete(*args, **kwargs)
-
-    def _create_starter_todos(self) -> list[TodoItem]:
-        return [
-            TodoItem.objects.create(
-                label="Register your first asset", view="profile create asset"
-            ),
-            TodoItem.objects.create(
-                label="Upload a payment method", view="profile create payment"
-            ),
-            TodoItem.objects.create(
-                label="Select a subscription plan", view="tracker subscriptions"
-            ),
-        ]
 
     def _delete_wialon_objects(self) -> None:
         with WialonSession() as session:
@@ -141,6 +90,14 @@ class TrackerProfile(models.Model):
     @property
     def customerProfileId(self) -> str:
         return str(self.authorizenet_profile_id)
+
+    @property
+    def firstName(self) -> str:
+        return self.user.first_name
+
+    @property
+    def lastName(self) -> str:
+        return self.user.last_name
 
     def _create_wialon_objects(self, session: WialonSession) -> None:
         admin_user = WialonUser(id="27881459", session=session)

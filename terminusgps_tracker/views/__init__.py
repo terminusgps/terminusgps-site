@@ -25,4 +25,5 @@ from .views import (
     TrackerLoginView,
     TrackerLogoutView,
     TrackerRegistrationView,
+    TestTemplateView,
 )

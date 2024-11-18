@@ -37,29 +37,25 @@ class PaymentMethodCreationForm(forms.Form):
     )
 
     address_street = forms.CharField(
-        min_length=12,
-        max_length=16,
+        max_length=64,
         widget=widgets.TextInput(
             attrs={"placeholder": "Street", "class": "w-full bg-white p-2 rounded-md"}
         ),
     )
     address_city = forms.CharField(
-        min_length=12,
-        max_length=16,
+        max_length=64,
         widget=widgets.TextInput(
             attrs={"placeholder": "City", "class": "w-full bg-white p-2 rounded-md"}
         ),
     )
     address_state = forms.CharField(
-        min_length=12,
-        max_length=16,
+        max_length=32,
         widget=widgets.TextInput(
             attrs={"placeholder": "State", "class": "w-full bg-white p-2 rounded-md"}
         ),
     )
     address_zip = forms.CharField(
-        min_length=12,
-        max_length=16,
+        max_length=9,
         widget=widgets.TextInput(
             attrs={"placeholder": "ZIP #", "class": "w-full bg-white p-2 rounded-md"}
         ),
@@ -75,10 +71,22 @@ class PaymentMethodCreationForm(forms.Form):
         )
     )
     address_phone = forms.CharField(
-        min_length=12,
-        max_length=16,
+        max_length=19,
         widget=widgets.TextInput(
             attrs={"placeholder": "Phone #", "class": "w-full bg-white rounded-md p-2"}
+        ),
+    )
+    is_default = forms.BooleanField(
+        initial=False,
+        widget=widgets.CheckboxInput(
+            attrs={"class": "bg-white rounded-md accent-terminus-red-700"}
+        ),
+    )
+    is_consenting = forms.BooleanField(
+        initial=False,
+        required=True,
+        widget=widgets.CheckboxInput(
+            attrs={"class": "bg-white rounded-md accent-terminus-red-700"}
         ),
     )
 

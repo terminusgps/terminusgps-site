@@ -11,6 +11,13 @@ from django.views.generic import TemplateView, RedirectView, FormView
 from terminusgps_tracker.forms import TrackerRegistrationForm, TrackerAuthenticationForm
 
 
+class TestTemplateView(TemplateView):
+    template_name = "terminusgps_tracker/tooltip.html"
+    content_type = "text/html"
+    extra_context = {"element": "tooltip-logout", "text": "Logout"}
+    http_method_names = ["get"]
+
+
 class TrackerSubscriptionView(TemplateView):
     template_name = "terminusgps_tracker/subscriptions.html"
     content_type = "text/html"

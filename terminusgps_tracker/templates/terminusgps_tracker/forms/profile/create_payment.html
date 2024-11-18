@@ -2,11 +2,12 @@
 {% load static %}
 {% block content %}
 <form action="{% url 'profile create payment' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
+    {{ form.non_field_errors }}
     {% csrf_token %}
-    <div class="grid grid-cols-2 gap-8 mb-8">
+    <div class="mb-8 grid grid-rows-1 gap-8 md:grid-cols-2">
         <div class="flex flex-col gap-4">
             <h2 class="text-lg">Credit Card</h2>
-            <p class="text-sm"><em>NOTE:</em> Your selected payment method will be charged at the first of every month according to your selected subscription.<br><br>If you do not have a subscription yet, you will be charged after selection.</p>
+            <p class="text-sm"><em>NOTE:</em> Your selected payment method will be charged every month starting the day you select a subscription.</p>
         </div>
         <div class="flex flex-col gap-4">
             {{ form.credit_card_number }}
@@ -17,7 +18,7 @@
             {{ form.credit_card_ccv }}
         </div>
     </div>
-    <div class="grid grid-cols-2 gap-8 mb-8">
+    <div class="mb-8 grid grid-rows-1 gap-8 md:grid-cols-2">
         <div class="flex flex-col gap-4">
             <h2 class="text-lg">Billing Address</h2>
         </div>
@@ -34,8 +35,24 @@
             </div>
         </div>
     </div>
+    <div class="mb-8 grid grid-rows-1 gap-8 md:grid-cols-2">
+        <div class="flex flex-col gap-4">
+            <h2 class="text-lg">Set as default payment method?:</h2>
+        </div>
+        <div class="flex-inline bg-white block w-full p-8">
+            {{ form.is_default }}
+        </div>
+    </div>
+    <div class="mb-8 grid grid-rows-1 gap-8 md:grid-cols-2">
+        <div class="flex flex-col gap-4">
+            <h2 class="text-lg">I authorize <a href="{% url 'tracker privacy' %}" class="hover:underline font-semibold">{{ legal_name|default:'Terminus GPS, LLC.' }}</a> to charge this card according to my selected subscription:</h2>
+        </div>
+        <div class="flex-inline bg-white block w-full p-8">
+            {{ form.is_consenting }}
+        </div>
+    </div>
     <div class="flex justify-evenly gap-2">
-        <a href="{% url 'tracker profile' %}" class="text-center grow rounded-md border border-solid border-gray-600 bg-terminus-gray-600 hover:bg-terminus-gray-300 hover:cursor-pointer px-4 py-2 text-gray-50 hover:from-terminus-red-300 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
+        <a href="{% url 'tracker profile' %}" class="grow rounded-md border border-solid border-gray-600 bg-terminus-gray-600 px-4 py-2 text-center text-gray-50 hover:cursor-pointer hover:bg-terminus-gray-300 hover:from-terminus-red-300 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
             Cancel
         </a>
         <button class="grow rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-gray-50 hover:from-terminus-red-300 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">

@@ -4,6 +4,7 @@
 <form action="{% url 'tracker logout' %}" method="post" class="m-4" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
     {% csrf_token %}
     {{ form }}
+    <input class="hidden" type="hidden" name="next" value="{{ next }}"></input>
     <div class="mb-4 grid grid-rows-2">
         <h2 class="mb-2 text-2xl text-center font-semibold">Are you sure you want to logout?</h2>
         {% if user.username %}<h3 class="mb-2 text-xl text-center font-light">Currently logged in as <span class="font-extralight"><em>{{ user.username }}</em></span></h3>{% endif %}
