@@ -1,117 +1,115 @@
+from django.db import models
+from django.conf import settings
+
+from authorizenet.apicontrollers import createCustomerPaymentProfileController
 from authorizenet.apicontractsv1 import (
+    deleteCustomerPaymentProfileRequest,
+    deleteCustomerPaymentProfileResponse,
+    createCustomerPaymentProfileRequest,
+    createCustomerPaymentProfileResponse,
     creditCardType,
     customerAddressType,
     customerPaymentProfileType,
+    merchantAuthenticationType,
     paymentType,
-    createCustomerPaymentProfileRequest,
-    createCustomerPaymentProfileResponse,
-    deleteCustomerPaymentProfileRequest,
-    deleteCustomerPaymentProfileResponse,
 )
-from authorizenet.apicontrollers import createCustomerPaymentProfileController
-from django.db import models
+from terminusgps_tracker.integrations.authorizenet.auth import get_merchant_auth
 
 from terminusgps_tracker.forms.payments import (
     PaymentMethodCreationForm,
     PaymentMethodDeletionForm,
 )
-from terminusgps_tracker.integrations.authorizenet.auth import get_merchant_auth
 
 
 class TrackerPaymentMethod(models.Model):
-    id = models.PositiveBigIntegerField(primary_key=True)
-    is_default = models.BooleanField(default=False)
-    profile = models.ForeignKey(
-        "terminusgps_tracker.TrackerProfile", on_delete=models.CASCADE
+    profile = models.OneToOneField(
+        "terminusgps_tracker.TrackerProfile",
+        on_delete=models.CASCADE,
+        related_name="payments",
     )
+    authorizenet_id = models.PositiveBigIntegerField(
+        default=None, null=True, blank=True
+    )
+    is_default = models.BooleanField(default=False)
 
     def __str__(self) -> str:
-        return f"Paymet Method #{self.id}"
+        username: str = self.profile.user.username
+        return f"{username}'s Payment Method #{self.authorizenet_id}"
 
-    def save(self, **kwargs) -> None:
-        if self.id is None:
-            self.id = self.create_authorizenet_payment_profile(form=kwargs.get("form"))
+    def save(self, form: PaymentMethodCreationForm | None = None, **kwargs) -> None:
+        if form and form.is_valid():
+            paymentProfile: customerPaymentProfileType = self._generate_payment_profile(
+                form
+            )
+            merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
+            testMode: bool = settings.DEBUG
+
+            request = self._generate_create_payment_profile_request(
+                paymentProfile=paymentProfile,
+                merchantAuthentication=merchantAuthentication,
+                testMode=testMode,
+            )
+            controller = createCustomerPaymentProfileController(request)
+            controller.execute()
+            response: createCustomerPaymentProfileResponse = controller.getresponse()
+            if response.messages.statusCode != "Ok":
+                raise ValueError(response.messages.message["text"].text)
+            self.authorizenet_id = int(response.customerPaymentProfileId)
         super().save(**kwargs)
 
-    def delete(self, *args, **kwargs):
-        self.delete_authorizenet_payment_profile(kwargs.get("form"))
-        return super().delete(*args, **kwargs)
+    def delete(self, form: PaymentMethodDeletionForm | None = None, **kwargs):
+        if form and self.authorizenet_id:
+            merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
+            customerProfileId: str = str(self.profile.customerProfileId)
+            customerPaymentProfileId: str = str(self.authorizenet_id)
 
-    def create_authorizenet_payment_profile(
-        self, form: PaymentMethodCreationForm | None = None
-    ) -> str:
-        if form is None:
-            raise ValueError("Cannot create payment profile without form")
-        if self.profile is None:
-            raise ValueError("Cannot create payment profile without customer profile")
-
-        request = self._generate_create_request(form)
-        controller = createCustomerPaymentProfileController(request)
-        controller.execute()
-        response: createCustomerPaymentProfileResponse = controller.getresponse()
-        if response.messages.resultCode != "Ok":
-            raise ValueError(
-                f"Failed to create customer profile: {response.message.messages["text"].text}"
+            request = deleteCustomerPaymentProfileRequest(
+                merchantAuthentication=merchantAuthentication,
+                customerProfileId=customerProfileId,
+                customerPaymentProfileId=customerPaymentProfileId,
             )
-        return str(response.customerPaymentProfileId)
+            controller = deleteCustomerPaymentProfileController(request)
+            controller.execute()
+            response: deleteCustomerPaymentProfileResponse = controller.getresponse()
+            if response.messages.statusCode != "Ok":
+                raise ValueError(response.messages.message["text"].text)
+            self.authorizenet_id = None
+        return super().delete(**kwargs)
 
-    def delete_authorizenet_payment_profile(
-        self, form: PaymentMethodDeletionForm | None = None
-    ) -> None:
-        if form is None:
-            raise ValueError("Cannot delete payment profile without form")
-        if self.profile is None:
-            raise ValueError("Cannot delete payment profile without customer profile")
-
-        request = self._generate_delete_request(form)
-        controller = deleteCustomerPaymentProfileRequest(request)
-        controller.execute()
-        response: deleteCustomerPaymentProfileResponse = controller.getresponse()
-        if response.messages.resultCode != "Ok":
-            raise ValueError(
-                f"Failed to delete customer profile: {response.message.messages["text"].text}"
-            )
-        return
-
-    def _generate_delete_request(self, form: PaymentMethodDeletionForm):
-        profile_id = self.profile.authorizenet_profile_id
-        payment_profile_id = self.id
-
-        return deleteCustomerPaymentProfileRequest(
-            merchantAuthentication=get_merchant_auth(),
-            customerProfileId=profile_id,
-            customerPaymentProfileId=payment_profile_id,
-        )
-
-    def _generate_create_request(self, form: PaymentMethodCreationForm):
-        expiry_date = f"{form.cleaned_data["credit_card_expiry_month"]}-{form.cleaned_data["credit_card_expiry_year"]}"
-        first_name, last_name = (
-            self.profile.user.first_name,
-            self.profile.user.last_name,
-        )
-        customer_profile_id = str(self.profile.authorizenet_profile_id)
-
+    def _generate_create_payment_profile_request(
+        self,
+        paymentProfile: customerPaymentProfileType,
+        merchantAuthentication: merchantAuthenticationType,
+        testMode: bool = False,
+    ) -> createCustomerPaymentProfileRequest:
         return createCustomerPaymentProfileRequest(
-            merchantAuthentication=get_merchant_auth(),
-            customerProfileId=customer_profile_id,
-            paymentProfile=customerPaymentProfileType(
-                billTo=customerAddressType(
-                    firstName=first_name,
-                    lastName=last_name,
-                    address=form.cleaned_data["address_street"],
-                    city=form.cleaned_data["address_city"],
-                    state=form.cleaned_data["address_state"],
-                    zip=form.cleaned_data["address_zip"],
-                    country=form.cleaned_data["address_country"],
-                    phoneNumber=form.cleaned_data["address_phone"],
-                ),
-                payment=paymentType(
-                    creditCard=creditCardType(
-                        cardNumber=form.cleaned_data["credit_card_number"],
-                        expirationDate=expiry_date,
-                        cardCode=form.cleaned_data["credit_card_ccv"],
-                    )
-                ),
-                defaultPaymentProfile=bool(form.cleaned_data["is_default"] == "on"),
+            merchantAuthentication=merchantAuthentication,
+            paymentProfile=paymentProfile,
+            validationMode="testMode" if testMode else "liveMode",
+        )
+
+    def _generate_payment_profile(
+        self, form: PaymentMethodCreationForm
+    ) -> customerPaymentProfileType:
+        return customerPaymentProfileType(
+            customerProfileId=self.profile.customerProfileId,
+            payment=paymentType(
+                creditCard=creditCardType(
+                    cardNumber=form.cleaned_data["credit_card_number"],
+                    expirationDate=f"{form.cleaned_data["credit_card_expiry_month"]}-{form.cleaned_data["credit_card_expiry_year"]}",
+                    cardCode=form.cleaned_data["credit_card_ccv"],
+                )
             ),
+            billTo=customerAddressType(
+                firstName=self.profile.first_name,
+                lastName=self.profile.last_name,
+                email=self.profile.email or self.profile.username,
+                address=form.cleaned_data["address_street"],
+                city=form.cleaned_data["address_city"],
+                state=form.cleaned_data["address_state"],
+                zip=form.cleaned_data["address_zip"],
+                country=form.cleaned_data["address_country"],
+                phoneNumber=form.cleaned_data["address_phone"],
+            ),
+            defaultPaymentProfile=self.is_default,
         )

@@ -23,6 +23,7 @@ from terminusgps_tracker.integrations.wialon.items import WialonUnit, WialonUnit
 from terminusgps_tracker.integrations.wialon.session import WialonSession
 from terminusgps_tracker.integrations.wialon.utils import get_id_from_iccid
 from terminusgps_tracker.models.profile import TrackerProfile
+from terminusgps_tracker.models.todo import TrackerTodoList
 from terminusgps_tracker.forms import (
     AssetCreationForm,
     AssetDeletionForm,
@@ -53,16 +54,23 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
+        self.profile = None
         if request.user.is_authenticated:
             self.profile = TrackerProfile.objects.get(user=self.request.user)
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        if self.profile:
-            context["title"] = f"{self.profile.user.first_name}'s Profile"
-            context["profile"] = self.profile
-            context["todos"] = self.profile.todo_list.items.all()
-            context["subscription"] = self.profile.subscription or None
+        if self.profile is not None:
+            title = f"{self.profile.user.first_name}'s Profile"
+            todo_list, _ = TrackerTodoList.objects.get_or_create(profile=self.profile)
+            subscription, _ = TrackerSubscription.objects.get_or_create(
+                profile=self.profile
+            )
+
+            context["title"] = title
+            context["todos"] = todo_list.todo_items.all()
+            context["subscription_tier"] = subscription.curr_tier
+
         return context
 
 
@@ -186,7 +194,10 @@ class TrackerProfileAssetCreationView(LoginRequiredMixin, FormView):
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
-        self.profile = TrackerProfile.objects.get(user=request.user)
+        if request.user.is_authenticated:
+            self.profile = TrackerProfile.objects.get(user=request.user)
+        else:
+            self.profile = None
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if request.GET.get("imei"):
@@ -229,7 +240,7 @@ class TrackerProfileAssetCreationView(LoginRequiredMixin, FormView):
             return self.form_invalid(form=form)
         else:
             # Complete the todo
-            todo = self.profile.todo_list.items.filter(
+            todo = self.profile.todo_list.todo_items.filter(
                 view__exact="profile create asset"
             )
             if todo.exists():

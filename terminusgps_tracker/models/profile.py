@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db import transaction
 
 from authorizenet.apicontractsv1 import (
     customerProfileType,
@@ -56,7 +57,6 @@ class TrackerProfile(models.Model):
         if not self.wialon_user_id:
             with WialonSession() as session:
                 self._create_wialon_objects(session=session)
-
         super().save(**kwargs)
 
     def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
@@ -66,6 +66,19 @@ class TrackerProfile(models.Model):
         self._delete_authorizenet_profile(delete_request)
         self._delete_wialon_objects()
         return super().delete(*args, **kwargs)
+
+    @transaction.atomic
+    def complete_todo(self, view_name: str) -> None:
+        todo_item = self.todo_list.todo_items.filter(view=view_name).first()
+        if todo_item:
+            todo_item.is_complete = True
+            todo_item.save()
+
+    @transaction.atomic
+    def delete_todo(self, view_name: str) -> None:
+        todo_item = self.todo_list.todo_items.filter(view=view_name).first()
+        if todo_item:
+            del todo_item
 
     def _delete_wialon_objects(self) -> None:
         with WialonSession() as session:

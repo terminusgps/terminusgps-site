@@ -1,13 +1,12 @@
 import terminusgps_tracker.integrations.wialon.flags as flag
 
-UNIT_BASIC_ACCESS_MASK = sum(
+UNIT_GROUP_BASIC = sum(
     [
         flag.ACCESSFLAG_VIEW_ITEM_BASIC,
         flag.ACCESSFLAG_VIEW_ITEM_DETAILED,
         flag.ACCESSFLAG_RENAME_ITEM,
         flag.ACCESSFLAG_VIEW_CUSTOM_FIELDS,
         flag.ACCESSFLAG_MANAGE_CUSTOM_FIELDS,
-        flag.ACCESSFLAG_VIEW_ADMIN_FIELDS,
         flag.ACCESSFLAG_MANAGE_ICON,
         flag.ACCESSFLAG_QUERY_REPORTS,
         flag.ACCESSFLAG_VIEW_ATTACHED_FILES,

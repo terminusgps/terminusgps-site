@@ -1,0 +1,46 @@
+[
+    {
+        "model": "terminusgps_tracker.TrackerSubscriptionTier",
+        "pk": 1,
+        "fields" : {
+            "name": "Copper",
+            "amount": "19.99",
+            "amount_currency": "USD",
+            "period": "1",
+            "length": "1"
+        }
+    },
+    {
+        "model": "terminusgps_tracker.TrackerSubscriptionTier",
+        "pk": 2,
+        "fields" : {
+            "name": "Silver",
+            "amount": "29.99",
+            "amount_currency": "USD",
+            "period": "1",
+            "length": "1"
+        }
+    },
+    {
+        "model": "terminusgps_tracker.TrackerSubscriptionTier",
+        "pk": 3,
+        "fields" : {
+            "name": "Gold",
+            "amount": "39.99",
+            "amount_currency": "USD",
+            "period": "1",
+            "length": "1"
+        }
+    },
+    {
+        "model": "terminusgps_tracker.TrackerSubscriptionTier",
+        "pk": 4,
+        "fields" : {
+            "name": "Platinum",
+            "amount": "49.99",
+            "amount_currency": "USD",
+            "period": "1",
+            "length": "1"
+        }
+    }
+]
