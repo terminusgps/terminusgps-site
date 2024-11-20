@@ -1,5 +1,4 @@
 from django.urls import path
-
 from . import views
 
 urlpatterns = [
@@ -47,7 +46,7 @@ urlpatterns = [
         name="profile create subscription",
     ),
     path(
-        "profile/subscription/delete/<int:imei_number>/",
+        "profile/subscription/delete/",
         views.TrackerProfileSubscriptionDeletionView.as_view(),
         name="profile delete subscription",
     ),
@@ -86,5 +85,19 @@ urlpatterns = [
         views.TrackerProfileNotificationModificationView.as_view(),
         name="profile update notification",
     ),
-    path("test_template/", views.TestTemplateView.as_view(), name="test template"),
+    path(
+        "profile/shipping/",
+        views.TrackerProfileShippingAddressView.as_view(),
+        name="profile shipping address",
+    ),
+    path(
+        "profile/shipping/new/",
+        views.TrackerProfileShippingAddressCreationView.as_view(),
+        name="profile create shipping address",
+    ),
+    path(
+        "profile/shipping/delete/",
+        views.TrackerProfileShippingAddressDeletionView.as_view(),
+        name="profile delete shipping address",
+    ),
 ]

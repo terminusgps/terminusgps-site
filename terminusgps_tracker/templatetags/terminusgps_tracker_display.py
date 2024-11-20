@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.template import Library
+from django.urls import reverse_lazy
 from django.utils.safestring import SafeString, mark_safe
 
 from terminusgps_tracker.models.subscription import TrackerSubscriptionTier
@@ -20,14 +21,33 @@ def render_todo_item(todo: TodoItem) -> dict[str, Any]:
             '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-red-500"><path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>'
         )
 
-    return {
-        "label": todo.label,
-        "url": todo.get_absolute_url(),
-        "complete": todo.is_complete,
-        "svg": svg_str,
-    }
+    return {"label": todo.label, "url": todo.get_absolute_url(), "svg": svg_str}
 
 
 @register.inclusion_tag("terminusgps_tracker/subscription_card.html")
 def render_subscription_card(tier: TrackerSubscriptionTier) -> dict[str, Any]:
-    return {"name": tier.name, "rate": tier.amount}
+    match tier.name:
+        case "Copper":
+            bg_gradient = "from-orange-700 via-orange-300 to-orange-700"
+            text_color = "#f4f4f4"
+        case "Silver":
+            bg_gradient = "from-gray-700 via-gray-300 to-gray-700"
+            text_color = "#f4f4f4"
+        case "Gold":
+            bg_gradient = "from-yellow-700 via-yellow-300 to-yellow-700"
+            text_color = "#f4f4f4"
+        case "Platinum":
+            bg_gradient = "from-gray-500 via-gray-100 to-gray-500"
+            text_color = "#f4f4f4"
+        case _:
+            bg_gradient = "from-gray-700 via-gray-300 to-gray-700"
+            text_color = "#f4f4f4"
+    print({feature.name: feature.amount for feature in tier.features.all()})
+    return {
+        "name": tier.name,
+        "amount": tier.amount,
+        "features": {feature.name: feature.amount for feature in tier.features.all()},
+        "text_color": text_color,
+        "bg_gradient": bg_gradient,
+        "select_url": reverse_lazy("profile create subscription"),
+    }

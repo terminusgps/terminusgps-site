@@ -2,6 +2,7 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
@@ -36,8 +37,13 @@ from terminusgps_tracker.forms import (
     NotificationModificationForm,
     PaymentMethodCreationForm,
     PaymentMethodDeletionForm,
+    ShippingAddressCreationForm,
+    ShippingAddressDeletionForm,
 )
-from terminusgps_tracker.models.payment import TrackerPaymentMethod
+from terminusgps_tracker.models.payment import (
+    TrackerPaymentMethod,
+    TrackerShippingAddress,
+)
 from terminusgps_tracker.models.subscription import TrackerSubscription
 
 
@@ -353,36 +359,14 @@ class TrackerProfileSubscriptionCreationView(LoginRequiredMixin, FormView):
     http_method_names = ["get", "post"]
     success_url = reverse_lazy("tracker profile")
 
-    def get_initial(self) -> dict[str, Any]:
-        initial = super().get_initial()
-        if self.request.GET.get("tier"):
-            initial["subscription_tier"] = self.request.GET.get("tier", "Cu")
-        return initial
-
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
 
     def form_valid(self, form: SubscriptionCreationForm) -> HttpResponse:
-        if not self.profile.subscription:
-            subscription_tier: str = form.cleaned_data["subscription_tier"]
-            subscription_name: str = f"{self.profile.user.username}'s Subscription"
-            subscription_duration: int = 12
-            subscription = TrackerSubscription.objects.create(
-                name=subscription_name,
-                tier=subscription_tier,
-                duration=subscription_duration,
-            )
-            self.profile.subscription = subscription
-            self.profile.save()
-
-        todo = self.profile.todo_list.items.filter(
-            view__exact="profile create subscription"
-        )
-        if todo.exists():
-            todo_item = todo.first()
+        todo_item = self.profile.todo_list.todo_items.filter(view=str(self)).first()
+        if todo_item.exists() and not todo_item.is_complete:
             todo_item.is_complete = True
-            todo_item.view = "tracker profile"
             todo_item.save()
         return super().form_valid(form=form)
 
@@ -501,72 +485,20 @@ class TrackerProfilePaymentMethodCreationView(LoginRequiredMixin, FormView):
     raise_exception = False
     http_method_names = ["get", "post"]
     success_url = reverse_lazy("profile payments")
+    success_message = "%(username)s's payment method was properly added"
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
 
-    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        form_cls = self.get_form_class()
-        form = form_cls(request.POST)
-        print(form)
-        print(form.errors)
-        return super().post(request, *args, **kwargs)
-
     def form_valid(self, form: PaymentMethodCreationForm) -> HttpResponse:
-        request = self._generate_create_request(form)
-        controller = createCustomerPaymentProfileController(request)
-        controller.execute()
-        response: createCustomerPaymentProfileResponse = controller.getresponse()
-        if response.messages.resultCode != "Ok":
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Failed to create customer payment profile: %(error)s"),
-                    code="invalid",
-                    params={"error": response.messages.message["text"].text},
-                ),
-            )
-            return self.form_invalid(form=form)
-
-        if not self.profile.payments:
-            self.profile.payments.set(
-                [
-                    TrackerPaymentMethod.objects.create(
-                        id=int(response.customerPaymentProfileId), profile=self.profile
-                    )
-                ]
-            )
+        payment_obj = TrackerPaymentMethod.objects.create(profile=self.profile)
+        payment_obj.save(form)
         return super().form_valid(form=form)
 
-    def _generate_create_request(self, form: PaymentMethodCreationForm):
-        expirationDate = f"{form.cleaned_data["credit_card_expiry_month"]}-{form.cleaned_data["credit_card_expiry_year"]}"
-        is_default = bool(form.cleaned_data["is_default"] == "on")
-        return createCustomerPaymentProfileRequest(
-            merchantAuthentication=get_merchant_auth(),
-            customerProfileId=str(self.profile.authorizenet_profile_id),
-            paymentProfile=customerPaymentProfileType(
-                billTo=customerAddressType(
-                    firstName=str(self.profile.user.first_name),
-                    lastName=str(self.profile.user.last_name),
-                    email=str(self.profile.user.username),
-                    address=form.cleaned_data["address_street"],
-                    city=form.cleaned_data["address_city"],
-                    state=form.cleaned_data["address_state"],
-                    zip=form.cleaned_data["address_zip"],
-                    country=form.cleaned_data["address_country"],
-                    phoneNumber=form.cleaned_data["address_phone"],
-                ),
-                payment=paymentType(
-                    creditCard=creditCardType(
-                        cardNumber=form.cleaned_data["credit_card_number"],
-                        expirationDate=expirationDate,
-                        cardCode=form.cleaned_data["credit_card_ccv"],
-                    )
-                ),
-                defaultPaymentProfile=is_default,
-            ),
-            validationMode="liveMode" if not settings.DEBUG else "testMode",
+    def get_success_message(self, cleaned_data: dict[str, Any]) -> str:
+        return self.success_message % dict(
+            cleaned_data, username=cleaned_data.get("username")
         )
 
 
@@ -576,6 +508,73 @@ class TrackerProfilePaymentMethodDeletionView(LoginRequiredMixin, FormView):
     extra_context = {
         "title": "Delete Payment Method",
         "subtitle": "Delete a payment method",
+    }
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.profile = TrackerProfile.objects.get(user=request.user)
+
+
+class TrackerProfileShippingAddressView(LoginRequiredMixin, TemplateView):
+    template_name = "terminusgps_tracker/profile_shipping_address.html"
+    extra_context = {"title": "Your Shipping Address"}
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.profile = TrackerProfile.objects.get(user=request.user)
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        return context
+
+
+class TrackerProfileShippingAddressCreationView(
+    SuccessMessageMixin, LoginRequiredMixin, FormView
+):
+    form_class = ShippingAddressCreationForm
+    template_name = "terminusgps_tracker/forms/profile/create_shipping_address.html"
+    extra_context = {
+        "title": "Create Shipping Address",
+        "subtitle": "Enter your address below.",
+    }
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get", "post"]
+    success_url = reverse_lazy("tracker profile")
+    success_message = "%(username)s's shipping address was properly set"
+
+    def form_valid(self, form: ShippingAddressCreationForm) -> HttpResponse:
+        address_obj, _ = TrackerShippingAddress.objects.get_or_create(
+            profile=self.profile
+        )
+        address_obj.save(form=form)
+        return super().form_valid(form=form)
+
+    def get_success_message(self, cleaned_data: dict[str, Any]) -> str:
+        return self.success_message % dict(
+            cleaned_data, username=cleaned_data.get("username")
+        )
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.profile = TrackerProfile.objects.get(user=request.user)
+
+
+class TrackerProfileShippingAddressDeletionView(LoginRequiredMixin, FormView):
+    form_class = ShippingAddressDeletionForm
+    template_name = "terminusgps_tracker/forms/profile/delete_shipping_address.html"
+    extra_context = {
+        "title": "Delete Shipping Address",
+        "subtitle": "Are you sure you want to clear your shipping address?",
     }
     login_url = reverse_lazy("tracker login")
     permission_denied_message = "Please login and try again."

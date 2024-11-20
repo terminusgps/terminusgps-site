@@ -1,12 +1,22 @@
 from django.contrib import admin
 
 from terminusgps_tracker.models.profile import TrackerProfile
-from terminusgps_tracker.models.payment import TrackerPaymentMethod
+from terminusgps_tracker.models.payment import (
+    TrackerPaymentMethod,
+    TrackerShippingAddress,
+)
 from terminusgps_tracker.models.subscription import (
     TrackerSubscription,
+    TrackerSubscriptionFeature,
     TrackerSubscriptionTier,
 )
 from terminusgps_tracker.models.todo import TrackerTodoList, TodoItem
+
+
+@admin.register(TrackerShippingAddress)
+class TrackerShippingAddressAdmin(admin.ModelAdmin):
+    list_display = ["profile", "authorizenet_id", "is_default"]
+    readonly_fields = ["profile", "authorizenet_id"]
 
 
 @admin.register(TrackerProfile)
@@ -50,9 +60,21 @@ class TrackerPaymentMethodAdmin(admin.ModelAdmin):
 @admin.register(TrackerSubscription)
 class TrackerSubscriptionAdmin(admin.ModelAdmin):
     list_display = ["profile__user__username", "curr_tier"]
+    list_editable = ["curr_tier"]
 
 
 @admin.register(TrackerSubscriptionTier)
 class TrackerSubscriptionTierAdmin(admin.ModelAdmin):
-    list_display = ["name", "period", "length", "amount"]
+    list_display = ["name", "amount", "unit_cmd"]
     ordering = ["amount"]
+    fieldsets = [
+        (None, {"fields": ["name"]}),
+        ("Wialon", {"fields": ["wialon_group_id", "unit_cmd"]}),
+        ("Details", {"fields": ["amount", "period", "length", "features"]}),
+    ]
+    readonly_fields = ["wialon_group_id"]
+
+
+@admin.register(TrackerSubscriptionFeature)
+class TrackerSubscriptionFeatureAdmin(admin.ModelAdmin):
+    fieldsets = [(None, {"fields": ["name", "amount"]})]

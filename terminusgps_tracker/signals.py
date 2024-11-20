@@ -2,14 +2,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 
-from terminusgps_tracker.models import (
-    TrackerProfile,
-    TrackerTodoList,
-    TrackerSubscription,
-)
+from terminusgps_tracker.models import TrackerProfile
 from terminusgps_tracker.models.todo import TodoItem
-from terminusgps_tracker.integrations.wialon.items import WialonUnitGroup
-from terminusgps_tracker.integrations.wialon.session import WialonSession
 
 
 @receiver(post_save, sender=get_user_model())

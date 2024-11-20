@@ -112,6 +112,10 @@ class TrackerProfile(models.Model):
     def lastName(self) -> str:
         return self.user.last_name
 
+    @property
+    def fullName(self) -> str:
+        return f"{self.firstName} {self.lastName}"
+
     def _create_wialon_objects(self, session: WialonSession) -> None:
         admin_user = WialonUser(id="27881459", session=session)
         super_user = WialonUser(

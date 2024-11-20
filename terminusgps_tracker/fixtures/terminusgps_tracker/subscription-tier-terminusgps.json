@@ -4,10 +4,11 @@
         "pk": 1,
         "fields" : {
             "name": "Copper",
-            "amount": "19.99",
+            "amount": 19.99,
             "amount_currency": "USD",
-            "period": "1",
-            "length": "1"
+            "period": 1,
+            "length": 1,
+            "features": [1, 4, 7]
         }
     },
     {
@@ -15,10 +16,11 @@
         "pk": 2,
         "fields" : {
             "name": "Silver",
-            "amount": "29.99",
+            "amount": 29.99,
             "amount_currency": "USD",
-            "period": "1",
-            "length": "1"
+            "period": 1,
+            "length": 1,
+            "features": [1, 5, 8]
         }
     },
     {
@@ -26,10 +28,11 @@
         "pk": 3,
         "fields" : {
             "name": "Gold",
-            "amount": "39.99",
+            "amount": 39.99,
             "amount_currency": "USD",
-            "period": "1",
-            "length": "1"
+            "period": 1,
+            "length": 1,
+            "features": [1, 2, 3, 6, 9]
         }
     },
     {
@@ -37,10 +40,11 @@
         "pk": 4,
         "fields" : {
             "name": "Platinum",
-            "amount": "49.99",
+            "amount": 49.99,
             "amount_currency": "USD",
-            "period": "1",
-            "length": "1"
+            "period": 1,
+            "length": 1,
+            "features": [1, 2, 3, 6, 9]
         }
     }
 ]

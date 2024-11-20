@@ -4,11 +4,13 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
+from django.db.models import Q, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, RedirectView, FormView
 
 from terminusgps_tracker.forms import TrackerRegistrationForm, TrackerAuthenticationForm
+from terminusgps_tracker.models.subscription import TrackerSubscriptionTier
 
 
 class TestTemplateView(TemplateView):
@@ -23,6 +25,19 @@ class TrackerSubscriptionView(TemplateView):
     content_type = "text/html"
     extra_context = {"title": "Subscriptions"}
     http_method_names = ["get"]
+
+    def get_subscription_tiers(
+        self, total: int = 3
+    ) -> QuerySet[TrackerSubscriptionTier, TrackerSubscriptionTier | None]:
+        queryset: QuerySet[TrackerSubscriptionTier, TrackerSubscriptionTier | None] = (
+            TrackerSubscriptionTier.objects.all().order_by("amount")[:total]
+        )
+        return queryset
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["subscription_tiers"] = self.get_subscription_tiers()
+        return context
 
 
 class TrackerAboutView(TemplateView):
@@ -85,7 +100,7 @@ class TrackerRegistrationView(SuccessMessageMixin, FormView):
     http_method_names = ["get", "post"]
     template_name = "terminusgps_tracker/forms/register.html"
     success_url = reverse_lazy("tracker login")
-    success_message = "%(username)s's profile was created succesfully"
+    success_message = "%(username)s's account was created succesfully"
 
     def get_success_message(self, cleaned_data: dict[str, Any]) -> str:
         return self.success_message % dict(
@@ -98,5 +113,6 @@ class TrackerRegistrationView(SuccessMessageMixin, FormView):
             last_name=form.cleaned_data["last_name"],
             username=form.cleaned_data["username"],
             password=form.cleaned_data["password1"],
+            email=form.cleaned_data["username"],
         )
         return super().form_valid(form=form)

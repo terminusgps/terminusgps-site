@@ -1,5 +1,10 @@
 from .assets import AssetCreationForm, AssetDeletionForm, AssetModificationForm
-from .payments import PaymentMethodCreationForm, PaymentMethodDeletionForm
+from .payments import (
+    PaymentMethodCreationForm,
+    PaymentMethodDeletionForm,
+    ShippingAddressCreationForm,
+    ShippingAddressDeletionForm,
+)
 from .notifications import (
     NotificationCreationForm,
     NotificationDeletionForm,

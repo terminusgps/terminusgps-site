@@ -15,6 +15,9 @@ from .profile import (
     TrackerProfilePaymentMethodView,
     TrackerProfilePaymentMethodCreationView,
     TrackerProfilePaymentMethodDeletionView,
+    TrackerProfileShippingAddressView,
+    TrackerProfileShippingAddressCreationView,
+    TrackerProfileShippingAddressDeletionView,
 )
 from .views import (
     TrackerAboutView,
