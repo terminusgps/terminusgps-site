@@ -551,7 +551,7 @@ class TrackerProfilePaymentMethodDeletionView(LoginRequiredMixin, FormView):
 
 class TrackerProfileShippingAddressView(LoginRequiredMixin, FormView):
     form_class = ShippingAddressModificationForm
-    template_name = "terminusgps_tracker/profile_shipping_address.html"
+    template_name = "terminusgps_tracker/profile/shipping.html"
     extra_context = {"title": "Your Shipping Address"}
     login_url = reverse_lazy("tracker login")
     permission_denied_message = "Please login and try again."

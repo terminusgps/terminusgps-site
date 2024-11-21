@@ -1,26 +1,40 @@
 {% extends "terminusgps_tracker/layout.html" %}
 {% load static terminusgps_tracker_display %}
 {% block content %}
+<div class="container mx-auto bg-stone-200 px-8 md:px-12 py-4 shadow-inner rounded-md space-y-4 overflow-y-scroll">
 {% for payment_profile in payment_profiles %}
-<div class="container mx-auto rounded-md bg-white p-4 drop-shadow-md">
-    <div class="flex flex-col space-y-4 md:flex-row md:justify-between md:space-y-0 dark:text-white ">
-        <div class="flex flex-col gap-2">
-            <h2 class="text-md font-semibold tracking-wide text-gray-800">{{ payment_profile.payment.creditCardNumber }}</h2>
-            <div class="grid grid-rows-2 text-sm">
-                <p class="text-gray-700">{{ payment_profile.billTo.address }}</p>
-                <p class="text-gray-600">{{ payment_profile.billTo.city }}, {{ payment_profile.billTo.state }}, {{ payment_profile.billTo.zip }}</p>
+    <div class="container mx-auto rounded-md bg-white p-4 drop-shadow-md">
+        <div class="flex flex-col space-y-4 md:flex-row md:justify-between md:space-y-0 dark:text-white ">
+            <div class="flex flex-col gap-2">
+                <h2 class="text-md font-semibold tracking-wide text-gray-800 flex-inline">{{ payment_profile.payment.creditCardNumber }}</h2>
+                <div class="grid grid-rows-2 text-sm">
+                    <p class="text-gray-700">{{ payment_profile.billTo.address }}</p>
+                    <p class="text-gray-600">{{ payment_profile.billTo.city }}, {{ payment_profile.billTo.state }}, {{ payment_profile.billTo.zip }}</p>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                {{ payment_profile.payment.creditCardType|credit_card_icon }}
+                <h2 class="text-gray-500">{{ payment_profile.billTo.firstName }} {{ payment_profile.billTo.lastName }}</h2>
             </div>
         </div>
-        <h2 class="text-gray-500">{{ payment_profile.billTo.firstName }} {{ payment_profile.billTo.lastName }}</h2>
+        <div class="mt-8 flex flex-col justify-evenly gap-2 md:flex-row">
+            <a href="#" class="border-gray-599 block w-full rounded-md border border-solid bg-gray-50 text-center hover:bg-gray-300">
+                Delete
+            </a>
+            <a href="#" class="block w-full rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-center text-gray-50 hover:from-terminus-red-400 hover:via-terminus-red-300 hover:to-terminus-red-400">
+                Set as default
+            </a>
+        </div>
     </div>
-    <div class="mt-8 flex flex-col justify-evenly gap-2 md:flex-row">
-        <a href="#" class="block w-full rounded-md border border-solid border-gray-599 bg-gray-50 text-center hover:bg-gray-300">
-            Delete
-        </a>
-        <a href="#" class="block w-full rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-center text-gray-50 hover:from-terminus-red-400 hover:via-terminus-red-300 hover:to-terminus-red-400">
-            Set as default
+{% empty %}
+    <div class="container mx-auto rounded-md bg-white p-4 drop-shadow-md">
+        <a href="{% url 'create payment' %}" class="w-full block text-center rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-gray-50 hover:from-terminus-red-400 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
+            Upload Payment Method
         </a>
     </div>
-</div>
 {% endfor %}
+</div>
+<a href="{% url 'create payment' %}" class="w-full block text-center rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-gray-50 hover:from-terminus-red-400 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
+    Upload Payment Method
+</a>
 {% endblock content %}
