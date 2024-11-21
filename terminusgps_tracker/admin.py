@@ -47,7 +47,7 @@ class TrackerTodoListAdmin(admin.ModelAdmin):
 @admin.register(TodoItem)
 class TodoItemAdmin(admin.ModelAdmin):
     list_display = ["todo_list__profile__user", "label", "view", "is_complete"]
-    fields = ["todo_list__profile__user", "label", "view", "is_complete"]
+    fields = ["todo_list", "label", "view", "is_complete"]
 
 
 @admin.register(TrackerPaymentMethod)

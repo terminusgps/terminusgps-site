@@ -22,6 +22,7 @@ from terminusgps_tracker.integrations.wialon.items import (
     WialonUnitGroup,
     WialonResource,
 )
+from terminusgps_tracker.models.todo import TodoItem
 
 
 class TrackerProfile(models.Model):
@@ -42,43 +43,36 @@ class TrackerProfile(models.Model):
         unique=False, null=True, blank=True, default=None
     )
 
+    class Meta:
+        verbose_name = "profile"
+        verbose_name_plural = "profiles"
+
     def __str__(self) -> str:
         return f"{self.user.username}'s Profile"
 
     def save(self, **kwargs) -> None:
         if not self.authorizenet_profile_id:
-            create_request = self._generate_create_customer_profile_request(
-                merchantAuthentication=get_merchant_auth()
+            merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
+            request = createCustomerProfileRequest(
+                merchantAuthentication=merchantAuthentication,
+                profile=customerProfileType(merchantCustomerId=self.merchantCustomerId),
             )
-            self.authorizenet_profile_id = self._create_authorizenet_profile(
-                create_request
-            )
+            self.authorizenet_profile_id = self._create_authorizenet_profile(request)
 
         if not self.wialon_user_id:
             with WialonSession() as session:
                 self._create_wialon_objects(session=session)
         super().save(**kwargs)
 
-    def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
-        delete_request = self._generate_delete_customer_profile_request(
-            merchantAuthentication=get_merchant_auth()
-        )
-        self._delete_authorizenet_profile(delete_request)
-        self._delete_wialon_objects()
-        return super().delete(*args, **kwargs)
-
     @transaction.atomic
-    def complete_todo(self, view_name: str) -> None:
-        todo_item = self.todo_list.todo_items.filter(view=view_name).first()
-        if todo_item:
+    def complete_todo(self, todo_item_id: int) -> None:
+        try:
+            todo_item = self.todo_list.get(pk=todo_item_id)
+        except TodoItem.DoesNotExist:
+            return
+        else:
             todo_item.is_complete = True
             todo_item.save()
-
-    @transaction.atomic
-    def delete_todo(self, view_name: str) -> None:
-        todo_item = self.todo_list.todo_items.filter(view=view_name).first()
-        if todo_item:
-            del todo_item
 
     def _delete_wialon_objects(self) -> None:
         with WialonSession() as session:
@@ -171,12 +165,4 @@ class TrackerProfile(models.Model):
         return deleteCustomerProfileRequest(
             merchantAuthentication=merchantAuthentication,
             customerProfileId=self.customerProfileId,
-        )
-
-    def _generate_create_customer_profile_request(
-        self, merchantAuthentication: merchantAuthenticationType
-    ) -> dict:
-        return createCustomerProfileRequest(
-            merchantAuthentication=merchantAuthentication,
-            profile=customerProfileType(merchantCustomerId=self.merchantCustomerId),
         )

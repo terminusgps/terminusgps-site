@@ -12,6 +12,10 @@ class TodoItem(models.Model):
     view = models.CharField(max_length=512)
     is_complete = models.BooleanField(default=False)
 
+    class Meta:
+        verbose_name = "to-do item"
+        verbose_name_plural = "to-do items"
+
     def __str__(self) -> str:
         return self.label
 
@@ -25,6 +29,10 @@ class TrackerTodoList(models.Model):
         on_delete=models.CASCADE,
         related_name="todo_list",
     )
+
+    class Meta:
+        verbose_name = "to-do list"
+        verbose_name_plural = "to-do lists"
 
     def __str__(self) -> str:
         return f"{self.profile.user.first_name}'s To-Do List"

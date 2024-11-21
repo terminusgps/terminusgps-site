@@ -1,4 +1,16 @@
 {% extends "terminusgps_tracker/layout.html" %}
-{% load static %}
+{% load static terminusgps_tracker_display %}
 {% block content %}
+{% for payment_profile in payment_profiles %}
+<a class="flex flex-col space-y-4 md:flex-row md:justify-between md:space-y-0 dark:text-white bg-white rounded-md p-4 drop-shadow-md hover:bg-gray-300 transition-colors duration-300 ease-in-out" href="{% url "profile modify payment" payment_profile.customerPaymentProfileId %}">
+    <div class="flex flex-col gap-2">
+        <h2 class="text-gray-800 tracking-wide font-semibold text-md">{{ payment_profile.payment.creditCardNumber }}</h2>
+        <div class="grid grid-rows-2 text-sm">
+            <p class="text-gray-700">{{ payment_profile.billTo.address }}</p>
+            <p class="text-gray-600">{{ payment_profile.billTo.city }}, {{ payment_profile.billTo.state }}, {{ payment_profile.billTo.zip }}</p>
+        </div>
+    </div>
+    <h2 class="text-gray-500">{{ payment_profile.billTo.firstName }} {{ payment_profile.billTo.lastName }}</h2>
+</a>
+{% endfor %}
 {% endblock content %}

@@ -1,3 +1,4 @@
+from typing import Any
 from django.db import models
 from django.conf import settings
 
@@ -33,6 +34,7 @@ from terminusgps_tracker.integrations.authorizenet.auth import get_merchant_auth
 from terminusgps_tracker.forms.payments import (
     PaymentMethodCreationForm,
     ShippingAddressCreationForm,
+    ShippingAddressModificationForm,
 )
 
 
@@ -44,71 +46,33 @@ class TrackerShippingAddress(models.Model):
     profile = models.OneToOneField(
         "terminusgps_tracker.TrackerProfile",
         on_delete=models.CASCADE,
-        related_name="addresses",
+        related_name="address",
     )
 
     class Meta:
-        verbose_name = "profile address"
-        verbose_name_plural = "profile addresses"
+        verbose_name = "shipping address"
+        verbose_name_plural = "shipping addresses"
 
     def __str__(self) -> str:
         return f"{self.profile.user.username}'s Shipping Address"
 
     def save(self, form: ShippingAddressCreationForm | None = None, **kwargs) -> None:
         if form and form.is_valid():
+            if form.cleaned_data.get("is_default", False):
+                self.is_default = True
             self.authorizenet_id = self.create_authorizenet_address(form)
         return super().save(**kwargs)
 
     def delete(self, **kwargs):
         if self.authorizenet_id is not None:
-            self.delete_authorizenet_address(self.authorizenet_id)
+            profile_id = int(self.profile.customerProfileId)
+            address_id = int(self.authorizenet_id)
+            self.delete_authorizenet_address(profile_id, address_id)
         return super().delete(**kwargs)
 
-    def create_authorizenet_address(
-        self, form: ShippingAddressCreationForm
-    ) -> int | None:
-        request = self._gen_create_request(form=form)
-        controller = createCustomerShippingAddressController(request)
-        controller.execute()
-        response: createCustomerShippingAddressResponse = controller.getresponse()
-        if response.messages.resultCode != "Ok":
-            raise ValueError(response.messages.message[0]["text"].text)
-
-        return int(response.customerAddressId)
-
-    def delete_authorizenet_address(self, address_id: int) -> None:
-        request = self._gen_delete_request(address_id)
-        controller = deleteCustomerShippingAddressController(request)
-        controller.execute()
-        response: deleteCustomerShippingAddressResponse = controller.getresponse()
-        if response.messages.resultCode != "Ok":
-            raise ValueError(response.messages.message[0]["text"].text)
-
-    def get_authorizenet_address(self, address_id: int) -> customerAddressType:
-        request = self._gen_get_request(address_id)
-        controller = getCustomerShippingAddressController(request)
-        controller.execute()
-        response: getCustomerShippingAddressResponse = controller.getresponse()
-        if response.messages.resultCode != "Ok":
-            raise ValueError(response.messages.message[0]["text"].text)
-        return response.address
-
-    def _gen_get_request(self, address_id: int) -> getCustomerShippingAddressRequest:
+    def create_authorizenet_address(self, form: ShippingAddressCreationForm) -> int:
         merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
-        return getCustomerShippingAddressRequest(
-            merchantAuthentication=merchantAuthentication,
-            customerProfileId=self.profile.customerProfileId,
-            customerAddressId=str(address_id),
-        )
-
-    def _gen_create_request(
-        self, form: ShippingAddressCreationForm
-    ) -> createCustomerShippingAddressRequest:
-        if form.cleaned_data.get("is_default", False):
-            self.is_default = True
-
-        merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
-        return createCustomerShippingAddressRequest(
+        request = createCustomerShippingAddressRequest(
             merchantAuthentication=merchantAuthentication,
             customerProfileId=self.profile.customerProfileId,
             defaultShippingAddress=form.cleaned_data["is_default"],
@@ -124,15 +88,60 @@ class TrackerShippingAddress(models.Model):
             ),
         )
 
-    def _gen_delete_request(
-        self, authorizenet_id: int
-    ) -> deleteCustomerShippingAddressRequest:
+        controller = createCustomerShippingAddressController(request)
+        controller.execute()
+        response: createCustomerShippingAddressResponse = controller.getresponse()
+        if response.messages.resultCode != "Ok":
+            raise ValueError(response.messages.message[0]["text"].text)
+        return int(response.customerAddressId)
+
+    @classmethod
+    def delete_authorizenet_address(
+        cls, profile_id: int, address_id: int | None = None
+    ) -> None:
         merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
-        return deleteCustomerShippingAddressRequest(
+        request = deleteCustomerShippingAddressRequest(
             merchantAuthentication=merchantAuthentication,
-            customerProfileId=self.profile.customerProfileId,
-            customerAddressId=str(authorizenet_id),
+            customerProfileId=str(profile_id),
         )
+        if address_id is not None:
+            request.customerAddressId = str(address_id)
+
+        controller = deleteCustomerShippingAddressController(request)
+        controller.execute()
+        response = controller.getresponse()
+        if response.messages.resultCode != "Ok":
+            raise ValueError(response.messages.message[0]["text"].text)
+        return
+
+    @classmethod
+    def get_authorizenet_address(
+        cls, profile_id: int, address_id: int | None = None
+    ) -> dict[str, Any]:
+        merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
+        request = getCustomerShippingAddressRequest(
+            merchantAuthentication=merchantAuthentication,
+            customerProfileId=str(profile_id),
+        )
+        if address_id is not None:
+            request.customerAddressId = str(address_id)
+
+        controller = getCustomerShippingAddressController(request)
+        controller.execute()
+        response = controller.getresponse()
+        if response.messages.resultCode != "Ok":
+            raise ValueError(response.messages.message[0]["text"].text)
+        return {
+            "customerAddressId": response.address.customerAddressId,
+            "address": {
+                "street": response.address.address,
+                "city": response.address.city,
+                "state": response.address.state,
+                "zip": response.address.zip,
+                "country": response.address.country,
+                "phone": response.address.phoneNumber,
+            },
+        }
 
 
 class TrackerPaymentMethod(models.Model):
@@ -146,6 +155,10 @@ class TrackerPaymentMethod(models.Model):
         related_name="payments",
     )
 
+    class Meta:
+        verbose_name = "payment method"
+        verbose_name_plural = "payment methods"
+
     def __str__(self) -> str:
         username: str = self.profile.user.username
         return f"{username}'s Payment Method #{self.authorizenet_id}"
@@ -155,22 +168,9 @@ class TrackerPaymentMethod(models.Model):
             self.authorizenet_id = self.create_authorizenet_payment_profile(form)
         return super().save(**kwargs)
 
-    def delete(self, **kwargs):
-        if self.authorizenet_id is not None:
-            self.delete_authorizenet_payment_profile(self.authorizenet_id)
-        return super().delete(**kwargs)
-
-    def delete_authorizenet_payment_profile(self, payment_profile_id: int) -> None:
-        request = self._gen_delete_request(payment_profile_id)
-        controller = deleteCustomerPaymentProfileController(request)
-        controller.execute()
-        response: deleteCustomerPaymentProfileResponse = controller.getresponse()
-        if response.messages.resultCode != "Ok":
-            raise ValueError(response.messages.message[0]["text"].text)
-
     def create_authorizenet_payment_profile(
         self, form: PaymentMethodCreationForm
-    ) -> int | None:
+    ) -> int:
         request = self._gen_create_request(form=form)
         controller = createCustomerPaymentProfileController(request)
         controller.execute()
@@ -179,36 +179,60 @@ class TrackerPaymentMethod(models.Model):
             raise ValueError(response.messages.message[0]["text"].text)
         return int(response.customerPaymentProfileId)
 
-    def get_authorizenet_payment_profile(
-        self, payment_profile_id: int
-    ) -> customerPaymentProfileType:
-        request = self._gen_get_request(payment_profile_id)
-        controller = getCustomerPaymentProfileController(request)
+    @classmethod
+    def delete_authorizenet_payment_profile(
+        cls, profile_id: int, payment_profile_id: int | None = None
+    ) -> None:
+        merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
+        request = deleteCustomerPaymentProfileRequest(
+            merchantAuthentication=merchantAuthentication,
+            customerProfileId=str(profile_id),
+        )
+        if payment_profile_id is not None:
+            request.customerPaymentProfileId = str(payment_profile_id)
+
+        controller = deleteCustomerPaymentProfileController(request)
         controller.execute()
-        response: getCustomerPaymentProfileResponse = controller.getresponse()
+        response = controller.getresponse()
         if response.messages.resultCode != "Ok":
             raise ValueError(response.messages.message[0]["text"].text)
-        return response.paymentProfile
+        return
 
-    def _gen_get_request(
-        self, payment_profile_id: int
-    ) -> getCustomerPaymentProfileRequest:
+    @classmethod
+    def get_authorizenet_payment_profile(
+        cls, profile_id: int, payment_profile_id: int | None = None
+    ) -> dict[str, Any]:
         merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
-        return getCustomerPaymentProfileRequest(
+        request = getCustomerPaymentProfileRequest(
             merchantAuthentication=merchantAuthentication,
-            customerProfileId=self.profile.customerProfileId,
-            customerPaymentProfileId=str(payment_profile_id),
+            customerProfileId=str(profile_id),
         )
+        if payment_profile_id is not None:
+            request.customerPaymentProfileId = str(payment_profile_id)
 
-    def _gen_delete_request(
-        self, payment_profile_id: int
-    ) -> deleteCustomerPaymentProfileRequest:
-        merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
-        return deleteCustomerPaymentProfileRequest(
-            merchantAuthentication=merchantAuthentication,
-            customerProfileId=self.profile.customerProfileId,
-            customerPaymentProfileId=str(payment_profile_id),
-        )
+        controller = getCustomerPaymentProfileController(request)
+        controller.execute()
+        response = controller.getresponse()
+        if response.messages.resultCode != "Ok":
+            raise ValueError(response.messages.message[0]["text"].text)
+        return {
+            "customerProfileId": response.paymentProfile.customerProfileId,
+            "customerPaymentProfileId": response.paymentProfile.customerPaymentProfileId,
+            "billTo": {
+                "firstName": response.paymentProfile.billTo.firstName,
+                "lastName": response.paymentProfile.billTo.lastName,
+                "address": response.paymentProfile.billTo.address,
+                "city": response.paymentProfile.billTo.city,
+                "state": response.paymentProfile.billTo.state,
+                "zip": response.paymentProfile.billTo.zip,
+                "phoneNumber": response.paymentProfile.billTo.phoneNumber,
+            },
+            "payment": {
+                "creditCardNumber": response.paymentProfile.payment.creditCard.cardNumber,
+                "creditCardExpirationDate": response.paymentProfile.payment.creditCard.expirationDate,
+                "creditCardType": response.paymentProfile.payment.creditCard.cardType,
+            },
+        }
 
     def _gen_create_request(
         self, form: PaymentMethodCreationForm, testMode: bool | None = None

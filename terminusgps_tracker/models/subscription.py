@@ -9,6 +9,7 @@ from djmoney.money import Currency
 from authorizenet.apicontractsv1 import (
     ARBCreateSubscriptionRequest,
     ARBCreateSubscriptionResponse,
+    ARBSubscriptionType,
     ARBSubscriptionUnitEnum,
     customerProfileIdType,
     paymentScheduleType,
@@ -33,6 +34,10 @@ class TrackerSubscriptionFeature(models.Model):
     amount = models.IntegerField(
         choices=FeatureAmount.choices, default=FeatureAmount.LOW
     )
+
+    class Meta:
+        verbose_name = "subscription feature"
+        verbose_name_plural = "subscription features"
 
     def __str__(self) -> str:
         if self.amount:
@@ -81,6 +86,10 @@ class TrackerSubscriptionTier(models.Model):
     authorizenet_id = models.PositiveBigIntegerField(
         default=None, null=True, blank=True
     )
+
+    class Meta:
+        verbose_name = "subscription tier"
+        verbose_name_plural = "subscription tiers"
 
     def __str__(self) -> str:
         return self.name
@@ -157,6 +166,10 @@ class TrackerSubscription(models.Model):
         blank=True,
     )
 
+    class Meta:
+        verbose_name = "subscription"
+        verbose_name_plural = "subscriptions"
+
     def __str__(self) -> str:
         return str(self.profile)
 
@@ -189,7 +202,7 @@ class TrackerSubscription(models.Model):
 
         return ARBCreateSubscriptionRequest(
             merchantAuthentication=get_merchant_auth(),
-            subscription=subscriptionCustomerProfileType(
+            subscription=ARBSubscriptionType(
                 name=name,
                 paymentSchedule=paymentSchedule,
                 amount=amount,
@@ -208,7 +221,7 @@ class TrackerSubscription(models.Model):
 
         startDate: str = f"{timezone.now():%Y-%m-%d}"
         totalOccurrences: str = str(tier.length // int(tier.period))
-        trialOccurrences: str = str(0)
+        trialOccurrences: str = str(0.00)
         interval: paymentScheduleTypeInterval = paymentScheduleTypeInterval(
             length=str(tier.length), unit=ARBSubscriptionUnitEnum.months
         )
