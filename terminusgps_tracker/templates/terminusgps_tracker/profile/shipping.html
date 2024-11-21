@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 <div class="flex mx-auto">
-    <form action="{% url 'profile shipping address' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
+    <form action="{% url 'shipping' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
         {{ form.non_field_errors }}
         {% csrf_token %}
         <div class="mb-8 grid grid-rows-1 gap-8 md:grid-cols-2">

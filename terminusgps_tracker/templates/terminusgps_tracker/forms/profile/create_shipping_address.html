@@ -1,7 +1,7 @@
 {% extends "terminusgps_tracker/layout.html" %}
 {% load static %}
 {% block content %}
-<form action="{% url 'profile create shipping address' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
+<form action="{% url 'create shipping' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
     {{ form.non_field_errors }}
     {% csrf_token %}
     <div class="mb-8 grid grid-rows-1 gap-8 md:grid-cols-2">

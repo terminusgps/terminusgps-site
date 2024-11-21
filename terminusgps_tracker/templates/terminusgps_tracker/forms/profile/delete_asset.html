@@ -1,7 +1,7 @@
 {% extends "terminusgps_tracker/layout.html" %}
 {% load static %}
 {% block content %}
-<form action="{% url 'profile delete asset' imei_number %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
+<form action="{% url 'delete asset' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
     {% csrf_token %}
     {{ form }}
     <div class="flex justify-evenly gap-2">
