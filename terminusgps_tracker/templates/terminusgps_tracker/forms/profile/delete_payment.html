@@ -24,12 +24,12 @@
         </div>
     </div>
     <div class="mt-4 flex flex-grow justify-evenly gap-2">
-        <a href="{% url 'payments' %}" class="grow rounded-md border border-solid border-gray-600 bg-gray-200 px-4 py-2 text-center text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-400">
+        <a href="{% url 'payments' %}" class="grow rounded-md border border-solid border-gray-600 bg-gray-200 px-4 py-2 text-center text-gray-700 hover:bg-gray-50 dark:border-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-400">
             Back
         </a>
-        <a href="{% url 'delete payment' payment_id %}" class="grow rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-center text-gray-50 hover:from-terminus-red-400 hover:via-terminus-red-300 hover:to-terminus-red-400">
+        <button class="grow rounded-md border border-solid border-gray-600 bg-terminus-red-500 px-4 py-2 text-center text-gray-50 hover:bg-terminus-red-300 dark:border-gray-300" type="submit">
             Delete it
-        </a>
+        </button>
     </div>
 </form>
 {% endblock content %}

@@ -35,12 +35,10 @@ from terminusgps_tracker.integrations.authorizenet.auth import get_merchant_auth
 from terminusgps_tracker.forms.payments import (
     PaymentMethodCreationForm,
     ShippingAddressCreationForm,
-    ShippingAddressModificationForm,
 )
 
 
 class TrackerShippingAddress(models.Model):
-    is_default = models.BooleanField(default=False)
     authorizenet_id = models.PositiveBigIntegerField(
         default=None, null=True, blank=True
     )
@@ -59,13 +57,18 @@ class TrackerShippingAddress(models.Model):
 
     def save(self, form: ShippingAddressCreationForm | None = None, **kwargs) -> None:
         if form and form.is_valid():
-            if form.cleaned_data.get("is_default", False):
-                self.is_default = True
-            self.authorizenet_id = self.create_authorizenet_address(form)
+            profile_id: int = int(self.profile.customerProfileId)
+            address_id: int | None = self.profile.address.authorizenet_id
+
+            if not address_id:
+                self.authorizenet_id = self.create_authorizenet_address(form)
+            else:
+                self.delete_authorizenet_address(profile_id, address_id)
+                self.authorizenet_id = self.create_authorizenet_address(form)
         return super().save(**kwargs)
 
     def delete(self, **kwargs):
-        if self.authorizenet_id is not None:
+        if self.authorizenet_id:
             profile_id = int(self.profile.customerProfileId)
             address_id = int(self.authorizenet_id)
             self.delete_authorizenet_address(profile_id, address_id)
@@ -76,7 +79,7 @@ class TrackerShippingAddress(models.Model):
         request = createCustomerShippingAddressRequest(
             merchantAuthentication=merchantAuthentication,
             customerProfileId=self.profile.customerProfileId,
-            defaultShippingAddress=form.cleaned_data["is_default"],
+            defaultShippingAddress=True,
             address=customerAddressType(
                 firstName=self.profile.firstName,
                 lastName=self.profile.lastName,
@@ -165,8 +168,16 @@ class TrackerPaymentMethod(models.Model):
 
     def save(self, form: PaymentMethodCreationForm | None = None, **kwargs) -> None:
         if form and form.is_valid():
+            self.is_default = form.cleaned_data["is_default"]
             self.authorizenet_id = self.create_authorizenet_payment_profile(form)
         return super().save(**kwargs)
+
+    def delete(self, **kwargs):
+        if self.authorizenet_id:
+            profile_id = int(self.profile.customerProfileId)
+            payment_id = int(self.authorizenet_id)
+            self.delete_authorizenet_payment_profile(profile_id, payment_id)
+        return super().delete(**kwargs)
 
     def create_authorizenet_payment_profile(
         self, form: PaymentMethodCreationForm
@@ -177,7 +188,7 @@ class TrackerPaymentMethod(models.Model):
             merchantAuthentication=merchantAuthentication,
             customerProfileId=self.profile.customerProfileId,
             paymentProfile=customerPaymentProfileType(
-                defaultPaymentProfile=form.cleaned_data["is_default"],
+                defaultPaymentProfile=self.is_default,
                 billTo=customerAddressType(
                     firstName=self.profile.firstName,
                     lastName=self.profile.lastName,
@@ -207,16 +218,16 @@ class TrackerPaymentMethod(models.Model):
 
     @classmethod
     def delete_authorizenet_payment_profile(
-        cls, profile_id: int, payment_profile_id: int | None = None
+        cls, profile_id: int, payment_id: int | None = None
     ) -> None:
         merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
         request = deleteCustomerPaymentProfileRequest(
             merchantAuthentication=merchantAuthentication,
             customerProfileId=str(profile_id),
         )
-        if payment_profile_id is not None:
-            request.customerPaymentProfileId = str(payment_profile_id)
 
+        if payment_id is not None:
+            request.customerPaymentProfileId = str(payment_id)
         controller = deleteCustomerPaymentProfileController(request)
         controller.execute()
         response = controller.getresponse()
@@ -226,7 +237,7 @@ class TrackerPaymentMethod(models.Model):
 
     @classmethod
     def get_authorizenet_payment_profile(
-        cls, profile_id: int, payment_profile_id: int | None = None
+        cls, profile_id: int, payment_id: int | None = None
     ) -> dict[str, Any]:
         defaultPaymentMethod: bool = False
         merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
@@ -234,12 +245,12 @@ class TrackerPaymentMethod(models.Model):
             merchantAuthentication=merchantAuthentication,
             customerProfileId=str(profile_id),
         )
-        if payment_profile_id is not None:
-            request.customerPaymentProfileId = str(payment_profile_id)
-            defaultPaymentMethod: bool = TrackerPaymentMethod.objects.get(
-                authorizenet_id__exact=payment_profile_id
-            ).is_default
 
+        if payment_id is not None:
+            request.customerPaymentProfileId = str(payment_id)
+            defaultPaymentMethod: bool = TrackerPaymentMethod.objects.get(
+                authorizenet_id=payment_id
+            ).is_default
         controller = getCustomerPaymentProfileController(request)
         controller.execute()
         response = controller.getresponse()

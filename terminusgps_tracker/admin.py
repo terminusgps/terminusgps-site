@@ -15,7 +15,7 @@ from terminusgps_tracker.models.todo import TrackerTodoList, TodoItem
 
 @admin.register(TrackerShippingAddress)
 class TrackerShippingAddressAdmin(admin.ModelAdmin):
-    list_display = ["profile", "authorizenet_id", "is_default"]
+    list_display = ["profile", "authorizenet_id"]
     readonly_fields = ["profile", "authorizenet_id"]
 
 

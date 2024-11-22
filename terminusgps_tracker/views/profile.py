@@ -183,26 +183,26 @@ class TrackerProfilePaymentMethodView(LoginRequiredMixin, TemplateView):
         payment_ids: list = self.get_payment_ids()
         if self.profile:
             context["title"] = f"{self.profile.user.first_name}'s Payment Methods"
+        if self.profile.address:
             context["shipping_address"] = self.get_shipping_address()
         if payment_ids:
             context["payment_profiles"] = self.get_payment_profiles(payment_ids)
         return context
 
     def get_payment_ids(self) -> list[int]:
-        if not self.profile.customerProfileId:
+        if not self.profile.payments.all().exists():
             return []
 
         return [
             payment.authorizenet_id
             for payment in self.profile.payments.all()
-            if isinstance(payment.authorizenet_id, int)
+            if payment.authorizenet_id is not None
         ]
 
     def get_payment_profiles(self, payment_ids: list[int]) -> list:
         return [
             TrackerPaymentMethod.get_authorizenet_payment_profile(
-                profile_id=int(self.profile.customerProfileId),
-                payment_profile_id=payment_id,
+                int(self.profile.customerProfileId), payment_id
             )
             for payment_id in payment_ids
         ]
@@ -211,10 +211,10 @@ class TrackerProfilePaymentMethodView(LoginRequiredMixin, TemplateView):
         if not self.profile.customerProfileId:
             return {}
 
-        customer_id: int = int(self.profile.customerProfileId)
+        profile_id: int = int(self.profile.customerProfileId)
         address_id: int | None = self.profile.address.authorizenet_id or None
         address = TrackerShippingAddress.get_authorizenet_address(
-            customer_id, address_id
+            profile_id, address_id
         ).get("address", {})
 
         return {
@@ -224,7 +224,6 @@ class TrackerProfilePaymentMethodView(LoginRequiredMixin, TemplateView):
             "address_zip": address.get("zip"),
             "address_country": address.get("country"),
             "address_phone": address.get("phone"),
-            "is_default": self.profile.address.is_default,
         }
 
 
@@ -583,8 +582,7 @@ class TrackerProfilePaymentMethodDeletionView(LoginRequiredMixin, FormView):
             profile=self.profile, authorizenet_id__exact=payment_id
         )
         payment_obj.delete_authorizenet_payment_profile(
-            profile_id=int(self.profile.customerProfileId),
-            payment_profile_id=payment_id,
+            int(self.profile.customerProfileId), payment_id
         )
         payment_obj.delete()
 
@@ -592,8 +590,7 @@ class TrackerProfilePaymentMethodDeletionView(LoginRequiredMixin, FormView):
         if payment_id is None:
             return
         return TrackerPaymentMethod.get_authorizenet_payment_profile(
-            profile_id=int(self.profile.customerProfileId),
-            payment_profile_id=payment_id,
+            int(self.profile.customerProfileId), payment_id
         )
 
 
@@ -631,7 +628,6 @@ class TrackerProfileShippingAddressView(LoginRequiredMixin, FormView):
             "address_zip": address.get("zip"),
             "address_country": address.get("country"),
             "address_phone": address.get("phone"),
-            "is_default": self.profile.address.is_default,
         }
 
 
