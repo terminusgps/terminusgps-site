@@ -30,12 +30,12 @@
                 {{ form.is_default }}
             </div>
         </div>
-        <div class="flex justify-evenly gap-2">
-            <a href="{% url 'tracker profile' %}" class="grow rounded-md border border-solid border-gray-600 bg-terminus-gray-600 px-4 py-2 text-center text-gray-50 hover:cursor-pointer hover:bg-terminus-gray-300 hover:from-terminus-red-300 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
-                Cancel
+        <div class="mt-4 flex flex-grow justify-evenly gap-2">
+            <a href="{% url 'tracker profile' %}" class="text-center grow rounded-md border border-solid border-gray-600 px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-50">
+                Back
             </a>
-            <button class="grow rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-gray-50 hover:from-terminus-red-300 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
-                Create
+            <button class="grow rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-gray-50 hover:from-terminus-red-400 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
+                Update
             </button>
         </div>
     </form>

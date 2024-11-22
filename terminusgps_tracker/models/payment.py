@@ -27,6 +27,7 @@ from authorizenet.apicontractsv1 import (
     customerAddressType,
     customerPaymentProfileType,
     merchantAuthenticationType,
+    merchantContactType,
     paymentType,
 )
 from terminusgps_tracker.integrations.authorizenet.auth import get_merchant_auth
@@ -160,8 +161,7 @@ class TrackerPaymentMethod(models.Model):
         verbose_name_plural = "payment methods"
 
     def __str__(self) -> str:
-        username: str = self.profile.user.username
-        return f"{username}'s Payment Method #{self.authorizenet_id}"
+        return f"Payment Method #{self.authorizenet_id}"
 
     def save(self, form: PaymentMethodCreationForm | None = None, **kwargs) -> None:
         if form and form.is_valid():
@@ -171,7 +171,33 @@ class TrackerPaymentMethod(models.Model):
     def create_authorizenet_payment_profile(
         self, form: PaymentMethodCreationForm
     ) -> int:
-        request = self._gen_create_request(form=form)
+        merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
+        request = createCustomerPaymentProfileRequest(
+            validationMode="testMode" if settings.DEBUG else "liveMode",
+            merchantAuthentication=merchantAuthentication,
+            customerProfileId=self.profile.customerProfileId,
+            paymentProfile=customerPaymentProfileType(
+                defaultPaymentProfile=form.cleaned_data["is_default"],
+                billTo=customerAddressType(
+                    firstName=self.profile.firstName,
+                    lastName=self.profile.lastName,
+                    address=form.cleaned_data["address_street"],
+                    city=form.cleaned_data["address_city"],
+                    state=form.cleaned_data["address_state"],
+                    zip=form.cleaned_data["address_zip"],
+                    country=form.cleaned_data["address_country"],
+                    phoneNumber=form.cleaned_data["address_phone"],
+                ),
+                payment=paymentType(
+                    creditCard=creditCardType(
+                        cardNumber=form.cleaned_data["credit_card_number"],
+                        cardCode=form.cleaned_data["credit_card_ccv"],
+                        expirationDate=f"{form.cleaned_data["credit_card_expiry_month"]}-{form.cleaned_data["credit_card_expiry_year"]}",
+                    )
+                ),
+            ),
+        )
+
         controller = createCustomerPaymentProfileController(request)
         controller.execute()
         response: createCustomerPaymentProfileResponse = controller.getresponse()
@@ -202,6 +228,7 @@ class TrackerPaymentMethod(models.Model):
     def get_authorizenet_payment_profile(
         cls, profile_id: int, payment_profile_id: int | None = None
     ) -> dict[str, Any]:
+        defaultPaymentMethod: bool = False
         merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
         request = getCustomerPaymentProfileRequest(
             merchantAuthentication=merchantAuthentication,
@@ -209,6 +236,9 @@ class TrackerPaymentMethod(models.Model):
         )
         if payment_profile_id is not None:
             request.customerPaymentProfileId = str(payment_profile_id)
+            defaultPaymentMethod: bool = TrackerPaymentMethod.objects.get(
+                authorizenet_id__exact=payment_profile_id
+            ).is_default
 
         controller = getCustomerPaymentProfileController(request)
         controller.execute()
@@ -231,43 +261,6 @@ class TrackerPaymentMethod(models.Model):
                 "creditCardNumber": response.paymentProfile.payment.creditCard.cardNumber,
                 "creditCardExpirationDate": response.paymentProfile.payment.creditCard.expirationDate,
                 "creditCardType": response.paymentProfile.payment.creditCard.cardType,
+                "defaultPaymentMethod": defaultPaymentMethod,
             },
         }
-
-    def _gen_create_request(
-        self, form: PaymentMethodCreationForm, testMode: bool | None = None
-    ) -> createCustomerPaymentProfileRequest:
-        if testMode is None:
-            testMode = settings.DEBUG
-
-        month, year = (
-            form.cleaned_data["credit_card_expiry_month"],
-            form.cleaned_data["credit_card_expiry_year"],
-        )
-        merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
-        expirationDate: str = "-".join({month, year})
-        return createCustomerPaymentProfileRequest(
-            validationMode="testMode" if testMode else "liveMode",
-            merchantAuthentication=merchantAuthentication,
-            customerProfileId=self.profile.customerProfileId,
-            paymentProfile=customerPaymentProfileType(
-                defaultPaymentProfile=form.cleaned_data["is_default"],
-                billTo=customerAddressType(
-                    firstName=self.profile.firstName,
-                    lastName=self.profile.lastName,
-                    address=form.cleaned_data["address_street"],
-                    city=form.cleaned_data["address_city"],
-                    state=form.cleaned_data["address_state"],
-                    zip=form.cleaned_data["address_zip"],
-                    country=form.cleaned_data["address_country"],
-                    phoneNumber=form.cleaned_data["address_phone"],
-                ),
-                payment=paymentType(
-                    creditCard=creditCardType(
-                        cardNumber=form.cleaned_data["credit_card_number"],
-                        expirationDate=expirationDate,
-                        cardCode=form.cleaned_data["credit_card_ccv"],
-                    )
-                ),
-            ),
-        )

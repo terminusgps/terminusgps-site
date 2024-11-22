@@ -24,8 +24,6 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "static/"
 TAILWIND_APP_NAME = "theme"
 TIME_ZONE = "America/Chicago"
-TRACKER_MOTD = ""
-TRACKER_SOURCE_URL = ""
 TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER")
 TWILIO_MESSAGING_SID = os.getenv("TWILIO_MESSAGING_SID")
 TWILIO_SID = os.getenv("TWILIO_SID")
@@ -51,42 +49,23 @@ TRACKER_PROFILE = {
     "SOCIALS": {
         "FACEBOOK": {
             "display_name": "Terminus GPS",
-            "profile_link": "",
-            "username": "Terminus GPS",
+            "profile_link": "https://www.facebook.com/TerminusGPSllc",
+            "username": "TerminusGPSllc",
         },
-        "YOUTUBE": {
-            "display_name": "Terminus GPS",
-            "profile_link": "",
-            "username": "Terminus GPS",
-        },
-        "INSTAGRAM": {
-            "display_name": "Terminus GPS",
-            "profile_link": "",
-            "username": "Terminus GPS",
+        "INSTAGRAM": None,
+        "NEXTDOOR": {
+            "display_name": "TerminusGPS",
+            "profile_link": "https://nextdoor.com/pages/terminusgps-cypress-tx/",
+            "username": "TerminusGPS",
         },
         "TIKTOK": {
-            "display_name": "Terminus GPS",
-            "profile_link": "",
-            "username": "Terminus GPS",
+            "display_name": "TerminusGps",
+            "profile_link": "https://www.tiktok.com/@terminusgps",
+            "username": "terminusgps",
         },
-        "TWITTER": {
-            "display_name": "Terminus GPS",
-            "profile_link": "",
-            "username": "Terminus GPS",
-        },
-        "REDDIT": {
-            "display_name": "Terminus GPS",
-            "profile_link": "",
-            "username": "Terminus GPS",
-        },
+        "TWITTER": None,
+        "YOUTUBE": None,
     },
-}
-
-QUICKBOOKS = {
-    "CLIENT_ID": "",
-    "CLIENT_SECRET": "",
-    "REDIRECT_URI": "",
-    "ENVIRONMENT": "sandbox",
 }
 
 STORAGES = {

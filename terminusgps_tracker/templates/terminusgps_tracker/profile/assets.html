@@ -2,6 +2,8 @@
 {% load static %}
 {% block content %}
 <div class="flex mx-auto">
+    {{ wialon_user.name }}
+    {{ wialon_user.id }}
     <div class="flex space-x-2 p-4">
         <a href="https://apps.apple.com/us/app/terminus-gps-mobile/id1419439009">
             <img src="{% static 'terminusgps_tracker/download_app_store.svg' %}" class="size-48">

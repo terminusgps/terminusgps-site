@@ -18,43 +18,41 @@ def create_tracker_profile(sender, instance, created, **kwargs) -> None:
 def create_starter_todos(sender, instance, created, **kwargs) -> None:
     if created:
         TodoItem.objects.create(
-            label="Enter your shipping address",
-            view="create shipping",
-            todo_list=instance,
+            label="Enter your shipping address", view="shipping", todo_list=instance
         )
         TodoItem.objects.create(
-            label="Upload a payment method", view="create payment", todo_list=instance
+            label="Upload a payment method", view="payments", todo_list=instance
         )
         TodoItem.objects.create(
-            label="Register your first asset", view="create asset", todo_list=instance
+            label="Register your first asset", view="assets", todo_list=instance
         )
         TodoItem.objects.create(
             label="Select your subscription",
-            view="create subscription",
+            view="tracker subscriptions",
             todo_list=instance,
         )
 
 
 @receiver(post_save, sender="terminusgps_tracker.TrackerProfile")
-def complete_todo(sender, instance, created, **kwargs) -> None:
+def complete_todos(sender, instance, created, **kwargs) -> None:
     if instance.address.authorizenet_id:
-        todo_item = instance.todo_list.todo_items.get(view="create shipping")
+        todo_item = instance.todo_list.todo_items.get(view="shipping")
         todo_item.is_complete = True
         todo_item.save()
 
     if instance.payments.filter().exists():
-        todo_item = instance.todo_list.todo_items.get(view="create payment")
+        todo_item = instance.todo_list.todo_items.get(view="payments")
         todo_item.is_complete = True
         todo_item.save()
 
     if instance.subscription.curr_tier:
-        todo_item = instance.todo_list.todo_items.get(view="create subscription")
+        todo_item = instance.todo_list.todo_items.get(view="tracker subscriptions")
         todo_item.is_complete = True
         todo_item.save()
 
     with WialonSession() as session:
         unit_group = WialonUnitGroup(id=str(instance.wialon_group_id), session=session)
         if unit_group.items:
-            todo_item = instance.todo_list.todo_items.get(view="create asset")
+            todo_item = instance.todo_list.todo_items.get(view="assets")
             todo_item.is_complete = True
             todo_item.save()

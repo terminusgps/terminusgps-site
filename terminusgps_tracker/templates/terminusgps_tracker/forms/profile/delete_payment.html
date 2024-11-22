@@ -1,0 +1,35 @@
+{% extends "terminusgps_tracker/layout.html" %}
+{% load static terminusgps_tracker_display %}
+{% block content %}
+<form action="{% url 'delete payment' payment_id %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
+    {% csrf_token %}
+    {{ form.payment_id }}
+    {% if payment_profile.payment.defaultPaymentMethod %}
+    <div class="border-xl container mx-auto rounded-md border border-green-600 bg-green-100 p-4 drop-shadow-md dark:bg-green-900">
+    {% else %}
+    <div class="border-xl container mx-auto rounded-md border border-gray-600 bg-white p-4 drop-shadow-md dark:bg-gray-500">
+    {% endif %}
+        <div class="flex flex-col space-y-4 md:flex-row md:justify-between md:space-y-0 dark:text-white ">
+            <div class="flex flex-col gap-2">
+                <div class="flex-inline flex items-center gap-2">
+                    {{ payment_profile.payment.creditCardType|credit_card_icon }}
+                    <h2 class="text-md flex-inline font-semibold tracking-widest text-gray-800 dark:text-gray-100">{{ payment_profile.payment.creditCardNumber }}</h2>
+                </div>
+                <div class="grid grid-rows-2 text-sm">
+                    <p class="text-gray-800 dark:text-gray-100">{{ payment_profile.billTo.address }}</p>
+                    <p class="text-gray-700 dark:text-gray-200">{{ payment_profile.billTo.city }}, {{ payment_profile.billTo.state }}, {{ payment_profile.billTo.zip }}</p>
+                </div>
+            </div>
+            <h2 class="text-gray-800 dark:text-gray-100">{{ payment_profile.billTo.firstName }} {{ payment_profile.billTo.lastName }}</h2>
+        </div>
+    </div>
+    <div class="mt-4 flex flex-grow justify-evenly gap-2">
+        <a href="{% url 'payments' %}" class="grow rounded-md border border-solid border-gray-600 bg-gray-200 px-4 py-2 text-center text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-400">
+            Back
+        </a>
+        <a href="{% url 'delete payment' payment_id %}" class="grow rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-center text-gray-50 hover:from-terminus-red-400 hover:via-terminus-red-300 hover:to-terminus-red-400">
+            Delete it
+        </a>
+    </div>
+</form>
+{% endblock content %}

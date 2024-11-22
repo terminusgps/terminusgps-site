@@ -1,5 +1,4 @@
 from os import getenv
-from typing import Any
 
 from django.conf import settings
 from wialon import Wialon, WialonError
@@ -12,8 +11,11 @@ from terminusgps_tracker.integrations.wialon.errors import (
 
 class WialonSession:
     def __init__(self, token: str | None = None, sid: str | None = None) -> None:
+        self.destroy_session = bool(sid)
         self.token = token
-        self.wialon_api = Wialon(sid=sid)
+        self.wialon_api = Wialon(
+            scheme="https", host="hst-api.wialon.com", port=443, sid=sid
+        )
 
     @property
     def id(self) -> str | None:
@@ -33,7 +35,8 @@ class WialonSession:
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb) -> None:
-        self.logout()
+        if self.destroy_session:
+            self.logout()
         return
 
     def _deconstruct_login_response(self, login_response: dict) -> None:
@@ -54,21 +57,21 @@ class WialonSession:
             raise WialonTokenNotFoundError(token=token, wialon_error=None)
         try:
             login_response = self.wialon_api.token_login(
-                **{"token": self.token, "fl": sum([0x1, 0x2, 0x20])}
+                **{"token": token, "fl": sum([0x1, 0x2, 0x20])}
             )
         except WialonError as e:
-            raise WialonLoginError(token=self.token, wialon_error=e)
+            raise WialonLoginError(token=token, wialon_error=e)
         else:
             self._deconstruct_login_response(login_response)
-            print(f"Logged into session #{self.wialon_api.sid} as '{self.username}'")
+            print(f"Logged into session #{self.id}'")
 
     def logout(self) -> None:
         """Logs out of the Wialon API and raises an error if the session was not destroyed."""
-        sid = str(self.wialon_api.sid)
+        sid: str = str(self.id)
         logout_response = self.wialon_api.core_logout({})
 
         if logout_response.get("error") == 0:
-            print(f"Logged out of session #{sid} as '{self.username}'")
+            print(f"Logged out of session #{sid}'")
         else:
             print(f"Failed to properly destroy session #{sid}")
 

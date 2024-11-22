@@ -39,24 +39,24 @@
         <div class="flex flex-col gap-4">
             <h2 class="text-lg">Set as default payment method?:</h2>
         </div>
-        <div class="flex-inline bg-white block w-full p-8">
+        <div class="flex-inline block w-full bg-white p-8">
             {{ form.is_default }}
         </div>
     </div>
     <div class="mb-8 grid grid-rows-1 gap-8 md:grid-cols-2">
         <div class="flex flex-col gap-4">
-            <h2 class="text-lg">I authorize <a href="{% url 'tracker privacy' %}" class="hover:underline font-semibold">{{ legal_name|default:'Terminus GPS, LLC.' }}</a> to charge this card according to my selected subscription:</h2>
+            <h2 class="text-lg">I authorize <a href="{% url 'tracker privacy' %}" class="font-semibold hover:underline">{{ legal_name|default:'Terminus GPS, LLC.' }}</a> to charge this card according to my selected subscription:</h2>
         </div>
-        <div class="flex-inline bg-white block w-full p-8">
+        <div class="flex-inline block w-full bg-white p-8">
             {{ form.is_consenting }}
         </div>
     </div>
-    <div class="flex justify-evenly gap-2">
-        <a href="{% url 'tracker profile' %}" class="grow rounded-md border border-solid border-gray-600 bg-terminus-gray-600 px-4 py-2 text-center text-gray-50 hover:cursor-pointer hover:bg-terminus-gray-300 hover:from-terminus-red-300 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
-            Cancel
+    <div class="mt-4 flex flex-grow justify-evenly gap-2">
+        <a href="{% url 'payments' %}" class="grow rounded-md border border-solid border-gray-600 bg-gray-200 px-4 py-2 text-center text-gray-700 hover:bg-gray-50">
+            Back
         </a>
-        <button class="grow rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-gray-50 hover:from-terminus-red-300 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
-            Create
+        <button href="{% url 'create payment' %}" class="grow rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-gray-50 hover:from-terminus-red-400 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
+            Upload
         </button>
     </div>
 </form>

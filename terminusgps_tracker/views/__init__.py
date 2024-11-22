@@ -10,7 +10,6 @@ from .profile import (
     TrackerProfileNotificationView,
     TrackerProfilePaymentMethodCreationView,
     TrackerProfilePaymentMethodDeletionView,
-    TrackerProfilePaymentMethodModificationView,
     TrackerProfilePaymentMethodView,
     TrackerProfileShippingAddressCreationView,
     TrackerProfileShippingAddressDeletionView,
