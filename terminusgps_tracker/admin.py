@@ -5,62 +5,41 @@ from terminusgps_tracker.models.payment import (
     TrackerPaymentMethod,
     TrackerShippingAddress,
 )
-from terminusgps_tracker.models.subscription import (
+from terminusgps_tracker.models import (
     TrackerSubscription,
     TrackerSubscriptionFeature,
     TrackerSubscriptionTier,
 )
-from terminusgps_tracker.models.todo import TrackerTodoList, TodoItem
-
-
-@admin.register(TrackerShippingAddress)
-class TrackerShippingAddressAdmin(admin.ModelAdmin):
-    list_display = ["profile", "authorizenet_id"]
-    readonly_fields = ["profile", "authorizenet_id"]
 
 
 @admin.register(TrackerProfile)
 class TrackerProfileAdmin(admin.ModelAdmin):
-    fields = [
-        "user",
-        "authorizenet_profile_id",
-        "wialon_super_user_id",
-        "wialon_user_id",
-        "wialon_group_id",
-        "wialon_resource_id",
-    ]
-    readonly_fields = [
-        "user",
-        "authorizenet_profile_id",
-        "wialon_super_user_id",
-        "wialon_user_id",
-        "wialon_group_id",
-        "wialon_resource_id",
-    ]
+    fields = ["user"]
+    readonly_fields = ["user"]
 
 
-@admin.register(TrackerTodoList)
-class TrackerTodoListAdmin(admin.ModelAdmin):
-    fields = ["profile"]
-
-
-@admin.register(TodoItem)
-class TodoItemAdmin(admin.ModelAdmin):
-    list_display = ["todo_list__profile__user", "label", "view", "is_complete"]
-    fields = ["todo_list", "label", "view", "is_complete"]
+@admin.register(TrackerShippingAddress)
+class TrackerShippingAddressAdmin(admin.ModelAdmin):
+    list_display = ["authorizenet_id", "profile__user"]
+    readonly_fields = ["authorizenet_id", "profile"]
 
 
 @admin.register(TrackerPaymentMethod)
 class TrackerPaymentMethodAdmin(admin.ModelAdmin):
-    list_display = ["id", "profile__user__username", "is_default"]
-    fields = ["profile", "is_default"]
-    readonly_fields = ["id", "profile"]
+    list_display = ["authorizenet_id", "profile__user", "is_default"]
+    fields = ["authorizenet_id", "profile", "is_default"]
+    readonly_fields = ["authorizenet_id", "profile", "is_default"]
 
 
 @admin.register(TrackerSubscription)
 class TrackerSubscriptionAdmin(admin.ModelAdmin):
-    list_display = ["profile__user__username", "curr_tier"]
-    list_editable = ["curr_tier"]
+    list_display = ["authorizenet_id", "profile__user", "status", "tier"]
+    list_editable = ["tier"]
+    fieldsets = [
+        (None, {"fields": ["profile", "authorizenet_id"]}),
+        ("Details", {"fields": ["tier", "status"]}),
+    ]
+    readonly_fields = ["authorizenet_id", "profile", "status"]
 
 
 @admin.register(TrackerSubscriptionTier)
@@ -69,10 +48,10 @@ class TrackerSubscriptionTierAdmin(admin.ModelAdmin):
     ordering = ["amount"]
     fieldsets = [
         (None, {"fields": ["name"]}),
-        ("Wialon", {"fields": ["wialon_group_id", "unit_cmd"]}),
+        ("Data", {"fields": ["group_id", "unit_cmd"]}),
         ("Details", {"fields": ["amount", "period", "length", "features"]}),
     ]
-    readonly_fields = ["wialon_group_id"]
+    readonly_fields = ["group_id"]
 
 
 @admin.register(TrackerSubscriptionFeature)

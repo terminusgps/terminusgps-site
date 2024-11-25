@@ -16,18 +16,13 @@ from authorizenet.apicontractsv1 import (
     createCustomerShippingAddressRequest,
     createCustomerShippingAddressResponse,
     getCustomerShippingAddressRequest,
-    getCustomerShippingAddressResponse,
     getCustomerPaymentProfileRequest,
-    getCustomerPaymentProfileResponse,
     deleteCustomerPaymentProfileRequest,
-    deleteCustomerPaymentProfileResponse,
     deleteCustomerShippingAddressRequest,
-    deleteCustomerShippingAddressResponse,
     creditCardType,
     customerAddressType,
     customerPaymentProfileType,
     merchantAuthenticationType,
-    merchantContactType,
     paymentType,
 )
 from terminusgps_tracker.integrations.authorizenet.auth import get_merchant_auth
@@ -58,7 +53,7 @@ class TrackerShippingAddress(models.Model):
     def save(self, form: ShippingAddressCreationForm | None = None, **kwargs) -> None:
         if form and form.is_valid():
             profile_id: int = int(self.profile.customerProfileId)
-            address_id: int | None = self.profile.address.authorizenet_id
+            address_id: int | None = self.authorizenet_id
 
             if not address_id:
                 self.authorizenet_id = self.create_authorizenet_address(form)

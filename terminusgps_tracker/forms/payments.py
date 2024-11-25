@@ -61,14 +61,6 @@ class ShippingAddressModificationForm(forms.Form):
             }
         ),
     )
-    is_default = forms.BooleanField(
-        initial=False,
-        widget=widgets.CheckboxInput(
-            attrs={
-                "class": "bg-white rounded-md accent-terminus-red-700 dark:bg-gray-700"
-            }
-        ),
-    )
 
 
 class ShippingAddressDeletionForm(forms.Form): ...
@@ -272,4 +264,4 @@ class PaymentMethodCreationForm(forms.Form):
 
 
 class PaymentMethodDeletionForm(forms.Form):
-    payment_id = forms.IntegerField(required=True, widget=widgets.HiddenInput())
+    subscription_id = forms.IntegerField(required=True, widget=widgets.HiddenInput())

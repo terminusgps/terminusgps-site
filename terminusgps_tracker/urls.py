@@ -91,19 +91,4 @@ urlpatterns = [
         views.TrackerProfileShippingAddressView.as_view(),
         name="shipping",
     ),
-    path(
-        "profile/shipping/new/",
-        views.TrackerProfileShippingAddressCreationView.as_view(),
-        name="create shipping",
-    ),
-    path(
-        "profile/shipping/update/<int:id>/",
-        views.TrackerProfileShippingAddressCreationView.as_view(),
-        name="update shipping",
-    ),
-    path(
-        "profile/shipping/delete/<int:id>/",
-        views.TrackerProfileShippingAddressDeletionView.as_view(),
-        name="delete shipping",
-    ),
 ]

@@ -5,7 +5,9 @@ from django.contrib.auth import get_user_model
 from terminusgps_tracker.integrations.wialon.items import WialonUnitGroup
 from terminusgps_tracker.integrations.wialon.session import WialonSession
 from terminusgps_tracker.models import TrackerProfile
+from terminusgps_tracker.models.payment import TrackerShippingAddress
 from terminusgps_tracker.models.todo import TodoItem
+from terminusgps_tracker.models.subscription import TrackerSubscription
 
 
 @receiver(post_save, sender=get_user_model())
@@ -31,28 +33,3 @@ def create_starter_todos(sender, instance, created, **kwargs) -> None:
             view="tracker subscriptions",
             todo_list=instance,
         )
-
-
-@receiver(post_save, sender="terminusgps_tracker.TrackerProfile")
-def complete_todos(sender, instance, created, **kwargs) -> None:
-    if instance.address.authorizenet_id:
-        todo_item = instance.todo_list.todo_items.get(view="shipping")
-        todo_item.is_complete = True
-        todo_item.save()
-
-    if instance.payments.filter().exists():
-        todo_item = instance.todo_list.todo_items.get(view="payments")
-        todo_item.is_complete = True
-        todo_item.save()
-
-    if instance.subscription.curr_tier:
-        todo_item = instance.todo_list.todo_items.get(view="tracker subscriptions")
-        todo_item.is_complete = True
-        todo_item.save()
-
-    with WialonSession() as session:
-        unit_group = WialonUnitGroup(id=str(instance.wialon_group_id), session=session)
-        if unit_group.items:
-            todo_item = instance.todo_list.todo_items.get(view="assets")
-            todo_item.is_complete = True
-            todo_item.save()

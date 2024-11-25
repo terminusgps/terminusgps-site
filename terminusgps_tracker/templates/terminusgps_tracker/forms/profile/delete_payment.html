@@ -13,7 +13,7 @@
             <div class="flex flex-col gap-2">
                 <div class="flex-inline flex items-center gap-2">
                     {{ payment_profile.payment.creditCardType|credit_card_icon }}
-                    <h2 class="text-md flex-inline font-semibold tracking-widest text-gray-800 dark:text-gray-100">{{ payment_profile.payment.creditCardNumber }}</h2>
+                    <h2 class="text-md flex-inline font-semibold tracking-widest text-gray-800 dark:text-gray-100">&#8226; &#8226; &#8226; &#8226; {{ payment_profile.payment.creditCardNumber|cut:"XXXX" }}</h2>
                 </div>
                 <div class="grid grid-rows-2 text-sm">
                     <p class="text-gray-800 dark:text-gray-100">{{ payment_profile.billTo.address }}</p>

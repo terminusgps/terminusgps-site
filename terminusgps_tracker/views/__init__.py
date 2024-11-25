@@ -12,7 +12,6 @@ from .profile import (
     TrackerProfilePaymentMethodDeletionView,
     TrackerProfilePaymentMethodView,
     TrackerProfileShippingAddressCreationView,
-    TrackerProfileShippingAddressDeletionView,
     TrackerProfileShippingAddressView,
     TrackerProfileSubscriptionCreationView,
     TrackerProfileSubscriptionDeletionView,
