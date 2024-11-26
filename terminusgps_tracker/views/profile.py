@@ -603,7 +603,6 @@ class TrackerProfileShippingAddressView(LoginRequiredMixin, FormView):
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
-        self.address_id: int | None = self.profile.address.authorizenet_id or None
 
     def get_initial(self) -> dict[str, Any]:
         return self.get_addr_from_authorizenet()

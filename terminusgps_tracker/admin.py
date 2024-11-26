@@ -20,7 +20,6 @@ class TrackerPaymentMethodAdmin(admin.ModelAdmin):
 @admin.register(TrackerProfile)
 class TrackerProfileAdmin(admin.ModelAdmin):
     fields = ["user", "authorizenet_id"]
-    readonly_fields = ["user"]
 
 
 @admin.register(TrackerShippingAddress)

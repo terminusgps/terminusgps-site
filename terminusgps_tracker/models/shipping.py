@@ -4,11 +4,12 @@ from django.db import models
 from authorizenet.apicontractsv1 import (
     createCustomerShippingAddressRequest,
     customerAddressType,
+    deleteCustomerShippingAddressRequest,
     getCustomerShippingAddressRequest,
-    merchantAuthenticationType,
 )
 from authorizenet.apicontrollers import (
     createCustomerShippingAddressController,
+    deleteCustomerShippingAddressController,
     getCustomerShippingAddressController,
 )
 
@@ -32,29 +33,29 @@ class TrackerShippingAddress(models.Model):
         verbose_name_plural = "shipping addresses"
 
     def __str__(self) -> str:
-        return f"{self.profile.user.username}'s Shipping Address"
+        return f"Address #{self.authorizenet_id}"
 
     def save(self, form: ShippingAddressCreationForm | None = None, **kwargs) -> None:
         if form and form.is_valid():
             self.is_default = form.cleaned_data["is_default"]
-            self.authorizenet_id = self.create_authorizenet_address(form)
+            self.authorizenet_id = self.authorizenet_create_shipping_address(form)
         return super().save(**kwargs)
 
-    def create_authorizenet_address(self, form: ShippingAddressCreationForm) -> int:
+    def delete(self, **kwargs):
+        if self.authorizenet_id:
+            profile_id = int(self.profile.authorizenet_id)
+            address_id = int(self.authorizenet_id)
+            self.authorizenet_delete_shipping_address(profile_id, address_id)
+        return super().delete(**kwargs)
+
+    def authorizenet_create_shipping_address(
+        self, form: ShippingAddressCreationForm
+    ) -> int:
         request = createCustomerShippingAddressRequest(
-            merchantAuthentication=self.profile.merchantAuthentication,
-            customerProfileId=self.profile.customerProfileId,
+            merchantAuthentication=get_merchant_auth(),
+            customerProfileId=str(self.profile.user.pk),
+            address=self.generate_shipping_address(form),
             defaultShippingAddress=form.cleaned_data["is_default"],
-            address=customerAddressType(
-                firstName=self.profile.user.first_name,
-                lastName=self.profile.user.last_name,
-                address=form.cleaned_data["address_street"],
-                city=form.cleaned_data["address_city"],
-                state=form.cleaned_data["address_state"],
-                zip=form.cleaned_data["address_zip"],
-                country=form.cleaned_data["address_country"],
-                phoneNumber=form.cleaned_data["address_phone"],
-            ),
         )
 
         controller = createCustomerShippingAddressController(request)
@@ -65,16 +66,14 @@ class TrackerShippingAddress(models.Model):
         return int(response.customerAddressId)
 
     @classmethod
-    def get_authorizenet_address(
-        cls, profile_id: int, address_id: int | None = None
+    def authorizenet_get_shipping_address(
+        cls, profile_id: int, address_id: int
     ) -> dict[str, Any]:
-        merchantAuthentication: merchantAuthenticationType = get_merchant_auth()
         request = getCustomerShippingAddressRequest(
-            merchantAuthentication=merchantAuthentication,
+            merchantAuthentication=get_merchant_auth(),
             customerProfileId=str(profile_id),
+            customerAddressId=str(address_id),
         )
-        if address_id is not None:
-            request.customerAddressId = str(address_id)
 
         controller = getCustomerShippingAddressController(request)
         controller.execute()
@@ -92,3 +91,34 @@ class TrackerShippingAddress(models.Model):
                 "phone": response.address.phoneNumber,
             },
         }
+
+    @classmethod
+    def authorizenet_delete_shipping_address(
+        cls, profile_id: int, address_id: int
+    ) -> None:
+        request = deleteCustomerShippingAddressRequest(
+            merchantAuthentication=get_merchant_auth(),
+            customerProfileId=str(profile_id),
+            customerAddressId=str(address_id),
+        )
+
+        controller = deleteCustomerShippingAddressController(request)
+        controller.execute()
+        response = controller.getresponse()
+        if response.messages.resultCode != "Ok":
+            raise ValueError(response.messages.message[0]["text"].text)
+
+    @classmethod
+    def generate_shipping_address(
+        cls, form: ShippingAddressCreationForm
+    ) -> customerAddressType:
+        return customerAddressType(
+            firstName=form.cleaned_data["address_first_name"],
+            lastName=form.cleaned_data["address_last_name"],
+            address=form.cleaned_data["address_street"],
+            city=form.cleaned_data["address_city"],
+            state=form.cleaned_data["address_state"],
+            zip=form.cleaned_data["address_zip"],
+            country=form.cleaned_data["address_country"],
+            phoneNumber=form.cleaned_data["address_phone"],
+        )
