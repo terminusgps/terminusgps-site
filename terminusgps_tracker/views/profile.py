@@ -34,7 +34,6 @@ from terminusgps_tracker.forms import (
     PaymentMethodCreationForm,
     PaymentMethodDeletionForm,
     ShippingAddressCreationForm,
-    ShippingAddressDeletionForm,
 )
 from terminusgps_tracker.models import (
     TrackerSubscription,

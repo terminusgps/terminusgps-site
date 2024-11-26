@@ -36,6 +36,20 @@ class WialonUnit(WialonBase):
         self.phone = search.get("ph", "")
         self.is_active = bool(search.get("act", 0))
 
+    def execute_command(
+        self, command_name: str, link_type: str, timeout: int = 5, flags: int = 0
+    ) -> None:
+        self.session.wialon_api.unit_exec_cmd(
+            **{
+                "itemId": str(self.id),
+                "commandName": command_name,
+                "linkType": link_type,
+                "param": "",
+                "timeout": timeout,
+                "flags": flags,
+            }
+        )
+
     def set_access_password(self, access_password: str) -> None:
         self.session.wialon_api.unit_update_access_password(
             **{"itemId": self.id, "accessPassword": access_password}
@@ -44,20 +58,18 @@ class WialonUnit(WialonBase):
     def activate(self) -> None:
         if self.is_active:
             return
-        else:
-            self.session.wialon_api.unit_set_active(
-                **{"itemId": self.id, "active": int(True)}
-            )
-            self.populate()
+        self.session.wialon_api.unit_set_active(
+            **{"itemId": self.id, "active": int(True)}
+        )
+        self.populate()
 
     def deactivate(self) -> None:
         if not self.is_active:
             return
-        else:
-            self.session.wialon_api.unit_set_active(
-                **{"itemId": self.id, "active": int(False)}
-            )
-            self.populate()
+        self.session.wialon_api.unit_set_active(
+            **{"itemId": self.id, "active": int(False)}
+        )
+        self.populate()
 
     def assign_phone(self, phone: str) -> None:
         self.session.wialon_api.unit_update_phone(

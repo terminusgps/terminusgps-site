@@ -32,24 +32,19 @@ urlpatterns = [
         name="delete asset",
     ),
     path(
+        "profile/shipping/",
+        views.TrackerProfileShippingAddressView.as_view(),
+        name="shipping",
+    ),
+    path(
         "profile/subscription/",
         views.TrackerProfileSubscriptionView.as_view(),
         name="subscription",
     ),
     path(
-        "profile/subscription/new/",
-        views.TrackerProfileSubscriptionCreationView.as_view(),
-        name="create subscription",
-    ),
-    path(
         "profile/subscription/update/<int:id>/",
-        views.TrackerProfileSubscriptionDeletionView.as_view(),
+        views.TrackerProfileSubscriptionModificationView.as_view(),
         name="modify subscription",
-    ),
-    path(
-        "profile/subscription/delete/",
-        views.TrackerProfileSubscriptionDeletionView.as_view(),
-        name="delete subscription",
     ),
     path(
         "profile/payments/",
@@ -85,10 +80,5 @@ urlpatterns = [
         "profile/notifications/delete/<int:id>/",
         views.TrackerProfileNotificationDeletionView.as_view(),
         name="delete notification",
-    ),
-    path(
-        "profile/shipping/",
-        views.TrackerProfileShippingAddressView.as_view(),
-        name="shipping",
     ),
 ]

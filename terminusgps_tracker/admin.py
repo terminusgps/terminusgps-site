@@ -1,27 +1,13 @@
 from django.contrib import admin
 
 from terminusgps_tracker.models.profile import TrackerProfile
-from terminusgps_tracker.models.payment import (
-    TrackerPaymentMethod,
-    TrackerShippingAddress,
-)
+from terminusgps_tracker.models.payment import TrackerPaymentMethod
+from terminusgps_tracker.models.shipping import TrackerShippingAddress
 from terminusgps_tracker.models import (
     TrackerSubscription,
     TrackerSubscriptionFeature,
     TrackerSubscriptionTier,
 )
-
-
-@admin.register(TrackerProfile)
-class TrackerProfileAdmin(admin.ModelAdmin):
-    fields = ["user"]
-    readonly_fields = ["user"]
-
-
-@admin.register(TrackerShippingAddress)
-class TrackerShippingAddressAdmin(admin.ModelAdmin):
-    list_display = ["authorizenet_id", "profile__user"]
-    readonly_fields = ["authorizenet_id", "profile"]
 
 
 @admin.register(TrackerPaymentMethod)
@@ -31,27 +17,49 @@ class TrackerPaymentMethodAdmin(admin.ModelAdmin):
     readonly_fields = ["authorizenet_id", "profile", "is_default"]
 
 
+@admin.register(TrackerProfile)
+class TrackerProfileAdmin(admin.ModelAdmin):
+    fields = ["user", "authorizenet_id"]
+    readonly_fields = ["user"]
+
+
+@admin.register(TrackerShippingAddress)
+class TrackerShippingAddressAdmin(admin.ModelAdmin):
+    list_display = ["authorizenet_id", "profile__user"]
+    readonly_fields = ["authorizenet_id", "profile"]
+
+
 @admin.register(TrackerSubscription)
 class TrackerSubscriptionAdmin(admin.ModelAdmin):
     list_display = ["authorizenet_id", "profile__user", "status", "tier"]
     list_editable = ["tier"]
     fieldsets = [
-        (None, {"fields": ["profile", "authorizenet_id"]}),
-        ("Details", {"fields": ["tier", "status"]}),
+        ("Tracker", {"fields": ["profile", "tier", "status"]}),
+        ("Authorize.NET", {"fields": ["authorizenet_id"]}),
     ]
     readonly_fields = ["authorizenet_id", "profile", "status"]
 
 
 @admin.register(TrackerSubscriptionTier)
 class TrackerSubscriptionTierAdmin(admin.ModelAdmin):
-    list_display = ["name", "amount", "unit_cmd"]
+    list_display = ["wialon_id", "name", "amount"]
     ordering = ["amount"]
     fieldsets = [
         (None, {"fields": ["name"]}),
-        ("Data", {"fields": ["group_id", "unit_cmd"]}),
-        ("Details", {"fields": ["amount", "period", "length", "features"]}),
+        (
+            "Wialon",
+            {
+                "fields": [
+                    "wialon_id",
+                    "wialon_cmd",
+                    "wialon_cmd_link",
+                    "wialon_cmd_type",
+                ]
+            },
+        ),
+        ("Tracker", {"fields": ["amount", "period", "length", "features"]}),
     ]
-    readonly_fields = ["group_id"]
+    readonly_fields = ["wialon_id"]
 
 
 @admin.register(TrackerSubscriptionFeature)
