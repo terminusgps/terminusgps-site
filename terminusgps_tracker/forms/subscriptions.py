@@ -11,7 +11,12 @@ class SubscriptionCreationForm(forms.Form):
     )
 
 
-class SubscriptionDeletionForm(forms.Form): ...
+class SubscriptionDeletionForm(forms.Form):
+    subscription_id = forms.IntegerField(widget=widgets.HiddenInput())
 
 
-class SubscriptionModificationForm(forms.Form): ...
+class SubscriptionModificationForm(forms.Form):
+    tier = forms.ModelChoiceField(
+        queryset=TrackerSubscriptionTier.objects.all()[:3],
+        widget=widgets.Select(attrs={"class": "p-4 rounded-md mb-4 w-full bg-white"}),
+    )

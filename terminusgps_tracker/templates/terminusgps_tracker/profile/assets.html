@@ -1,18 +1,12 @@
 {% extends "terminusgps_tracker/layout.html" %}
 {% load static %}
 {% block content %}
-<div class="flex mx-auto">
-    {{ wialon_user.name }}
-    {{ wialon_user.id }}
-    <div class="flex space-x-2 p-4">
-        <a href="https://apps.apple.com/us/app/terminus-gps-mobile/id1419439009">
-            <img src="{% static 'terminusgps_tracker/download_app_store.svg' %}" class="size-48">
-            <span class="sr-only">Download the app from the Apple App Store</span>
-        </a>
-        <a href="https://play.google.com/store/apps/details?id=com.terminusgps.track&pcampaignid=web_share">
-            <img src="{% static 'terminusgps_tracker/download_play_store.svg' %}" class="size-48">
-            <span class="sr-only">Download the app from the Google Play Store</span>
-        </a>
-    </div>
+<div class="mt-4 flex flex-grow justify-evenly gap-2">
+    <a href="{% url 'tracker profile' %}" class="grow rounded-md border border-solid border-gray-600 bg-gray-200 px-4 py-2 text-center text-gray-700 hover:bg-gray-50 dark:border-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-400">
+        Back
+    </a>
+    <a href="{% url 'create asset' %}" class="grow rounded-md border border-solid border-gray-600 bg-terminus-red-500 px-4 py-2 text-center text-gray-50 hover:bg-terminus-red-300 dark:border-gray-300" type="submit">
+        New
+    </a>
 </div>
 {% endblock content %}

@@ -35,6 +35,43 @@ TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
 USE_I18N = True
 USE_TZ = True
 WIALON_API_TOKEN = os.getenv("WIALON_API_TOKEN")
+WIALON_ADMIN_ID = 27881459
+
+TRACKER_PROFILE = {
+    "DISPLAY_NAME": "Terminus GPS",
+    "EMAIL": {"SUPPORT": "support@terminusgps.com", "SALES": "sales@terminusgps.com"},
+    "GITHUB": "https://github.com/terminus-gps/terminusgps-site/",
+    "MOTD": "Check out the Terminus GPS mobile app!",
+    "LEGAL_NAME": "Terminus GPS, LLC",
+    "PHONE": {"OFFICE": "+17139045262", "SALES": ""},
+    "ADDRESS": {
+        "STREET": "17240 Huffmeister Road, Suite 103",
+        "CITY": "Cypress",
+        "STATE": "Texas",
+        "ZIP": "77429",
+        "COUNTRY": "USA",
+    },
+    "SOCIALS": {
+        "FACEBOOK": {
+            "display_name": "Terminus GPS",
+            "profile_link": "https://www.facebook.com/TerminusGPSllc",
+            "username": "TerminusGPSllc",
+        },
+        "INSTAGRAM": None,
+        "NEXTDOOR": {
+            "display_name": "TerminusGPS",
+            "profile_link": "https://nextdoor.com/pages/terminusgps-cypress-tx/",
+            "username": "TerminusGPS",
+        },
+        "TIKTOK": {
+            "display_name": "TerminusGps",
+            "profile_link": "https://www.tiktok.com/@terminusgps",
+            "username": "terminusgps",
+        },
+        "TWITTER": None,
+        "YOUTUBE": None,
+    },
+}
 
 LOGGING = {
     "version": 1,
@@ -75,7 +112,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.forms",
     "django_browser_reload",
-    "django_htmx",
     "tailwind",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
     "theme",
@@ -89,7 +125,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django_htmx.middleware.HtmxMiddleware",
 ]
 
 ROOT_URLCONF = "terminusgps.urls"

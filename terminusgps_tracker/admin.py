@@ -19,7 +19,28 @@ class TrackerPaymentMethodAdmin(admin.ModelAdmin):
 
 @admin.register(TrackerProfile)
 class TrackerProfileAdmin(admin.ModelAdmin):
-    fields = ["user", "authorizenet_id"]
+    fieldsets = [
+        ("Tracker", {"fields": ["user"]}),
+        ("Authorize.NET", {"fields": ["authorizenet_id"]}),
+        (
+            "Wialon",
+            {
+                "fields": [
+                    "wialon_super_user_id",
+                    "wialon_end_user_id",
+                    "wialon_group_id",
+                    "wialon_resource_id",
+                ]
+            },
+        ),
+    ]
+    readonly_fields = [
+        "authorizenet_id",
+        "wialon_super_user_id",
+        "wialon_end_user_id",
+        "wialon_group_id",
+        "wialon_resource_id",
+    ]
 
 
 @admin.register(TrackerShippingAddress)

@@ -22,14 +22,9 @@ urlpatterns = [
         name="create asset",
     ),
     path(
-        "profile/assets/update/<int:id>/",
+        "profile/assets/<int:id>/update/",
         views.TrackerProfileAssetDeletionView.as_view(),
         name="update asset",
-    ),
-    path(
-        "profile/assets/delete/<int:id>/",
-        views.TrackerProfileAssetDeletionView.as_view(),
-        name="delete asset",
     ),
     path(
         "profile/shipping/",
@@ -37,13 +32,28 @@ urlpatterns = [
         name="shipping",
     ),
     path(
+        "profile/shipping/new/",
+        views.TrackerProfileShippingAddressCreationView.as_view(),
+        name="create shipping",
+    ),
+    path(
+        "profile/shipping/<int:id>/delete/",
+        views.TrackerProfileShippingAddressDeletionView.as_view(),
+        name="delete shipping",
+    ),
+    path(
+        "profile/shipping/<int:id>/set-default/",
+        views.TrackerProfileShippingAddressSetDefaultView.as_view(),
+        name="default shipping",
+    ),
+    path(
         "profile/subscription/",
         views.TrackerProfileSubscriptionView.as_view(),
         name="subscription",
     ),
     path(
-        "profile/subscription/update/<int:id>/",
-        views.TrackerProfileSubscriptionModificationView.as_view(),
+        "profile/subscription/<int:id>/update/",
+        views.TrackerProfileSubscriptionView.as_view(),
         name="modify subscription",
     ),
     path(
@@ -57,9 +67,14 @@ urlpatterns = [
         name="create payment",
     ),
     path(
-        "profile/payments/delete/<int:id>/",
+        "profile/payments/<int:id>/delete/",
         views.TrackerProfilePaymentMethodDeletionView.as_view(),
         name="delete payment",
+    ),
+    path(
+        "profile/payments/<int:id>/set-default/",
+        views.TrackerProfilePaymentMethodSetDefaultView.as_view(),
+        name="default payment",
     ),
     path(
         "profile/notifications/",
@@ -72,12 +87,12 @@ urlpatterns = [
         name="create notification",
     ),
     path(
-        "profile/notifications/update/<int:id>/",
+        "profile/notifications/<int:id>/update/",
         views.TrackerProfileNotificationModificationView.as_view(),
         name="update notification",
     ),
     path(
-        "profile/notifications/delete/<int:id>/",
+        "profile/notifications/<int:id>/delete/",
         views.TrackerProfileNotificationDeletionView.as_view(),
         name="delete notification",
     ),

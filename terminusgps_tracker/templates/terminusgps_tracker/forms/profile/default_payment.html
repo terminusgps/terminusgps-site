@@ -1,7 +1,7 @@
 {% extends "terminusgps_tracker/layout.html" %}
 {% load static terminusgps_tracker_display %}
 {% block content %}
-<form action="{% url 'delete payment' payment_id %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
+<form action="{% url 'default payment' payment_id %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
     {% csrf_token %}
     {{ form.payment_id }}
     <div class="border-xl container mx-auto rounded-md border border-gray-600 bg-white p-4 drop-shadow-md dark:border-gray-300 dark:bg-gray-500">
@@ -24,7 +24,7 @@
             Back
         </a>
         <button class="grow rounded-md border border-solid border-gray-600 bg-terminus-red-500 px-4 py-2 text-center text-gray-50 hover:bg-terminus-red-300 dark:border-gray-300" type="submit">
-            Delete it
+            Confirm
         </button>
     </div>
 </form>

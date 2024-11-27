@@ -53,7 +53,7 @@ class TrackerShippingAddress(models.Model):
     ) -> int:
         request = createCustomerShippingAddressRequest(
             merchantAuthentication=get_merchant_auth(),
-            customerProfileId=str(self.profile.user.pk),
+            customerProfileId=str(self.profile.authorizenet_id),
             address=self.generate_shipping_address(form),
             defaultShippingAddress=form.cleaned_data["is_default"],
         )
@@ -83,6 +83,8 @@ class TrackerShippingAddress(models.Model):
         return {
             "customerAddressId": response.address.customerAddressId,
             "address": {
+                "firstName": response.address.firstName,
+                "lastName": response.address.lastName,
                 "street": response.address.address,
                 "city": response.address.city,
                 "state": response.address.state,

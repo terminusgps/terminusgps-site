@@ -2,9 +2,10 @@ from .assets import AssetCreationForm, AssetDeletionForm, AssetModificationForm
 from .payments import (
     PaymentMethodCreationForm,
     PaymentMethodDeletionForm,
+    PaymentMethodSetDefaultForm,
     ShippingAddressCreationForm,
     ShippingAddressDeletionForm,
-    ShippingAddressModificationForm,
+    ShippingAddressSetDefaultForm,
 )
 from .notifications import (
     NotificationCreationForm,

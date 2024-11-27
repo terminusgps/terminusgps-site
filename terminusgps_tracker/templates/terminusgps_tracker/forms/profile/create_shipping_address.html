@@ -9,6 +9,10 @@
             <h2 class="text-lg">Shipping Address</h2>
         </div>
         <div class="flex flex-col gap-4">
+            <div class="flex gap-2">
+                {{ form.address_first_name }}
+                {{ form.address_last_name }}
+            </div>
             {{ form.address_street }}
             {{ form.address_city }}
             <div class="flex gap-2">

@@ -58,7 +58,7 @@ class TrackerPaymentMethod(models.Model):
         self, form: PaymentMethodCreationForm
     ) -> int:
         request = createCustomerPaymentProfileRequest(
-            customerProfileId=str(self.profile.user.pk),
+            customerProfileId=str(self.profile.authorizenet_id),
             merchantAuthentication=get_merchant_auth(),
             paymentProfile=self.generate_payment_profile(form),
             validationMode="testMode" if settings.DEBUG else "liveMode",
@@ -106,12 +106,13 @@ class TrackerPaymentMethod(models.Model):
 
     @classmethod
     def authorizenet_get_payment_profile(
-        cls, profile_id: int, payment_id: int
+        cls, profile_id: int, payment_id: int, unmaskExpirationDate: bool = False
     ) -> dict[str, Any]:
         request = getCustomerPaymentProfileRequest(
             merchantAuthentication=get_merchant_auth(),
             customerProfileId=str(profile_id),
             customerPaymentProfileId=str(payment_id),
+            unmaskExpirationDate=unmaskExpirationDate,
         )
 
         controller = getCustomerPaymentProfileController(request)
@@ -169,7 +170,7 @@ class TrackerPaymentMethod(models.Model):
         month: str = form.cleaned_data["credit_card_expiry_month"]
         year: str = form.cleaned_data["credit_card_expiry_year"]
         cardNumber: str = form.cleaned_data["credit_card_number"]
-        cardCode: str = form.cleaned_data["credit_card_code"]
+        cardCode: str = form.cleaned_data["credit_card_ccv"]
         expirationDate: str = f"{month}-{year}"
 
         return paymentType(

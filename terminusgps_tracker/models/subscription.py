@@ -1,6 +1,7 @@
 from typing import Any
 from django.db import models
 from django.utils import timezone
+from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from djmoney.models.fields import MoneyField
@@ -133,25 +134,35 @@ class TrackerSubscriptionTier(models.Model):
     def __str__(self) -> str:
         return self.name
 
-    def add_to_group(self, unit_id: str, session: WialonSession) -> None:
+    def save(self, **kwargs) -> None:
+        with WialonSession() as session:
+            if self.wialon_id is None:
+                admin_id: int = settings.WIALON_ADMIN_ID
+                self.wialon_id: int = self.wialon_create_subscription_group(
+                    owner_id=admin_id, session=session
+                )
+            self.wialon_execute_subscription_command(session=session, timeout=5)
+        return super().save(**kwargs)
+
+    def wialon_add_to_group(self, unit_id: int, session: WialonSession) -> None:
         if not self.wialon_id:
             raise ValueError(f"{self.name} has no Wialon group")
 
-        group_id: str = str(self.wialon_id)
-        unit: WialonUnit = WialonUnit(id=unit_id, session=session)
-        group: WialonUnitGroup = WialonUnitGroup(id=group_id, session=session)
+        group_id: int = self.wialon_id
+        unit: WialonUnit = WialonUnit(id=str(unit_id), session=session)
+        group: WialonUnitGroup = WialonUnitGroup(id=str(group_id), session=session)
         group.add_item(unit)
 
-    def rm_from_group(self, unit_id: str, session: WialonSession) -> None:
+    def wialon_rm_from_group(self, unit_id: int, session: WialonSession) -> None:
         if not self.wialon_id:
             raise ValueError(f"{self.name} has no Wialon group")
 
-        group_id: str = str(self.wialon_id)
-        unit: WialonUnit = WialonUnit(id=unit_id, session=session)
-        group: WialonUnitGroup = WialonUnitGroup(id=group_id, session=session)
+        group_id: int = self.wialon_id
+        unit: WialonUnit = WialonUnit(id=str(unit_id), session=session)
+        group: WialonUnitGroup = WialonUnitGroup(id=str(group_id), session=session)
         group.rm_item(unit)
 
-    def create_wialon_subscription_group(
+    def wialon_create_subscription_group(
         self, owner_id: int, session: WialonSession
     ) -> int:
         admin = WialonUser(id=str(owner_id), session=session)
@@ -160,6 +171,22 @@ class TrackerSubscriptionTier(models.Model):
         if not group or not group.id:
             raise ValueError("Failed to properly create Wialon subscription group")
         return group.id
+
+    def wialon_execute_subscription_command(
+        self, session: WialonSession, timeout: int = 5
+    ) -> None:
+        group = WialonUnitGroup(id=str(self.wialon_id), session=session)
+        for unit_id in group.items:
+            session.wialon_api.unit_exec_cmd(
+                **{
+                    "itemId": str(unit_id),
+                    "commandName": self.wialon_cmd,
+                    "linkType": self.wialon_cmd_link,
+                    "param": {},
+                    "timeout": timeout,
+                    "flags": 0,
+                }
+            )
 
     @property
     def group_name(self) -> str:
@@ -201,42 +228,16 @@ class TrackerSubscription(models.Model):
     def __str__(self) -> str:
         return str(self.profile)
 
-    def save(self, **kwargs) -> None:
-        if self.authorizenet_id:
-            self.refresh_status()
-        return super().save(**kwargs)
-
-    def upgrade(
+    def update_tier(
         self,
         new_tier: TrackerSubscriptionTier,
         payment_id: int | None = None,
         address_id: int | None = None,
     ) -> None:
-        if new_tier.amount < self.tier.amount:
-            raise ValueError(f"Cannot upgrade to a lower tier than {self.tier}")
-
         self.tier = new_tier
         self.authorizenet_id = self.authorizenet_update_subscription(
             new_tier, payment_id, address_id
         )
-
-    def downgrade(
-        self,
-        new_tier: TrackerSubscriptionTier,
-        payment_id: int | None = None,
-        address_id: int | None = None,
-    ) -> None:
-        if new_tier.amount > self.tier.amount:
-            raise ValueError(f"Cannot downgrade to a higher tier than {self.tier}")
-
-        self.tier = new_tier
-        self.authorizenet_id = self.authorizenet_update_subscription(
-            new_tier, payment_id, address_id
-        )
-
-    def cancel(self) -> None:
-        if self.authorizenet_id:
-            self.authorizenet_cancel_subscription(self.authorizenet_id)
 
     def refresh_status(self) -> None:
         self.status = self.authorizenet_get_subscription_status(
