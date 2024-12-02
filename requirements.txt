@@ -143,6 +143,7 @@ django==5.1.1
     #   django-payments
     #   django-phonenumber-field
     #   django-ses
+    #   django-storages
     #   django-stubs
     #   django-stubs-ext
     #   django-tailwind
@@ -172,6 +173,8 @@ django-phonenumber-field==8.0.0
     #   terminusgps-site (pyproject.toml)
     #   django-payments
 django-ses==4.1.0
+    # via terminusgps-site (pyproject.toml)
+django-storages==1.14.4
     # via terminusgps-site (pyproject.toml)
 django-stubs==5.0.2
     # via terminusgps-site (pyproject.toml)
@@ -237,6 +240,8 @@ googleapis-common-protos==1.65.0
     # via
     #   terminusgps-site (pyproject.toml)
     #   google-api-core
+gunicorn==23.0.0
+    # via terminusgps-site (pyproject.toml)
 httplib2==0.22.0
     # via
     #   terminusgps-site (pyproject.toml)
@@ -328,6 +333,7 @@ packaging==24.1
     # via
     #   terminusgps-site (pyproject.toml)
     #   deprecation
+    #   gunicorn
     #   jpype1
     #   pip-upgrader
     #   sphinx

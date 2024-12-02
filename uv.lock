@@ -649,6 +649,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-storages"
+version = "1.14.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6d/88/77b5ede11147941dece064bd80ac618f6a4b91b4c9d5d305a2660014941e/django-storages-1.14.4.tar.gz", hash = "sha256:69aca94d26e6714d14ad63f33d13619e697508ee33ede184e462ed766dc2a73f", size = 83496 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e0/69/a4b2f2dfa51fd18fd898e10cc41d73a30965da7cb3b683f1375b1dc3dd5c/django_storages-1.14.4-py3-none-any.whl", hash = "sha256:d61930acb4a25e3aebebc6addaf946a3b1df31c803a6bf1af2f31c9047febaa3", size = 31809 },
+]
+
+[[package]]
 name = "django-stubs"
 version = "5.0.2"
 source = { registry = "https://pypi.org/simple" }
@@ -888,6 +900,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/53/3b/1599ceafa875ffb951480c8c74f4b77646a6b80e80970698f2aa93c216ce/googleapis_common_protos-1.65.0.tar.gz", hash = "sha256:334a29d07cddc3aa01dee4988f9afd9b2916ee2ff49d6b757155dc0d197852c0", size = 113657 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ec/08/49bfe7cf737952cc1a9c43e80cc258ed45dad7f183c5b8276fc94cb3862d/googleapis_common_protos-1.65.0-py2.py3-none-any.whl", hash = "sha256:2972e6c496f435b92590fd54045060867f3fe9be2c82ab148fc8885035479a63", size = 220890 },
+]
+
+[[package]]
+name = "gunicorn"
+version = "23.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/34/72/9614c465dc206155d93eff0ca20d42e1e35afc533971379482de953521a4/gunicorn-23.0.0.tar.gz", hash = "sha256:f014447a0101dc57e294f6c18ca6b40227a4c90e9bdb586042628030cba004ec", size = 375031 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cb/7d/6dac2a6e1eba33ee43f318edbed4ff29151a49b5d37f080aad1e6469bca4/gunicorn-23.0.0-py3-none-any.whl", hash = "sha256:ec400d38950de4dfd418cff8328b2c8faed0edb0d517d3394e457c317908ca4d", size = 85029 },
 ]
 
 [[package]]
@@ -1947,6 +1971,7 @@ dependencies = [
     { name = "django-payments" },
     { name = "django-phonenumber-field" },
     { name = "django-ses" },
+    { name = "django-storages" },
     { name = "django-stubs" },
     { name = "django-stubs-ext" },
     { name = "django-tailwind" },
@@ -1965,6 +1990,7 @@ dependencies = [
     { name = "google-auth-httplib2" },
     { name = "google-auth-oauthlib" },
     { name = "googleapis-common-protos" },
+    { name = "gunicorn" },
     { name = "httplib2" },
     { name = "idna" },
     { name = "imagesize" },
@@ -2097,6 +2123,7 @@ requires-dist = [
     { name = "django-payments", specifier = "==2.0.0" },
     { name = "django-phonenumber-field", specifier = "==8.0.0" },
     { name = "django-ses", specifier = "==4.1.0" },
+    { name = "django-storages", specifier = ">=1.14.4" },
     { name = "django-stubs", specifier = "==5.0.2" },
     { name = "django-stubs-ext", specifier = "==5.0.2" },
     { name = "django-tailwind", specifier = "==3.8.0" },
@@ -2115,6 +2142,7 @@ requires-dist = [
     { name = "google-auth-httplib2", specifier = "==0.2.0" },
     { name = "google-auth-oauthlib", specifier = "==1.2.1" },
     { name = "googleapis-common-protos", specifier = "==1.65.0" },
+    { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "httplib2", specifier = "==0.22.0" },
     { name = "idna", specifier = "==3.7" },
     { name = "imagesize", specifier = "==1.4.1" },
