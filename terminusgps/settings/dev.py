@@ -13,25 +13,26 @@ INTERNAL_IPS = ["127.0.0.1", "0.0.0.0"]
 LANGUAGE_CODE = "en-us"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
-MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
-MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
 MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
-SECRET_KEY = "po=qc@jlt0e#h6c8xv96vr%v2l^ib=f9m0!m-@bv0cz25pm$-g"
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "static/"
 TAILWIND_APP_NAME = "theme"
 TIME_ZONE = "America/Chicago"
-TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER")
-TWILIO_MESSAGING_SID = os.getenv("TWILIO_MESSAGING_SID")
-TWILIO_SID = os.getenv("TWILIO_SID")
-TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
 USE_I18N = True
 USE_TZ = True
-WIALON_API_TOKEN = os.getenv("WIALON_API_TOKEN")
-WIALON_API_HOST = "http://hst-api.wialon.com"
-WIALON_ADMIN_ID = 27881459
+
+SECRET_KEY = "po=qc@jlt0e#h6c8xv96vr%v2l^ib=f9m0!m-@bv0cz25pm$-g"
+MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
+MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
+TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
+TWILIO_SID = os.getenv("TWILIO_SID")
+TWILIO_MESSAGING_SID = os.getenv("TWILIO_MESSAGING_SID")
+TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER")
+WIALON_TOKEN = os.getenv("WIALON_TOKEN")
+WIALON_HOST = os.getenv("WIALON_HOST")
+WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID")
 
 TRACKER_PROFILE = {
     "DISPLAY_NAME": "Terminus GPS",

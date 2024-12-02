@@ -17,7 +17,7 @@ from authorizenet.apicontrollers import (
     updateCustomerProfileController,
 )
 
-from terminusgps_tracker.integrations.authorizenet.auth import get_merchant_auth
+from terminusgps_tracker.integrations.authorizenet import get_merchant_auth
 from terminusgps_tracker.integrations.wialon.items import (
     WialonUnitGroup,
     WialonUser,
@@ -94,8 +94,9 @@ class TrackerProfile(models.Model):
         self.wialon_resource_id = resource.id
 
     def authorizenet_create_customer_profile(self) -> int:
+        merchantAuthentication = get_merchant_auth()
         request = createCustomerProfileRequest(
-            merchantAuthentication=get_merchant_auth(),
+            merchantAuthentication=merchantAuthentication,
             profile=customerProfileType(
                 merchantCustomerId=str(self.user.pk), email=str(self.user.email)
             ),

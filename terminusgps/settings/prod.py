@@ -28,16 +28,17 @@ TIME_ZONE = "America/Chicago"
 USE_I18N = True
 USE_TZ = True
 
-secret: dict[str, Any] = get_secret("terminusgps-site-live-env")
+secret: dict[str, str] = get_secret("terminusgps-site-live-env")
 SECRET_KEY = secret.get("SECRET_KEY")
 MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
 MERCHANT_AUTH_TRANSACTION_KEY = secret.get("MERCHANT_AUTH_TRANSACTION_KEY")
-TWILIO_FROM_NUMBER = secret.get("TWILIO_FROM_NUMBER")
-TWILIO_MESSAGING_SID = secret.get("TWILIO_MESSAGING_SID")
-TWILIO_SID = secret.get("TWILIO_SID")
 TWILIO_TOKEN = secret.get("TWILIO_TOKEN")
+TWILIO_SID = secret.get("TWILIO_SID")
+TWILIO_MESSAGING_SID = secret.get("TWILIO_MESSAGING_SID")
+TWILIO_FROM_NUMBER = secret.get("TWILIO_FROM_NUMBER")
+WIALON_TOKEN = secret.get("WIALON_TOKEN")
+WIALON_HOST = secret.get("WIALON_HOST")
 WIALON_ADMIN_ID = secret.get("WIALON_ADMIN_ID")
-WIALON_API_TOKEN = secret.get("WIALON_API_TOKEN")
 
 
 TRACKER_PROFILE = {
