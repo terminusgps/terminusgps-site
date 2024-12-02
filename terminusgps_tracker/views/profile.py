@@ -16,9 +16,9 @@ from terminusgps_tracker.models.profile import TrackerProfile
 from terminusgps_tracker.models.subscription import TrackerSubscriptionTier
 from terminusgps_tracker.models.todo import TrackerTodoList
 from terminusgps_tracker.integrations.wialon.items import WialonUnit, WialonUnitGroup
+from terminusgps_tracker.integrations.wialon import flags as flag
 from terminusgps_tracker.forms import (
     AssetCreationForm,
-    AssetDeletionForm,
     AssetModificationForm,
     SubscriptionModificationForm,
     NotificationCreationForm,
@@ -77,17 +77,63 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
 class TrackerProfileAssetView(LoginRequiredMixin, TemplateView):
     template_name = "terminusgps_tracker/profile/assets.html"
     extra_context = {
-        "title": "Your Assets",
-        "subtitle": "Register, modify, or delete your assets",
+        "title": "Your Units",
+        "subtitle": "Register, modify, or delete your units",
     }
     login_url = reverse_lazy("tracker login")
     permission_denied_message = "Please login and try again."
     raise_exception = False
     http_method_names = ["get"]
 
+    @classmethod
+    def get_wialon_units(
+        cls, profile: TrackerProfile, session: WialonSession
+    ) -> list[dict[str, Any | None]]:
+        unit_group = WialonUnitGroup(id=str(profile.wialon_group_id), session=session)
+        units = [
+            WialonUnit(id=unit_id, session=session) for unit_id in unit_group.items
+        ]
+        return [
+            {
+                unit.name: session.wialon_api.core_search_item(
+                    **{
+                        "id": unit.id,
+                        "flags": sum(
+                            [
+                                flag.DATAFLAG_UNIT_BASE,
+                                flag.DATAFLAG_UNIT_ADMIN_FIELDS,
+                                flag.DATAFLAG_UNIT_CONNECTION_STATUS,
+                                flag.DATAFLAG_UNIT_CUSTOM_FIELDS,
+                                flag.DATAFLAG_UNIT_IMAGE,
+                                flag.DATAFLAG_UNIT_POSITION,
+                            ]
+                        ),
+                    }
+                ).get("item")
+            }
+            for unit in units
+        ]
+
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
+        self.group_id = self.profile.wialon_group_id
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        with WialonSession() as session:
+            context = self.get_context_data(session)
+            return self.render_to_response(context=context)
+
+    def get_context_data(
+        self, wialon_session: WialonSession | None = None, **kwargs
+    ) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        if wialon_session:
+            context["wialon_units"] = self.get_wialon_units(
+                profile=self.profile, session=wialon_session
+            )
+            print(context["wialon_units"])
+        return context
 
 
 class TrackerProfileSubscriptionView(LoginRequiredMixin, FormView):
@@ -279,24 +325,6 @@ class TrackerProfileAssetCreationView(LoginRequiredMixin, FormView):
             unit.rename(asset_name)
 
 
-class TrackerProfileAssetDeletionView(LoginRequiredMixin, FormView):
-    form_class = AssetDeletionForm
-    template_name = "terminusgps_tracker/forms/profile/delete_asset.html"
-    extra_context = {
-        "title": "Delete asset",
-        "subtitle": "Delete an asset from your account",
-    }
-    login_url = reverse_lazy("tracker login")
-    permission_denied_message = "Please login and try again."
-    raise_exception = False
-    http_method_names = ["get", "post"]
-    success_url = reverse_lazy("tracker profile")
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        self.profile = TrackerProfile.objects.get(user=request.user)
-
-
 class TrackerProfileAssetModificationView(LoginRequiredMixin, FormView):
     form_class = AssetModificationForm
     template_name = "terminusgps_tracker/forms/profile/modify_asset.html"
@@ -309,6 +337,14 @@ class TrackerProfileAssetModificationView(LoginRequiredMixin, FormView):
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
+
+    def get_context_data(
+        self, wialon_session: WialonSession | None = None, **kwargs
+    ) -> dict[str, Any]:
+        context: dict[str, Any] = self.get_context_data(**kwargs)
+        if wialon_session:
+            context["wialon_unit"] = wialon_session.wialon_api
+        return context
 
 
 class TrackerProfileNotificationCreationView(LoginRequiredMixin, FormView):

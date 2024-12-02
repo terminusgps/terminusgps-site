@@ -17,7 +17,6 @@ MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
 MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
 MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
 SECRET_KEY = "po=qc@jlt0e#h6c8xv96vr%v2l^ib=f9m0!m-@bv0cz25pm$-g"
-SERIALIZATION_MODULES = {"json": "djmoney.serializers"}
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]
@@ -31,6 +30,7 @@ TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
 USE_I18N = True
 USE_TZ = True
 WIALON_API_TOKEN = os.getenv("WIALON_API_TOKEN")
+WIALON_API_HOST = "http://hst-api.wialon.com"
 WIALON_ADMIN_ID = 27881459
 
 TRACKER_PROFILE = {
@@ -88,9 +88,6 @@ INSTALLED_APPS = [
     "tailwind",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
     "theme",
-    "djmoney",
-    "oauth2_provider",
-    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -103,7 +100,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_browser_reload.middleware.BrowserReloadMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "terminusgps.urls"

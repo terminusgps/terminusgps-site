@@ -4,9 +4,6 @@ from django.utils import timezone
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
-from djmoney.models.fields import MoneyField
-from djmoney.money import Currency
-
 from authorizenet.apicontrollers import (
     ARBCreateSubscriptionController,
     ARBCancelSubscriptionController,
@@ -117,9 +114,7 @@ class TrackerSubscriptionTier(models.Model):
     )
 
     features = models.ManyToManyField("terminusgps_tracker.TrackerSubscriptionFeature")
-    amount = MoneyField(
-        max_digits=14, decimal_places=2, default_currency=Currency("USD")
-    )
+    amount = models.DecimalField(default=0.00, max_digits=14, decimal_places=2)
     period = models.PositiveSmallIntegerField(
         choices=IntervalPeriod.choices, default=IntervalPeriod.MONTHLY
     )
@@ -361,7 +356,7 @@ class TrackerSubscription(models.Model):
         return ARBSubscriptionType(
             name=f"{self.profile.user.email}'s {tier} Subscription",
             paymentSchedule=paymentSchedule,
-            amount=str(tier.amount.amount),
+            amount=str(tier.amount),
             trialAmount=str("0.00"),
             profile=profile,
         )

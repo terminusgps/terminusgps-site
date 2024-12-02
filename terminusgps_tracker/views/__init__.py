@@ -1,6 +1,5 @@
 from .profile import (
     TrackerProfileAssetCreationView,
-    TrackerProfileAssetDeletionView,
     TrackerProfileAssetModificationView,
     TrackerProfileAssetView,
     TrackerProfileNotificationCreationView,

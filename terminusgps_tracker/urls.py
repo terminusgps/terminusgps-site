@@ -23,7 +23,7 @@ urlpatterns = [
     ),
     path(
         "profile/assets/<int:id>/update/",
-        views.TrackerProfileAssetDeletionView.as_view(),
+        views.TrackerProfileAssetModificationView.as_view(),
         name="update asset",
     ),
     path(

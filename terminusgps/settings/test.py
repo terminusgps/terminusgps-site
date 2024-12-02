@@ -1,8 +1,8 @@
-import os
 from terminusgps.settings.dev import *
 
-os.environ["DJANGO_SETTINGS_MODULE"] = "terminusgps.settings.test"
+import os
 
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "terminusgps.settings.test")
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.InMemoryStorage"},

@@ -1,6 +1,9 @@
 {% extends "terminusgps_tracker/layout.html" %}
-{% load static %}
+{% load static terminusgps_tracker_display %}
 {% block content %}
+<div>
+    {% for unit in wialon_units %}{% render_wialon_unit unit %}{% endfor %}
+</div>
 <div class="mt-4 flex flex-grow justify-evenly gap-2">
     <a href="{% url 'tracker profile' %}" class="grow rounded-md border border-solid border-gray-600 bg-gray-200 px-4 py-2 text-center text-gray-700 hover:bg-gray-50 dark:border-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-400">
         Back
