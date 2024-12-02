@@ -27,7 +27,7 @@ class WialonSession:
 
     @token.setter
     def token(self, value: str | None) -> None:
-        self._token = value if value else settings.WIALON_API_TOKEN
+        self._token = value if value else settings.WIALON_TOKEN
 
     def __enter__(self) -> "WialonSession":
         if not self.wialon_api.sid:
