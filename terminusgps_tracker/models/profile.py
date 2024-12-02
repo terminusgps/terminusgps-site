@@ -11,6 +11,7 @@ from authorizenet.apicontractsv1 import (
     updateCustomerProfileRequest,
 )
 from authorizenet.apicontrollers import (
+    constants,
     createCustomerProfileController,
     deleteCustomerProfileController,
     getCustomerProfileController,
@@ -103,6 +104,8 @@ class TrackerProfile(models.Model):
         )
 
         controller = createCustomerProfileController(request)
+        if not settings.DEBUG:
+            controller.setenvironment(constants.PRODUCTION)
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
@@ -120,6 +123,8 @@ class TrackerProfile(models.Model):
         )
 
         controller = getCustomerProfileController(request)
+        if not settings.DEBUG:
+            controller.setenvironment(constants.PRODUCTION)
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
@@ -135,6 +140,8 @@ class TrackerProfile(models.Model):
         )
 
         controller = updateCustomerProfileController(request)
+        if not settings.DEBUG:
+            controller.setenvironment(constants.PRODUCTION)
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
@@ -149,6 +156,8 @@ class TrackerProfile(models.Model):
 
         controller = deleteCustomerProfileController(request)
         controller.execute()
+        if not settings.DEBUG:
+            controller.setenvironment(constants.PRODUCTION)
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
             raise ValueError(response.messages.message[0]["text"].text)
