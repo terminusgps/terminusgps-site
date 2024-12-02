@@ -97,9 +97,7 @@ class TrackerProfile(models.Model):
         request = createCustomerProfileRequest(
             merchantAuthentication=get_merchant_auth(),
             profile=customerProfileType(
-                merchantCustomerId=str(self.user.pk),
-                email=str(self.user.email),
-                description="Terminus GPS Tracker Profile",
+                merchantCustomerId=str(self.user.pk), email=str(self.user.email)
             ),
         )
 
