@@ -1,4 +1,5 @@
 import os
+from typing import Any
 from pathlib import Path
 
 from terminusgps.aws import get_secret
@@ -16,9 +17,6 @@ INTERNAL_IPS = ["127.0.0.1", "0.0.0.0"]
 LANGUAGE_CODE = "en-us"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
-MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
-MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
-SECRET_KEY = get_secret("terminusgps-site-key")
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = True
@@ -27,14 +25,20 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = "/var/www/terminusgps-site/static/"
 STATIC_URL = "/static/"
 TIME_ZONE = "America/Chicago"
-TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER")
-TWILIO_MESSAGING_SID = os.getenv("TWILIO_MESSAGING_SID")
-TWILIO_SID = os.getenv("TWILIO_SID")
-TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
 USE_I18N = True
 USE_TZ = True
-WIALON_API_TOKEN = os.getenv("WIALON_API_TOKEN")
-WIALON_ADMIN_ID = 27881459
+
+secret: dict[str, Any] = get_secret("terminusgps-site-live-env")
+SECRET_KEY = secret.get("SECRET_KEY")
+MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
+MERCHANT_AUTH_TRANSACTION_KEY = secret.get("MERCHANT_AUTH_TRANSACTION_KEY")
+TWILIO_FROM_NUMBER = secret.get("TWILIO_FROM_NUMBER")
+TWILIO_MESSAGING_SID = secret.get("TWILIO_MESSAGING_SID")
+TWILIO_SID = secret.get("TWILIO_SID")
+TWILIO_TOKEN = secret.get("TWILIO_TOKEN")
+WIALON_ADMIN_ID = secret.get("WIALON_ADMIN_ID")
+WIALON_API_TOKEN = secret.get("WIALON_API_TOKEN")
+
 
 TRACKER_PROFILE = {
     "DISPLAY_NAME": "Terminus GPS",
