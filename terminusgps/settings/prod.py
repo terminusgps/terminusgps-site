@@ -12,7 +12,6 @@ CLIENT_NAME = "Terminus GPS"
 CSRF_COOKIE_SECURE = True
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-FORM_RENDERER = "terminusgps_tracker.forms.TerminusFormRenderer"
 INTERNAL_IPS = ["127.0.0.1", "0.0.0.0"]
 LANGUAGE_CODE = "en-us"
 MEDIA_ROOT = BASE_DIR / "media"
