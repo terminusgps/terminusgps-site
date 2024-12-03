@@ -27,7 +27,9 @@ TIME_ZONE = "America/Chicago"
 USE_I18N = True
 USE_TZ = True
 
-secret: dict[str, str] = get_secret("terminusgps-site-live-env")
+secret: dict[str, str] = get_secret(
+    name="terminusgps-site-live-env", profile="Blake Nall"
+)
 SECRET_KEY = secret.get("SECRET_KEY")
 MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
 MERCHANT_AUTH_TRANSACTION_KEY = secret.get("MERCHANT_AUTH_TRANSACTION_KEY")
