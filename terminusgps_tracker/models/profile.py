@@ -11,14 +11,16 @@ from authorizenet.apicontractsv1 import (
     updateCustomerProfileRequest,
 )
 from authorizenet.apicontrollers import (
-    constants,
     createCustomerProfileController,
     deleteCustomerProfileController,
     getCustomerProfileController,
     updateCustomerProfileController,
 )
 
-from terminusgps_tracker.integrations.authorizenet import get_merchant_auth
+from terminusgps_tracker.integrations.authorizenet import (
+    get_merchant_auth,
+    get_environment,
+)
 from terminusgps_tracker.integrations.wialon.items import (
     WialonUnitGroup,
     WialonUser,
@@ -48,6 +50,9 @@ class TrackerProfile(models.Model):
     class Meta:
         verbose_name = "profile"
         verbose_name_plural = "profiles"
+        permissions = [
+            ("update_profile_user", "Can change the user associated with the profile.")
+        ]
 
     def __str__(self) -> str:
         return f"{self.user}'s Profile"
@@ -104,8 +109,7 @@ class TrackerProfile(models.Model):
         )
 
         controller = createCustomerProfileController(request)
-        if not settings.DEBUG:
-            controller.setenvironment(constants.PRODUCTION)
+        controller.setenvironment(get_environment())
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
@@ -115,16 +119,19 @@ class TrackerProfile(models.Model):
 
     @classmethod
     def authorizenet_get_customer_profile(
-        cls, profile_id: int
+        cls, profile_id: int | None = None, merchant_id: int | None = None
     ) -> dict[str, Any] | None:
-        request = getCustomerProfileRequest(
-            merchantAuthentication=get_merchant_auth(),
-            customerProfileId=str(profile_id),
-        )
+        if not profile_id or not merchant_id:
+            raise ValueError("No 'profile_id' or 'merchant_id' provided.")
+
+        request = getCustomerProfileRequest(merchantAuthentication=get_merchant_auth())
+        if profile_id:
+            request.customerProfileId = str(profile_id)
+        if merchant_id:
+            request.merchantCustomerId = str(merchant_id)
 
         controller = getCustomerProfileController(request)
-        if not settings.DEBUG:
-            controller.setenvironment(constants.PRODUCTION)
+        controller.setenvironment(get_environment())
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
@@ -140,8 +147,7 @@ class TrackerProfile(models.Model):
         )
 
         controller = updateCustomerProfileController(request)
-        if not settings.DEBUG:
-            controller.setenvironment(constants.PRODUCTION)
+        controller.setenvironment(get_environment())
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
@@ -155,9 +161,8 @@ class TrackerProfile(models.Model):
         )
 
         controller = deleteCustomerProfileController(request)
+        controller.setenvironment(get_environment())
         controller.execute()
-        if not settings.DEBUG:
-            controller.setenvironment(constants.PRODUCTION)
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
             raise ValueError(response.messages.message[0]["text"].text)

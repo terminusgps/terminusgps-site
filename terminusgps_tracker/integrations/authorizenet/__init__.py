@@ -1,1 +1,1 @@
-from .auth import get_merchant_auth
+from .auth import get_merchant_auth, get_environment

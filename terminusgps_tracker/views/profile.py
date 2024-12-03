@@ -50,9 +50,11 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
-        self.profile = None
-        if request.user.is_authenticated:
-            self.profile = TrackerProfile.objects.get(user=self.request.user)
+        if request.user and request.user.is_authenticated:
+            try:
+                self.profile = TrackerProfile.objects.get(user=request.user)
+            except TrackerProfile.DoesNotExist:
+                self.profile = None
 
     def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         if self.profile:
@@ -61,16 +63,9 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        if self.profile is not None:
-            title = f"{self.profile.user.first_name}'s Profile"
-            todo_list, _ = TrackerTodoList.objects.get_or_create(profile=self.profile)
-            subscription, _ = TrackerSubscription.objects.get_or_create(
-                profile=self.profile
-            )
-
-            context["title"] = title
-            context["todos"] = todo_list.todo_items.all()
-            context["subscription_tier"] = subscription.tier
+        context["profile"] = self.profile
+        context["todo_list"] = self.profile.todo_list
+        context["subscription"] = self.profile.subscription
         return context
 
 

@@ -18,13 +18,13 @@ from .profile import (
     TrackerProfileView,
 )
 from .views import (
+    TestTemplateView,
     TrackerAboutView,
-    TrackerSourceView,
     TrackerContactView,
-    TrackerPrivacyView,
-    TrackerSubscriptionView,
     TrackerLoginView,
     TrackerLogoutView,
+    TrackerPrivacyView,
     TrackerRegistrationView,
-    TestTemplateView,
+    TrackerSourceView,
+    TrackerSubscriptionView,
 )

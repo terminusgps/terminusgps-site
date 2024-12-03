@@ -1,28 +1,26 @@
 {% extends "terminusgps_tracker/layout.html" %}
 {% load static %}
 {% block content %}
-<div class="m-6 flex flex-col gap-4 p-4">
-    <div class="flex flex-col">
-        <h2 class="mb-2 text-xl font-bold text-gray-800 dark:text-gray-200">Quick Links</h2>
-        <ul class="list-disc list-inside">
-            <li><a class="text-transparent bg-gradient-to-r from-terminus-red-800 via-terminus-red-400 to-terminus-red-800 dark:from-terminus-red-300 dark:via-terminus-red-100 dark:to-terminus-red-300 bg-clip-text font-semibold underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:decoration-dotted" href="https://hosting.terminusgps.com/">Terminus GPS Hosting</a></li>
-            <li><a class="text-transparent bg-gradient-to-r from-terminus-red-800 via-terminus-red-400 to-terminus-red-800 dark:from-terminus-red-300 dark:via-terminus-red-100 dark:to-terminus-red-300 bg-clip-text font-semibold underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:decoration-dotted" href="https://dashboard.lightmetrics.co/login">Lightmetrics</a></li>
-        </ul>
-    </div>
-    <div>
-        <h2 class="mb-2 text-xl font-bold text-gray-800 dark:text-gray-200">Contact Us</h2>
-        <div class="flex gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-gray-600">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 3.75H6.912a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859M12 3v8.25m0 0-3-3m3 3 3-3" />
-            </svg>
-            <a class="text-transparent bg-gradient-to-r from-terminus-red-800 via-terminus-red-400 to-terminus-red-800 dark:from-terminus-red-300 dark:via-terminus-red-100 dark:to-terminus-red-300 bg-clip-text font-semibold underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:decoration-dotted" href="mailto:support@terminusgps.com">Email</a>
+<div class="flex flex-col gap-16">
+    <div class="flex flex-col gap-4">
+        <div class="flex flex-col items-center gap-2 text-center">
+            <h3 class="bg-gradient-to-tr from-terminus-red-800 via-terminus-red-100 to-terminus-red-800 bg-clip-text text-xl font-bold text-transparent md:text-4xl">Hey, check your pockets...<h3>
+            <h2 class="text-lg font-semibold text-gray-700 md:text-2xl dark:text-gray-300">Stay informed with the TerminusGPS mobile app<h2>
         </div>
-        <div class="flex gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-gray-600">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 3.75v4.5m0-4.5h-4.5m4.5 0-6 6m3 12c-8.284 0-15-6.716-15-15V4.5A2.25 2.25 0 0 1 4.5 2.25h1.372c.516 0 .966.351 1.091.852l1.106 4.423c.11.44-.054.902-.417 1.173l-1.293.97a1.062 1.062 0 0 0-.38 1.21 12.035 12.035 0 0 0 7.143 7.143c.441.162.928-.004 1.21-.38l.97-1.293a1.125 1.125 0 0 1 1.173-.417l4.423 1.106c.5.125.852.575.852 1.091V19.5a2.25 2.25 0 0 1-2.25 2.25h-2.25Z" />
-            </svg>
-            <a class="text-transparent bg-gradient-to-r from-terminus-red-800 via-terminus-red-400 to-terminus-red-800 dark:from-terminus-red-300 dark:via-terminus-red-100 dark:to-terminus-red-300 bg-clip-text font-semibold underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:decoration-dotted" href="tel:+17139045262">Phone</a>
+        <div class="flex flex-col items-center gap-2">
+            <img class="w-full rounded" src="{% static 'terminusgps_tracker/phones.png' %}" alt="Three generic smartphones displaying the Terminus GPS mobile application"/>
+            <div class="flex -mt-8 gap-2">
+                <a href="https://apps.apple.com/us/app/terminus-gps-mobile/id1419439009">
+                    <img src="{% static 'terminusgps_tracker/download_app_store.svg' %}" class="size-48">
+                    <span class="sr-only">Download the app from the Apple App Store</span>
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=com.terminusgps.track&pcampaignid=web_share">
+                    <img src="{% static 'terminusgps_tracker/download_play_store.svg' %}" class="size-48">
+                    <span class="sr-only">Download the app from the Google Play Store</span>
+                </a>
+            </div>
         </div>
     </div>
+    {% include "terminusgps_tracker/about_story.html" %}
 </div>
 {% endblock content %}

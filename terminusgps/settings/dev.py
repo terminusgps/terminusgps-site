@@ -1,5 +1,5 @@
-import os
 from pathlib import Path
+from terminusgps.aws import get_secret
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -8,7 +8,6 @@ ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 CORS_ORIGIN_ALLOW_ALL = True
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-ENCRYPTION_KEY = "HX2qfcgHEtzd0UWUgDFUMKOeTVq5u-6DYASldb057W4="
 INTERNAL_IPS = ["127.0.0.1", "0.0.0.0"]
 LANGUAGE_CODE = "en-us"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -23,16 +22,17 @@ TIME_ZONE = "America/Chicago"
 USE_I18N = True
 USE_TZ = True
 
+secret: dict[str, str] = get_secret("terminusgps-site-env-dev", profile="Blake Nall")
 SECRET_KEY = "po=qc@jlt0e#h6c8xv96vr%v2l^ib=f9m0!m-@bv0cz25pm$-g"
-MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
-MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
-TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
-TWILIO_SID = os.getenv("TWILIO_SID")
-TWILIO_MESSAGING_SID = os.getenv("TWILIO_MESSAGING_SID")
-TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER")
-WIALON_TOKEN = os.getenv("WIALON_TOKEN")
-WIALON_HOST = os.getenv("WIALON_HOST")
-WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID")
+MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
+MERCHANT_AUTH_TRANSACTION_KEY = secret.get("MERCHANT_AUTH_TRANSACTION_KEY")
+TWILIO_TOKEN = secret.get("TWILIO_TOKEN")
+TWILIO_SID = secret.get("TWILIO_SID")
+TWILIO_MESSAGING_SID = secret.get("TWILIO_MESSAGING_SID")
+TWILIO_FROM_NUMBER = secret.get("TWILIO_FROM_NUMBER")
+WIALON_TOKEN = secret.get("WIALON_TOKEN")
+WIALON_HOST = secret.get("WIALON_HOST")
+WIALON_ADMIN_ID = secret.get("WIALON_ADMIN_ID")
 
 TRACKER_PROFILE = {
     "DISPLAY_NAME": "Terminus GPS",
