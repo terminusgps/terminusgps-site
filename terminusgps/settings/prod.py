@@ -38,7 +38,15 @@ TWILIO_FROM_NUMBER = secret.get("TWILIO_FROM_NUMBER")
 WIALON_TOKEN = secret.get("WIALON_TOKEN")
 WIALON_HOST = secret.get("WIALON_HOST")
 WIALON_ADMIN_ID = secret.get("WIALON_ADMIN_ID")
+WIALON_UNACTIVATED_GROUP = secret.get("WIALON_UNACTIVATED_GROUP")
+EMAIL_HOST_USER = secret.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")
 
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = "support@terminusgps.com"
 
 TRACKER_PROFILE = {
     "DISPLAY_NAME": "Terminus GPS",

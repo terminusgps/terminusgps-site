@@ -24,20 +24,20 @@ DEFAULT_ACCESS_MASK: int = sum(
 
 
 class CreateWialonUserKwargs(TypedDict):
-    owner: WialonBase
+    owner_id: int
     name: str
     password: str
 
 
 class WialonUser(WialonBase):
     def create(self, **kwargs: CreateWialonUserKwargs) -> str | None:
-        owner: WialonBase = kwargs["owner"]
+        owner_id: int = kwargs["owner_id"]
         name: str = kwargs["name"]
         password: str = kwargs["password"]
 
         response: dict = self.session.wialon_api.core_create_user(
             **{
-                "creatorId": owner.id,
+                "creatorId": str(owner_id),
                 "name": name,
                 "password": password,
                 "dataFlags": flag.DATAFLAG_USER_BASE,

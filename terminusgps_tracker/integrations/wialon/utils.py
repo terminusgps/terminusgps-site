@@ -1,3 +1,6 @@
+import secrets
+import string
+
 import terminusgps_tracker.integrations.wialon.flags as flag
 from terminusgps_tracker.integrations.wialon.session import WialonSession
 from terminusgps_tracker.integrations.wialon.constants import WIALON_ITEM_TYPES
@@ -36,3 +39,16 @@ def is_unique(value: str, session: WialonSession, items_type: str = "avl_unit") 
         **{"type": items_type, "value": value.strip()}
     ).get("result")
     return not bool(result)
+
+
+def gen_wialon_password(length: int = 32) -> str:
+    symbols: str = "!@#$%^*()[]-_+"
+    alphabet: str = string.ascii_letters + string.digits + symbols
+    password: str = "".join(secrets.choice(alphabet) for _ in range(length - 4))
+    return (
+        password
+        + secrets.choice(string.ascii_lowercase)
+        + secrets.choice(string.ascii_uppercase)
+        + secrets.choice(string.digits)
+        + secrets.choice(symbols)
+    )

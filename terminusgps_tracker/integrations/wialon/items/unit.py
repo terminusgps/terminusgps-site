@@ -6,20 +6,20 @@ from terminusgps_tracker.integrations.wialon.items.base import WialonBase
 
 
 class CreateWialonUnitKwargs(TypedDict):
-    owner: WialonBase
+    owner_id: int
     name: str
     hw_type: str
 
 
 class WialonUnit(WialonBase):
     def create(self, **kwargs: CreateWialonUnitKwargs) -> str | None:
-        owner: WialonBase = kwargs["owner"]
+        owner_id: int = kwargs["owner_id"]
         name: str = kwargs["name"]
         hw_type: str = kwargs["hw_type"]
 
         response: dict = self.session.wialon_api.core_create_unit(
             **{
-                "creatorId": str(owner.id),
+                "creatorId": str(owner_id),
                 "name": name,
                 "hwTypeId": hw_type,
                 "dataFlags": flag.DATAFLAG_UNIT_BASE,

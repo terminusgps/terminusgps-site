@@ -6,18 +6,18 @@ from .user import DEFAULT_ACCESS_MASK, WialonUser
 
 
 class CreateWialonUnitGroupKwargs(TypedDict):
-    owner: WialonBase
+    owner_id: int
     name: str
 
 
 class WialonUnitGroup(WialonBase):
     def create(self, **kwargs: CreateWialonUnitGroupKwargs) -> str | None:
-        owner: WialonBase = kwargs["owner"]
+        owner_id: int = kwargs["owner_id"]
         name: str = kwargs["name"]
 
         response: dict = self.session.wialon_api.core_create_unit_group(
             **{
-                "creatorId": owner.id,
+                "creatorId": owner_id,
                 "name": name,
                 "dataFlags": flag.DATAFLAG_UNIT_BASE,
             }
