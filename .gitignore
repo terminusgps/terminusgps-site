@@ -16,7 +16,6 @@ db.*
 
 
 package-lock.json
-credentials.*
 *.p12
 *.log
 *.*.log
