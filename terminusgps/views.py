@@ -87,9 +87,10 @@ class TerminusRegistrationView(FormView):
                     self.wialon_assign_user_to_unit(
                         unit_id=int(unit_id), user_id=user.id, session=session
                     )
-                    self.wialon_assign_phone_to_unit(
-                        unit_id=int(unit_id), phone_number=phone_number, session=session
-                    )
+                    # TODO: Fix phone assignments
+                    #  self.wialon_assign_phone_to_unit(
+                    #     unit_id=int(unit_id), phone_number=phone_number, session=session
+                    # )
                     self.send_credentials_email(username, password)
         return super().form_valid(form=form)
 
