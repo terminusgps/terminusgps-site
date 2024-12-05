@@ -4,7 +4,7 @@ aiohappyeyeballs==2.4.0
     # via
     #   terminusgps-site (pyproject.toml)
     #   aiohttp
-aiohttp==3.10.2
+aiohttp==3.10.11
     # via
     #   terminusgps-site (pyproject.toml)
     #   aiohttp-retry
