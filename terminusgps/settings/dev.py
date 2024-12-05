@@ -1,9 +1,12 @@
+import os
 from pathlib import Path
 from terminusgps.aws import get_secret
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 CORS_ORIGIN_ALLOW_ALL = True
 DEBUG = True
@@ -22,7 +25,9 @@ TIME_ZONE = "America/Chicago"
 USE_I18N = True
 USE_TZ = True
 
-secret: dict[str, str] = get_secret("terminusgps-site-env-dev", profile="Blake Nall")
+secret: dict[str, str] = get_secret(
+    "terminusgps-site-env-dev", profile="terminusgps-profile"
+)
 SECRET_KEY = "po=qc@jlt0e#h6c8xv96vr%v2l^ib=f9m0!m-@bv0cz25pm$-g"
 MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
 MERCHANT_AUTH_TRANSACTION_KEY = secret.get("MERCHANT_AUTH_TRANSACTION_KEY")

@@ -7,6 +7,8 @@ os.umask(0)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 ALLOWED_HOSTS = [".terminusgps.com"]
 CLIENT_NAME = "Terminus GPS"
 CSRF_COOKIE_SECURE = True
@@ -27,7 +29,7 @@ TIME_ZONE = "America/Chicago"
 USE_I18N = True
 USE_TZ = True
 
-secret: dict[str, str] = get_secret("terminusgps-site-live-env", profile="Blake Nall")
+secret: dict[str, str] = get_secret("terminusgps-site-live-env")
 SECRET_KEY = secret.get("SECRET_KEY")
 MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
 MERCHANT_AUTH_TRANSACTION_KEY = secret.get("MERCHANT_AUTH_TRANSACTION_KEY")
