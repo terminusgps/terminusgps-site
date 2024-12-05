@@ -7,8 +7,6 @@ os.umask(0)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 ALLOWED_HOSTS = [".terminusgps.com"]
 CLIENT_NAME = "Terminus GPS"
 CSRF_COOKIE_SECURE = True
