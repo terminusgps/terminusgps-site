@@ -1,7 +1,11 @@
 import os
 from pathlib import Path
 
+from terminusgps.aws import get_secret
+
 os.umask(0)
+secret: dict[str, str] = get_secret("terminusgps-site-live-env")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,19 +29,19 @@ TIME_ZONE = "America/Chicago"
 USE_I18N = True
 USE_TZ = True
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
-MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
-TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
-TWILIO_SID = os.getenv("TWILIO_SID")
-TWILIO_MESSAGING_SID = os.getenv("TWILIO_MESSAGING_SID")
-TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER")
-WIALON_TOKEN = os.getenv("WIALON_TOKEN")
-WIALON_HOST = os.getenv("WIALON_HOST")
-WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID")
-WIALON_UNACTIVATED_GROUP = os.getenv("WIALON_UNACTIVATED_GROUP")
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+SECRET_KEY = secret.get("SECRET_KEY")
+MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
+MERCHANT_AUTH_TRANSACTION_KEY = secret.get("MERCHANT_AUTH_TRANSACTION_KEY")
+TWILIO_TOKEN = secret.get("TWILIO_TOKEN")
+TWILIO_SID = secret.get("TWILIO_SID")
+TWILIO_MESSAGING_SID = secret.get("TWILIO_MESSAGING_SID")
+TWILIO_FROM_NUMBER = secret.get("TWILIO_FROM_NUMBER")
+WIALON_TOKEN = secret.get("WIALON_TOKEN")
+WIALON_HOST = secret.get("WIALON_HOST")
+WIALON_ADMIN_ID = secret.get("WIALON_ADMIN_ID")
+WIALON_UNACTIVATED_GROUP = secret.get("WIALON_UNACTIVATED_GROUP")
+EMAIL_HOST_USER = secret.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
@@ -96,17 +100,15 @@ LOGGING = {
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
-    # "staticfiles": {
-    #     "BACKEND": "storages.backends.s3.S3Storage",
-    #     "OPTIONS": {
-    #         "session_profile": "Blake Nall",
-    #         "bucket_name": "terminusgps-bucket",
-    #         "location": "static/",
-    #         "region_name": "us-east-1",
-    #         "verify": False,
-    #     },
-    # },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": "terminusgps-site-bucket",
+            "location": "static/",
+            "region_name": "us-east-1",
+            "verify": False,
+        },
+    },
 }
 
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}

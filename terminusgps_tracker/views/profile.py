@@ -14,7 +14,6 @@ from terminusgps_tracker.integrations.wialon.session import WialonSession
 from terminusgps_tracker.integrations.wialon.utils import get_id_from_iccid
 from terminusgps_tracker.models.profile import TrackerProfile
 from terminusgps_tracker.models.subscription import TrackerSubscriptionTier
-from terminusgps_tracker.models.todo import TrackerTodoList
 from terminusgps_tracker.integrations.wialon.items import WialonUnit, WialonUnitGroup
 from terminusgps_tracker.integrations.wialon import flags as flag
 from terminusgps_tracker.forms import (
@@ -30,11 +29,7 @@ from terminusgps_tracker.forms import (
     ShippingAddressSetDefaultForm,
     ShippingAddressCreationForm,
 )
-from terminusgps_tracker.models import (
-    TrackerSubscription,
-    TrackerPaymentMethod,
-    TrackerShippingAddress,
-)
+from terminusgps_tracker.models import TrackerPaymentMethod, TrackerShippingAddress
 
 
 class TrackerProfileView(LoginRequiredMixin, TemplateView):
