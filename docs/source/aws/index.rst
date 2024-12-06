@@ -6,3 +6,4 @@ Amazon Web Services (AWS)
    :caption: Contents:
 
    org.rst
+   terms.rst
