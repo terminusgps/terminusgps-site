@@ -137,6 +137,7 @@ django==5.1.2
     #   django-browser-reload
     #   django-cors-headers
     #   django-cryptography
+    #   django-docs
     #   django-filter
     #   django-htmx
     #   django-oauth-toolkit
@@ -159,6 +160,8 @@ django-browser-reload==1.13.0
 django-cors-headers==4.4.0
     # via terminusgps-site (pyproject.toml)
 django-cryptography==1.1
+    # via terminusgps-site (pyproject.toml)
+django-docs==0.3.3
     # via terminusgps-site (pyproject.toml)
 django-filter==24.3
     # via terminusgps-site (pyproject.toml)
