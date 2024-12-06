@@ -6,12 +6,12 @@
 terminusgps-site documentation
 ==============================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+Welcome to the Terminus GPS site documentation! Please select a link below to get started.
 
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   aws/index.rst
+   services/index.rst
