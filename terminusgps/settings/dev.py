@@ -11,6 +11,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 CORS_ORIGIN_ALLOW_ALL = True
 DEBUG = True
+DOCS_ACCESS = "staff"
+DOCS_ROOT = BASE_DIR / "docs/build/html"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FROM_EMAIL = "no-reply@terminusgps.com"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -98,6 +100,7 @@ INSTALLED_APPS = [
     "django.forms",
     "django_browser_reload",
     "django_htmx",
+    "docs",
     "tailwind",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
     "theme",

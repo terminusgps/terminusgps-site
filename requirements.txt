@@ -194,6 +194,7 @@ docutils==0.21.2
     # via
     #   terminusgps-site (pyproject.toml)
     #   sphinx
+    #   sphinx-rtd-theme
 ecdsa==0.19.0
     # via
     #   terminusgps-site (pyproject.toml)
@@ -500,6 +501,11 @@ soupsieve==2.5
     #   terminusgps-site (pyproject.toml)
     #   beautifulsoup4
 sphinx==8.0.2
+    # via
+    #   terminusgps-site (pyproject.toml)
+    #   sphinx-rtd-theme
+    #   sphinxcontrib-jquery
+sphinx-rtd-theme==3.0.2
     # via terminusgps-site (pyproject.toml)
 sphinxcontrib-applehelp==2.0.0
     # via
@@ -513,6 +519,8 @@ sphinxcontrib-htmlhelp==2.1.0
     # via
     #   terminusgps-site (pyproject.toml)
     #   sphinx
+sphinxcontrib-jquery==4.1
+    # via sphinx-rtd-theme
 sphinxcontrib-jsmath==1.0.1
     # via
     #   terminusgps-site (pyproject.toml)
