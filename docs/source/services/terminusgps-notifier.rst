@@ -3,6 +3,8 @@ terminusgps-notifier
 
 `terminusgps-notifier`_ is a `FastAPI application`_ that uses the `Twilio API`_ to programatically create phone calls/sms messages.
 
+**terminusgps-notifier** listens for webhooks at :literal:`/notify/<method>`.
+
 .. _terminusgps-notifier: https://github.com/darthnall/terminusgps-notifier
 .. _FastAPI application: https://fastapi.tiangolo.com/
 .. _Twilio API: https://www.twilio.com/docs
@@ -11,16 +13,41 @@ terminusgps-notifier
 Installation
 ============
 
+.. highlight:: bash
+
+1. Clone the `repository`_ and :command:`cd` into :literal:`terminusgps-notifier/`::
+
+    git clone https://github.com/darthnall/terminusgps-notifier
+    cd terminusgps-notifier/
+
+.. _repository: https://github.com/darthnall/terminusgps-notifier
+
+2. Set environment variables for the application::
+   
+    export TWILIO_TOKEN="<YOUR_TWILIO_TOKEN>"
+    export TWILIO_SID="<YOUR_TWILIO_SID>"
+    export TWILIO_MESSAGING_SID="<YOUR_TWILIO_MESSAGING_SID>"
+    export TWILIO_FROM_NUMBER="<YOUR_TWILIO_FROM_NUMBER>"
+    export WIALON_TOKEN="<YOUR_WIALON_TOKEN>"
+
+3. Install dependencies::
+
+    python -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+
+4. Start the development server::
+
+    fastapi dev
+
 ------------
 Requirements
 ------------
 
-* `UNIX-like command-line interface`_
 * `Python 3.1x`_
 * `Twilio credentials`_
 * `Wialon credentials`_
 
-.. _UNIX-like command-line interface: https://en.wikipedia.org/wiki/Unix_shell
 .. _Python 3.1x: https://www.python.org/downloads/
 .. _Twilio credentials: https://www.twilio.com/login
 .. _Wialon credentials: https://hosting.wialon.com/?lang=en
@@ -88,11 +115,33 @@ Reference
 Usage
 =====
 
+--------------
+Twilio methods
+--------------
+
+**terminusgps-notifier** offers three types of notifications, text-to-speech phone calls, sms messaging and stdout.
+
+For backwards compatibility, :literal:`call` and :literal:`phone` are both mapped to the same Twilio logic.
+
++--------+-------------+
+| method | result      | 
++========+=============+
+| call   | tts call    |
++--------+-------------+
+| phone  | tts call    |
++--------+-------------+
+| sms    | sms message |
++--------+-------------+
+| echo   | stdout      |
++--------+-------------+
+
 -----------------------
 Notify one phone number
 -----------------------
 
-Use the :literal:`create_notification()` method on your :literal:`TwilioCaller` instance to create an asyncronous notification task::
+.. highlight:: python
+
+Use the :literal:`create_notification()` method on a :literal:`TwilioCaller` instance to create an asyncronous notification task::
 
     import asyncio
     from asyncio import Task
@@ -109,7 +158,7 @@ Use the :literal:`create_notification()` method on your :literal:`TwilioCaller` 
         method=method,
     )
     
-After you've created a task using :literal:`create_notification()`, execute it in asyncio's event runner::
+After creating a task, execute it in :literal:`asyncio`'s event runner::
 
     asyncio.run(task)
 
@@ -140,7 +189,6 @@ Use the :literal:`create_tasks()` function with a list of phone numbers to creat
         caller=caller
     )
     
-After you've created a list of tasks using :literal:`create_tasks()`, execute the tasks using :literal:`asyncio.gather()`::
+Execute the tasks using :literal:`asyncio.gather()`, unpacking the tasks with :literal:`*`::
 
-    # Use a '*' to unpack the list into asyncio.gather()
-    asyncio.gather(*tasks)
+        asyncio.gather(*tasks)
