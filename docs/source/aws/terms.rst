@@ -3,9 +3,9 @@ Terms
 
 Click on a term to learn more.
 
-=======
-General
-=======
+=========
+Computing
+=========
 
 `account`_
     AWS accounts are responsible for paying bills accrued by AWS resources.
@@ -88,7 +88,7 @@ Services
 .. _RDS: https://docs.aws.amazon.com/rds/
 
 `Route 53`_
-    AWS Route 53 is a domain registrar and DNS management service, i.e. Wix DNS settings.
+    AWS Route 53 is a domain registrar and DNS management service, i.e. `Wix`_ DNS settings.
 
 .. _Route 53: https://docs.aws.amazon.com/route53/
-
+.. _Wix: https://users.wix.com/signin/

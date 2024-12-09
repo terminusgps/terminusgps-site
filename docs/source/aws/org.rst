@@ -1,5 +1,5 @@
-Organization Structure
-======================
+Organization
+============
 
 
 =================
