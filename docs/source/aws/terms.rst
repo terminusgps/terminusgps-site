@@ -5,24 +5,34 @@ Terms
 General
 =======
 
-account
+`account`_
     AWS accounts are responsible for paying bills accrued by AWS resources.
 
     AWS resources cannot be created without an AWS account that owns them.
 
-application
+.. _account: https://docs.aws.amazon.com/accounts/latest/reference/accounts-welcome.html
+
+`application`_
     A collection of AWS resources.
 
-cloud
+.. _application: https://docs.aws.amazon.com/awsconsolehelpdocs/latest/gsg/myApp-getting-started.html#myApp-step1?icmpid=docs_console_home_create_application_help_panel
+
+`cloud`_
     A collection of servers that are able to easily interact with each other.
 
     In a cloud configuration, servers are able to pass data between each other freely.
 
-server
+.. _cloud: https://aws.amazon.com/what-is-aws/
+
+`server`_
     A computer that runs code programatically.
 
-user
+.. _server: https://en.wikipedia.org/wiki/Server_(computing)
+
+`user`_
     A human that has credentials (username + password) allowing them access to an AWS account or AWS application.
+
+.. _user: https://en.wikipedia.org/wiki/User_(computing)
 
 ========
 Services
