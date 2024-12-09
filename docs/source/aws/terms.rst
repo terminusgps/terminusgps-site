@@ -1,6 +1,8 @@
 Terms
 =====
 
+Click on a term to learn more.
+
 =======
 General
 =======
@@ -38,15 +40,42 @@ General
 Services
 ========
 
+`Billing and Cost Management`_
+    AWS Billing and Cost Management provides a suite of features to help set up billing, retrieve and pay invoices, and analyze, organize, plan, and optimize our costs.
+
+.. _Billing and Cost Management: https://docs.aws.amazon.com/account-billing/
+
+`Certificate Manager`_
+    AWS Certificate Manager provides an easy to use UI to request `SSL certificates`_.
+
+.. _Certificate Manager: https://docs.aws.amazon.com/acm/
+.. _SSL certificates: https://www.digicert.com/what-is-an-ssl-certificate
+
 `EC2`_ (Amazon Elastic Compute Cloud)
     AWS EC2 is a compute platform which allows developers to quickly and easily spawn cloud servers.
 
 .. _EC2: https://docs.aws.amazon.com/ec2/
 
+`IAM`_ (Identity and Access Management)
+    AWS IAM is a web service for securely controlling access to AWS services and resources.
+
+.. _IAM: https://docs.aws.amazon.com/iam/
+
+`IAM Identity Center`_
+    AWS IAM Identity Center provides one place where developers can create or connect workforce users and centrally manage their access to all their AWS accounts and applications.
+
+    AWS IAM Identity Center is the service responsible for `Terminus GPS SSO`_.
+
+.. _IAM Identity Center: https://docs.aws.amazon.com/singlesignon/
+.. _Terminus GPS SSO: https://terminusgps.awsapps.com/start/
+
 `S3`_ (Amazon Simple Storage Service)
     AWS S3 is an object storage service that offers virtually infinite storage space.
 
+    AWS S3 is responsible for collecting and distributing `static files`_ for terminusgps-site.
+
 .. _S3: https://docs.aws.amazon.com/s3/
+.. _static files: https://en.wikipedia.org/wiki/Static_web_page
 
 `Secrets Manager`_
     AWS Secrets Managers helps developers manage, retrieve, and rotate database credentials, application credentials, OAuth tokens, and more.
@@ -63,7 +92,3 @@ Services
 
 .. _Route 53: https://docs.aws.amazon.com/route53/
 
-`Billing and Cost Management`_
-    AWS Billing and Cost Management provides a suite of features to help set up billing, retrieve and pay invoices, and analyze, organize, plan, and optimize our costs.
-
-.. _Billing and Cost Management: https://docs.aws.amazon.com/account-billing/
