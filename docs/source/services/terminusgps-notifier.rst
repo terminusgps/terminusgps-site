@@ -78,9 +78,11 @@ Reference
 
    Takes either a :literal:`to_number` or a :literal:`unit_id` (or both) and returns a list of phone numbers associated with it (or both).
 
+   If :literal:`unit_id` is supplied, the Wialon API is called to retrieve phone numbers out of that Wialon unit's custom fields (key=to_number).
+
 .. py:function:: create_tasks(phone_numbers: list[str], message: str, method: str, caller: TwilioCaller) -> list[Task[Any]]
 
-   Takes :literal:`phone_numbers`, a :literal:`message`, and a :literal:`method` and returns a list of awaitable Twilio notification tasks.
+   Takes :literal:`phone_numbers`, a :literal:`message`, a :literal:`method` and a :literal:`TwilioCaller` instance, returns a list of awaitable Twilio notification tasks.
 
 =====
 Usage
@@ -92,18 +94,22 @@ Notify one phone number
 
 Use the :literal:`create_notification()` method on your :literal:`TwilioCaller` instance to create an asyncronous notification task::
 
+    import asyncio
+    from asyncio import Task
     from caller import TwilioCaller
 
-    caller = TwilioCaller()
-    task = caller.create_notification(
-        to_number="+15555555555",
-        message="This is a test message.",
-        method="sms",
+    to_number: str = "+15555555555"
+    message: str = "This is a test message."
+    method: str = "sms"
+    caller: TwilioCaller = TwilioCaller()
+
+    task: Task = caller.create_notification(
+        to_number=to_number,
+        message=message,
+        method=method,
     )
     
 After you've created a task using :literal:`create_notification()`, execute it in asyncio's event runner::
-
-    import asyncio
 
     asyncio.run(task)
 
@@ -113,16 +119,21 @@ Notify multiple phone numbers
 
 Use the :literal:`create_tasks()` function with a list of phone numbers to create a list of awaitable tasks::
 
+    import asyncio
+    from asyncio import Task
+    from typing import Any
     from caller import TwilioCaller
 
-    message: str = "This is a test message."
     phone_numbers: list[str] = [
         "+15555555555",
         "+17133049421",
         "+18324558034",
     ]
-    caller = TwilioCaller()
-    tasks = create_tasks(
+    message: str = "This is a test message."
+    method: str = "sms"
+    caller: TwilioCaller = TwilioCaller()
+
+    tasks: list[Task[Any]] = create_tasks(
         phone_numbers,
         message=message,
         method="sms",
@@ -131,6 +142,5 @@ Use the :literal:`create_tasks()` function with a list of phone numbers to creat
     
 After you've created a list of tasks using :literal:`create_tasks()`, execute the tasks using :literal:`asyncio.gather()`::
 
-    import asyncio
-
-    asyncio.gather(*tasks) # Use a '*' to unpack the list into asyncio.gather()
+    # Use a '*' to unpack the list into asyncio.gather()
+    asyncio.gather(*tasks)
