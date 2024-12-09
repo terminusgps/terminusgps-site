@@ -2,9 +2,9 @@ Amazon Web Services (AWS)
 ==============================
 
 
-============
-Quick Links:
-============
+===========
+Quick Links
+===========
 
 * `Start Page Login`_
 * `Console Login`_
