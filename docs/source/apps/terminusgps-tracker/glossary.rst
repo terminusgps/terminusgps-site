@@ -7,17 +7,17 @@ Glossary
 
     .. py:attribute:: user
 
-        A Django user.
+        The customer's Django user.
         
-        Assumes :py:attr:`TrackerProfile.user.username` is a valid email address.
+        *Assumes the Django user's username is a valid email address.*
 
         :type: :py:class:`django.contrib.auth.models.AbstractBaseUser`
-        :value: :py:meth:`django.contrib.auth.get_user_model`
+        :canonical: :py:func:`django.contrib.auth.get_user_model`
 
 
     .. py:attribute:: authorizenet_id
 
-        Represents an Authorize.NET ``customerProfileId``.
+        The customer's Authorize.NET ``customerProfileId``.
 
         :type: :py:type:`int` | :py:type:`None`
         :value: ``None``
@@ -25,7 +25,7 @@ Glossary
 
     .. py:attribute:: wialon_group_id
 
-        Wialon group id associated with this profile.
+        The customer's Wialon group ID.
 
         :type: :py:type:`int` | :py:type:`None`
         :value: ``None``
@@ -33,7 +33,7 @@ Glossary
 
     .. py:attribute:: wialon_resource_id
 
-        Wialon resource id associated with this profile.
+        The customer's Wialon resource ID.
 
         :type: :py:type:`int` | :py:type:`None`
         :value: ``None``
@@ -41,7 +41,7 @@ Glossary
 
     .. py:attribute:: wialon_end_user_id
 
-        Wialon end user id associated with this profile.
+        The customer's user ID.
 
         :type: :py:type:`int` | :py:type:`None` 
         :value: ``None``
@@ -49,7 +49,7 @@ Glossary
 
     .. py:attribute:: wialon_super_user_id 
 
-        Wialon super user id associated with this profile.
+        The customer's super (owner) user ID.
 
         :type: :py:type:`int` | :py:type:`None`
         :value: ``None``
@@ -59,19 +59,21 @@ Glossary
 
     .. py:attribute:: is_default
 
+        Determines whether or not the payment method was set as default on creation with Authorize.NET.
+
         :type: :py:type:`bool`
         :value: ``False``
 
     .. py:attribute:: authorizenet_id
 
-        Represents the Authorize.NET API's ``customerPaymentProfileId``.
+        The payment method's Authorize.NET ``customerPaymentProfileId``.
 
         :type: :py:type:`int` | :py:type:`None`
         :value: ``None``
 
     .. py:attribute:: profile
 
-        The :py:class:`TrackerProfile` associated with this payment method.
+        The :py:class:`TrackerProfile` associated with the payment method.
 
         :type: :py:class:`TrackerProfile`
 
@@ -79,12 +81,14 @@ Glossary
 
     .. py:attribute:: is_default
 
+        Determines whether or not this address was set as default on creation in Authorize.NET.
+
         :type: :py:type:`bool`
         :value: ``False``
 
     .. py:attribute:: authorizenet_id
 
-        Represents the Authorize.NET API's ``customerAddressId``.
+        The shipping address' Authorize.NET ``customerPaymentProfileId``.
 
         :type: :py:type:`int` | :py:type:`None`
         :value: ``None``
@@ -123,7 +127,7 @@ Glossary
 
     .. py:attribute:: authorizenet_id
 
-        Represents the Authorize.NET API's ``subscriptionId``.
+        An Authorize.NET API ``subscriptionId``.
 
         :type: :py:type:`int` | :py:type:`None`
         :value: ``None``
