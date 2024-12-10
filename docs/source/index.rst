@@ -14,4 +14,4 @@ Welcome to the Terminus GPS site documentation! Please select a link below to ge
    :caption: Contents:
 
    aws/index.rst
-   services/index.rst
+   apps/index.rst
