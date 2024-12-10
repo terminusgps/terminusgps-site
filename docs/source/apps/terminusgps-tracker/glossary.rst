@@ -64,10 +64,14 @@ Glossary
 
     .. py:attribute:: authorizenet_id
 
+        Represents the Authorize.NET API's ``customerPaymentProfileId``.
+
         :type: :py:type:`int` | :py:type:`None`
         :value: ``None``
 
     .. py:attribute:: profile
+
+        The :py:class:`TrackerProfile` associated with this payment method.
 
         :type: :py:class:`TrackerProfile`
 
@@ -80,10 +84,14 @@ Glossary
 
     .. py:attribute:: authorizenet_id
 
+        Represents the Authorize.NET API's ``customerAddressId``.
+
         :type: :py:type:`int` | :py:type:`None`
         :value: ``None``
 
     .. py:attribute:: profile
+
+        The :py:class:`TrackerProfile` associated with this shipping address.
 
         :type: :py:class:`TrackerProfile`
 
@@ -122,9 +130,13 @@ Glossary
 
     .. py:attribute:: profile
 
+        The :py:class:`TrackerProfile` associated with this subscription.
+
         :type: :py:class:`TrackerProfile`
 
     .. py:attribute:: tier
+
+        The :py:class:`TrackerSubscriptionTier` associated with this subscription.
 
         :type: :py:class:`TrackerSubscriptionTier`
 
