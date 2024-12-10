@@ -355,6 +355,7 @@ Glossary
 
         :type: :py:type:`int`
         :value: ``1``
+        :canonical: :py:class:`TrackerSubscriptionTier.IntervalPeriod.MONTHLY`
 
     .. py:attribute:: QUARTERLY
 
@@ -362,6 +363,7 @@ Glossary
 
         :type: :py:type:`int`
         :value: ``3``
+        :canonical: :py:class:`TrackerSubscriptionTier.IntervalPeriod.QUARTERLY`
 
     .. py:attribute:: ANNUALLY
 
@@ -369,6 +371,7 @@ Glossary
 
         :type: :py:type:`int`
         :value: ``12``
+        :canonical: :py:class:`TrackerSubscriptionTier.IntervalPeriod.ANNUALLY`
 
 .. py:class:: TrackerSubscriptionTier.IntervalLength
 
@@ -378,6 +381,7 @@ Glossary
 
         :type: :py:type:`int`
         :value: ``6``
+        :canonical: :py:class:`TrackerSubscriptionTier.IntervalLength.HALF_YEAR`
 
     .. py:attribute:: FULL_YEAR
 
@@ -385,6 +389,7 @@ Glossary
 
         :type: :py:type:`int`
         :value: ``12``
+        :canonical: :py:class:`TrackerSubscriptionTier.IntervalLength.FULL_YEAR`
 
 .. py:class:: TrackerSubscriptionTier.WialonCommandType
 
@@ -392,66 +397,79 @@ Glossary
 
         :type: :py:type:`str`
         :value: ``"block_engine"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandType.ENGINE_BLOCK`
 
     .. py:attribute:: ENGINE_UNBLOCK
 
         :type: :py:type:`str`
         :value: ``"unblock_engine"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandType.ENGINE_UNBLOCK`
 
     .. py:attribute:: MSG_CUSTOM
 
         :type: :py:type:`str`
         :value: ``"custom_msg"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandType.MSG_CUSTOM`
 
     .. py:attribute:: MSG_DRIVER
 
         :type: :py:type:`str`
         :value: ``"driver_msg"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandType.MSG_DRIVER`
 
     .. py:attribute:: MSG_DOWNLOAD
 
         :type: :py:type:`str`
         :value: ``"download_msgs"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandType.MSG_DOWNLOAD`
 
     .. py:attribute:: QUERY_POS
 
         :type: :py:type:`str`
         :value: ``"query_pos"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandType.QUERY_POS`
 
     .. py:attribute:: QUERY_PHOTO
 
         :type: :py:type:`str`
         :value: ``"query_photo"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandType.QUERY_PHOTO`
 
     .. py:attribute:: OUTPUT_ON
 
         :type: :py:type:`str`
         :value: ``"output_on"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandType.OUTPUT_ON`
 
     .. py:attribute:: OUTPUT_OFF
 
         :type: :py:type:`str`
         :value: ``"output_off"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandType.OUTPUT_OFF`
 
     .. py:attribute:: SEND_POS
 
         :type: :py:type:`str`
         :value: ``"send_position"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandType.SEND_POS`
 
     .. py:attribute:: SET_REPORT_INT
 
         :type: :py:type:`str`
         :value: ``"set_report_interval"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandType.SET_REPORT_INT`
 
     .. py:attribute:: UPLOAD_CFG
 
         :type: :py:type:`str`
         :value: ``"upload_cfg"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandType.UPLOAD_CFG`
 
     .. py:attribute:: UPLOAD_SW
 
         :type: :py:type:`str`
         :value: ``"upload_sw"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandType.UPLOAD_SW`
 
 .. py:class:: TrackerSubscriptionTier.WialonCommandLink
 
@@ -459,26 +477,31 @@ Glossary
 
         :type: :py:type:`str`
         :value: ``""``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandLink.AUTO`
 
     .. py:attribute:: TCP
 
         :type: :py:type:`str`
         :value: ``"tcp"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandLink.TCP`
 
     .. py:attribute:: UDP
 
         :type: :py:type:`str`
         :value: ``"udp"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandLink.UDP`
 
     .. py:attribute:: VRT
 
         :type: :py:type:`str`
         :value: ``"vrt"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandLink.VRT`
 
     .. py:attribute:: GSM
 
         :type: :py:type:`str`
         :value: ``"gsm"``
+        :canonical: :py:class:`TrackerSubscriptionTier.WialonCommandLink.GSM`
 
 
 .. py:class:: TrackerSubscriptionFeature
