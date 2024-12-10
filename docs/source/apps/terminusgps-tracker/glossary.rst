@@ -91,11 +91,31 @@ Glossary
 
     .. py:attribute:: status
 
+        Current Authorize.NET status of the subscription.
+
+        Represented by enum :py:class:`TrackerSubscription.SubscriptionStatus`.
+
+        +------------+------------------+--------------------------------------------------------------+
+        | name       | value            | member                                                       |
+        +============+==================+==============================================================+
+        | Active     | ``"active"``     | :py:attr:`TrackerSubscription.SubscriptionStatus.ACTIVE`     |
+        +------------+------------------+--------------------------------------------------------------+
+        | Expired    | ``"expired"``    | :py:attr:`TrackerSubscription.SubscriptionStatus.EXPIRED`    |
+        +------------+------------------+--------------------------------------------------------------+
+        | Suspended  | ``"suspended"``  | :py:attr:`TrackerSubscription.SubscriptionStatus.SUSPENDED`  |
+        +------------+------------------+--------------------------------------------------------------+
+        | Canceled   | ``"canceled"``   | :py:attr:`TrackerSubscription.SubscriptionStatus.CANCELED`   |
+        +------------+------------------+--------------------------------------------------------------+
+        | Terminated | ``"terminated"`` | :py:attr:`TrackerSubscription.SubscriptionStatus.TERMINATED` | 
+        +------------+------------------+--------------------------------------------------------------+
+
         :type: :py:type:`str`
         :value: ``"suspended"``
         :canonical: :py:attr:`TrackerSubscription.SubscriptionStatus.SUSPENDED`
 
     .. py:attribute:: authorizenet_id
+
+        Represents the Authorize.NET API's ``subscriptionId``.
 
         :type: :py:type:`int` | :py:type:`None`
         :value: ``None``
