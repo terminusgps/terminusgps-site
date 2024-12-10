@@ -1,11 +1,7 @@
 Settings
 ========
 
-===============
-Django Settings
-===============
-
-:literal:`terminusgps-tracker` requires the following settings to be present in :literal:`settings.py`:
+:literal:`terminusgps-tracker` requires the following settings to be present in ``settings.py``:
 
 
 .. confval:: MERCHANT_AUTH_LOGIN_ID

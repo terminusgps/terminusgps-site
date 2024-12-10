@@ -496,29 +496,51 @@ Glossary
 
         If present, rendered alongside this feature's name.
 
-        Options are enum members of :py:class:`TrackerSubscriptionFeature.FeatureAmount`.
+        Represented by enum :py:class:`TrackerSubscriptionFeature.FeatureAmount`.
 
-        +---------+---------+---------+----------------------------------------------------------+
-        | name    | value   | display | member                                                   |
-        +=========+=========+=========+==========================================================+
-        | ``LOW`` | ``5``   | 5       | :py:class:`TrackerSubscriptionFeature.FeatureAmount.LOW` |
-        +---------+---------+---------+----------------------------------------------------------+
-        | ``MID`` | ``25``  | 25      | :py:class:`TrackerSubscriptionFeature.FeatureAmount.MID` |
-        +---------+---------+---------+----------------------------------------------------------+
-        | ``INF`` | ``999`` | ∞       | :py:class:`TrackerSubscriptionFeature.FeatureAmount.INF` |
-        +---------+---------+---------+----------------------------------------------------------+
+        +-----------+---------+---------------------------------------------------------+
+        | name      | value   | member                                                  |
+        +===========+=========+=========================================================+
+        | Low       | ``5``   | :py:attr:`TrackerSubscriptionFeature.FeatureAmount.LOW` |
+        +-----------+---------+---------------------------------------------------------+
+        | Mid       | ``25``  | :py:attr:`TrackerSubscriptionFeature.FeatureAmount.MID` |
+        +-----------+---------+---------------------------------------------------------+
+        | Infinite  | ``999`` | :py:attr:`TrackerSubscriptionFeature.FeatureAmount.INF` |
+        +-----------+---------+---------------------------------------------------------+
 
         :type: :py:type:`int` | :py:type:`None`
         :value: ``None``
 
+.. py:class:: TrackerSubscriptionFeature.FeatureAmount
+
+    .. py:attribute:: LOW
+
+        :type: :py:type:`int`
+        :value: ``5``
+        :canonical: :py:attr:`TrackerSubscriptionFeature.FeatureAmount.LOW`
+
+    .. py:attribute:: MID
+
+        :type: :py:type:`int`
+        :value: ``25``
+        :canonical: :py:attr:`TrackerSubscriptionFeature.FeatureAmount.MID`
+
+    .. py:attribute:: INF
+
+        :type: :py:type:`int`
+        :value: ``999``
+        :canonical: :py:attr:`TrackerSubscriptionFeature.FeatureAmount.INF`
+
+
+.. py:class:: TrackerTodoList
+
+    .. py:attribute:: profile
+
+        The :py:class:`TrackerProfile` associated with this todo list.
+
+        :type: :py:class:`TrackerProfile`
 
 .. py:class:: TodoItem
-
-    .. py:attribute:: todo_list
-
-        The todo list this todo item is associated with.
-
-        :type: :py:type:`TodoList`
 
     .. py:attribute:: label
 
@@ -538,8 +560,13 @@ Glossary
 
     .. py:attribute:: is_complete
 
-        Used to determine whether or not the todo item is complete.
+        Determines whether or not this todo item is complete.
 
         :type: :py:type:`bool` 
         :value: ``False``
 
+    .. py:attribute:: todo_list
+
+        The todo list this todo item is associated with.
+
+        :type: :py:class:`TrackerTodoList`
