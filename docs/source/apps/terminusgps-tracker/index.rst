@@ -10,8 +10,8 @@ terminusgps-tracker
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
    installation.rst
    settings.rst
-   glossary.rst
+   glossary/index.rst

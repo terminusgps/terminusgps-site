@@ -11,7 +11,7 @@ Welcome to the Terminus GPS site documentation! Please select a link below to ge
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
    aws/index.rst
    apps/index.rst

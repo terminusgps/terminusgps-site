@@ -50,14 +50,18 @@ class TrackerAboutView(TemplateView):
 class TrackerContactView(TemplateView):
     template_name = "terminusgps_tracker/contact.html"
     content_type = "text/html"
-    extra_context = {"title": "Contact", "subtitle": "Get in touch with us"}
+    extra_context = {
+        "title": "Contact",
+        "subtitle": "Ready to get in touch?",
+        "profile": settings.TRACKER_PROFILE,
+    }
     http_method_names = ["get"]
 
 
 class TrackerPrivacyView(TemplateView):
     template_name = "terminusgps_tracker/privacy.html"
     content_type = "text/html"
-    extra_context = {"title": "Privacy Policy"}
+    extra_context = {"title": "Privacy Policy", "profile": settings.TRACKER_PROFILE}
     http_method_names = ["get"]
 
 

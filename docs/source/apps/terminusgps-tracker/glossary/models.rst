@@ -1,5 +1,5 @@
-Glossary
-========
+Models
+======
 
 .. py:class:: TrackerProfile
 
