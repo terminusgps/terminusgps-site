@@ -34,7 +34,14 @@ Instructions
 
 .. _AWS CLI v2: https://docs.aws.amazon.com/cli/
 
-3. Set the required :doc:`settings`.
+
+3. Install dependencies.
+
+.. code-block:: bash
+
+   uv sync --upgrade
+
+4. Set the required :doc:`settings`.
 
 .. code-block:: python
 
@@ -46,13 +53,6 @@ Instructions
     WIALON_HOST="<YOUR_WIALON_API_HOST>" # Default is "hst-api.wialon.com"
     WIALON_ADMIN_ID="<YOUR_WIALON_ADMIN_ID>"
     WIALON_UNACTIVATED_GROUP="<YOUR_WIALON_UNACTIVATED_GROUP_ID>"
-
-4. Install dependencies.
-
-.. code-block:: bash
-
-   uv sync --upgrade
-
 
 5. Apply database migrations.
 
