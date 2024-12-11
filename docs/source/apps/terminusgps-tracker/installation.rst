@@ -34,21 +34,35 @@ Instructions
 
 .. _AWS CLI v2: https://docs.aws.amazon.com/cli/
 
-3. Install dependencies.
+3. Set the required :doc:`settings`.
+
+.. code-block:: python
+
+    # settings.py
+    ...
+    MERCHANT_AUTH_LOGIN_ID="<YOUR_AUTHORIZENET_LOGIN_ID>"
+    MERCHANT_AUTH_TRANSACTION_KEY="<YOUR_AUTHORIZENET_TRANSACTION_KEY>"
+    WIALON_TOKEN="<YOUR_MERCHANT_AUTH_LOGIN_ID>"
+    WIALON_HOST="<YOUR_WIALON_HOST>" # Default is "hst-api.wialon.com"
+    WIALON_ADMIN_ID="<YOUR_ADMIN_ID>"
+    WIALON_UNACTIVATED_GROUP="<YOUR_UNACTIVATED_GROUP_ID>"
+
+
+4. Install dependencies.
 
 .. code-block:: bash
 
    uv sync --upgrade
 
 
-4. Apply database migrations.
+5. Apply database migrations.
 
 .. code-block:: bash
 
    uv run manage.py migrate
 
 
-5. Start the development server.
+6. Start the development server.
 
 .. code-block:: bash
 

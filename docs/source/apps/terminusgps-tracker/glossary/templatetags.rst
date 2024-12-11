@@ -8,11 +8,15 @@ Add ``{% load terminusgps_tracker_display %}`` at the top of your template to us
     Takes a todo item and renders its value alongside an svg representing its completion status.
 
     :param todo: A :py:obj:`TodoItem` instance.
-    :param size: Size of the returned svg, max of 96.
+    :param size: Size of the returned svg, max 96.
     :returns: A rendered todo item.
     :type todo: :py:class:`TodoItem`
     :type size: :py:type:`int`
     :rtype: :py:type:`dict`
+
+=======
+Filters
+=======
 
 .. py:function:: credit_card_icon(name, [size=6]) -> SafeString
 
@@ -26,7 +30,7 @@ Add ``{% load terminusgps_tracker_display %}`` at the top of your template to us
         * `American Express <https://www.americanexpress.com/>`_
 
     :param name: A credit card merchant name, i.e. ``"visa"``. Case insensitive.
-    :param size: Size of the returned svg, max of 96.
+    :param size: Size of the returned svg, max 96.
     :returns: A credit card merchant icon.
     :type name: :py:type:`str`
     :type size: :py:type:`int`
@@ -48,7 +52,7 @@ Add ``{% load terminusgps_tracker_display %}`` at the top of your template to us
         * `Youtube <https://youtube.com/>`_
 
     :param name: A social media site name, i.e. ``"instagram"``. Case insensitive.
-    :param size: Size of the returned svg, max of 96.
+    :param size: Size of the returned svg, max 96.
     :returns: A social media site icon.
     :type name: :py:type:`str`
     :type size: :py:type:`int`

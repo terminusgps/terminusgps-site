@@ -26,9 +26,3 @@ Before using :literal:`terminusgps-notifier`, ensure you have the following valu
    :default: ``""``
 
     Twilio from number, used as the origin phone number for this application's calls/sms messages.
-
-.. confval:: WIALON_TOKEN
-   :type: ``str``
-   :default: ``""``
-
-    Wialon API token, used to authenticate with Wialon's API to retrieve phone numbers from a unit.
