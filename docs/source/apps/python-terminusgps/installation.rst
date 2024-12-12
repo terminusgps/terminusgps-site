@@ -31,13 +31,7 @@ Install a specific version:
 
 .. code-block:: bash
 
-   pip install terminusgps==1.0.0
-
-Install the with development requirements:
-
-.. code-block:: bash
-
-   pip install 'terminusgps[dev]'
+   pip install "terminusgps==1.0.0"
 
 --------------
 Install via uv
@@ -53,10 +47,4 @@ Add a specific version to the uv environment:
 
 .. code-block:: bash
 
-   uv add terminusgps==1.0.0
-
-Add the development dependencies to the uv environment:
-
-.. code-block:: bash
-
-   uv add terminusgps --extra dev
+   uv add "terminusgps==1.0.0"

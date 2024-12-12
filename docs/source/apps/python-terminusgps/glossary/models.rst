@@ -7,11 +7,11 @@ Models
 
     .. py:method:: create(owner_id, name) -> int | None
 
-        :param owner_id: A Wialon user ID to own the new resource.
+        :param owner_id: Owner user of the new Wialon resource.
         :type owner_id: :py:obj:`int`
-        :param name: The name of the new Wialon resource.
+        :param name: Name for the new Wialon resource.
         :type name: :py:obj:`str`
-        :returns: The newly created Wialon resource's ID.
+        :returns: A new Wialon resource's ID.
         :rtype: :py:obj:`int`
 
 .. py:class:: WialonRetranslator
@@ -20,11 +20,13 @@ Models
 
     .. py:method:: create(owner_id, name) -> int | None
 
-        :param owner_id: A Wialon user ID to own the new retranslator.
+        :param owner_id: Owner user of the new Wialon retranslator.
         :type owner_id: :py:obj:`int`
-        :param name: The name of the new Wialon retranslator.
+        :param name: Name for the new Wialon retranslator.
         :type name: :py:obj:`str`
-        :returns: The newly created Wialon retranslator's ID.
+        :param config: Configuration for the new retranslator.
+        :type config: :py:obj:`dict`
+        :returns: A new Wialon retranslator's ID.
         :rtype: :py:obj:`int`
 
 .. py:class:: WialonRoute
@@ -33,25 +35,60 @@ Models
 
     .. py:method:: create(owner_id, name) -> int | None
 
-        :param owner_id: A Wialon user ID to own the new route.
+        :param owner_id: Owner user of the new Wialon route.
         :type owner_id: :py:obj:`int`
-        :param name: The name of the new Wialon route.
+        :param name: Name for the new Wialon route.
         :type name: :py:obj:`str`
-        :returns: The newly created Wialon route's ID.
+        :returns: A new Wialon route's ID.
         :rtype: :py:obj:`int`
 
 .. py:class:: WialonUser
 
     :canonical: :py:class:`terminusgps.items.base.WialonBase`
 
-    .. py:method:: create(owner_id, name) -> int | None
+    .. py:method:: create(owner_id, name, password) -> int | None
 
-        :param owner_id: A Wialon user ID to own the new user.
+
+        :param owner_id: Owner user of the new Wialon user.
         :type owner_id: :py:obj:`int`
-        :param name: The name of the new Wialon user.
+        :param name: Name for the new Wialon user.
         :type name: :py:obj:`str`
-        :returns: The newly created Wialon user's ID.
+        :param password: Password for the new Wialon user.
+        :type password: :py:obj:`str`
+        :returns: A new Wialon user's ID.
         :rtype: :py:obj:`int`
+        :raises AssertionError: If the password is invalid.
+
+    .. py:method:: has_access(other) -> bool
+
+        Returns :py:obj:`True` if ``other`` is a Wialon object that this user has access to.
+
+        :param other: A Wialon object.
+        :type other: :py:obj:`~terminusgps.wialon.items.WialonBase`
+        :returns: :py:obj:`True` if the user has access to ``other``, else :py:obj:`False`
+        :rtype: :py:obj:`bool`
+
+    .. py:method:: assign_phone(phone) -> None
+
+        Assigns a phone number to the Wialon user.
+
+        :param phone: A valid phone number, including country code.
+        :type phone: :py:obj:`str`
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+        :raises ValueError: If the phone number is invalid.
+        :raises WialonError: If something goes wrong with the Wialon API.
+
+    .. py:method:: assign_email(email) -> None
+
+        Assigns an email address to the Wialon user.
+
+        :param email: A valid email address.
+        :type phone: :py:obj:`str`
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+        :raises ValueError: If the email address is invalid.
+        :raises WialonError: If something goes wrong with the Wialon API.
 
 .. py:class:: WialonUnitGroup
 
@@ -59,22 +96,24 @@ Models
 
     .. py:method:: create(owner_id, name) -> int | None
 
-        :param owner_id: A Wialon user ID to own the new group.
+        :param owner_id: Owner user of the new Wialon group.
         :type owner_id: :py:obj:`int`
-        :param name: The name of the new Wialon group.
+        :param name: Name for the new Wialon group.
         :type name: :py:obj:`str`
-        :returns: The newly created Wialon group's ID.
+        :returns: A new Wialon group's ID.
         :rtype: :py:obj:`int`
 
 .. py:class:: WialonUnit
 
     :canonical: :py:class:`terminusgps.items.base.WialonBase`
 
-    .. py:method:: create(owner_id, name) -> int | None
+    .. py:method:: create(owner_id, name, hw_type) -> int | None
 
-        :param owner_id: A Wialon user ID to own the new user.
+        :param owner_id: Owner user of the new Wialon unit.
         :type owner_id: :py:obj:`int`
-        :param name: The name of the new Wialon user.
+        :param name: Name for the new Wialon unit.
         :type name: :py:obj:`str`
-        :returns: The newly created Wialon user's ID.
+        :param hw_type: Hardware type for the new Wialon unit.
+        :type str: :py:obj:`str`
+        :returns: A new Wialon unit's ID.
         :rtype: :py:obj:`int`

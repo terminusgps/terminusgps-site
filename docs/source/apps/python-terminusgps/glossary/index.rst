@@ -6,3 +6,4 @@ Glossary
    :caption: Contents
 
    models.rst
+   utils.rst
