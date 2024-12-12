@@ -38,3 +38,4 @@ Utilities
     :type length: :py:obj:`int`
     :returns: A new Wialon compliant password.
     :rtype: :py:obj:`str`
+    :raises ValueError: If length is not within the allowed range.
