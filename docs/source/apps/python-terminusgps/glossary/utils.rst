@@ -7,6 +7,8 @@ Utilities
     :type value: :py:obj:`str`
     :param session: A valid Wialon API session.
     :type session: :py:obj:`~terminusgps.wialon.session.WialonSession`
+    :param items_type: Type of Wialon object to search against. Default is ``"avl_unit"``.
+    :type items_type: :py:obj:`str`
     :returns: Whether or not ``value`` is unique in the Wialon database.
     :rtype bool: :py:obj:`bool`
 
