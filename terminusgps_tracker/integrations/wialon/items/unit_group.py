@@ -5,23 +5,21 @@ from terminusgps_tracker.integrations.wialon.items.base import WialonBase
 from .user import DEFAULT_ACCESS_MASK, WialonUser
 
 
-class CreateWialonUnitGroupKwargs(TypedDict):
-    owner_id: int
-    name: str
-
-
 class WialonUnitGroup(WialonBase):
-    def create(self, **kwargs: CreateWialonUnitGroupKwargs) -> str | None:
-        owner_id: int = kwargs["owner_id"]
-        name: str = kwargs["name"]
+    def create(self, **kwargs) -> str | None:
+        if not kwargs.get("owner_id"):
+            raise ValueError("'owner_id' is required on creation.")
+        if not kwargs.get("name"):
+            raise ValueError("'name' is required on creation.")
 
         response: dict = self.session.wialon_api.core_create_unit_group(
             **{
-                "creatorId": owner_id,
-                "name": name,
+                "creatorId": str(kwargs["owner_id"]),
+                "name": kwargs["name"],
                 "dataFlags": flag.DATAFLAG_UNIT_BASE,
             }
         )
+
         return response.get("item", {}).get("id")
 
     @property
@@ -78,6 +76,7 @@ class WialonUnitGroup(WialonBase):
 
         current_items = self.items
         new_items = [unit_id for unit_id in current_items if unit_id != str(item.id)]
+
         self.session.wialon_api.unit_group_update_units(
             **{"itemId": self.id, "units": new_items}
         )

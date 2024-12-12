@@ -1,4 +1,3 @@
-from typing import TypedDict
 from urllib.parse import quote_plus
 
 import terminusgps_tracker.integrations.wialon.flags as flag
@@ -23,23 +22,20 @@ DEFAULT_ACCESS_MASK: int = sum(
 )
 
 
-class CreateWialonUserKwargs(TypedDict):
-    owner_id: int
-    name: str
-    password: str
-
-
 class WialonUser(WialonBase):
-    def create(self, **kwargs: CreateWialonUserKwargs) -> str | None:
-        owner_id: int = kwargs["owner_id"]
-        name: str = kwargs["name"]
-        password: str = kwargs["password"]
+    def create(self, **kwargs) -> str | None:
+        if not kwargs.get("owner_id"):
+            raise ValueError("'owner_id' is required on creation.")
+        if not kwargs.get("name"):
+            raise ValueError("'name' is required on creation.")
+        if not kwargs.get("password"):
+            raise ValueError("'password' is required on creation.")
 
-        response: dict = self.session.wialon_api.core_create_user(
+        response = self.session.wialon_api.core_create_user(
             **{
-                "creatorId": str(owner_id),
-                "name": name,
-                "password": password,
+                "creatorId": str(kwargs["owner_id"]),
+                "name": kwargs["name"],
+                "password": kwargs["password"],
                 "dataFlags": flag.DATAFLAG_USER_BASE,
             }
         )

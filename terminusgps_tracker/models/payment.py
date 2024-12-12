@@ -19,7 +19,10 @@ from authorizenet.apicontractsv1 import (
     validateCustomerPaymentProfileRequest,
 )
 
-from terminusgps_tracker.integrations.authorizenet.auth import get_merchant_auth
+from terminusgps_tracker.integrations.authorizenet.auth import (
+    get_merchant_auth,
+    get_environment,
+)
 from terminusgps_tracker.forms.payments import PaymentMethodCreationForm
 
 
@@ -65,6 +68,7 @@ class TrackerPaymentMethod(models.Model):
         )
 
         controller = createCustomerPaymentProfileController(request)
+        controller.setenvironment(get_environment())
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
@@ -83,6 +87,7 @@ class TrackerPaymentMethod(models.Model):
         )
 
         controller = validateCustomerPaymentProfileController(request)
+        controller.setenvironment(get_environment())
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
@@ -99,6 +104,7 @@ class TrackerPaymentMethod(models.Model):
         )
 
         controller = deleteCustomerPaymentProfileController(request)
+        controller.setenvironment(get_environment())
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
@@ -116,6 +122,7 @@ class TrackerPaymentMethod(models.Model):
         )
 
         controller = getCustomerPaymentProfileController(request)
+        controller.setenvironment(get_environment())
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":

@@ -1,27 +1,24 @@
-from typing import Any, TypedDict
+from typing import Any
 from urllib.parse import quote_plus
 
 import terminusgps_tracker.integrations.wialon.flags as flag
 from terminusgps_tracker.integrations.wialon.items.base import WialonBase
 
 
-class CreateWialonUnitKwargs(TypedDict):
-    owner_id: int
-    name: str
-    hw_type: str
-
-
 class WialonUnit(WialonBase):
-    def create(self, **kwargs: CreateWialonUnitKwargs) -> str | None:
-        owner_id: int = kwargs["owner_id"]
-        name: str = kwargs["name"]
-        hw_type: str = kwargs["hw_type"]
+    def create(self, **kwargs) -> str | None:
+        if not kwargs.get("owner_id"):
+            raise ValueError("'owner_id' is required on creation.")
+        if not kwargs.get("name"):
+            raise ValueError("'name' is required on creation.")
+        if not kwargs.get("hw_type"):
+            raise ValueError("'hw_type' is required on creation.")
 
         response: dict = self.session.wialon_api.core_create_unit(
             **{
-                "creatorId": str(owner_id),
-                "name": name,
-                "hwTypeId": hw_type,
+                "creatorId": str(kwargs["owner_id"]),
+                "name": kwargs["name"],
+                "hwTypeId": kwargs["hw_type"],
                 "dataFlags": flag.DATAFLAG_UNIT_BASE,
             }
         )

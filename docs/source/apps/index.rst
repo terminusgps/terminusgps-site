@@ -7,3 +7,4 @@ Terminus GPS Applications
 
    terminusgps-tracker/index.rst
    terminusgps-notifier/index.rst
+   python-terminusgps/index.rst

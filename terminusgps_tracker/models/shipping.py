@@ -14,7 +14,10 @@ from authorizenet.apicontrollers import (
 )
 
 from terminusgps_tracker.forms import ShippingAddressCreationForm
-from terminusgps_tracker.integrations.authorizenet.auth import get_merchant_auth
+from terminusgps_tracker.integrations.authorizenet.auth import (
+    get_merchant_auth,
+    get_environment,
+)
 
 
 class TrackerShippingAddress(models.Model):
@@ -59,6 +62,7 @@ class TrackerShippingAddress(models.Model):
         )
 
         controller = createCustomerShippingAddressController(request)
+        controller.setenvironment(get_environment())
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
@@ -76,6 +80,7 @@ class TrackerShippingAddress(models.Model):
         )
 
         controller = getCustomerShippingAddressController(request)
+        controller.setenvironment(get_environment())
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
@@ -105,6 +110,7 @@ class TrackerShippingAddress(models.Model):
         )
 
         controller = deleteCustomerShippingAddressController(request)
+        controller.setenvironment(get_environment())
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":

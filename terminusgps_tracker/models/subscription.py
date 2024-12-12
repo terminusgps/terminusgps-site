@@ -1,5 +1,5 @@
 from typing import Any
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.conf import settings
 from django.utils.safestring import mark_safe
@@ -24,7 +24,10 @@ from authorizenet.apicontractsv1 import (
     paymentScheduleTypeInterval,
 )
 
-from terminusgps_tracker.integrations.authorizenet.auth import get_merchant_auth
+from terminusgps_tracker.integrations.authorizenet.auth import (
+    get_merchant_auth,
+    get_environment,
+)
 from terminusgps_tracker.integrations.wialon.session import WialonSession
 from terminusgps_tracker.integrations.wialon.items import (
     WialonUnitGroup,
@@ -76,42 +79,9 @@ class TrackerSubscriptionTier(models.Model):
         HALF_YEAR = 6
         FULL_YEAR = 12
 
-    class WialonCommandType(models.TextChoices):
-        ENGINE_BLOCK = "block_engine", _("Block engine")
-        ENGINE_UNBLOCK = "unblock_engine", _("Unblock engine")
-        MSG_CUSTOM = "custom_msg", _("Custom message")
-        MSG_DRIVER = "driver_msg", _("Message to driver")
-        MSG_DOWNLOAD = "download_msgs", _("Download messages")
-        QUERY_POS = "query_pos", _("Query position")
-        QUERY_PHOTO = "query_photo", _("Query snapshot")
-        OUTPUT_ON = "output_on", _("Activate output")
-        OUTPUT_OFF = "output_off", _("Deactivate output")
-        SEND_POS = "send_position", _("Send coordinates")
-        SET_REPORT_INT = "set_report_interval", _("Set data transfer interval")
-        UPLOAD_CFG = "upload_cfg", _("Upload configuration")
-        UPLOAD_SW = "upload_sw", _("Upload firmware")
-
-    class WialonCommandLink(models.TextChoices):
-        AUTO = "", _("Automatic link")
-        TCP = "tcp", _("TCP")
-        UDP = "udp", _("UDP")
-        VRT = "vrt", _("Virtual")
-        GSM = "gsm", _("SMS")
-
     name = models.CharField(max_length=256)
     wialon_id = models.PositiveBigIntegerField(default=None, null=True, blank=True)
     wialon_cmd = models.CharField(max_length=256, default=None, null=True, blank=True)
-    wialon_cmd_link = models.CharField(
-        max_length=3,
-        choices=WialonCommandLink.choices,
-        default=WialonCommandLink.AUTO,
-        blank=True,
-    )
-    wialon_cmd_type = models.CharField(
-        max_length=32,
-        choices=WialonCommandType.choices,
-        default=WialonCommandType.UPLOAD_CFG,
-    )
 
     features = models.ManyToManyField("terminusgps_tracker.TrackerSubscriptionFeature")
     amount = models.DecimalField(default=0.00, max_digits=14, decimal_places=2)
@@ -130,18 +100,17 @@ class TrackerSubscriptionTier(models.Model):
         return self.name
 
     def save(self, **kwargs) -> None:
-        with WialonSession() as session:
-            if self.wialon_id is None:
+        if not self.wialon_id:
+            with WialonSession() as session:
                 admin_id: int = settings.WIALON_ADMIN_ID
-                self.wialon_id: int = self.wialon_create_subscription_group(
+                group_id: int = self.wialon_create_subscription_group(
                     owner_id=admin_id, session=session
                 )
-            self.wialon_execute_subscription_command(session=session, timeout=5)
+                self.wialon_id = group_id
         return super().save(**kwargs)
 
     def wialon_add_to_group(self, unit_id: int, session: WialonSession) -> None:
-        if not self.wialon_id:
-            raise ValueError(f"{self.name} has no Wialon group")
+        assert self.wialon_id
 
         group_id: int = self.wialon_id
         unit: WialonUnit = WialonUnit(id=str(unit_id), session=session)
@@ -149,8 +118,7 @@ class TrackerSubscriptionTier(models.Model):
         group.add_item(unit)
 
     def wialon_rm_from_group(self, unit_id: int, session: WialonSession) -> None:
-        if not self.wialon_id:
-            raise ValueError(f"{self.name} has no Wialon group")
+        assert self.wialon_id
 
         group_id: int = self.wialon_id
         unit: WialonUnit = WialonUnit(id=str(unit_id), session=session)
@@ -164,24 +132,21 @@ class TrackerSubscriptionTier(models.Model):
         group = WialonUnitGroup(owner=admin, name=self.group_name, session=session)
 
         if not group or not group.id:
-            raise ValueError("Failed to properly create Wialon subscription group")
+            raise ValueError("Failed to properly create Wialon subscription group.")
         return group.id
 
     def wialon_execute_subscription_command(
-        self, session: WialonSession, timeout: int = 5
+        self, unit_id: int, session: WialonSession, timeout: int = 5
     ) -> None:
-        group = WialonUnitGroup(id=str(self.wialon_id), session=session)
-        for unit_id in group.items:
-            session.wialon_api.unit_exec_cmd(
-                **{
-                    "itemId": str(unit_id),
-                    "commandName": self.wialon_cmd,
-                    "linkType": self.wialon_cmd_link,
-                    "param": {},
-                    "timeout": timeout,
-                    "flags": 0,
-                }
-            )
+        session.wialon_api.unit_exec_cmd(
+            **{
+                "itemId": str(unit_id),
+                "commandName": self.name,
+                "linkType": "",
+                "timeout": timeout,
+                "flags": 0,
+            }
+        )
 
     @property
     def group_name(self) -> str:
@@ -223,24 +188,44 @@ class TrackerSubscription(models.Model):
     def __str__(self) -> str:
         return str(self.profile)
 
-    def update_tier(
-        self,
-        new_tier: TrackerSubscriptionTier,
-        payment_id: int | None = None,
-        address_id: int | None = None,
+    @transaction.atomic
+    def upgrade(
+        self, new_tier: TrackerSubscriptionTier, payment_id: int, address_id: int
     ) -> None:
-        self.tier = new_tier
-        self.authorizenet_id = self.authorizenet_update_subscription(
-            new_tier, payment_id, address_id
-        )
-
-    def refresh_status(self) -> None:
-        self.status = self.authorizenet_get_subscription_status(
-            ARBGetSubscriptionStatusRequest(
-                merchantAuthentication=get_merchant_auth(),
-                subscriptionId=str(self.authorizenet_id),
+        if self.authorizenet_id:
+            assert new_tier.amount > self.tier.amount, "Cannot upgrade to lower tier"
+            self.authorizenet_update_subscription(new_tier, payment_id, address_id)
+        else:
+            self.authorizenet_id = self.authorizenet_create_subscription(
+                tier=new_tier, payment_id=payment_id, address_id=address_id
             )
-        )
+        self.tier = new_tier
+        self.refresh_status()
+
+    @transaction.atomic
+    def downgrade(
+        self, new_tier: TrackerSubscriptionTier, payment_id: int, address_id: int
+    ) -> None:
+        if self.authorizenet_id:
+            assert new_tier.amount < self.tier.amount, "Cannot downgrade to higher tier"
+            self.authorizenet_update_subscription(new_tier, payment_id, address_id)
+        else:
+            self.authorizenet_id = self.authorizenet_create_subscription(
+                tier=new_tier, payment_id=payment_id, address_id=address_id
+            )
+        self.tier = new_tier
+        self.refresh_status()
+
+    @transaction.atomic
+    def refresh_status(self) -> None:
+        assert self.authorizenet_id, "No subscription to refresh status"
+        self.status = self.authorizenet_get_subscription_status(self.authorizenet_id)
+
+    @transaction.atomic
+    def cancel(self) -> None:
+        assert self.authorizenet_id, "No subscription to cancel"
+        self.authorizenet_cancel_subscription(self.authorizenet_id)
+        self.refresh_status()
 
     @classmethod
     def authorizenet_get_subscription_status(cls, subscription_id: int) -> str:
@@ -250,6 +235,7 @@ class TrackerSubscription(models.Model):
         )
 
         controller = ARBGetSubscriptionStatusController(request)
+        controller.setenvironment(get_environment())
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
@@ -268,6 +254,7 @@ class TrackerSubscription(models.Model):
         )
 
         controller = ARBGetSubscriptionController(request)
+        controller.setenvironment(get_environment())
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
@@ -298,16 +285,14 @@ class TrackerSubscription(models.Model):
         )
 
         controller = ARBCancelSubscriptionController(request)
+        controller.setenvironment(get_environment())
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
             raise ValueError(response.messages.message[0]["text"].text)
 
     def authorizenet_update_subscription(
-        self,
-        tier: TrackerSubscriptionTier,
-        payment_id: int | None = None,
-        address_id: int | None = None,
+        self, tier: TrackerSubscriptionTier, payment_id: int, address_id: int
     ) -> None:
         request = ARBUpdateSubscriptionRequest(
             merchantAuthentication=get_merchant_auth(),
@@ -317,16 +302,14 @@ class TrackerSubscription(models.Model):
         )
 
         controller = ARBUpdateSubscriptionController(request)
+        controller.setenvironment(get_environment())
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
             raise ValueError(response.messages.message[0]["text"].text)
 
     def authorizenet_create_subscription(
-        self,
-        tier: TrackerSubscriptionTier,
-        payment_id: int | None = None,
-        address_id: int | None = None,
+        self, tier: TrackerSubscriptionTier, payment_id: int, address_id: int
     ) -> int:
         request = ARBCreateSubscriptionRequest(
             merchantAuthentication=get_merchant_auth(),
@@ -336,6 +319,7 @@ class TrackerSubscription(models.Model):
         )
 
         controller = ARBCreateSubscriptionController(request)
+        controller.setenvironment(get_environment())
         controller.execute()
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
@@ -343,10 +327,7 @@ class TrackerSubscription(models.Model):
         return int(response.subscriptionId)
 
     def generate_customer_subscription(
-        self,
-        tier: TrackerSubscriptionTier,
-        payment_id: int | None = None,
-        address_id: int | None = None,
+        self, tier: TrackerSubscriptionTier, payment_id: int, address_id: int
     ) -> ARBSubscriptionType:
         paymentSchedule: paymentScheduleType = self.generate_payment_schedule(tier)
         profile: customerProfileIdType = self.generate_customer_profile(
@@ -362,16 +343,9 @@ class TrackerSubscription(models.Model):
         )
 
     def generate_customer_profile(
-        self, payment_id: int | None = None, address_id: int | None = None
+        self, payment_id: int, address_id: int
     ) -> customerProfileIdType:
-        if self.profile.authorizenet_id is None:
-            raise ValueError(
-                "Subscription profile requires an Authorizenet customer profile"
-            )
-
-        payment_id: int = payment_id if payment_id else self.payment_id
-        address_id: int = address_id if address_id else self.address_id
-
+        assert self.profile.authorizenet_id
         return customerProfileIdType(
             customerProfileId=str(self.profile.authorizenet_id),
             customerPaymentProfileId=str(payment_id),
@@ -383,9 +357,7 @@ class TrackerSubscription(models.Model):
         cls, tier: TrackerSubscriptionTier, trial_occurrences: int = 0
     ) -> paymentScheduleType:
         if tier.length < tier.period:
-            raise ValueError(
-                f"Invalid length-period combination: {tier.length} is less than {tier.period}"
-            )
+            raise ValueError("Tier length cannot be less than tier period")
 
         startDate: str = f"{timezone.now():%Y-%m-%d}"
         totalOccurrences: str = str(tier.length // int(tier.period))
@@ -399,22 +371,4 @@ class TrackerSubscription(models.Model):
             totalOccurrences=totalOccurrences,
             trialOccurrences=trialOccurrences,
             interval=interval,
-        )
-
-    @property
-    def payment_id(self) -> int:
-        return (
-            self.profile.payments.filter()
-            .order_by("-is_default")
-            .first()
-            .authorizenet_id
-        )
-
-    @property
-    def address_id(self) -> int:
-        return (
-            self.profile.addresses.filter()
-            .order_by("-is_default")
-            .first()
-            .authorizenet_id
         )

@@ -1,7 +1,7 @@
 from typing import Any
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.conf import settings
 
 from authorizenet.apicontractsv1 import (
     customerProfileType,
@@ -27,6 +27,7 @@ from terminusgps_tracker.integrations.wialon.items import (
     WialonResource,
 )
 from terminusgps_tracker.integrations.wialon.session import WialonSession
+from terminusgps_tracker.integrations.wialon.utils import gen_wialon_password
 
 
 class TrackerProfile(models.Model):
@@ -50,62 +51,114 @@ class TrackerProfile(models.Model):
     class Meta:
         verbose_name = "profile"
         verbose_name_plural = "profiles"
-        permissions = [
-            ("update_profile_user", "Can change the user associated with the profile.")
-        ]
 
     def __str__(self) -> str:
         return f"{self.user}'s Profile"
 
     def save(self, **kwargs) -> None:
         if self.authorizenet_id is None:
-            self.authorizenet_id = self.authorizenet_create_customer_profile()
-        if self.wialon_super_user_id is None:
-            with WialonSession() as session:
-                admin_id: int = settings.WIALON_ADMIN_ID
-                self.wialon_create_profile_objects(admin_id, session)
+            self.authorizenet_id = self.authorizenet_create_customer_profile(
+                customer_id=self.user.pk, email=self.user.username
+            )
+
+        with WialonSession() as session:
+            admin: WialonUser = self._get_admin_user(session)
+            if self.wialon_super_user_id is None:
+                super_user = self.wialon_create_user(
+                    owner=admin,
+                    name=f"super_{self.user.username}",
+                    password=gen_wialon_password(),
+                    session=session,
+                )
+                self.wialon_super_user_id = super_user.id
+
+            if self.wialon_end_user_id is None:
+                super_user = WialonUser(
+                    id=str(self.wialon_super_user_id), session=session
+                )
+                end_user = self.wialon_create_user(
+                    owner=super_user,
+                    name=f"super_{self.user.username}",
+                    password=gen_wialon_password(),
+                    session=session,
+                )
+                self.wialon_end_user_id = end_user.id
+
+            if self.wialon_group_id is None:
+                super_user = WialonUser(
+                    id=str(self.wialon_super_user_id), session=session
+                )
+                group = self.wialon_create_group(
+                    owner=super_user,
+                    name=f"group_{self.user.username}",
+                    session=session,
+                )
+                self.wialon_group_id = group.id
+
+            if self.wialon_resource_id is None:
+                super_user = WialonUser(
+                    id=str(self.wialon_super_user_id), session=session
+                )
+                resource = self.wialon_create_resource(
+                    owner=super_user,
+                    name=f"resource_{self.user.username}",
+                    session=session,
+                )
+                self.wialon_resource_id = resource.id
+
         return super().save(**kwargs)
 
-    def delete(self, *args, **kwargs):
-        if self.authorizenet_id is not None:
+    def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
+        if self.authorizenet_id:
             self.authorizenet_delete_customer_profile(profile_id=self.authorizenet_id)
         return super().delete(*args, **kwargs)
 
-    def wialon_create_profile_objects(
-        self, admin_id: int, session: WialonSession
-    ) -> None:
-        admin_user = WialonUser(id=str(admin_id), session=session)
-        super_user = WialonUser(
-            owner=admin_user,
-            name=f"super_{self.user.email}",
-            password=self.user.password,
-            session=session,
-        )
-        end_user = WialonUser(
-            owner=super_user,
-            name=self.user.email,
-            password=self.user.password,
-            session=session,
-        )
-        group = WialonUnitGroup(
-            owner=super_user, name=f"group_{self.user.email}", session=session
-        )
-        resource = WialonResource(
-            owner=super_user, name=f"resource_{self.user.email}", session=session
+    def _get_admin_user(
+        self, session: WialonSession, alt_id: int | None = None
+    ) -> WialonUser:
+        admin_id: int = alt_id if alt_id else settings.WIALON_ADMIN_ID
+        return WialonUser(id=str(admin_id), session=session)
+
+    @classmethod
+    def wialon_create_resource(
+        cls, owner: WialonUser, name: str, session: WialonSession
+    ) -> WialonResource:
+        return WialonResource(owner_id=owner.id, name=name, session=session)
+
+    @classmethod
+    def wialon_create_group(
+        cls, owner: WialonUser, name: str, session: WialonSession
+    ) -> WialonUnitGroup:
+        return WialonUnitGroup(owner_id=owner.id, name=name, session=session)
+
+    @classmethod
+    def wialon_delete_group(cls, group_id: int, session: WialonSession) -> None:
+        group = WialonUnitGroup(id=str(group_id), session=session)
+        group.delete()
+
+    @classmethod
+    def wialon_delete_resource(cls, resource_id: int, session: WialonSession) -> None:
+        resource = WialonResource(id=str(resource_id), session=session)
+        resource.delete()
+
+    @classmethod
+    def wialon_create_user(
+        cls, owner: WialonUser, name: str, password: str, session: WialonSession
+    ) -> WialonUser:
+        return WialonUser(
+            owner_id=owner.id, name=name, password=password, session=session
         )
 
-        self.wialon_super_user_id = super_user.id
-        self.wialon_end_user_id = end_user.id
-        self.wialon_group_id = group.id
-        self.wialon_resource_id = resource.id
+    @classmethod
+    def wialon_delete_user(cls, user_id: int, session: WialonSession) -> None:
+        user = WialonUser(id=str(user_id), session=session)
+        user.delete()
 
-    def authorizenet_create_customer_profile(self) -> int:
-        merchantAuthentication = get_merchant_auth()
+    @classmethod
+    def authorizenet_create_customer_profile(cls, customer_id: int, email: str) -> int:
         request = createCustomerProfileRequest(
-            merchantAuthentication=merchantAuthentication,
-            profile=customerProfileType(
-                merchantCustomerId=str(self.user.pk), email=str(self.user.email)
-            ),
+            merchantAuthentication=get_merchant_auth(),
+            profile=customerProfileType(merchantCustomerId=customer_id, email=email),
         )
 
         controller = createCustomerProfileController(request)
@@ -114,7 +167,6 @@ class TrackerProfile(models.Model):
         response = controller.getresponse()
         if response.messages.resultCode != "Ok":
             raise ValueError(response.messages.message[0]["text"].text)
-
         return int(response.customerProfileId)
 
     @classmethod
