@@ -85,7 +85,6 @@ Models
         :returns: Nothing.
         :rtype: :py:obj:`None`
         :raises ValueError: If the phone number is invalid.
-        :raises WialonError: If something goes wrong with the Wialon API.
 
     .. py:method:: assign_email(email) -> None
 
@@ -96,7 +95,6 @@ Models
         :returns: Nothing.
         :rtype: :py:obj:`None`
         :raises ValueError: If the email address is invalid.
-        :raises WialonError: If something goes wrong with the Wialon API.
 
 .. py:class:: WialonUnitGroup
 
@@ -120,14 +118,14 @@ Models
         :returns: Whether or not ``item`` is a member of this group.
         :rtype: :py:obj:`bool`
 
-    .. py:method:: grant_access(item, [access_mask=None]) -> None
+    .. py:method:: grant_access(item, [access_mask=3540009843]) -> None
 
         Grants access to the group based on the access mask.
 
         :param item: A Wialon object to grant access to.
         :type item: :py:obj:`~terminusgps.wialon.items.base.WialonBase`
-        :param access_mask: A Wialon access mask integer.
-        :type access_mask: :py:obj:`int` | :py:obj:`None`
+        :param access_mask: A Wialon access mask integer. Default is ``3540009843``.
+        :type access_mask: :py:obj:`int`
         :returns: Nothing.
         :rtype: :py:obj:`None`
 
@@ -137,8 +135,6 @@ Models
 
         :param item: A Wialon object to revoke access from.
         :type item: :py:obj:`~terminusgps.wialon.items.base.WialonBase`
-        :param access_mask: A Wialon access mask integer.
-        :type access_mask: :py:obj:`int` | :py:obj:`None`
         :returns: Nothing.
         :rtype: :py:obj:`None`
 
