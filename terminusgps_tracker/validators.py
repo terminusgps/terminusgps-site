@@ -36,7 +36,7 @@ def validate_wialon_imei_number(value: str) -> None:
 
 def validate_wialon_unit_name(value: str) -> None:
     """Raises `ValidationError` if the value represents a non-unique asset name in Wialon."""
-    with WialonSession() as session:
+    with WialonSession(token=settings.WIALON_TOKEN) as session:
         if not is_unique(value, session, items_type="avl_unit"):
             raise ValidationError(
                 _("'%(value)s' is taken."), code="invalid", params={"value": value}
@@ -45,7 +45,7 @@ def validate_wialon_unit_name(value: str) -> None:
 
 def validate_wialon_username(value: str) -> None:
     """Raises `ValidationError` if the value represents a non-unique user name in Wialon."""
-    with WialonSession() as session:
+    with WialonSession(token=settings.WIALON_TOKEN) as session:
         if not is_unique(value, session, items_type="user"):
             raise ValidationError(
                 _("'%(value)s' is taken."), code="invalid", params={"value": value}
@@ -54,7 +54,7 @@ def validate_wialon_username(value: str) -> None:
 
 def validate_wialon_resource_name(value: str) -> None:
     """Raises `ValidationError` if the value represents a non-unique user name in Wialon."""
-    with WialonSession() as session:
+    with WialonSession(token=settings.WIALON_TOKEN) as session:
         if not is_unique(value, session, items_type="avl_resource"):
             raise ValidationError(
                 _("'%(value)s' is taken."), code="invalid", params={"value": value}
