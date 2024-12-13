@@ -1367,11 +1367,11 @@ wheels = [
 
 [[package]]
 name = "pyjwt"
-version = "2.8.0"
+version = "2.10.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/30/72/8259b2bccfe4673330cea843ab23f86858a419d8f1493f66d413a76c7e3b/PyJWT-2.8.0.tar.gz", hash = "sha256:57e28d156e3d5c10088e0c68abb90bfac3df82b40a71bd0daa20c65ccd5c23de", size = 78313 }
+sdist = { url = "https://files.pythonhosted.org/packages/e7/46/bd74733ff231675599650d3e47f361794b22ef3e3770998dda30d3b63726/pyjwt-2.10.1.tar.gz", hash = "sha256:3cc5772eb20009233caf06e9d8a0577824723b44e6648ee0a2aedb6cf9381953", size = 87785 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2b/4f/e04a8067c7c96c364cef7ef73906504e2f40d690811c021e1a1901473a19/PyJWT-2.8.0-py3-none-any.whl", hash = "sha256:59127c392cc44c2da5bb3192169a91f429924e17aff6534d70fdc02ab3e04320", size = 22591 },
+    { url = "https://files.pythonhosted.org/packages/61/ad/689f02752eeec26aed679477e80e632ef1b682313be70793d798c1d5fc8f/PyJWT-2.10.1-py3-none-any.whl", hash = "sha256:dcdd193e30abefd5debf142f9adfcdd2b58004e644f25406ffaebd50bd98dacb", size = 22997 },
 ]
 
 [[package]]
@@ -1460,7 +1460,7 @@ wheels = [
 
 [[package]]
 name = "python-terminusgps"
-version = "1.2.0"
+version = "1.2.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "argparse" },
@@ -1469,9 +1469,9 @@ dependencies = [
     { name = "django" },
     { name = "python-wialon" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/56/78/484f6a796552d02a09099efa0a221a4b0fa027bf2932a48c4ae2f76945f4/python_terminusgps-1.2.0.tar.gz", hash = "sha256:1eddb42661d7aac6d50014f81776b5bb034ef318f5b0601548016f16f025df97", size = 33053 }
+sdist = { url = "https://files.pythonhosted.org/packages/c1/9c/bdb86e60318a6f78a58adcc01c78aa449311ee2a7311ead4878ae7452a76/python_terminusgps-1.2.1.tar.gz", hash = "sha256:e466206114c0cc93da271bcd690c9909cb1ab57fc2f5ff9532f37232aa3150d9", size = 33070 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f3/ed/d6a8ce9c298c96711b63b515558caa6ab2be0ad3b429540cc544748f5178/python_terminusgps-1.2.0-py3-none-any.whl", hash = "sha256:d0278e6fe875c6a16950f7107f1a0eccaa00d53b002abfce716b41180be859a0", size = 27060 },
+    { url = "https://files.pythonhosted.org/packages/f1/12/530e7bf88ad2d462b105697b1a0e3ec1eade6751a7b83e50e96ec8889b15/python_terminusgps-1.2.1-py3-none-any.whl", hash = "sha256:09993620688cee9da3f316b083819c09b42aa7badc0ba8bad1c039ea74a13e76", size = 27077 },
 ]
 
 [[package]]
@@ -2077,7 +2077,7 @@ requires-dist = [
     { name = "python-jose", specifier = "==3.3.0" },
     { name = "python-quickbooks", specifier = "==0.9.9" },
     { name = "python-slugify", specifier = "==8.0.4" },
-    { name = "python-terminusgps", specifier = "==1.2.0" },
+    { name = "python-terminusgps", specifier = "==1.2.1" },
     { name = "python-wialon", specifier = "==1.2.4" },
     { name = "pytz", specifier = "==2024.1" },
     { name = "pyxb-x", specifier = "==1.2.6.2" },
