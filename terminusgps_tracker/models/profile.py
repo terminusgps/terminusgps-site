@@ -60,7 +60,9 @@ class TrackerProfile(models.Model):
     def authorizenet_create_customer_profile(cls, customer_id: int, email: str) -> int:
         request = createCustomerProfileRequest(
             merchantAuthentication=get_merchant_auth(),
-            profile=customerProfileType(merchantCustomerId=customer_id, email=email),
+            profile=customerProfileType(
+                merchantCustomerId=str(customer_id), email=email
+            ),
         )
 
         controller = createCustomerProfileController(request)

@@ -9,7 +9,7 @@ urlpatterns = [
     path("privacy/", views.TrackerPrivacyView.as_view(), name="tracker privacy"),
     path("login/", views.TrackerLoginView.as_view(), name="tracker login"),
     path("logout/", views.TrackerLogoutView.as_view(), name="tracker logout"),
-    path("register/", views.TrackerRegistrationView.as_view(), name="tracker register"),
+    path("signup/", views.TrackerSignupView.as_view(), name="tracker signup"),
     path(
         "subscriptions/",
         views.TrackerSubscriptionView.as_view(),

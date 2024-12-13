@@ -9,8 +9,13 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, RedirectView, FormView
 
-from terminusgps_tracker.forms import TrackerRegistrationForm, TrackerAuthenticationForm
-from terminusgps_tracker.models.subscription import TrackerSubscriptionTier
+from terminusgps_tracker.forms import TrackerSignupForm, TrackerAuthenticationForm
+from terminusgps_tracker.models.profile import TrackerProfile
+from terminusgps_tracker.models.subscription import (
+    TrackerSubscription,
+    TrackerSubscriptionTier,
+)
+from terminusgps_tracker.models.todo import TrackerTodoList
 
 
 class TestTemplateView(TemplateView):
@@ -74,7 +79,7 @@ class TrackerSourceView(RedirectView):
 class TrackerLoginView(LoginView):
     authentication_form = TrackerAuthenticationForm
     content_type = "text/html"
-    extra_context = {"title": "Login"}
+    extra_context = {"title": "Login", "subtitle": "We know where ours are... do you?"}
     http_method_names = ["get", "post"]
     next_page = reverse_lazy("tracker profile")
     template_name = "terminusgps_tracker/forms/login.html"
@@ -94,15 +99,12 @@ class TrackerLogoutView(SuccessMessageMixin, LogoutView):
         return HttpResponseRedirect(self.success_url)
 
 
-class TrackerRegistrationView(SuccessMessageMixin, FormView):
-    form_class = TrackerRegistrationForm
+class TrackerSignupView(SuccessMessageMixin, FormView):
+    form_class = TrackerSignupForm
     content_type = "text/html"
-    extra_context = {
-        "title": "Registration",
-        "subtitle": "Start tracking your vehicles with the Terminus GPS Tracker",
-    }
+    extra_context = {"title": "Sign-up", "subtitle": "You'll know where yours are..."}
     http_method_names = ["get", "post"]
-    template_name = "terminusgps_tracker/forms/register.html"
+    template_name = "terminusgps_tracker/forms/signup.html"
     success_url = reverse_lazy("tracker login")
     success_message = "%(username)s's account was created succesfully"
 
@@ -111,12 +113,15 @@ class TrackerRegistrationView(SuccessMessageMixin, FormView):
             cleaned_data, username=cleaned_data.get("username", "")
         )
 
-    def form_valid(self, form: TrackerRegistrationForm) -> HttpResponse:
-        get_user_model().objects.create_user(
+    def form_valid(self, form: TrackerSignupForm) -> HttpResponse:
+        user = get_user_model().objects.create_user(
             first_name=form.cleaned_data["first_name"],
             last_name=form.cleaned_data["last_name"],
             username=form.cleaned_data["username"],
             password=form.cleaned_data["password1"],
             email=form.cleaned_data["username"],
         )
+        profile = TrackerProfile.objects.create(user=user)
+        TrackerSubscription.objects.create(profile=profile)
+        TrackerTodoList.objects.create(profile=profile)
         return super().form_valid(form=form)

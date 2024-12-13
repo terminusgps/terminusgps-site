@@ -8,7 +8,7 @@ from terminusgps_tracker.models.todo import TodoItem
 register = Library()
 
 
-@register.inclusion_tag("terminusgps_tracker/todo_item.html")
+@register.inclusion_tag("templatetags/todo_item.html")
 def render_todo_item(todo: TodoItem, size: int = 6) -> dict[str, Any]:
     if todo.is_complete:
         svg_path: SafeString = mark_safe(

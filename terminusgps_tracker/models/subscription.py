@@ -94,7 +94,7 @@ class TrackerSubscriptionTier(models.Model):
 
     def save(self, **kwargs) -> None:
         if not self.wialon_id:
-            with WialonSession() as session:
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
                 admin_id: int = settings.WIALON_ADMIN_ID
                 group_id: int = self.wialon_create_subscription_group(
                     owner_id=admin_id, session=session
@@ -186,11 +186,15 @@ class TrackerSubscription(models.Model):
         self, new_tier: TrackerSubscriptionTier, payment_id: int, address_id: int
     ) -> None:
         if self.authorizenet_id:
-            assert new_tier.amount > self.tier.amount, "Cannot upgrade to lower tier"
-            self.authorizenet_update_subscription(new_tier, payment_id, address_id)
+            if new_tier.amount < self.tier.amount:
+                raise ValueError("Cannot upgrade to lower tier")
+            trial_amount = None
+            self.authorizenet_update_subscription(
+                new_tier, payment_id, address_id, trial_amount
+            )
         else:
             self.authorizenet_id = self.authorizenet_create_subscription(
-                tier=new_tier, payment_id=payment_id, address_id=address_id
+                new_tier, payment_id, address_id
             )
         self.tier = new_tier
         self.refresh_status()
@@ -200,7 +204,8 @@ class TrackerSubscription(models.Model):
         self, new_tier: TrackerSubscriptionTier, payment_id: int, address_id: int
     ) -> None:
         if self.authorizenet_id:
-            assert new_tier.amount < self.tier.amount, "Cannot downgrade to higher tier"
+            if new_tier.amount > self.tier.amount:
+                raise ValueError("Cannot downgrade to higher tier")
             self.authorizenet_update_subscription(new_tier, payment_id, address_id)
         else:
             self.authorizenet_id = self.authorizenet_create_subscription(
@@ -285,12 +290,16 @@ class TrackerSubscription(models.Model):
             raise ValueError(response.messages.message[0]["text"].text)
 
     def authorizenet_update_subscription(
-        self, tier: TrackerSubscriptionTier, payment_id: int, address_id: int
+        self,
+        tier: TrackerSubscriptionTier,
+        payment_id: int,
+        address_id: int,
+        trial_amount: str | None = None,
     ) -> None:
         request = ARBUpdateSubscriptionRequest(
             merchantAuthentication=get_merchant_auth(),
             subscription=self.generate_customer_subscription(
-                tier, payment_id, address_id
+                tier, payment_id, address_id, trial_amount
             ),
         )
 
@@ -320,7 +329,11 @@ class TrackerSubscription(models.Model):
         return int(response.subscriptionId)
 
     def generate_customer_subscription(
-        self, tier: TrackerSubscriptionTier, payment_id: int, address_id: int
+        self,
+        tier: TrackerSubscriptionTier,
+        payment_id: int,
+        address_id: int,
+        trial_amount: str | None = None,
     ) -> ARBSubscriptionType:
         paymentSchedule: paymentScheduleType = self.generate_payment_schedule(tier)
         profile: customerProfileIdType = self.generate_customer_profile(
@@ -331,7 +344,7 @@ class TrackerSubscription(models.Model):
             name=f"{self.profile.user.email}'s {tier} Subscription",
             paymentSchedule=paymentSchedule,
             amount=str(tier.amount),
-            trialAmount=str("0.00"),
+            trialAmount=trial_amount if trial_amount else str("0.00"),
             profile=profile,
         )
 

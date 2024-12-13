@@ -17,4 +17,4 @@ from .subscriptions import (
     SubscriptionDeletionForm,
     SubscriptionModificationForm,
 )
-from .auth import TrackerRegistrationForm, TrackerAuthenticationForm
+from .auth import TrackerSignupForm, TrackerAuthenticationForm

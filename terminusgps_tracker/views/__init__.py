@@ -24,7 +24,7 @@ from .views import (
     TrackerLoginView,
     TrackerLogoutView,
     TrackerPrivacyView,
-    TrackerRegistrationView,
+    TrackerSignupView,
     TrackerSourceView,
     TrackerSubscriptionView,
 )
