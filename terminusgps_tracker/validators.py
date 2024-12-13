@@ -11,6 +11,14 @@ from terminusgps.wialon.utils import get_id_from_iccid, is_unique
 
 def validate_phone(value: str) -> None:
     """Raises `ValidationError` if the value does not represent a valid phone number."""
+    if not value.startswith("+"):
+        raise ValidationError(
+            _("Phone number must begin with a '+', got: '(value)%s'"),
+            code="invalid",
+            params={"value": value},
+        )
+    if " " in value:
+        raise ValidationError(_("Phone number cannot contain spaces."), code="invalid")
     return
 
 
@@ -32,6 +40,7 @@ def validate_wialon_imei_number(value: str) -> None:
                 code="invalid",
                 params={"value": value},
             )
+    return
 
 
 def validate_wialon_unit_name(value: str) -> None:
@@ -41,6 +50,7 @@ def validate_wialon_unit_name(value: str) -> None:
             raise ValidationError(
                 _("'%(value)s' is taken."), code="invalid", params={"value": value}
             )
+    return
 
 
 def validate_wialon_username(value: str) -> None:
@@ -50,6 +60,7 @@ def validate_wialon_username(value: str) -> None:
             raise ValidationError(
                 _("'%(value)s' is taken."), code="invalid", params={"value": value}
             )
+    return
 
 
 def validate_wialon_resource_name(value: str) -> None:
@@ -59,6 +70,7 @@ def validate_wialon_resource_name(value: str) -> None:
             raise ValidationError(
                 _("'%(value)s' is taken."), code="invalid", params={"value": value}
             )
+    return
 
 
 def validate_wialon_password(value: str) -> None:
@@ -113,6 +125,7 @@ def validate_wialon_password(value: str) -> None:
                 code="invalid",
                 params={"char": char},
             )
+    return
 
 
 def validate_credit_card_number(value: str) -> None:
@@ -144,3 +157,5 @@ def validate_credit_card_number(value: str) -> None:
         raise ValidationError(
             _("Card # is not a valid credit card number."), params={"value": value}
         )
+
+    return

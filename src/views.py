@@ -64,14 +64,14 @@ class TerminusRegistrationView(FormView):
 
         with WialonSession(token=settings.WIALON_TOKEN) as session:
             unit_id: str | None = get_id_from_iccid(imei_number, session=session)
-            if unit_id is not None:
+            if unit_id:
                 user: WialonUser = WialonUser(
                     owner_id=str(admin_id),
                     name=username,
                     password=password,
                     session=session,
                 )
-                if user.id is not None:
+                if user.id:
                     self.wialon_remove_unit_from_group(
                         unit_id=int(unit_id),
                         group_id=settings.WIALON_UNACTIVATED_GROUP,
@@ -117,7 +117,6 @@ class TerminusRegistrationView(FormView):
 
     @classmethod
     def send_credentials_email(cls, email_addr: str, password: str) -> None:
-        subject: str = "Terminus GPS - Your new account credentials"
         text_content: str = render_to_string(
             "terminusgps/emails/credentials.txt",
             context={"username": email_addr, "password": password},
@@ -126,9 +125,8 @@ class TerminusRegistrationView(FormView):
             "terminusgps/emails/credentials.html",
             context={"username": email_addr, "password": password},
         )
-
         email: EmailMultiAlternatives = EmailMultiAlternatives(
-            subject, text_content, to=[email_addr]
+            "Terminus GPS - Your new account credentials", text_content, to=[email_addr]
         )
         email.attach_alternative(html_content, "text/html")
         email.send()
