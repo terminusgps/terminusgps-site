@@ -425,7 +425,7 @@ python-slugify==8.0.4
     # via
     #   terminusgps-site (pyproject.toml)
     #   cookiecutter
-python-terminusgps==1.1.4
+python-terminusgps==1.2.0
     # via terminusgps-site (pyproject.toml)
 python-wialon==1.2.4
     # via
