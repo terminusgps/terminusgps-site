@@ -14,10 +14,7 @@ from authorizenet.apicontrollers import (
 )
 
 from terminusgps_tracker.forms import ShippingAddressCreationForm
-from terminusgps_tracker.integrations.authorizenet.auth import (
-    get_merchant_auth,
-    get_environment,
-)
+from terminusgps.authorizenet.auth import get_merchant_auth, get_environment
 
 
 class TrackerShippingAddress(models.Model):

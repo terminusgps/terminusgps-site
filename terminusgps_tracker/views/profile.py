@@ -9,13 +9,12 @@ from django.views.generic import FormView, TemplateView
 from django.utils.translation import gettext_lazy as _
 from wialon.api import WialonError
 
+from terminusgps.wialon.session import WialonSession
+from terminusgps.wialon.utils import get_id_from_iccid
+from terminusgps.wialon.items import WialonUnit, WialonUnitGroup
+from terminusgps.wialon import flags
+
 from terminusgps_tracker.forms.payments import ShippingAddressDeletionForm
-from terminusgps_tracker.integrations.wialon.session import WialonSession
-from terminusgps_tracker.integrations.wialon.utils import get_id_from_iccid
-from terminusgps_tracker.models.profile import TrackerProfile
-from terminusgps_tracker.models.subscription import TrackerSubscriptionTier
-from terminusgps_tracker.integrations.wialon.items import WialonUnit, WialonUnitGroup
-from terminusgps_tracker.integrations.wialon import flags as flag
 from terminusgps_tracker.forms import (
     AssetCreationForm,
     AssetModificationForm,
@@ -29,7 +28,12 @@ from terminusgps_tracker.forms import (
     ShippingAddressSetDefaultForm,
     ShippingAddressCreationForm,
 )
-from terminusgps_tracker.models import TrackerPaymentMethod, TrackerShippingAddress
+from terminusgps_tracker.models import (
+    TrackerPaymentMethod,
+    TrackerShippingAddress,
+    TrackerProfile,
+    TrackerSubscriptionTier,
+)
 
 
 class TrackerProfileView(LoginRequiredMixin, TemplateView):
@@ -90,12 +94,12 @@ class TrackerProfileAssetView(LoginRequiredMixin, TemplateView):
                         "id": unit.id,
                         "flags": sum(
                             [
-                                flag.DATAFLAG_UNIT_BASE,
-                                flag.DATAFLAG_UNIT_ADMIN_FIELDS,
-                                flag.DATAFLAG_UNIT_CONNECTION_STATUS,
-                                flag.DATAFLAG_UNIT_CUSTOM_FIELDS,
-                                flag.DATAFLAG_UNIT_IMAGE,
-                                flag.DATAFLAG_UNIT_POSITION,
+                                flags.DATAFLAG_UNIT_BASE,
+                                flags.DATAFLAG_UNIT_ADMIN_FIELDS,
+                                flags.DATAFLAG_UNIT_CONNECTION_STATUS,
+                                flags.DATAFLAG_UNIT_CUSTOM_FIELDS,
+                                flags.DATAFLAG_UNIT_IMAGE,
+                                flags.DATAFLAG_UNIT_POSITION,
                             ]
                         ),
                     }

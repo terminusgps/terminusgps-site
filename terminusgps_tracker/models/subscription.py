@@ -24,16 +24,9 @@ from authorizenet.apicontractsv1 import (
     paymentScheduleTypeInterval,
 )
 
-from terminusgps_tracker.integrations.authorizenet.auth import (
-    get_merchant_auth,
-    get_environment,
-)
-from terminusgps_tracker.integrations.wialon.session import WialonSession
-from terminusgps_tracker.integrations.wialon.items import (
-    WialonUnitGroup,
-    WialonUser,
-    WialonUnit,
-)
+from terminusgps.authorizenet.auth import get_merchant_auth, get_environment
+from terminusgps.wialon.session import WialonSession
+from terminusgps.wialon.items import WialonUnitGroup, WialonUser, WialonUnit
 
 
 class TrackerSubscriptionFeature(models.Model):

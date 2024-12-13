@@ -19,10 +19,7 @@ from authorizenet.apicontractsv1 import (
     validateCustomerPaymentProfileRequest,
 )
 
-from terminusgps_tracker.integrations.authorizenet.auth import (
-    get_merchant_auth,
-    get_environment,
-)
+from terminusgps.authorizenet.auth import get_merchant_auth, get_environment
 from terminusgps_tracker.forms.payments import PaymentMethodCreationForm
 
 

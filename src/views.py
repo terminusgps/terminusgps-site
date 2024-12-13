@@ -7,16 +7,9 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 
-from terminusgps_tracker.integrations.wialon.utils import (
-    get_id_from_iccid,
-    gen_wialon_password,
-)
-from terminusgps_tracker.integrations.wialon.items import (
-    WialonUnit,
-    WialonUnitGroup,
-    WialonUser,
-)
-from terminusgps_tracker.integrations.wialon.session import WialonSession
+from terminusgps.wialon.utils import get_id_from_iccid, gen_wialon_password
+from terminusgps.wialon.items import WialonUnit, WialonUnitGroup, WialonUser
+from terminusgps.wialon.session import WialonSession
 
 from terminusgps_tracker.validators import (
     validate_wialon_imei_number,
@@ -87,10 +80,9 @@ class TerminusRegistrationView(FormView):
                     self.wialon_assign_user_to_unit(
                         unit_id=int(unit_id), user_id=user.id, session=session
                     )
-                    # TODO: Fix phone assignments
-                    #  self.wialon_assign_phone_to_unit(
-                    #     unit_id=int(unit_id), phone_number=phone_number, session=session
-                    # )
+                    self.wialon_assign_phone_to_unit(
+                        unit_id=int(unit_id), phone_number=phone_number, session=session
+                    )
                     self.send_credentials_email(username, password)
         return super().form_valid(form=form)
 
@@ -111,7 +103,7 @@ class TerminusRegistrationView(FormView):
     def wialon_assign_phone_to_unit(
         cls, unit_id: int, session: WialonSession, phone_number: str | None = None
     ) -> None:
-        if phone_number is not None:
+        if phone_number:
             unit: WialonUnit = WialonUnit(id=str(unit_id), session=session)
             unit.assign_phone(phone_number)
 
@@ -124,19 +116,19 @@ class TerminusRegistrationView(FormView):
         user.assign_item(unit)
 
     @classmethod
-    def send_credentials_email(cls, username: str, password: str) -> None:
+    def send_credentials_email(cls, email_addr: str, password: str) -> None:
         subject: str = "Terminus GPS - Your new account credentials"
         text_content: str = render_to_string(
             "terminusgps/emails/credentials.txt",
-            context={"username": username, "password": password},
+            context={"username": email_addr, "password": password},
         )
         html_content: str = render_to_string(
             "terminusgps/emails/credentials.html",
-            context={"username": username, "password": password},
+            context={"username": email_addr, "password": password},
         )
 
         email: EmailMultiAlternatives = EmailMultiAlternatives(
-            subject, text_content, to=[username]
+            subject, text_content, to=[email_addr]
         )
         email.attach_alternative(html_content, "text/html")
         email.send()

@@ -3,9 +3,9 @@ import string
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from terminusgps_tracker.integrations.wialon.session import WialonSession
-from terminusgps_tracker.integrations.wialon.utils import get_id_from_iccid, is_unique
-from terminusgps_tracker.integrations.wialon.items import WialonUnitGroup
+from terminusgps.wialon.session import WialonSession
+from terminusgps.wialon.items import WialonUnitGroup
+from terminusgps.wialon.utils import get_id_from_iccid, is_unique
 
 
 def validate_phone(value: str) -> None:

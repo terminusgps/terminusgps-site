@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from terminusgps.aws import get_secret
+from terminusgps.aws.secrets import get_secret
 
 os.umask(0)
 secret: dict[str, str] = get_secret("terminusgps-site-live-env")
@@ -140,7 +140,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "terminusgps.urls"
+ROOT_URLCONF = "src.urls"
 
 TEMPLATES = [
     {
@@ -157,7 +157,7 @@ TEMPLATES = [
     }
 ]
 
-WSGI_APPLICATION = "terminusgps.wsgi.application"
+WSGI_APPLICATION = "src.wsgi.application"
 
 DATABASES = {
     "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}

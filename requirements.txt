@@ -76,6 +76,7 @@ boto3==1.34.144
     # via
     #   terminusgps-site (pyproject.toml)
     #   django-ses
+    #   python-terminusgps
 botocore==1.34.144
     # via
     #   terminusgps-site (pyproject.toml)
@@ -132,7 +133,7 @@ distro==1.9.0
     # via
     #   terminusgps-site (pyproject.toml)
     #   tabula-py
-django==5.1.2
+django==5.1.4
     # via
     #   terminusgps-site (pyproject.toml)
     #   django-allauth
@@ -152,6 +153,7 @@ django==5.1.2
     #   django-stubs-ext
     #   django-tailwind
     #   djangorestframework
+    #   python-terminusgps
 django-allauth==0.63.6
     # via terminusgps-site (pyproject.toml)
 django-appconf==1.0.6
@@ -423,7 +425,7 @@ python-slugify==8.0.4
     # via
     #   terminusgps-site (pyproject.toml)
     #   cookiecutter
-python-terminusgps==1.0.0
+python-terminusgps==1.1.4
     # via terminusgps-site (pyproject.toml)
 python-wialon==1.2.4
     # via
