@@ -62,7 +62,7 @@ class TerminusRegistrationView(FormView):
         password: str = gen_wialon_password(length=32)
         phone_number: str | None = form.cleaned_data["phone_number"]
 
-        with WialonSession() as session:
+        with WialonSession(token=settings.WIALON_TOKEN) as session:
             unit_id: str | None = get_id_from_iccid(imei_number, session=session)
             if unit_id is not None:
                 user: WialonUser = WialonUser(

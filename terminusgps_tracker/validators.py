@@ -2,6 +2,7 @@ import string
 
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 from terminusgps.wialon.session import WialonSession
 from terminusgps.wialon.items import WialonUnitGroup
@@ -15,7 +16,7 @@ def validate_phone(value: str) -> None:
 
 def validate_wialon_imei_number(value: str) -> None:
     """Raises `ValidationError` if the value represents an invalid Wialon IMEI #."""
-    with WialonSession() as session:
+    with WialonSession(token=settings.WIALON_TOKEN) as session:
         unit_id: str | None = get_id_from_iccid(iccid=value.strip(), session=session)
         available = WialonUnitGroup(id="27890571", session=session)
 
