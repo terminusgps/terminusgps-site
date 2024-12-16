@@ -1,9 +1,9 @@
 from django.contrib import admin
 
-from terminusgps_tracker.models.profile import TrackerProfile
-from terminusgps_tracker.models.payment import TrackerPaymentMethod
-from terminusgps_tracker.models.shipping import TrackerShippingAddress
 from terminusgps_tracker.models import (
+    TrackerProfile,
+    TrackerPaymentMethod,
+    TrackerShippingAddress,
     TrackerSubscription,
     TrackerSubscriptionFeature,
     TrackerSubscriptionTier,

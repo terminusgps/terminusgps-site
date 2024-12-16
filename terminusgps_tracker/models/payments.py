@@ -1,6 +1,7 @@
 from typing import Any
 from django.db import models
 from django.conf import settings
+from django.forms import Form
 
 from authorizenet.apicontrollers import (
     createCustomerPaymentProfileController,
@@ -20,7 +21,6 @@ from authorizenet.apicontractsv1 import (
 )
 
 from terminusgps.authorizenet.auth import get_merchant_auth, get_environment
-from terminusgps_tracker.forms.payments import PaymentMethodCreationForm
 
 
 class TrackerPaymentMethod(models.Model):
@@ -41,7 +41,7 @@ class TrackerPaymentMethod(models.Model):
     def __str__(self) -> str:
         return f"Payment Method #{self.authorizenet_id}"
 
-    def save(self, form: PaymentMethodCreationForm | None = None, **kwargs) -> None:
+    def save(self, form: Form | None = None, **kwargs) -> None:
         if form and form.is_valid():
             self.is_default = form.cleaned_data["is_default"]
             self.authorizenet_id = self.authorizenet_create_payment_profile(form)
@@ -54,9 +54,7 @@ class TrackerPaymentMethod(models.Model):
             self.authorizenet_delete_payment_profile(profile_id, payment_id)
         return super().delete(**kwargs)
 
-    def authorizenet_create_payment_profile(
-        self, form: PaymentMethodCreationForm
-    ) -> int:
+    def authorizenet_create_payment_profile(self, form: Form) -> int:
         request = createCustomerPaymentProfileRequest(
             customerProfileId=str(self.profile.authorizenet_id),
             merchantAuthentication=get_merchant_auth(),
@@ -146,18 +144,14 @@ class TrackerPaymentMethod(models.Model):
             },
         }
 
-    def generate_payment_profile(
-        self, form: PaymentMethodCreationForm
-    ) -> customerPaymentProfileType:
+    def generate_payment_profile(self, form: Form) -> customerPaymentProfileType:
         return customerPaymentProfileType(
             defaultPaymentProfile=form.cleaned_data["is_default"],
             billTo=self.generate_billing_address(form),
             payment=self.generate_payment(form),
         )
 
-    def generate_billing_address(
-        self, form: PaymentMethodCreationForm
-    ) -> customerAddressType:
+    def generate_billing_address(self, form: Form) -> customerAddressType:
         return customerAddressType(
             firstName=form.cleaned_data["address_first_name"],
             lastName=form.cleaned_data["address_last_name"],
@@ -170,7 +164,7 @@ class TrackerPaymentMethod(models.Model):
         )
 
     @classmethod
-    def generate_payment(cls, form: PaymentMethodCreationForm) -> paymentType:
+    def generate_payment(cls, form: Form) -> paymentType:
         month: str = form.cleaned_data["credit_card_expiry_month"]
         year: str = form.cleaned_data["credit_card_expiry_year"]
         cardNumber: str = form.cleaned_data["credit_card_number"]

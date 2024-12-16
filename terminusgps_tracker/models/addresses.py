@@ -1,4 +1,5 @@
 from typing import Any
+from django.forms import Form
 from django.db import models
 
 from authorizenet.apicontractsv1 import (
@@ -13,7 +14,6 @@ from authorizenet.apicontrollers import (
     getCustomerShippingAddressController,
 )
 
-from terminusgps_tracker.forms import ShippingAddressCreationForm
 from terminusgps.authorizenet.auth import get_merchant_auth, get_environment
 
 
@@ -35,7 +35,7 @@ class TrackerShippingAddress(models.Model):
     def __str__(self) -> str:
         return f"Address #{self.authorizenet_id}"
 
-    def save(self, form: ShippingAddressCreationForm | None = None, **kwargs) -> None:
+    def save(self, form: Form | None = None, **kwargs) -> None:
         if form and form.is_valid():
             self.is_default = form.cleaned_data["is_default"]
             self.authorizenet_id = self.authorizenet_create_shipping_address(form)
@@ -48,9 +48,7 @@ class TrackerShippingAddress(models.Model):
             self.authorizenet_delete_shipping_address(profile_id, address_id)
         return super().delete(**kwargs)
 
-    def authorizenet_create_shipping_address(
-        self, form: ShippingAddressCreationForm
-    ) -> int:
+    def authorizenet_create_shipping_address(self, form: Form) -> int:
         request = createCustomerShippingAddressRequest(
             merchantAuthentication=get_merchant_auth(),
             customerProfileId=str(self.profile.authorizenet_id),
@@ -114,9 +112,7 @@ class TrackerShippingAddress(models.Model):
             raise ValueError(response.messages.message[0]["text"].text)
 
     @classmethod
-    def generate_shipping_address(
-        cls, form: ShippingAddressCreationForm
-    ) -> customerAddressType:
+    def generate_shipping_address(cls, form: Form) -> customerAddressType:
         return customerAddressType(
             firstName=form.cleaned_data["address_first_name"],
             lastName=form.cleaned_data["address_last_name"],

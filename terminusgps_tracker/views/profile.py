@@ -14,7 +14,6 @@ from terminusgps.wialon.utils import get_id_from_iccid
 from terminusgps.wialon.items import WialonUnit, WialonUnitGroup
 from terminusgps.wialon import flags
 
-from terminusgps_tracker.forms.payments import ShippingAddressDeletionForm
 from terminusgps_tracker.forms import (
     AssetCreationForm,
     AssetModificationForm,
@@ -27,6 +26,7 @@ from terminusgps_tracker.forms import (
     PaymentMethodSetDefaultForm,
     ShippingAddressSetDefaultForm,
     ShippingAddressCreationForm,
+    ShippingAddressDeletionForm,
 )
 from terminusgps_tracker.models import (
     TrackerPaymentMethod,

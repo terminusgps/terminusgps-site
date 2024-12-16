@@ -10,8 +10,8 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, RedirectView, FormView
 
 from terminusgps_tracker.forms import TrackerSignupForm, TrackerAuthenticationForm
-from terminusgps_tracker.models.profile import TrackerProfile
-from terminusgps_tracker.models.subscription import (
+from terminusgps_tracker.models import (
+    TrackerProfile,
     TrackerSubscription,
     TrackerSubscriptionTier,
 )

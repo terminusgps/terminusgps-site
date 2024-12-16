@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import widgets
 
-from terminusgps_tracker.models.subscription import TrackerSubscriptionTier
+from terminusgps_tracker.models import TrackerSubscriptionTier
 
 
 class SubscriptionCreationForm(forms.Form):
