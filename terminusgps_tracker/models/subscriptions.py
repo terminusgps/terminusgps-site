@@ -1,9 +1,16 @@
 from typing import Any
+from decimal import Decimal
+
 from django.db import models, transaction
 from django.utils import timezone
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+from terminusgps.authorizenet.auth import get_merchant_auth, get_environment
+from terminusgps.wialon.session import WialonSession
+from terminusgps.wialon.items import WialonUnitGroup, WialonUser, WialonUnit
+from terminusgps.wialon.items.base import WialonBase
+
 from authorizenet.apicontrollers import (
     ARBCreateSubscriptionController,
     ARBCancelSubscriptionController,
@@ -23,10 +30,6 @@ from authorizenet.apicontractsv1 import (
     paymentScheduleType,
     paymentScheduleTypeInterval,
 )
-
-from terminusgps.authorizenet.auth import get_merchant_auth, get_environment
-from terminusgps.wialon.session import WialonSession
-from terminusgps.wialon.items import WialonUnitGroup, WialonUser, WialonUnit
 
 
 class TrackerSubscriptionFeature(models.Model):
@@ -104,18 +107,14 @@ class TrackerSubscriptionTier(models.Model):
 
     def wialon_add_to_group(self, unit_id: int, session: WialonSession) -> None:
         assert self.wialon_id
-
-        group_id: int = self.wialon_id
-        unit: WialonUnit = WialonUnit(id=str(unit_id), session=session)
-        group: WialonUnitGroup = WialonUnitGroup(id=str(group_id), session=session)
+        unit = WialonUnit(id=str(unit_id), session=session)
+        group = WialonUnitGroup(id=str(self.wialon_id), session=session)
         group.add_item(unit)
 
     def wialon_rm_from_group(self, unit_id: int, session: WialonSession) -> None:
         assert self.wialon_id
-
-        group_id: int = self.wialon_id
-        unit: WialonUnit = WialonUnit(id=str(unit_id), session=session)
-        group: WialonUnitGroup = WialonUnitGroup(id=str(group_id), session=session)
+        unit = WialonUnit(id=str(unit_id), session=session)
+        group = WialonUnitGroup(id=str(self.wialon_id), session=session)
         group.rm_item(unit)
 
     def wialon_create_subscription_group(
@@ -133,7 +132,7 @@ class TrackerSubscriptionTier(models.Model):
     ) -> None:
         session.wialon_api.unit_exec_cmd(
             **{
-                "itemId": str(unit_id),
+                "itemId": unit_id,
                 "commandName": self.name,
                 "linkType": "",
                 "timeout": timeout,
@@ -188,10 +187,7 @@ class TrackerSubscription(models.Model):
         if self.authorizenet_id:
             if new_tier.amount < self.tier.amount:
                 raise ValueError("Cannot upgrade to lower tier")
-            trial_amount = None
-            self.authorizenet_update_subscription(
-                new_tier, payment_id, address_id, trial_amount
-            )
+            self.authorizenet_update_subscription(new_tier, payment_id, address_id)
         else:
             self.authorizenet_id = self.authorizenet_create_subscription(
                 new_tier, payment_id, address_id
@@ -378,3 +374,7 @@ class TrackerSubscription(models.Model):
             trialOccurrences=trialOccurrences,
             interval=interval,
         )
+
+    @property
+    def remaining_amount(self) -> Decimal:
+        return Decimal()

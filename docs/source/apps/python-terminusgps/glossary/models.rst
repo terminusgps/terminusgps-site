@@ -162,7 +162,7 @@ Models
         Calls the Wialon API and returns a list of the group's items.
 
         :type: :py:obj:`list`
-        :value: ``[]``
+        :rtype: :py:obj:`list[]`
 
 .. py:class:: WialonUnit
 
@@ -201,7 +201,7 @@ Models
         :param password: A new access password.
         :type password: :py:obj:`str`
         :returns: Nothing.
-        :rtype: None.
+        :rtype: :py:obj:`None`
 
     .. py:method:: activate() -> None
 
@@ -210,7 +210,7 @@ Models
         If already activated, does nothing.
 
         :returns: Nothing.
-        :rtype: None.
+        :rtype: :py:obj:`None`
 
     .. py:method:: deactivate() -> None
 
@@ -219,4 +219,4 @@ Models
         If already deactivated, does nothing.
 
         :returns: Nothing.
-        :rtype: None.
+        :rtype: :py:obj:`None`

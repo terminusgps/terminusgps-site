@@ -15,6 +15,7 @@ from .profile import (
     TrackerProfileShippingAddressSetDefaultView,
     TrackerProfileShippingAddressView,
     TrackerProfileSubscriptionView,
+    TrackerProfileSettingsView,
     TrackerProfileView,
 )
 from .views import (

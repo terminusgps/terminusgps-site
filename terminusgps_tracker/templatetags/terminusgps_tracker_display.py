@@ -8,7 +8,7 @@ register = Library()
 @register.filter(name="credit_card_icon")
 def credit_card_icon(name: str) -> SafeString:
     svg_class = "size-12"
-    match name.upper():
+    match str(name).upper():
         case "VISA":
             return mark_safe(
                 f""" 

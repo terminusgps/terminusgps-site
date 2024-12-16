@@ -37,23 +37,27 @@ class TrackerShippingAddress(models.Model):
 
     def save(self, form: Form | None = None, **kwargs) -> None:
         if form and form.is_valid():
-            self.is_default = form.cleaned_data["is_default"]
-            self.authorizenet_id = self.authorizenet_create_shipping_address(form)
+            self.default = form.cleaned_data.get("is_default", False)
+            self.authorizenet_id = self.authorizenet_create_shipping_address(
+                form, form.cleaned_data.get("is_default", False)
+            )
         return super().save(**kwargs)
 
     def delete(self, **kwargs):
-        if self.authorizenet_id:
+        if self.authorizenet_id and self.profile.authorizenet_id:
             profile_id = int(self.profile.authorizenet_id)
             address_id = int(self.authorizenet_id)
             self.authorizenet_delete_shipping_address(profile_id, address_id)
         return super().delete(**kwargs)
 
-    def authorizenet_create_shipping_address(self, form: Form) -> int:
+    def authorizenet_create_shipping_address(
+        self, form: Form, default: bool = False
+    ) -> int:
         request = createCustomerShippingAddressRequest(
             merchantAuthentication=get_merchant_auth(),
             customerProfileId=str(self.profile.authorizenet_id),
             address=self.generate_shipping_address(form),
-            defaultShippingAddress=form.cleaned_data["is_default"],
+            defaultShippingAddress=default,
         )
 
         controller = createCustomerShippingAddressController(request)
@@ -113,7 +117,7 @@ class TrackerShippingAddress(models.Model):
 
     @classmethod
     def generate_shipping_address(cls, form: Form) -> customerAddressType:
-        return customerAddressType(
+        address = customerAddressType(
             firstName=form.cleaned_data["address_first_name"],
             lastName=form.cleaned_data["address_last_name"],
             address=form.cleaned_data["address_street"],
@@ -121,5 +125,7 @@ class TrackerShippingAddress(models.Model):
             state=form.cleaned_data["address_state"],
             zip=form.cleaned_data["address_zip"],
             country=form.cleaned_data["address_country"],
-            phoneNumber=form.cleaned_data["address_phone"],
         )
+        if form.cleaned_data.get("address_phone"):
+            address.phoneNumber = form.cleaned_data["address_phone"]
+        return address

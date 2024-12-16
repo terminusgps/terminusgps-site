@@ -3,9 +3,10 @@ from typing import Any
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
+from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView, TemplateView, View
 from django.utils.translation import gettext_lazy as _
 from wialon.api import WialonError
 
@@ -17,21 +18,22 @@ from terminusgps.wialon import flags
 from terminusgps_tracker.forms import (
     AssetCreationForm,
     AssetModificationForm,
-    SubscriptionModificationForm,
     NotificationCreationForm,
     NotificationDeletionForm,
     NotificationModificationForm,
     PaymentMethodCreationForm,
     PaymentMethodDeletionForm,
     PaymentMethodSetDefaultForm,
-    ShippingAddressSetDefaultForm,
     ShippingAddressCreationForm,
     ShippingAddressDeletionForm,
+    ShippingAddressSetDefaultForm,
+    SubscriptionModificationForm,
 )
 from terminusgps_tracker.models import (
     TrackerPaymentMethod,
-    TrackerShippingAddress,
     TrackerProfile,
+    TrackerShippingAddress,
+    TrackerSubscription,
     TrackerSubscriptionTier,
 )
 
@@ -39,6 +41,7 @@ from terminusgps_tracker.models import (
 class TrackerProfileView(LoginRequiredMixin, TemplateView):
     template_name = "terminusgps_tracker/profile/profile.html"
     extra_context = {
+        "title": "Your Profile",
         "subtitle": settings.TRACKER_PROFILE["MOTD"],
         "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
     }
@@ -49,26 +52,73 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
-        if request.user and request.user.is_authenticated:
-            try:
-                profile = TrackerProfile.objects.get(user=request.user)
-            except TrackerProfile.DoesNotExist:
-                profile = None
+        if not request.user or not request.user.is_authenticated:
+            self.profile = None
         else:
-            profile = None
-        self.profile = profile
-
-    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
-        if self.profile:
-            self.profile.save()
-        return super().get(request, *args, **kwargs)
+            self.profile, _ = TrackerProfile.objects.get_or_create(user=request.user)
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["profile"] = self.profile
-        if self.profile is not None:
+        try:
             context["subscription"] = self.profile.subscription
+        except TrackerSubscription.DoesNotExist:
+            context["subscription"] = None
+        finally:
+            context["profile"] = self.profile
         return context
+
+
+class TrackerProfileSettingsView(LoginRequiredMixin, TemplateView):
+    template_name = "terminusgps_tracker/profile/settings.html"
+    extra_context = {
+        "title": "Settings",
+        "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
+    }
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    http_method_names = ["get"]
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.profile = TrackerProfile.objects.get(user=request.user)
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        if self.profile is not None:
+            context["addresses"] = self.get_addresses(self.profile)
+            context["payments"] = self.get_payments(self.profile)
+        return context
+
+    @classmethod
+    def get_payments(cls, profile: TrackerProfile) -> list:
+        if not profile.payments.all():
+            return []
+        return [
+            (
+                TrackerPaymentMethod.authorizenet_get_payment_profile(
+                    profile_id=profile.authorizenet_id,
+                    payment_id=payment.authorizenet_id,
+                ),
+                payment.is_default,
+            )
+            for payment in profile.payments.all()
+        ]
+
+    @classmethod
+    def get_addresses(cls, profile: TrackerProfile) -> list:
+        if not profile.addresses.all():
+            return []
+        return [
+            (
+                TrackerShippingAddress.authorizenet_get_shipping_address(
+                    profile_id=profile.authorizenet_id,
+                    address_id=address.authorizenet_id,
+                ),
+                address.is_default,
+            )
+            for address in profile.addresses.all()
+        ]
 
 
 class TrackerProfileAssetView(LoginRequiredMixin, TemplateView):
@@ -389,12 +439,18 @@ class TrackerProfileNotificationModificationView(LoginRequiredMixin, FormView):
 class TrackerProfilePaymentMethodCreationView(LoginRequiredMixin, FormView):
     form_class = PaymentMethodCreationForm
     template_name = "terminusgps_tracker/forms/profile/create_payment.html"
-    extra_context = {"title": "New Payment Method"}
+    partial_template = "terminusgps_tracker/forms/settings/create_payment.html"
+    extra_context = {"title": "New Payment"}
     login_url = reverse_lazy("tracker login")
     permission_denied_message = "Please login and try again."
     raise_exception = False
     http_method_names = ["get", "post"]
-    success_url = reverse_lazy("payments")
+    success_url = reverse_lazy("settings")
+
+    def get(self, request: HttpRequest, *args, **kwargs):
+        if request.headers.get("HX-Request"):
+            self.template_name = self.partial_template
+        return super().get(request, *args, **kwargs)
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
@@ -406,88 +462,43 @@ class TrackerProfilePaymentMethodCreationView(LoginRequiredMixin, FormView):
         return super().form_valid(form=form)
 
 
-class TrackerProfilePaymentMethodDeletionView(LoginRequiredMixin, FormView):
-    form_class = PaymentMethodDeletionForm
-    template_name = "terminusgps_tracker/forms/profile/delete_payment.html"
-    extra_context = {"title": "Delete this payment method?"}
+class TrackerProfilePaymentMethodDeletionView(LoginRequiredMixin, TemplateView):
+    http_method_names = ["delete"]
     login_url = reverse_lazy("tracker login")
     permission_denied_message = "Please login and try again."
     raise_exception = False
-    http_method_names = ["get", "post"]
-    success_url = reverse_lazy("payments")
+    template_name = "terminusgps_tracker/null.html"
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
-        self.payment_id = kwargs.get("id")
+        self.payment_id = self.kwargs.get("id")
 
-    def form_valid(self, form: PaymentMethodDeletionForm) -> HttpResponse:
-        payment_id: int = form.cleaned_data["payment_id"]
-        payment_profile = TrackerPaymentMethod.objects.get(
-            profile=self.profile, authorizenet_id__exact=payment_id
-        )
-        payment_profile.delete()
-        return super().form_valid(form=form)
-
-    def get_initial(self) -> dict[str, Any]:
-        initial: dict[str, Any] = super().get_initial()
-        initial["payment_id"] = self.payment_id
-        return initial
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        payment_id = self.payment_id
-
-        context["payment_id"] = payment_id
-        if payment_id is not None:
-            context["payment_profile"] = (
-                TrackerPaymentMethod.authorizenet_get_payment_profile(
-                    self.profile.authorizenet_id, payment_id
-                )
-            )
-        return context
+    def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if self.payment_id is not None:
+            payment = self.profile.payments.get(authorizenet_id=int(self.payment_id))
+            payment.delete()
+        return super().delete(request, *args, **kwargs)
 
 
-class TrackerProfileShippingAddressDeletionView(LoginRequiredMixin, FormView):
-    form_class = ShippingAddressDeletionForm
-    extra_context = {"title": "Delete Shipping Address?"}
+class TrackerProfileShippingAddressDeletionView(LoginRequiredMixin, TemplateView):
+    http_method_names = ["delete"]
     login_url = reverse_lazy("tracker login")
     permission_denied_message = "Please login and try again."
     raise_exception = False
-    http_method_names = ["get", "post"]
     success_url = reverse_lazy("tracker profile")
-    template_name = "terminusgps_tracker/forms/profile/delete_shipping_address.html"
+    template_name = "terminusgps_tracker/null.html"
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
-        self.address_id = kwargs.get("id")
+        self.address_id = self.kwargs.get("id")
 
-    def form_valid(self, form: PaymentMethodDeletionForm) -> HttpResponse:
-        address_id: int = form.cleaned_data["address_id"]
-        address = TrackerShippingAddress.objects.get(
-            profile=self.profile, authorizenet_id__exact=address_id
-        )
-        address.delete()
-        return super().form_valid(form=form)
-
-    def get_initial(self) -> dict[str, Any]:
-        initial: dict[str, Any] = super().get_initial()
-        initial["address_id"] = self.address_id
-        return initial
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        address_id = self.address_id
-
-        context["address_id"] = address_id
-        if address_id is not None:
-            context["address"] = (
-                TrackerShippingAddress.authorizenet_get_shipping_address(
-                    self.profile.authorizenet_id, address_id
-                )
-            )
-        return context
+    def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if self.address_id is not None:
+            address = self.profile.addresses.get(authorizenet_id=int(self.address_id))
+            address.delete()
+        return super().delete(request, *args, **kwargs)
 
 
 class TrackerProfileShippingAddressView(LoginRequiredMixin, TemplateView):
@@ -624,6 +635,7 @@ class TrackerProfilePaymentMethodSetDefaultView(LoginRequiredMixin, FormView):
 class TrackerProfileShippingAddressCreationView(LoginRequiredMixin, FormView):
     form_class = ShippingAddressCreationForm
     template_name = "terminusgps_tracker/forms/profile/create_shipping_address.html"
+    partial_template = "terminusgps_tracker/forms/settings/create_address.html"
     extra_context = {"title": "Create Shipping Address"}
     login_url = reverse_lazy("tracker login")
     permission_denied_message = "Please login and try again."
@@ -634,6 +646,11 @@ class TrackerProfileShippingAddressCreationView(LoginRequiredMixin, FormView):
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if request.headers.get("HX-Request"):
+            self.template_name = self.partial_template
+        return super().get(request, *args, **kwargs)
 
     def form_valid(self, form: ShippingAddressCreationForm) -> HttpResponse:
         address = TrackerShippingAddress.objects.create(profile=self.profile)

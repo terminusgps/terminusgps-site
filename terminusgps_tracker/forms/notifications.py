@@ -7,16 +7,16 @@ from terminusgps_tracker.models import TrackerNotification
 class NotificationCreationForm(ModelForm):
     class Meta:
         model = TrackerNotification
-        fields = ["method"]
+        fields = ["name"]
 
 
 class NotificationModificationForm(forms.Form):
     class Meta:
         model = TrackerNotification
-        fields = ["method"]
+        fields = ["name"]
 
 
 class NotificationDeletionForm(forms.Form):
     class Meta:
         model = TrackerNotification
-        fields = ["method"]
+        fields = ["name"]

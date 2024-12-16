@@ -87,7 +87,7 @@ class PaymentMethodSetDefaultForm(forms.Form):
 
 
 class PaymentMethodCreationForm(forms.Form):
-    default_class = "w-full bg-white p-2 rounded-md dark:bg-gray-700"
+    default_class = "w-full bg-white p-2 dark:bg-gray-700 mx-auto"
 
     credit_card_number = forms.CharField(
         min_length=12,

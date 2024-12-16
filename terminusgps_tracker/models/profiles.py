@@ -96,10 +96,12 @@ class TrackerProfile(models.Model):
         return response
 
     @classmethod
-    def authorizenet_update_customer_profile(cls, merchant_id: int) -> None:
+    def authorizenet_update_customer_profile(cls, merchant_id: int, email: str) -> None:
         request = updateCustomerProfileRequest(
             merchantAuthentication=get_merchant_auth(),
-            merchantCustomerId=str(merchant_id),
+            profile=customerProfileType(
+                merchantCustomerId=str(merchant_id), email=email
+            ),
         )
 
         controller = updateCustomerProfileController(request)

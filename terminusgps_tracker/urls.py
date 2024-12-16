@@ -15,6 +15,11 @@ urlpatterns = [
         views.TrackerSubscriptionView.as_view(),
         name="tracker subscriptions",
     ),
+    path(
+        "profile/settings/",
+        views.TrackerProfileSettingsView.as_view(),
+        name="profile settings",
+    ),
     path("profile/assets/", views.TrackerProfileAssetView.as_view(), name="assets"),
     path(
         "profile/assets/new/",

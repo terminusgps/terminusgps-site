@@ -43,22 +43,26 @@ class TrackerPaymentMethod(models.Model):
 
     def save(self, form: Form | None = None, **kwargs) -> None:
         if form and form.is_valid():
-            self.is_default = form.cleaned_data["is_default"]
-            self.authorizenet_id = self.authorizenet_create_payment_profile(form)
+            self.default = form.cleaned_data.get("is_default", False)
+            self.authorizenet_id = self.authorizenet_create_payment_profile(
+                form, form.cleaned_data.get("is_default", False)
+            )
         return super().save(**kwargs)
 
     def delete(self, **kwargs):
-        if self.authorizenet_id:
+        if self.authorizenet_id and self.profile.authorizenet_id:
             profile_id = int(self.profile.authorizenet_id)
             payment_id = int(self.authorizenet_id)
             self.authorizenet_delete_payment_profile(profile_id, payment_id)
         return super().delete(**kwargs)
 
-    def authorizenet_create_payment_profile(self, form: Form) -> int:
+    def authorizenet_create_payment_profile(
+        self, form: Form, default: bool = False
+    ) -> int:
         request = createCustomerPaymentProfileRequest(
             customerProfileId=str(self.profile.authorizenet_id),
             merchantAuthentication=get_merchant_auth(),
-            paymentProfile=self.generate_payment_profile(form),
+            paymentProfile=self.generate_payment_profile(form, default),
             validationMode="testMode" if settings.DEBUG else "liveMode",
         )
 
@@ -144,15 +148,18 @@ class TrackerPaymentMethod(models.Model):
             },
         }
 
-    def generate_payment_profile(self, form: Form) -> customerPaymentProfileType:
+    def generate_payment_profile(
+        self, form: Form, default: bool = False
+    ) -> customerPaymentProfileType:
         return customerPaymentProfileType(
-            defaultPaymentProfile=form.cleaned_data["is_default"],
+            defaultPaymentProfile=default,
             billTo=self.generate_billing_address(form),
             payment=self.generate_payment(form),
         )
 
-    def generate_billing_address(self, form: Form) -> customerAddressType:
-        return customerAddressType(
+    @classmethod
+    def generate_billing_address(cls, form: Form) -> customerAddressType:
+        address = customerAddressType(
             firstName=form.cleaned_data["address_first_name"],
             lastName=form.cleaned_data["address_last_name"],
             address=form.cleaned_data["address_street"],
@@ -162,6 +169,9 @@ class TrackerPaymentMethod(models.Model):
             country=form.cleaned_data["address_country"],
             phoneNumber=form.cleaned_data["address_phone"],
         )
+        if form.cleaned_data.get("address_phone"):
+            address.phoneNumber = form.cleaned_data["address_phone"]
+        return address
 
     @classmethod
     def generate_payment(cls, form: Form) -> paymentType:
