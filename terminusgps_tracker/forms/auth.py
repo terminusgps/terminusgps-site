@@ -50,6 +50,9 @@ class TrackerSignupForm(UserCreationForm):
 
 class TrackerAuthenticationForm(AuthenticationForm):
     default_css_class = "w-full block mt-2 mb-4 p-2 rounded-md text-black dark:bg-gray-800 dark:text-white"
+    error_messages = {
+        "invalid_login": "Couldn't find a user with those credentials. Please try again."
+    }
     username = forms.CharField(
         label="Email Address",
         min_length=4,
