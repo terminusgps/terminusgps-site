@@ -31,16 +31,5 @@
             "length": 1,
             "features": [1, 2, 3, 6, 9]
         }
-    },
-    {
-        "model": "terminusgps_tracker.TrackerSubscriptionTier",
-        "pk": 4,
-        "fields" : {
-            "name": "Platinum",
-            "amount": 49.99,
-            "period": 1,
-            "length": 1,
-            "features": [1, 2, 3, 6, 9]
-        }
     }
 ]
