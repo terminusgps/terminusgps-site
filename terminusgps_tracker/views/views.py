@@ -15,7 +15,6 @@ from terminusgps_tracker.models.subscription import (
     TrackerSubscription,
     TrackerSubscriptionTier,
 )
-from terminusgps_tracker.models.todo import TrackerTodoList
 
 
 class TestTemplateView(TemplateView):
@@ -123,5 +122,4 @@ class TrackerSignupView(SuccessMessageMixin, FormView):
         )
         profile = TrackerProfile.objects.create(user=user)
         TrackerSubscription.objects.create(profile=profile)
-        TrackerTodoList.objects.create(profile=profile)
         return super().form_valid(form=form)

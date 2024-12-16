@@ -1,31 +1,8 @@
-from typing import Any
-
 from django.template import Library
 from django.utils.safestring import SafeString, mark_safe
 
-from terminusgps_tracker.models.todo import TodoItem
 
 register = Library()
-
-
-@register.inclusion_tag("templatetags/todo_item.html")
-def render_todo_item(todo: TodoItem, size: int = 6) -> dict[str, Any]:
-    if todo.is_complete:
-        svg_path: SafeString = mark_safe(
-            '<path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />'
-        )
-    else:
-        svg_path: SafeString = mark_safe(
-            '<path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />'
-        )
-
-    return {
-        "label": todo.label,
-        "url": todo.get_absolute_url(),
-        "svg_path": svg_path,
-        "svg_color": "text-green-500" if todo.is_complete else "text-red-500",
-        "svg_size": size,
-    }
 
 
 @register.filter(name="credit_card_icon")

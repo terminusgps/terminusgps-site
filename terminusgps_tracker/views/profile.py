@@ -67,7 +67,6 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
         context: dict[str, Any] = super().get_context_data(**kwargs)
         context["profile"] = self.profile
         if self.profile is not None:
-            context["todo_list"] = self.profile.todo_list
             context["subscription"] = self.profile.subscription
         return context
 
