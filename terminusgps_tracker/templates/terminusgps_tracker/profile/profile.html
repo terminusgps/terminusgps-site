@@ -2,13 +2,15 @@
 {% load static terminusgps_tracker_display %}
 {% block content %}
 <a href="{% url 'profile settings' %}">Settings</a>
-<div class="container mx-auto">
+<div class="container mx-auto dark:text-white">
     <div class="flex flex-col gap-8">
-        <div class="rounded bg-gray-300 p-8 text-2xl drop-shadow">
+        <div class="p-8 text-2xl">
             <h2 class="font-serif font-bold tracking-wide">Your Assets</h2>
+            {% for asset in assets %}{% include "terminusgps_tracker/profile/asset.html" with asset=asset %}{% endfor %}
         </div>
-        <div class="rounded bg-gray-300 p-8 text-2xl drop-shadow">
+        <div class="p-8 text-2xl">
             <h2 class="font-serif font-bold tracking-wide">Your Subscription</h2>
+            {% include "terminusgps_tracker/profile/subscription.html" with subscription=subscription %}
         </div>
     </div>
 </div>

@@ -7,7 +7,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, RedirectView, FormView
+from django.views.generic import DetailView, TemplateView, RedirectView, FormView
 
 from terminusgps_tracker.forms import TrackerSignupForm, TrackerAuthenticationForm
 from terminusgps_tracker.models import (
@@ -24,19 +24,27 @@ class TestTemplateView(TemplateView):
     http_method_names = ["get"]
 
 
+class TrackerSubscriptionTierDetailView(DetailView):
+    model = TrackerSubscriptionTier
+    template_name = "terminusgps_tracker/subscription_tier.html"
+    content_type = "text/html"
+    context_object_name = "tier"
+    http_method_names = ["get"]
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["expanded"] = self.request.headers.get("HX-Request")
+        return context
+
+
 class TrackerSubscriptionView(TemplateView):
     template_name = "terminusgps_tracker/subscriptions.html"
     content_type = "text/html"
-    extra_context = {"title": "Subscriptions"}
+    extra_context = {"title": "Subscriptions", "subtitle": "Click a tier to learn more"}
     http_method_names = ["get"]
 
-    def get_subscription_tiers(
-        self, total: int = 3
-    ) -> QuerySet[TrackerSubscriptionTier, TrackerSubscriptionTier | None]:
-        queryset: QuerySet[TrackerSubscriptionTier, TrackerSubscriptionTier | None] = (
-            TrackerSubscriptionTier.objects.all().order_by("amount")[:total]
-        )
-        return queryset
+    def get_subscription_tiers(self, total: int = 3) -> QuerySet:
+        return TrackerSubscriptionTier.objects.filter().order_by("amount")[:total]
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)

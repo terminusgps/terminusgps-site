@@ -1,8 +1,8 @@
 {% load terminusgps_tracker_display %}
 {% if default %} 
-<div id="{{ payment.customerProfilePaymentId }}" class="border-xl container mx-auto rounded-md border border-green-600 bg-green-100 p-4 drop-shadow-md dark:border-green-300 dark:bg-green-900">
+<div class="border-xl container mx-auto rounded-md border border-green-600 bg-green-100 p-4 drop-shadow-md dark:border-green-300 dark:bg-green-900" hx-target="this">
 {% else %}
-<div id="{{ payment.customerPaymentProfileId }}" class="border-xl container mx-auto rounded-md border border-gray-600 bg-white p-4 drop-shadow-md dark:border-gray-300 dark:bg-gray-500">
+<div class="border-xl container mx-auto rounded-md border border-gray-600 bg-white p-4 drop-shadow-md dark:border-gray-300 dark:bg-gray-500" hx-target="this">
 {% endif %}
     <div class="flex flex-col space-y-4 md:flex-row md:justify-between md:space-y-0 dark:text-white">
         <div class="flex flex-col gap-2">
@@ -14,12 +14,19 @@
                 <p class="text-gray-800 dark:text-gray-100">{{ payment.billTo.address }}</p>
                 <p class="text-gray-700 dark:text-gray-200">{{ payment.billTo.city }}, {{ payment.billTo.state }}, {{ payment.billTo.zip }}</p>
             </div>
-            <button hx-target="#{{ payment.customerPaymentProfileId }}" hx-swap="outerHTML" class="max-w-4 text-left text-sm text-gray-400" hx-delete="{% url 'delete payment' payment.customerPaymentProfileId %}"><span class="hover:underline">Delete</span></button>
+            <button
+                type="button"
+                class="max-w-4 text-left text-sm text-gray-400"
+                hx-delete="{% url 'delete payment' payment.customerPaymentProfileId %}"
+                hx-swap="delete"
+                hx-prompt="Type the last 4 digits of the card to delete it.">
+                Delete
+            </button>
         </div>
         <h2 class="text-gray-800 dark:text-gray-100">{{ payment.billTo.firstName }} {{ payment.billTo.lastName }}</h2>
     </div>
     {% if not default %}
-    <a hx-target="#{{ payment.customerPaymentProfileId }}" hx-swap="outerHTML" hx-post="" class="mt-4 block w-full rounded-md border border-solid border-gray-600 bg-gray-200 px-4 py-2 text-center text-gray-700 hover:cursor-pointer hover:bg-gray-50 dark:border-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-400">
+    <a hx-swap="outerHTML" hx-post="{% url 'default payment' payment.customerPaymentProfileId %}" class="mt-4 block w-full rounded-md border border-solid border-gray-600 bg-gray-200 px-4 py-2 text-center text-gray-700 hover:cursor-pointer hover:bg-gray-50 dark:border-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-400">
         Set as default
     </a>
     {% endif %}

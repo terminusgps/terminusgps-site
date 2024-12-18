@@ -56,6 +56,9 @@ class TrackerPaymentMethod(models.Model):
             self.authorizenet_delete_payment_profile(profile_id, payment_id)
         return super().delete(**kwargs)
 
+    def set_as_default(self) -> None:
+        raise NotImplementedError("TODO")
+
     def authorizenet_create_payment_profile(
         self, form: Form, default: bool = False
     ) -> int:

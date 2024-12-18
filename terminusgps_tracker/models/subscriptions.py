@@ -4,12 +4,10 @@ from decimal import Decimal
 from django.db import models, transaction
 from django.utils import timezone
 from django.conf import settings
-from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from terminusgps.authorizenet.auth import get_merchant_auth, get_environment
 from terminusgps.wialon.session import WialonSession
 from terminusgps.wialon.items import WialonUnitGroup, WialonUser, WialonUnit
-from terminusgps.wialon.items.base import WialonBase
 
 from authorizenet.apicontrollers import (
     ARBCreateSubscriptionController,
@@ -33,36 +31,15 @@ from authorizenet.apicontractsv1 import (
 
 
 class TrackerSubscriptionFeature(models.Model):
-    class FeatureAmount(models.IntegerChoices):
-        LOW = 5
-        MID = 25
-        INF = 999
-
     name = models.CharField(max_length=256)
-    amount = models.IntegerField(
-        choices=FeatureAmount.choices, default=None, null=True, blank=True
-    )
+    desc = models.CharField(max_length=2048, default=None, null=True, blank=True)
 
     class Meta:
         verbose_name = "subscription feature"
         verbose_name_plural = "subscription features"
 
     def __str__(self) -> str:
-        amount_display: str = self.get_amount_display()
-        if amount_display:
-            return mark_safe(amount_display + " " + self.name)
         return self.name
-
-    def get_amount_display(self) -> str:
-        match self.amount:
-            case TrackerSubscriptionFeature.FeatureAmount.LOW:  # 5
-                return str(TrackerSubscriptionFeature.FeatureAmount.LOW)
-            case TrackerSubscriptionFeature.FeatureAmount.MID:  # 25
-                return str(TrackerSubscriptionFeature.FeatureAmount.MID)
-            case TrackerSubscriptionFeature.FeatureAmount.INF:  # 999
-                return "&#8734;"  # Infinity symbol
-            case _:
-                return ""
 
 
 class TrackerSubscriptionTier(models.Model):

@@ -14,9 +14,9 @@ from .profile import (
     TrackerProfileShippingAddressDeletionView,
     TrackerProfileShippingAddressSetDefaultView,
     TrackerProfileShippingAddressView,
-    TrackerProfileSubscriptionView,
     TrackerProfileSettingsView,
     TrackerProfileView,
+    TrackerProfileSubscriptionUpdateView,
 )
 from .views import (
     TestTemplateView,
@@ -28,4 +28,5 @@ from .views import (
     TrackerSignupView,
     TrackerSourceView,
     TrackerSubscriptionView,
+    TrackerSubscriptionTierDetailView,
 )

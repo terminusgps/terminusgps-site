@@ -1,0 +1,22 @@
+<svg class="{{ class|default:'size-8' }}" viewBox="0 0 64.927628 105.70147" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+     id="path14"
+     style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+     d="M 32.464185,4.1547361 A 32.46378,32.46378 0 0 0 0,36.618921 32.46378,32.46378 0 0 0 7.2087358,56.91609 L 32.497596,105.70147 57.937181,56.624295 A 32.46378,32.46378 0 0 0 64.927628,36.618921 32.46378,32.46378 0 0 0 32.464185,4.1547361 Z m 0,6.4929839 a 25.971024,25.971024 0 0 1 25.970458,25.971201 25.971024,25.971024 0 0 1 -25.970458,25.9712 25.971024,25.971024 0 0 1 -25.9712,-25.9712 25.971024,25.971024 0 0 1 25.9712,-25.971201 z" />
+  <g
+     id="g25"
+     transform="matrix(1.4367861,0,0,1.4367861,-40.009266,-6.3268531)">
+    <path
+       id="path23"
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 49.991216,5.0657744 35.540935,48.206803 H 64.44098 Z" />
+    <path
+       id="path24"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 49.991098,4.403476 -7.83879,39.798523 h 15.677299 z" />
+    <path
+       id="path25"
+       style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       d="M 49.990999,7.9014509 47.660245,41.528963 h 4.661425 z" />
+  </g>
+</svg>

@@ -1,7 +1,12 @@
-<div class="p-24 m-8 bg-gray-500 rounded">
-    {% if subscription %}
+{% if subscription.tier != None %}
+<div class="m-8 rounded bg-gray-300 p-8 drop-shadow">
     <h2>{{ subscription.name }}</h2>
-    {% else %}
-    <h2>No Subscription</h2>
-    {% endif %}
+    <ul>
+        {% for feature in subscription.features %}<li>{{ feature }}</li>{% endfor %}
+    </ul>
 </div>
+{% else %}
+<button class="m-8 rounded bg-gray-300 p-8 drop-shadow">
+    Subscribe
+</button>
+{% endif %}

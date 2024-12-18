@@ -8,10 +8,10 @@
         {% tailwind_css %}
         <script src="{% static 'terminusgps_tracker/js/htmx.min.js' %}" defer></script>
     </head>
-    <body class="h-fit bg-gradient-to-b from-terminus-red-300 to-terminus-red-900 bg-no-repeat dark:from-terminus-red-900 dark:to-terminus-red-300">
+    <body class="h-fit bg-gradient-to-b from-terminus-red-300 to-terminus-red-900 bg-no-repeat">
         <nav class="flex justify-between bg-stone-100 py-4 drop-shadow dark:bg-terminus-gray-900">
             <a href="{% url 'tracker profile' %}" class="flex items-center space-x-1">
-                <img class="size-12" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo">
+                {% include "terminusgps_tracker/logo.svg" with class="size-12 dark:fill-terminus-white" %}
                 <h2 class="text-xl font-semibold tracking-wide text-terminus-black dark:text-terminus-white">Terminus GPS Tracker</h2>
             </a>
             {% if user and user.is_authenticated %}
@@ -27,7 +27,7 @@
             <div class="container mx-auto">
                 <div class="mx-8 border bg-stone-100 drop-shadow dark:border-b-black dark:border-t-black dark:bg-terminus-gray-900">
                     <div class="m-2 flex flex-row items-center p-4">
-                        <img class="size-32 flex-none rounded-lg" src="{% static 'terminusgps_tracker/logo.svg' %}" alt="Terminus GPS Logo" height="60" width="60">
+                        {% include "terminusgps_tracker/logo.svg" with class="size-32 dark:fill-terminus-white" %}
                         <div class="flex flex-col">
                             <h1 class="text-2xl text-terminus-gray-800 dark:text-terminus-gray-100">{{ title }}</h1>
                             {% if subtitle %}<h2 class="text-md font-light text-terminus-gray-700 md:text-xl md:tracking-wide dark:text-terminus-gray-200">{{ subtitle|safe }}</h2>{% endif %}
@@ -60,9 +60,14 @@
                     <a href="{% url 'tracker privacy' %}" class="me-4 hover:underline md:me-6">Privacy Policy</a>
                 </li>
                 <li>
-                    <a href="{% url 'tracker subscriptions' %}" class="me-4 hover:underline md:me-6">Subscriptions</a>
+                    <a href="{% url 'tracker profile' %}" class="me-4 hover:underline md:me-6">Subscriptions</a>
                 </li>
             </ul>
         </footer>
+        <script>
+            document.body.addEventListener('htmx:configRequest', (event) => {
+                event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+            })
+        </script>
     </body>
 </html>

@@ -4,7 +4,7 @@
 <div class="container mx-auto">
     <div class="flex flex-col gap-8">
         <div class="space-y-8 p-8">
-            <h2 class="font-serif text-2xl font-bold tracking-wide">Payment Methods ({{ payment_methods|length|default:0 }}/4)</h2>
+            <h2 class="border-b-2 border-terminus-red-300 pb-2 text-2xl font-bold tracking-wider dark:text-terminus-white">Payment Methods</h2>
             {% for payment, default in payments %}
             {% include "terminusgps_tracker/profile/payment.html" with payment=payment default=default %}
             {% empty %}
@@ -20,9 +20,9 @@
             {% endfor %}
         </div>
         <div class="space-y-8 p-8">
-            <h2 class="font-serif text-2xl font-bold tracking-wide">Shipping Addresses ({{ addresses|length|default:0 }}/4)</h2>
-            {% for address in addresses %}
-            {% include "terminusgps_tracker/profile/address.html" with address=address %}
+            <h2 class="border-b-2 border-terminus-red-300 pb-2 text-2xl font-bold tracking-wider dark:text-terminus-white">Shipping Addresses</h2>
+            {% for address, default in addresses %}
+            {% include "terminusgps_tracker/profile/shipping.html" with address=address default=default %}
             {% empty %}
             <a hx-get="{% url 'create shipping' %}" hx-swap="outerHTML" hx-target="this" href="{% url 'create shipping' %}" class="group mx-auto flex flex-col gap-4 rounded bg-gray-200 p-8 text-center hover:cursor-pointer hover:bg-gray-50">
                 <h2 class="text-xl text-gray-800">There's nothing here...</h2>

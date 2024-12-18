@@ -16,25 +16,19 @@ urlpatterns = [
         name="tracker subscriptions",
     ),
     path(
+        "subscriptions/<int:pk>/",
+        views.TrackerSubscriptionTierDetailView.as_view(),
+        name="tier detail",
+    ),
+    path(
         "profile/settings/",
         views.TrackerProfileSettingsView.as_view(),
         name="profile settings",
     ),
-    path("profile/assets/", views.TrackerProfileAssetView.as_view(), name="assets"),
     path(
         "profile/assets/new/",
         views.TrackerProfileAssetCreationView.as_view(),
         name="create asset",
-    ),
-    path(
-        "profile/assets/<int:id>/update/",
-        views.TrackerProfileAssetModificationView.as_view(),
-        name="update asset",
-    ),
-    path(
-        "profile/shipping/",
-        views.TrackerProfileShippingAddressView.as_view(),
-        name="shipping",
     ),
     path(
         "profile/shipping/new/",
@@ -47,24 +41,9 @@ urlpatterns = [
         name="delete shipping",
     ),
     path(
-        "profile/shipping/<int:id>/set-default/",
-        views.TrackerProfileShippingAddressSetDefaultView.as_view(),
-        name="default shipping",
-    ),
-    path(
-        "profile/subscription/",
-        views.TrackerProfileSubscriptionView.as_view(),
-        name="subscription",
-    ),
-    path(
-        "profile/subscription/<int:id>/update/",
-        views.TrackerProfileSubscriptionView.as_view(),
-        name="modify subscription",
-    ),
-    path(
-        "profile/payments/",
-        views.TrackerProfilePaymentMethodView.as_view(),
-        name="payments",
+        "profile/subscription/<int:id>/update/<int:tier>/",
+        views.TrackerProfileSubscriptionUpdateView.as_view(),
+        name="update subscription",
     ),
     path(
         "profile/payments/new/",
@@ -75,30 +54,5 @@ urlpatterns = [
         "profile/payments/<int:id>/delete/",
         views.TrackerProfilePaymentMethodDeletionView.as_view(),
         name="delete payment",
-    ),
-    path(
-        "profile/payments/<int:id>/set-default/",
-        views.TrackerProfilePaymentMethodSetDefaultView.as_view(),
-        name="default payment",
-    ),
-    path(
-        "profile/notifications/",
-        views.TrackerProfileNotificationView.as_view(),
-        name="notifications",
-    ),
-    path(
-        "profile/notifications/new/",
-        views.TrackerProfileNotificationCreationView.as_view(),
-        name="create notification",
-    ),
-    path(
-        "profile/notifications/<int:id>/update/",
-        views.TrackerProfileNotificationModificationView.as_view(),
-        name="update notification",
-    ),
-    path(
-        "profile/notifications/<int:id>/delete/",
-        views.TrackerProfileNotificationDeletionView.as_view(),
-        name="delete notification",
     ),
 ]

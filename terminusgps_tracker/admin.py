@@ -17,6 +17,13 @@ class TrackerPaymentMethodAdmin(admin.ModelAdmin):
     readonly_fields = ["authorizenet_id", "profile", "is_default"]
 
 
+@admin.register(TrackerShippingAddress)
+class TrackerShippingAddressAdmin(admin.ModelAdmin):
+    list_display = ["authorizenet_id", "profile__user", "is_default"]
+    fields = ["authorizenet_id", "profile", "is_default"]
+    readonly_fields = ["authorizenet_id", "profile", "is_default"]
+
+
 @admin.register(TrackerProfile)
 class TrackerProfileAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -41,12 +48,6 @@ class TrackerProfileAdmin(admin.ModelAdmin):
         "wialon_group_id",
         "wialon_resource_id",
     ]
-
-
-@admin.register(TrackerShippingAddress)
-class TrackerShippingAddressAdmin(admin.ModelAdmin):
-    list_display = ["authorizenet_id", "profile__user"]
-    readonly_fields = ["authorizenet_id", "profile"]
 
 
 @admin.register(TrackerSubscription)
@@ -84,4 +85,4 @@ class TrackerSubscriptionTierAdmin(admin.ModelAdmin):
 
 @admin.register(TrackerSubscriptionFeature)
 class TrackerSubscriptionFeatureAdmin(admin.ModelAdmin):
-    fieldsets = [(None, {"fields": ["name", "amount"]})]
+    fieldsets = [(None, {"fields": ["name", "desc"]})]
