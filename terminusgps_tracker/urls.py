@@ -11,24 +11,14 @@ urlpatterns = [
     path("logout/", views.TrackerLogoutView.as_view(), name="tracker logout"),
     path("signup/", views.TrackerSignupView.as_view(), name="tracker signup"),
     path(
-        "subscriptions/",
-        views.TrackerSubscriptionView.as_view(),
-        name="tracker subscriptions",
-    ),
-    path(
-        "subscriptions/<int:pk>/",
-        views.TrackerSubscriptionTierDetailView.as_view(),
-        name="tier detail",
+        "profile/subscription/<int:pk>/update/",
+        views.TrackerProfileSubscriptionModificationView.as_view(),
+        name="modify subscription",
     ),
     path(
         "profile/settings/",
         views.TrackerProfileSettingsView.as_view(),
         name="profile settings",
-    ),
-    path(
-        "profile/assets/new/",
-        views.TrackerProfileAssetCreationView.as_view(),
-        name="create asset",
     ),
     path(
         "profile/shipping/new/",
@@ -39,11 +29,6 @@ urlpatterns = [
         "profile/shipping/<int:id>/delete/",
         views.TrackerProfileShippingAddressDeletionView.as_view(),
         name="delete shipping",
-    ),
-    path(
-        "profile/subscription/<int:id>/update/<int:tier>/",
-        views.TrackerProfileSubscriptionUpdateView.as_view(),
-        name="update subscription",
     ),
     path(
         "profile/payments/new/",

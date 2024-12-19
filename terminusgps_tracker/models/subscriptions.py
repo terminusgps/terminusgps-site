@@ -6,8 +6,9 @@ from django.utils import timezone
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from terminusgps.authorizenet.auth import get_merchant_auth, get_environment
+from terminusgps.wialon import flags
 from terminusgps.wialon.session import WialonSession
-from terminusgps.wialon.items import WialonUnitGroup, WialonUser, WialonUnit
+from terminusgps.wialon.items import WialonUnitGroup, WialonUnit
 
 from authorizenet.apicontrollers import (
     ARBCreateSubscriptionController,
@@ -72,14 +73,11 @@ class TrackerSubscriptionTier(models.Model):
     def __str__(self) -> str:
         return self.name
 
-    def save(self, **kwargs) -> None:
-        if not self.wialon_id:
-            with WialonSession(token=settings.WIALON_TOKEN) as session:
-                admin_id: int = settings.WIALON_ADMIN_ID
-                group_id: int = self.wialon_create_subscription_group(
-                    owner_id=admin_id, session=session
-                )
-                self.wialon_id = group_id
+    def save(self, session: WialonSession | None = None, **kwargs) -> None:
+        if not self.wialon_id and session is not None:
+            self.wialon_id = self.wialon_create_group(
+                name=f"{self.name} Subscription Group", session=session
+            )
         return super().save(**kwargs)
 
     def wialon_add_to_group(self, unit_id: int, session: WialonSession) -> None:
@@ -94,16 +92,6 @@ class TrackerSubscriptionTier(models.Model):
         group = WialonUnitGroup(id=str(self.wialon_id), session=session)
         group.rm_item(unit)
 
-    def wialon_create_subscription_group(
-        self, owner_id: int, session: WialonSession
-    ) -> int:
-        admin = WialonUser(id=str(owner_id), session=session)
-        group = WialonUnitGroup(owner=admin, name=self.group_name, session=session)
-
-        if not group or not group.id:
-            raise ValueError("Failed to properly create Wialon subscription group.")
-        return group.id
-
     def wialon_execute_subscription_command(
         self, unit_id: int, session: WialonSession, timeout: int = 5
     ) -> None:
@@ -117,9 +105,16 @@ class TrackerSubscriptionTier(models.Model):
             }
         )
 
-    @property
-    def group_name(self) -> str:
-        return f"{self.name} Subscription Group"
+    @staticmethod
+    def wialon_create_group(name: str, session: WialonSession) -> int:
+        response: dict = session.wialon_api.core_create_unit_group(
+            **{
+                "creatorId": settings.WIALON_ADMIN_ID,
+                "name": name,
+                "dataFlags": flags.DATAFLAG_UNIT_BASE,
+            }
+        )
+        return int(response["item"].get("id"))
 
 
 class TrackerSubscription(models.Model):
@@ -131,6 +126,8 @@ class TrackerSubscription(models.Model):
         TERMINATED = "terminated", _("Terminated")
 
     authorizenet_id = models.PositiveIntegerField(default=None, null=True, blank=True)
+    payment_id = models.PositiveIntegerField(default=None, null=True, blank=True)
+    address_id = models.PositiveIntegerField(default=None, null=True, blank=True)
     profile = models.OneToOneField(
         "terminusgps_tracker.TrackerProfile",
         on_delete=models.CASCADE,
@@ -159,30 +156,54 @@ class TrackerSubscription(models.Model):
 
     @transaction.atomic
     def upgrade(
-        self, new_tier: TrackerSubscriptionTier, payment_id: int, address_id: int
+        self,
+        new_tier: TrackerSubscriptionTier,
+        payment_id: int | None = None,
+        address_id: int | None = None,
     ) -> None:
-        if self.authorizenet_id:
-            if new_tier.amount < self.tier.amount:
-                raise ValueError("Cannot upgrade to lower tier")
-            self.authorizenet_update_subscription(new_tier, payment_id, address_id)
+        assert self.payment_id, "No payment method was set on this subscription."
+        assert self.address_id, "No shipping method was set on this subscription."
+
+        if new_tier.amount < self.tier.amount:
+            raise ValueError("Cannot upgrade to a lower tier.")
+        elif self.authorizenet_id is not None:
+            self.authorizenet_update_subscription(
+                new_tier,
+                payment_id if payment_id is not None else self.payment_id,
+                address_id if address_id is not None else self.address_id,
+            )
         else:
             self.authorizenet_id = self.authorizenet_create_subscription(
-                new_tier, payment_id, address_id
+                new_tier,
+                payment_id if payment_id is not None else self.payment_id,
+                address_id if address_id is not None else self.address_id,
             )
         self.tier = new_tier
         self.refresh_status()
 
     @transaction.atomic
     def downgrade(
-        self, new_tier: TrackerSubscriptionTier, payment_id: int, address_id: int
+        self,
+        new_tier: TrackerSubscriptionTier,
+        payment_id: int | None = None,
+        address_id: int | None = None,
     ) -> None:
-        if self.authorizenet_id:
-            if new_tier.amount > self.tier.amount:
-                raise ValueError("Cannot downgrade to higher tier")
-            self.authorizenet_update_subscription(new_tier, payment_id, address_id)
+        assert self.payment_id, "No payment method was set on this subscription."
+        assert self.address_id, "No shipping method was set on this subscription."
+
+        if new_tier.amount > self.tier.amount:
+            raise ValueError("Cannot downgrade to a higher tier.")
+        elif self.authorizenet_id is not None:
+            self.authorizenet_update_subscription(
+                new_tier,
+                payment_id if payment_id is not None else self.payment_id,
+                address_id if address_id is not None else self.address_id,
+            )
         else:
             self.authorizenet_id = self.authorizenet_create_subscription(
-                tier=new_tier, payment_id=payment_id, address_id=address_id
+                new_tier,
+                payment_id if payment_id is not None else self.payment_id,
+                address_id if address_id is not None else self.address_id,
             )
         self.tier = new_tier
         self.refresh_status()

@@ -1,37 +1,39 @@
 {% extends "terminusgps_tracker/layout.html" %}
 {% load static terminusgps_tracker_display %}
 {% block content %}
-<div class="container mx-auto">
+<div class="container mx-auto space-y-8">
+    <div class="flex flex-col gap-8 text-center">
+        <h2 class="text-3xl font-bold text-terminus-red-300">Give us a call</h2>
+        <div class="flex">
+            <div class="bg-gray-300 p-8">
+                OFFICE: 
+            </div>
+            <div class="bg-gray-300 p-8">
+                SALES: 
+            </div>
+        </div>
+    </div>
+    <div class="flex flex-col gap-8 text-center">
+        <h2 class="text-3xl font-bold text-terminus-red-300">Shoot us an email</h2>
+    </div>
+    <div class="flex flex-col gap-8 text-center">
+        <h2 class="text-3xl font-bold text-terminus-red-300">Walk into our office</h2>
+    </div>
     <div class="flex flex-col gap-8 text-center">
         <h2 class="text-3xl font-bold text-terminus-red-300">Check us out on social media</h2>
-        <div class="flex justify-evenly">
+        <div class="flex justify-evenly md:flex-col">
         {% for name, social in profile.SOCIALS.items %}
             {% if social %}
-                <a href="{{ social.profile_link }}" class="rounded-full bg-gray-200 p-6 drop-shadow transition duration-300 ease-in-out hover:fill-terminus-red-300 dark:fill-terminus-red-600">
-                <span class="sr-only">{{ social.username }}'s Profile</span>
-                <div class="flex flex-col items-center">
-                    {{ name|social_icon:12 }}
-                    <h2 class="text-gray-800">{{ social.display_name }}</h2>
-                    <h2 class="text-gray-600">@{{ social.username }}</h2>
-                    <h3 class="text-gray-500 text-sm">{{ name|title }}</span>
-                </div>
+                <a href="{{ social.profile_link }}" class="rounded-full bg-gray-200 p-6 drop-shadow transition duration-300 ease-in-out hover:scale-105 hover:bg-terminus-red-300">
+                <span class="sr-only">{{ social.username }}'s {{ name|title }} Profile</span>
+                    <div class="flex flex-col items-center">
+                        {{ name|social_icon:12 }}
+                        <h2 class="text-gray-800">@{{ social.username }}</h2>
+                    </div>
                 </a>
             {% endif %}
         {% endfor %}
         </div>
     </div>
 </div>
-<script type="text/javascript" defer>
-  (function(w, d, x, id){
-    s=d.createElement('script');
-    s.src='https://db08fjupg2abb.cloudfront.net/amazon-connect-chat-interface-client.js';
-    s.async=1;
-    s.id=id;
-    d.getElementsByTagName('head')[0].appendChild(s);
-    w[x] =  w[x] || function() { (w[x].ac = w[x].ac || []).push(arguments) };
-  })(window, document, 'amazon_connect', '7511b537-c6e4-48ab-b317-a908cbfc1b88');
-  amazon_connect('styles', { iconType: 'CHAT_VOICE', openChat: { color: '#ffffff', backgroundColor: '#951316' }, closeChat: { color: '#ffffff', backgroundColor: '#951316'} });
-  amazon_connect('snippetId', 'QVFJREFIZ2ZYaENvQWJCb1ZtYmxRNlFMNVJYMlhab3BKY1p0RnRGQ2pJNGhxdnBvemdGZGEwbEJkckFrL214TVBqbE1Sd2dMQUFBQWJqQnNCZ2txaGtpRzl3MEJCd2FnWHpCZEFnRUFNRmdHQ1NxR1NJYjNEUUVIQVRBZUJnbGdoa2dCWlFNRUFTNHdFUVFNU1hlaUxiTndDWlRtQUorWUFnRVFnQ3Q1VzB6azljYnNSUVQwMlV5WGFmZVlHbjBRSGRDTjRXeDFBMFYxMkpvUEpRN1ZKeThiKzFEQk53Q2M6OmxRQ20zdVFNT0JlVkRtRDJwWldsSVV0UEFSRGVHTzBkb0tvdXAwRjB1V1ZZcXZpUG1LWHNVdmtMNktvQ2J4Nk13MkxKdFpTUDYyY2Q3OWx4d0R4UlFyUG5pUWJjVG0reHp3Uyt2RmtScW4rWU5kNXB6eThobHljWkdTcDI1SmtGUllmbm9QeGxBZFN1U2lDVGhnQzZaOFBBcVk1SCt1VT0=');
-  amazon_connect('supportedMessagingContentTypes', [ 'text/plain', 'text/markdown', 'application/vnd.amazonaws.connect.message.interactive', 'application/vnd.amazonaws.connect.message.interactive.response' ]);
-</script>
 {% endblock content %}
