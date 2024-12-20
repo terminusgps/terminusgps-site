@@ -13,8 +13,8 @@ from .notifications import (
     NotificationModificationForm,
 )
 from .subscriptions import (
-    SubscriptionCreationForm,
     SubscriptionDeletionForm,
     SubscriptionModificationForm,
+    SubscriptionConfirmationForm,
 )
 from .auth import TrackerSignupForm, TrackerAuthenticationForm

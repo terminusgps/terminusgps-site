@@ -49,7 +49,7 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 TRACKER_PROFILE = {
     "DISPLAY_NAME": "Terminus GPS",
     "EMAIL": {"SUPPORT": "support@terminusgps.com", "SALES": "sales@terminusgps.com"},
-    "GITHUB": "https://github.com/terminus-gps/terminusgps-site/",
+    "GITHUB": "https://github.com/terminusgps/terminusgps-site/",
     "MOTD": "Check out the Terminus GPS mobile app!",
     "LEGAL_NAME": "Terminus GPS, LLC",
     "PHONE": {"OFFICE": "+17139045262", "SALES": ""},

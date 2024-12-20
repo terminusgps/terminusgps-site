@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, FormView, TemplateView, UpdateView, View
+from django.views.generic import FormView, TemplateView, UpdateView, View
 
 from terminusgps_tracker.forms import (
     PaymentMethodCreationForm,
@@ -34,7 +34,9 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
-        self.profile, _ = TrackerProfile.objects.get_or_create(user=request.user)
+        self.profile = None
+        if request.user.is_authenticated:
+            self.profile, _ = TrackerProfile.objects.get_or_create(user=request.user)
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)

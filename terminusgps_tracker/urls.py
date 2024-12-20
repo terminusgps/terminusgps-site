@@ -11,6 +11,21 @@ urlpatterns = [
     path("logout/", views.TrackerLogoutView.as_view(), name="tracker logout"),
     path("signup/", views.TrackerSignupView.as_view(), name="tracker signup"),
     path(
+        "subscriptions/",
+        views.TrackerSubscriptionOptionsView.as_view(),
+        name="tracker subscriptions",
+    ),
+    path(
+        "profile/subscription/<int:tier>/confirm/",
+        views.TrackerSubscriptionConfirmView.as_view(),
+        name="confirm subscription",
+    ),
+    path(
+        "profile/subscription/success/",
+        views.TrackerSubscriptionSuccessView.as_view(),
+        name="success subscription",
+    ),
+    path(
         "profile/subscription/<int:pk>/update/",
         views.TrackerProfileSubscriptionModificationView.as_view(),
         name="modify subscription",

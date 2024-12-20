@@ -15,4 +15,7 @@ from .views import (
     TrackerPrivacyView,
     TrackerSignupView,
     TrackerSourceView,
+    TrackerSubscriptionOptionsView,
+    TrackerSubscriptionConfirmView,
+    TrackerSubscriptionSuccessView,
 )

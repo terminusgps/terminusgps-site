@@ -1,35 +1,18 @@
-<div id="tier-{{ tier.pk }}" hx-get="{% url 'tier detail' tier.pk %}" hx-target="this" hx-swap="outerHTML" class="flex-grow space-y-4 rounded bg-gray-300 p-8">
+<div id="tier-{{ tier.pk }}" class="flex-grow space-y-4 rounded bg-gray-300 p-8">
     <div class="flex flex-col justify-between tracking-wider md:flex-row">
         <h2 class="text-2xl font-bold">{{ tier.name }}</h2>
-        <h3 class="text-xl font-light">${{ tier.amount }}</h3>
+        <h3 class="text-xl font-light">${{ tier.amount }}/mo</h3>
     </div>
     <div class="flex flex-col justify-evenly gap-4">
-        {% if expanded %}
-            {% for feature in tier.features.values %}
-            <div class="flex flex-col gap-4 border-l border-l-terminus-red-300 p-4">
-                <h2 class="text-lg font-semibold text-gray-800">{{ feature.name }}</h2>
-                <p class="indent-4 text-sm text-gray-700">{{ feature.desc|truncatechars:1024 }}</p>
-            </div>
-            {% endfor %}
-        {% else %}
-            {% for feature in tier.features.values %}
-            <div class="flex-inline flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-terminus-red-300">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
-                <h2 class="text-gray-800">{{ feature.name }}</h2>
-            </div>
-            {% endfor %}
-        {% endif %}
+        {% for feature in tier.features.values %}
+        <div class="flex-inline flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-terminus-red-300">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            <h2 class="text-gray-800">{{ feature.name }}</h2>
+            {% if expanded %}<p class="text-gray-700">{{ feature.desc|truncatechars:1024 }}{% endif %}</p>
+        </div>
+        {% endfor %}
+        {% if select %}{% include "terminusgps_tracker/subscription_select.html" with tier=tier %}{% endif %}
     </div>
-    {% if expanded %}
-    <div class="flex flex-col gap-2">
-        <button class="block w-full rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-gray-50 hover:from-terminus-red-400 hover:via-terminus-red-300 hover:to-terminus-red-400" type="button">
-            Select
-        </button>
-        <button class="block w-full rounded-md border border-solid border-gray-600 bg-gray-200 px-4 py-2 hover:bg-white" type="button">
-            Close
-        </button>
-    </div>
-    {% endif %}
 </div>

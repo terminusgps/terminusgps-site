@@ -7,9 +7,9 @@
             <h2 class="border-b-2 border-terminus-red-300 pb-2 text-2xl font-bold tracking-wider dark:text-terminus-white">Your Assets</h2>
             <table class="w-full p-8 text-left">
                 <tr class="bg-gray-200">
-                    <th>IMEI #</th>
                     <th>Name</th>
-                    <th>Active</th>
+                    <th>Phone #</th>
+                    <th>View</th>
                 </tr>
                 {% for asset in assets %}
                 {% include "terminusgps_tracker/profile/asset.html" with asset=asset only %}
@@ -23,5 +23,5 @@
         </div>
     </div>
 </div>
-<a class="mx-auto hover:underline" href="{% url 'profile settings' %}">Go to settings</a>
+<a class="mx-auto bg-gradient-to-r from-terminus-red-800 via-terminus-red-400 to-terminus-red-800 bg-clip-text font-semibold text-transparent underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:decoration-dotted dark:from-terminus-red-300 dark:via-terminus-red-100 dark:to-terminus-red-300" href="{% url 'profile settings' %}">Go to settings</a>
 {% endblock content %}

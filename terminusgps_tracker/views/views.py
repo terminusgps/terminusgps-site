@@ -1,15 +1,29 @@
 from typing import Any
 
 from django.conf import settings
+from django.db import transaction
 from django.contrib.auth import get_user_model
+from django.forms import ValidationError
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, RedirectView, FormView
 
-from terminusgps_tracker.forms import TrackerSignupForm, TrackerAuthenticationForm
-from terminusgps_tracker.models import TrackerProfile, TrackerSubscription
+from terminusgps_tracker.forms import (
+    TrackerSignupForm,
+    TrackerAuthenticationForm,
+    SubscriptionConfirmationForm,
+)
+from terminusgps_tracker.models import (
+    TrackerProfile,
+    TrackerSubscription,
+    TrackerPaymentMethod,
+    TrackerSubscriptionTier,
+)
 
 
 class TrackerAboutView(TemplateView):
@@ -69,7 +83,7 @@ class TrackerLogoutView(SuccessMessageMixin, LogoutView):
 class TrackerSignupView(SuccessMessageMixin, FormView):
     form_class = TrackerSignupForm
     content_type = "text/html"
-    extra_context = {"title": "Sign-up", "subtitle": "You'll know where yours are..."}
+    extra_context = {"title": "Sign Up", "subtitle": "You'll know where yours are..."}
     http_method_names = ["get", "post"]
     template_name = "terminusgps_tracker/forms/signup.html"
     success_url = reverse_lazy("tracker login")
@@ -91,3 +105,105 @@ class TrackerSignupView(SuccessMessageMixin, FormView):
         profile = TrackerProfile.objects.create(user=user)
         TrackerSubscription.objects.create(profile=profile)
         return super().form_valid(form=form)
+
+
+class TrackerSubscriptionOptionsView(TemplateView):
+    content_type = "text/html"
+    extra_context = {"title": "Subscriptions"}
+    http_method_names = ["get"]
+    template_name = "terminusgps_tracker/subscription_options.html"
+    partial_name = "terminusgps_tracker/_subscription_options.html"
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if request.headers.get("HX-Request"):
+            self.template_name = self.partial_name
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["subscription_tiers"] = TrackerSubscriptionTier.objects.all()[:3]
+        return context
+
+
+class TrackerSubscriptionConfirmView(LoginRequiredMixin, FormView):
+    content_type = "text/html"
+    extra_context = {"title": "Confirm Subscription"}
+    http_method_names = ["get", "post"]
+    template_name = "terminusgps_tracker/subscription_confirm.html"
+    form_class = SubscriptionConfirmationForm
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    success_url = reverse_lazy("success subscription")
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.profile = (
+            TrackerProfile.objects.get(user=request.user)
+            if request.user.is_authenticated
+            else None
+        )
+
+    def form_valid(self, form: SubscriptionConfirmationForm) -> HttpResponse:
+        tier = self.kwargs["tier"]
+        try:
+            if (
+                self.profile.subscription.tier is None
+                or tier.amount > self.profile.subscription.tier.amount
+            ):
+                self.profile.subscription.upgrade(
+                    tier,
+                    form.cleaned_data["payment_id"],
+                    form.cleaned_data["address_id"],
+                )
+            elif tier.amount < self.profile.tier.amount:
+                self.profile.subscription.downgrade(
+                    tier,
+                    form.cleaned_data["payment_id"],
+                    form.cleaned_data["address_id"],
+                )
+        except ValueError:
+            form.add_error(
+                None,
+                ValidationError(
+                    _(
+                        "Whoops! Something went wrong on our end. Please try again later."
+                    ),
+                    code="invalid",
+                ),
+            )
+            return self.form_invalid(form=form)
+        except AssertionError:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! Couldn't find a payment method and a shipping address."),
+                    code="invalid",
+                ),
+            )
+            return self.form_invalid(form=form)
+        return super().form_valid(form=form)
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["tier"] = TrackerSubscriptionTier.objects.get(pk=self.kwargs["tier"])
+        context["today"] = timezone.now()
+        context["card"] = {}
+        if self.profile.payments.filter().exists():
+            payment = TrackerPaymentMethod.authorizenet_get_payment_profile(
+                profile_id=self.profile.authorizenet_id,
+                payment_id=int(self.profile.payments.filter().first().authorizenet_id),
+            )
+            context["card"]["merchant"] = payment["payment"]["creditCard"]["cardType"]
+            context["card"]["last_4"] = payment["payment"]["creditCard"]["cardNumber"]
+        return context
+
+
+class TrackerSubscriptionSuccessView(TemplateView):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Successfully Subscribed!",
+        "subtitle": "Thanks for subscribing!",
+    }
+    template_name = "terminusgps_tracker/subscription_success.html"
+    redirect_url = reverse_lazy("tracker profile")

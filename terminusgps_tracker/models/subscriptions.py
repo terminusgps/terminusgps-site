@@ -161,8 +161,8 @@ class TrackerSubscription(models.Model):
         payment_id: int | None = None,
         address_id: int | None = None,
     ) -> None:
-        assert self.payment_id, "No payment method was set on this subscription."
-        assert self.address_id, "No shipping method was set on this subscription."
+        assert self.payment_id or payment_id, "No payment method found."
+        assert self.address_id or address_id, "No shipping method found."
 
         if new_tier.amount < self.tier.amount:
             raise ValueError("Cannot upgrade to a lower tier.")
@@ -188,8 +188,8 @@ class TrackerSubscription(models.Model):
         payment_id: int | None = None,
         address_id: int | None = None,
     ) -> None:
-        assert self.payment_id, "No payment method was set on this subscription."
-        assert self.address_id, "No shipping method was set on this subscription."
+        assert self.payment_id or payment_id, "No payment method found."
+        assert self.address_id or address_id, "No shipping method found."
 
         if new_tier.amount > self.tier.amount:
             raise ValueError("Cannot downgrade to a higher tier.")
