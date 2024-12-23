@@ -74,17 +74,7 @@ class TrackerSubscriptionTierAdmin(admin.ModelAdmin):
     ordering = ["amount"]
     fieldsets = [
         (None, {"fields": ["name"]}),
-        (
-            "Wialon",
-            {
-                "fields": [
-                    "wialon_id",
-                    "wialon_cmd",
-                    "wialon_cmd_link",
-                    "wialon_cmd_type",
-                ]
-            },
-        ),
+        ("Wialon", {"fields": ["wialon_id", "wialon_cmd"]}),
         ("Tracker", {"fields": ["amount", "period", "length", "features"]}),
     ]
     readonly_fields = ["wialon_id"]

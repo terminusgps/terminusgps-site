@@ -3,7 +3,6 @@ from typing import Any
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import QuerySet
 from django.forms import Form, ValidationError
 from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
