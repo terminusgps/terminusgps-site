@@ -43,7 +43,10 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
-        self.profile, _ = TrackerProfile.objects.get_or_create(user=request.user)
+        try:
+            self.profile = TrackerProfile.objects.get(user=request.user)
+        except TrackerProfile.DoesNotExist:
+            self.profile = TrackerProfile.objects.create(user=request.user)
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
