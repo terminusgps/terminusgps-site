@@ -7,6 +7,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 
+from terminusgps.wialon import constants
 from terminusgps.wialon.utils import get_id_from_iccid, gen_wialon_password
 from terminusgps.wialon.items import WialonUnit, WialonUnitGroup, WialonUser
 from terminusgps.wialon.session import WialonSession
@@ -91,32 +92,32 @@ class TerminusRegistrationView(FormView):
         initial["imei_number"] = self.imei_number
         return initial
 
-    @classmethod
+    @staticmethod
     def wialon_remove_unit_from_group(
-        cls, unit_id: int, group_id: int, session: WialonSession
+        unit_id: int, group_id: int, session: WialonSession
     ) -> None:
         unit: WialonUnit = WialonUnit(id=str(unit_id), session=session)
         group: WialonUnitGroup = WialonUnitGroup(id=str(group_id), session=session)
         group.rm_item(unit)
 
-    @classmethod
+    @staticmethod
     def wialon_assign_phone_to_unit(
-        cls, unit_id: int, session: WialonSession, phone_number: str | None = None
+        unit_id: int, session: WialonSession, phone_number: str | None = None
     ) -> None:
-        if phone_number:
+        if phone_number is not None:
             unit: WialonUnit = WialonUnit(id=str(unit_id), session=session)
             unit.assign_phone(phone_number)
 
-    @classmethod
+    @staticmethod
     def wialon_assign_user_to_unit(
-        cls, unit_id: int, user_id: int, session: WialonSession
+        unit_id: int, user_id: int, session: WialonSession
     ) -> None:
         unit: WialonUnit = WialonUnit(id=str(unit_id), session=session)
         user: WialonUser = WialonUser(id=str(user_id), session=session)
-        user.assign_item(unit)
+        user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
 
-    @classmethod
-    def send_credentials_email(cls, email_addr: str, password: str) -> None:
+    @staticmethod
+    def send_credentials_email(email_addr: str, password: str) -> None:
         text_content: str = render_to_string(
             "terminusgps/emails/credentials.txt",
             context={"username": email_addr, "password": password},

@@ -31,14 +31,14 @@
             </tr>
         </table>
         <ul class="list-inside list-disc p-4">
-            <li>You will be charged <strong>${{ tier.amount }}</strong> (not incl. taxes) on the {{ today|date:'jS' }} of every month.</li>
-            <li>First payment will be collected {{ today|date:'l, F jS, Y' }} (today).</li>
-            <li>Charges will be applied to the {{ card.merchant|title }} card you saved ending in '{{ card.last_4|cut:"XXXX" }}'.</li>
+            <li>You will be charged <strong>${{ tier.amount }}</strong> (not incl. taxes) on the {{ now|date:'jS' }} of every month.</li>
+            <li>First payment will be collected {{ now|date:'l, F jS, Y' }} (today).</li>
+            <li>Charges will be applied to the {{ card_merchant|title }} card you saved ending in '{{ card_last_4|cut:"XXXX" }}'.</li>
         </ul>
         <form method="post" action="{% url 'confirm subscription' tier.pk %}">
             {% csrf_token %}
-            {{ form.address_id.as_hidden_field }}
-            {{ form.payment_id.as_hidden_field }}
+            {{ form.address_id.as_hidden }}
+            {{ form.payment_id.as_hidden }}
             <div class="flex justify-evenly gap-2">
                 <a href="{% url 'tracker subscriptions' %}" class="grow rounded-md border border-solid border-gray-600 bg-gray-200 px-4 py-2 text-center text-gray-700 hover:bg-gray-50 dark:border-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-400">
                     Back

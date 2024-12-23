@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path("", views.TrackerLandingView.as_view(), name="tracker landing"),
     path("profile/", views.TrackerProfileView.as_view(), name="tracker profile"),
     path("about/", views.TrackerAboutView.as_view(), name="tracker about"),
     path("contact/", views.TrackerContactView.as_view(), name="tracker contact"),
@@ -54,5 +55,10 @@ urlpatterns = [
         "profile/payments/<int:id>/delete/",
         views.TrackerProfilePaymentMethodDeletionView.as_view(),
         name="delete payment",
+    ),
+    path(
+        "profile/assets/new/",
+        views.TrackerProfileAssetCreationView.as_view(),
+        name="create asset",
     ),
 ]

@@ -43,8 +43,7 @@ class TrackerPaymentMethod(models.Model):
 
     def save(self, form: Form | None = None, **kwargs) -> None:
         if form and form.is_valid():
-            print(f"{form.cleaned_data["is_default"] = }")
-            self.default = form.cleaned_data.get("is_default", False)
+            self.is_default = form.cleaned_data.get("is_default", False)
             self.authorizenet_id = self.authorizenet_create_payment_profile(
                 form, form.cleaned_data.get("is_default", False)
             )

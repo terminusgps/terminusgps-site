@@ -37,7 +37,7 @@ class TrackerShippingAddress(models.Model):
 
     def save(self, form: Form | None = None, **kwargs) -> None:
         if form and form.is_valid():
-            self.default = form.cleaned_data.get("is_default", False)
+            self.is_default = form.cleaned_data.get("is_default", False)
             self.authorizenet_id = self.authorizenet_create_shipping_address(
                 form, form.cleaned_data.get("is_default", False)
             )

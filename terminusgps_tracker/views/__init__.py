@@ -1,4 +1,5 @@
 from .profile import (
+    TrackerProfileAssetCreationView,
     TrackerProfilePaymentMethodCreationView,
     TrackerProfilePaymentMethodDeletionView,
     TrackerProfileSettingsView,
@@ -10,12 +11,13 @@ from .profile import (
 from .views import (
     TrackerAboutView,
     TrackerContactView,
+    TrackerLandingView,
     TrackerLoginView,
     TrackerLogoutView,
     TrackerPrivacyView,
     TrackerSignupView,
     TrackerSourceView,
-    TrackerSubscriptionOptionsView,
     TrackerSubscriptionConfirmView,
+    TrackerSubscriptionOptionsView,
     TrackerSubscriptionSuccessView,
 )

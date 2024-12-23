@@ -20,6 +20,10 @@ class TrackerAsset(models.Model):
     phone_number = models.CharField(max_length=64, default=None, null=True, blank=True)
     imei_number = models.PositiveIntegerField(default=None, null=True, blank=True)
 
+    class Meta:
+        verbose_name = "asset"
+        verbose_name_plural = "assets"
+
     def __str__(self) -> str:
         return str(self.name)
 

@@ -1,16 +1,25 @@
 from typing import Any
 
 from django.conf import settings
-from django.forms import Form
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import QuerySet
+from django.forms import Form, ValidationError
 from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView, UpdateView, View
+from wialon.api import WialonError
+
+from terminusgps.wialon import constants
+from terminusgps.wialon.items import WialonUnit, WialonUnitGroup, WialonUser
+from terminusgps.wialon.session import WialonSession
+from terminusgps.wialon.utils import get_id_from_iccid
 
 from terminusgps_tracker.forms import (
     PaymentMethodCreationForm,
     ShippingAddressCreationForm,
+    AssetCreationForm,
 )
 from terminusgps_tracker.models import (
     TrackerPaymentMethod,
@@ -18,6 +27,7 @@ from terminusgps_tracker.models import (
     TrackerShippingAddress,
     TrackerSubscription,
 )
+from terminusgps_tracker.models.assets import TrackerAsset
 
 
 class TrackerProfileView(LoginRequiredMixin, TemplateView):
@@ -34,23 +44,15 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
-        self.profile = None
-        if request.user.is_authenticated:
-            self.profile, _ = TrackerProfile.objects.get_or_create(user=request.user)
+        self.profile, _ = TrackerProfile.objects.get_or_create(user=request.user)
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["assets"] = self.get_assets(self.profile)
+        context["assets"] = TrackerAsset.objects.filter(profile=self.profile)
         context["subscription"], _ = TrackerSubscription.objects.get_or_create(
             profile=self.profile
         )
         return context
-
-    @staticmethod
-    def get_assets(profile: TrackerProfile | None = None) -> QuerySet | None:
-        if not profile or not profile.assets.filter().exists():
-            return
-        return profile.assets.all()
 
 
 class TrackerProfileSettingsView(LoginRequiredMixin, TemplateView):
@@ -76,7 +78,7 @@ class TrackerProfileSettingsView(LoginRequiredMixin, TemplateView):
 
     @staticmethod
     def get_payments(profile: TrackerProfile, total: int = 4) -> list:
-        if not profile.payments.filter().exists():
+        if profile.payments.count() == 0:
             return []
         return [
             (
@@ -91,7 +93,7 @@ class TrackerProfileSettingsView(LoginRequiredMixin, TemplateView):
 
     @staticmethod
     def get_addresses(profile: TrackerProfile, total: int = 4) -> list:
-        if not profile.addresses.filter().exists():
+        if profile.addresses.count() == 0:
             return []
         return [
             (
@@ -105,7 +107,71 @@ class TrackerProfileSettingsView(LoginRequiredMixin, TemplateView):
         ]
 
 
-class TrackerProfilePaymentMethodCreationView(LoginRequiredMixin, FormView):
+class TrackerProfileAssetCreationView(LoginRequiredMixin, FormView):
+    form_class = AssetCreationForm
+    template_name = "terminusgps_tracker/forms/profile/create_asset.html"
+    extra_context = {"title": "New Asset"}
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = True
+    http_method_names = ["get", "post"]
+    success_url = reverse_lazy("tracker profile")
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.profile = (
+            TrackerProfile.objects.get(user=request.user)
+            if request.user and request.user.is_authenticated
+            else None
+        )
+
+    def form_valid(self, form: AssetCreationForm) -> HttpResponse:
+        if self.profile is None or self.profile.wialon_end_user_id is None:
+            form.add_error(
+                None,
+                ValidationError(_("Whoops! Couldn't find a user profile for you.")),
+            )
+        try:
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                user = WialonUser(
+                    id=str(self.profile.wialon_end_user_id), session=session
+                )
+                unit_id: str | None = get_id_from_iccid(
+                    form.cleaned_data["imei_number"], session=session
+                )
+                if unit_id is not None:
+                    unit = WialonUnit(id=unit_id, session=session)
+                    available = WialonUnitGroup(
+                        id=str(settings.WIALON_UNACTIVATED_GROUP), session=session
+                    )
+                    available.rm_item(unit)
+                    user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
+        except WialonError:
+            form.add_error(
+                None,
+                ValidationError(
+                    _(
+                        "Whoops! Something went wrong with Wialon. Please try again later."
+                    )
+                ),
+            )
+            return self.form_invalid(form=form)
+        except ValueError:
+            form.add_error(
+                None,
+                ValidationError(
+                    _(
+                        "Whoops! Something went wrong on our end. Please try again later."
+                    )
+                ),
+            )
+            return self.form_invalid(form=form)
+        return super().form_valid(form=form)
+
+
+class TrackerProfilePaymentMethodCreationView(
+    SuccessMessageMixin, LoginRequiredMixin, FormView
+):
     form_class = PaymentMethodCreationForm
     template_name = "terminusgps_tracker/forms/profile/create_payment.html"
     partial_template = "terminusgps_tracker/forms/settings/create_payment.html"
@@ -115,6 +181,7 @@ class TrackerProfilePaymentMethodCreationView(LoginRequiredMixin, FormView):
     raise_exception = True
     http_method_names = ["get", "post"]
     success_url = reverse_lazy("profile settings")
+    success_message = "Payment method was added successfully."
 
     def get(self, request: HttpRequest, *args, **kwargs):
         if request.headers.get("HX-Request"):
@@ -158,7 +225,9 @@ class TrackerProfilePaymentMethodDeletionView(LoginRequiredMixin, View):
         return HttpResponse(status=406)
 
 
-class TrackerProfileShippingAddressCreationView(LoginRequiredMixin, FormView):
+class TrackerProfileShippingAddressCreationView(
+    SuccessMessageMixin, LoginRequiredMixin, FormView
+):
     form_class = ShippingAddressCreationForm
     template_name = "terminusgps_tracker/forms/profile/create_shipping_address.html"
     partial_template = "terminusgps_tracker/forms/settings/create_address.html"
@@ -168,6 +237,7 @@ class TrackerProfileShippingAddressCreationView(LoginRequiredMixin, FormView):
     raise_exception = True
     http_method_names = ["get", "post"]
     success_url = reverse_lazy("tracker profile")
+    success_message = "Shipping address was added successfully."
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)

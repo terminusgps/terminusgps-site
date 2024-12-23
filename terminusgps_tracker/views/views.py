@@ -1,8 +1,8 @@
 from typing import Any
 
 from django.conf import settings
-from django.db import transaction
 from django.contrib.auth import get_user_model
+from django.contrib import messages
 from django.forms import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -10,7 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, RedirectView, FormView
 
 from terminusgps_tracker.forms import (
@@ -26,15 +26,33 @@ from terminusgps_tracker.models import (
 )
 
 
+class TrackerLandingView(RedirectView):
+    http_method_names = ["get"]
+    permanent = True
+    url = reverse_lazy("tracker profile")
+
+
+class TrackerSourceView(RedirectView):
+    http_method_names = ["get"]
+    permanent = True
+    url = settings.TRACKER_PROFILE["GITHUB"]
+
+
 class TrackerAboutView(TemplateView):
-    template_name = "terminusgps_tracker/about.html"
     content_type = "text/html"
     extra_context = {"title": "About", "subtitle": "We know where ours are... do you?"}
     http_method_names = ["get"]
+    template_name = "terminusgps_tracker/about.html"
+
+
+class TrackerPrivacyView(TemplateView):
+    content_type = "text/html"
+    extra_context = {"title": "Privacy Policy", "profile": settings.TRACKER_PROFILE}
+    http_method_names = ["get"]
+    template_name = "terminusgps_tracker/privacy.html"
 
 
 class TrackerContactView(TemplateView):
-    template_name = "terminusgps_tracker/contact.html"
     content_type = "text/html"
     extra_context = {
         "title": "Contact",
@@ -42,19 +60,7 @@ class TrackerContactView(TemplateView):
         "profile": settings.TRACKER_PROFILE,
     }
     http_method_names = ["get"]
-
-
-class TrackerPrivacyView(TemplateView):
-    template_name = "terminusgps_tracker/privacy.html"
-    content_type = "text/html"
-    extra_context = {"title": "Privacy Policy", "profile": settings.TRACKER_PROFILE}
-    http_method_names = ["get"]
-
-
-class TrackerSourceView(RedirectView):
-    http_method_names = ["get"]
-    permanent = True
-    url = settings.TRACKER_PROFILE["GITHUB"]
+    template_name = "terminusgps_tracker/contact.html"
 
 
 class TrackerLoginView(LoginView):
@@ -144,23 +150,51 @@ class TrackerSubscriptionConfirmView(LoginRequiredMixin, FormView):
             else None
         )
 
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if self.profile is not None:
+            if self.profile.payments.count() == 0:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    "Please add a payment method before proceeding.",
+                )
+                return HttpResponseRedirect(reverse("profile settings"))
+            if self.profile.addresses.count() == 0:
+                messages.add_message(
+                    request,
+                    messages.ERROR,
+                    "Please add a shipping address before proceeding.",
+                )
+                return HttpResponseRedirect(reverse("profile settings"))
+        return super().get(request, *args, **kwargs)
+
+    def get_initial(self) -> dict[str, Any]:
+        if self.profile is not None:
+            return {
+                "payment_id": self.profile.payments.filter().first().authorizenet_id,
+                "address_id": self.profile.addresses.filter().first().authorizenet_id,
+            }
+        return {}
+
     def form_valid(self, form: SubscriptionConfirmationForm) -> HttpResponse:
-        tier = self.kwargs["tier"]
+        new_tier: TrackerSubscriptionTier = TrackerSubscriptionTier.objects.get(
+            pk=self.kwargs["tier"]
+        )
         try:
             if (
                 self.profile.subscription.tier is None
-                or tier.amount > self.profile.subscription.tier.amount
+                or new_tier.amount > self.profile.subscription.tier.amount
             ):
                 self.profile.subscription.upgrade(
-                    tier,
-                    form.cleaned_data["payment_id"],
-                    form.cleaned_data["address_id"],
+                    new_tier,
+                    int(form.cleaned_data["payment_id"]),
+                    int(form.cleaned_data["address_id"]),
                 )
             elif tier.amount < self.profile.tier.amount:
                 self.profile.subscription.downgrade(
-                    tier,
-                    form.cleaned_data["payment_id"],
-                    form.cleaned_data["address_id"],
+                    new_tier,
+                    int(form.cleaned_data["payment_id"]),
+                    int(form.cleaned_data["address_id"]),
                 )
         except ValueError:
             form.add_error(
@@ -187,19 +221,18 @@ class TrackerSubscriptionConfirmView(LoginRequiredMixin, FormView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
         context["tier"] = TrackerSubscriptionTier.objects.get(pk=self.kwargs["tier"])
-        context["today"] = timezone.now()
-        context["card"] = {}
-        if self.profile.payments.filter().exists():
+        context["now"] = timezone.now()
+        if self.profile is not None:
             payment = TrackerPaymentMethod.authorizenet_get_payment_profile(
                 profile_id=self.profile.authorizenet_id,
-                payment_id=int(self.profile.payments.filter().first().authorizenet_id),
+                payment_id=self.get_initial()["payment_id"],
             )
-            context["card"]["merchant"] = payment["payment"]["creditCard"]["cardType"]
-            context["card"]["last_4"] = payment["payment"]["creditCard"]["cardNumber"]
+            context["card_last_4"] = payment["payment"]["creditCard"]["cardNumber"]
+            context["card_merchant"] = payment["payment"]["creditCard"]["cardType"]
         return context
 
 
-class TrackerSubscriptionSuccessView(TemplateView):
+class TrackerSubscriptionSuccessView(LoginRequiredMixin, TemplateView):
     content_type = "text/html"
     extra_context = {
         "title": "Successfully Subscribed!",
