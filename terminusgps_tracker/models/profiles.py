@@ -54,11 +54,11 @@ class TrackerProfile(models.Model):
         return super().save(**kwargs)
 
     def clean(self, **kwargs) -> None:
-        if self.payments.count() > 4:
+        if self.payments.filter().exists() and self.payments.count() > 4:
             raise ValidationError(
                 _("You cannot assign more than four payment methods.")
             )
-        if self.addresses.count() > 4:
+        if self.addresses.filter().exists() and self.addresses.count() > 4:
             raise ValidationError(
                 _("You cannot assign more than four shipping addresses.")
             )
