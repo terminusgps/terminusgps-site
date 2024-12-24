@@ -14,6 +14,9 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, RedirectView, FormView
+from terminusgps.wialon.items import WialonResource, WialonUnitGroup, WialonUser
+from terminusgps.wialon.session import WialonSession
+from wialon.api import WialonError
 
 from terminusgps_tracker.forms import (
     TrackerSignupForm,
@@ -113,7 +116,40 @@ class TrackerSignupView(SuccessMessageMixin, FormView):
         )
         profile = TrackerProfile.objects.create(user=user)
         TrackerSubscription.objects.create(profile=profile)
+        try:
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                self.create_wialon_objects(profile, session)
+        except WialonError or ValueError:
+            print(f"{timezone.now()} - Failed to create Wialon objects.")
         return super().form_valid(form=form)
+
+    @staticmethod
+    def create_wialon_objects(profile: TrackerProfile, session: WialonSession) -> None:
+        admin = WialonUser(id=str(settings.WIALON_ADMIN_ID), session=session)
+        owner = WialonUser(
+            owner_id=admin.id,
+            name=f"super_{profile.user.username}",
+            password=profile.user.password,
+            session=session,
+        )
+        end_user = WialonUser(
+            owner_id=owner.id,
+            name=profile.user.username,
+            password=profile.user.password,
+            session=session,
+        )
+        group = WialonUnitGroup(
+            owner_id=owner.id, name=f"group_{profile.user.username}", session=session
+        )
+        resource = WialonResource(
+            owner_id=owner.id, name=f"resource_{profile.user.username}", session=session
+        )
+
+        profile.wialon_super_user_id = owner.id
+        profile.wialon_end_user_id = end_user.id
+        profile.wialon_group_id = group.id
+        profile.wialon_resource_id = resource.id
+        profile.save()
 
 
 class TrackerBugReportView(SuccessMessageMixin, FormView):
