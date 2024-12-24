@@ -26,7 +26,7 @@ from terminusgps_tracker.models import (
 )
 
 
-class TrackerLandingView(RedirectView):
+class TrackerLandingView(LoginRequiredMixin, RedirectView):
     http_method_names = ["get"]
     permanent = True
     url = reverse_lazy("tracker profile")
