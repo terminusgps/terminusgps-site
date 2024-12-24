@@ -57,7 +57,7 @@ TRACKER_PROFILE = {
     "GITHUB": "https://github.com/terminus-gps/terminusgps-site/",
     "MOTD": "Check out the Terminus GPS mobile app!",
     "LEGAL_NAME": "Terminus GPS, LLC",
-    "PHONE": {"OFFICE": "+17139045262", "SALES": ""},
+    "PHONE": {"OFFICE": "+17139045262", "SALES": "+17139045262"},
     "ADDRESS": {
         "STREET": "17240 Huffmeister Road, Suite 103",
         "CITY": "Cypress",
