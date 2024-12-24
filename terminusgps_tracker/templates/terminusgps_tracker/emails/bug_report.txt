@@ -1,0 +1,4 @@
+Bug Report created on {{ now|date:'l, F jS, Y' }} at {{ now|date:'p' }}.
+User: {{ user.username }}
+Report Category: {{ category }}
+Report Text: {{ text }}

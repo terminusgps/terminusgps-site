@@ -10,6 +10,7 @@ from .profile import (
 )
 from .views import (
     TrackerAboutView,
+    TrackerBugReportView,
     TrackerContactView,
     TrackerLandingView,
     TrackerLoginView,

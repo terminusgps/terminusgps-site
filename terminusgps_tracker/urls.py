@@ -11,6 +11,7 @@ urlpatterns = [
     path("login/", views.TrackerLoginView.as_view(), name="tracker login"),
     path("logout/", views.TrackerLogoutView.as_view(), name="tracker logout"),
     path("signup/", views.TrackerSignupView.as_view(), name="tracker signup"),
+    path("report/", views.TrackerBugReportView.as_view(), name="bug report"),
     path(
         "subscriptions/",
         views.TrackerSubscriptionOptionsView.as_view(),

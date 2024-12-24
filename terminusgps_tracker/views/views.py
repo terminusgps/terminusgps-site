@@ -3,6 +3,8 @@ from typing import Any
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib import messages
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
 from django.forms import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -18,6 +20,7 @@ from terminusgps_tracker.forms import (
     TrackerAuthenticationForm,
     SubscriptionConfirmationForm,
 )
+from terminusgps_tracker.forms.bug_report import BugReportForm
 from terminusgps_tracker.models import (
     TrackerProfile,
     TrackerSubscription,
@@ -111,6 +114,53 @@ class TrackerSignupView(SuccessMessageMixin, FormView):
         profile = TrackerProfile.objects.create(user=user)
         TrackerSubscription.objects.create(profile=profile)
         return super().form_valid(form=form)
+
+
+class TrackerBugReportView(SuccessMessageMixin, FormView):
+    form_class = BugReportForm
+    content_type = "text/html"
+    extra_context = {"title": "Bug Report"}
+    http_method_names = ["get", "post"]
+    template_name = "terminusgps_tracker/bug_report.html"
+    success_url = reverse_lazy("tracker profile")
+    success_message = "Thank you! Your bug report was submitted successfully."
+
+    def form_valid(self, form: BugReportForm) -> HttpResponse:
+        self.send_bug_report(form)
+        return super().form_valid(form=form)
+
+    def get_initial(self) -> dict[str, Any]:
+        if self.request.user:
+            return {"user": self.request.user}
+        return {}
+
+    @staticmethod
+    def send_bug_report(form: BugReportForm) -> None:
+        text_content: str = render_to_string(
+            "terminusgps_tracker/emails/bug_report.txt",
+            context={
+                "user": form.cleaned_data["user"],
+                "text": form.cleaned_data["text"],
+                "category": form.cleaned_data["category"],
+                "now": timezone.now(),
+            },
+        )
+        # html_content: str = render_to_string(
+        #     "terminusgps/emails/bug_report.html",
+        #     context={
+        #         "user": form.cleaned_data["user"],
+        #         "text": form.cleaned_data["text"],
+        #         "category": form.cleaned_data["category"],
+        #         "now": timezone.now(),
+        #     },
+        # )
+        email: EmailMultiAlternatives = EmailMultiAlternatives(
+            f"Bug Report - {timezone.now():%d/%m/%y} - {timezone.now():%I:%M:%S%z}",
+            text_content,
+            to=["support@terminusgps.com"],
+        )
+        # email.attach_alternative(html_content, "text/html")
+        email.send(fail_silently=True)
 
 
 class TrackerSubscriptionOptionsView(TemplateView):

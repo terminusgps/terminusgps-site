@@ -18,3 +18,4 @@ from .subscriptions import (
     SubscriptionConfirmationForm,
 )
 from .auth import TrackerSignupForm, TrackerAuthenticationForm
+from .bug_report import BugReportForm
