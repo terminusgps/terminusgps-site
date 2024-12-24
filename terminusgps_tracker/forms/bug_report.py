@@ -10,6 +10,7 @@ class BugReportForm(forms.Form):
         PAYMENT_METHOD = "PM", _("Payment Methods")
         SHIPPING_ADDRESS = "SA", _("Shipping Addresses")
         SUBSCRIPTION = "SB", _("Subscriptions")
+        OTHER = "OT", _("Other")
 
     text = forms.CharField(
         max_length=2048,
