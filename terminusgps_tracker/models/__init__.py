@@ -7,4 +7,4 @@ from .subscriptions import (
     TrackerSubscriptionTier,
     TrackerSubscriptionFeature,
 )
-from .assets import TrackerAsset
+from .assets import TrackerAsset, TrackerAssetCommand

@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.db import models
 from django.forms import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -19,6 +20,7 @@ from authorizenet.apicontrollers import (
 )
 
 from terminusgps.authorizenet.auth import get_merchant_auth, get_environment
+from terminusgps.wialon.session import WialonSession
 
 
 class TrackerProfile(models.Model):
@@ -54,14 +56,15 @@ class TrackerProfile(models.Model):
         return super().save(**kwargs)
 
     def clean(self, **kwargs) -> None:
-        if self.payments.filter().exists() and self.payments.count() > 4:
-            raise ValidationError(
-                _("You cannot assign more than four payment methods.")
-            )
-        if self.addresses.filter().exists() and self.addresses.count() > 4:
-            raise ValidationError(
-                _("You cannot assign more than four shipping addresses.")
-            )
+        if self.id is not None:
+            if self.payments.filter().exists() and self.payments.count() > 4:
+                raise ValidationError(
+                    _("You cannot assign more than four payment methods.")
+                )
+            if self.addresses.filter().exists() and self.addresses.count() > 4:
+                raise ValidationError(
+                    _("You cannot assign more than four shipping addresses.")
+                )
         return super().clean(**kwargs)
 
     def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:

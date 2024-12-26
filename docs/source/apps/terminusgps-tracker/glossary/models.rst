@@ -1,6 +1,76 @@
 Models
 ======
 
+.. py:class:: TrackerAsset
+
+    A Wialon unit.
+
+    .. py:attribute:: id
+        
+        **Required**. A Wialon ID.
+        
+        :type: :py:obj:`int`
+
+    .. py:attribute:: profile
+
+        **Required**. A :py:obj:`TrackerProfile` that owns the unit.
+
+        :type: :py:obj:`TrackerProfile`
+        :value: :py:obj:`None`
+
+    .. py:attribute:: name
+
+        Name of the Wialon unit.
+
+        :type: :py:obj:`str` | :py:obj:`None`
+        :value: :py:obj:`None`
+
+    .. py:attribute:: hw_type
+
+        Hardware type of the Wialon unit.
+
+        :type: :py:obj:`str` | :py:obj:`None`
+        :value: :py:obj:`None`
+
+    .. py:attribute:: is_active
+
+        Whether or not the Wialon unit is activated.
+
+        :type: :py:obj:`bool` | :py:obj:`None`
+        :value: :py:obj:`None`
+
+    .. py:attribute:: phone_number
+
+        A phone number associated with the Wialon unit.
+
+        :type: :py:obj:`str` | :py:obj:`None`
+        :value: :py:obj:`None`
+
+    .. py:attribute:: imei_number
+
+        A unique ID associated with the Wialon unit.
+
+        :type: :py:obj:`str` | :py:obj:`None`
+        :value: :py:obj:`None`
+
+    .. py:method:: execute_command(name, session, [link_type="", params=None, flags=0])
+
+        Executes a command by name using the Wialon API.
+
+        ``link_type`` is determined implicitly if passed as an empty string.
+
+        :param name: Name of the Wialon command to execute.
+        :type name: :py:obj:`str`
+        :param session: A valid Wialon API session.
+        :type session: :py:obj:`~terminusgps.wialon.session.WialonSession`
+        :param link_type: Protocol to execute the command through.
+        :type link_type: :py:obj:`str`
+        :param params: Optional additional command parameters.
+        :type params: :py:obj:`dict`
+        :param flags: Dataflags to execute the command under.
+        :type flags: :py:obj:`int`
+
+
 .. py:class:: TrackerProfile
 
     Stores Wialon API data, Authorize.NET API data and user data.

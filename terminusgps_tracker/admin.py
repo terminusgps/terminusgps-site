@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from terminusgps_tracker.models import (
     TrackerAsset,
+    TrackerAssetCommand,
     TrackerPaymentMethod,
     TrackerProfile,
     TrackerShippingAddress,
@@ -31,6 +32,12 @@ class TrackerAssetAdmin(admin.ModelAdmin):
     fields = ["id", "profile", "is_active", "hw_type", "imei_number", "phone_number"]
 
 
+@admin.register(TrackerAssetCommand)
+class TrackerAssetCommandAdmin(admin.ModelAdmin):
+    list_display = ["name", "type", "link"]
+    fields = ["name", "type", "link"]
+
+
 @admin.register(TrackerProfile)
 class TrackerProfileAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -48,13 +55,7 @@ class TrackerProfileAdmin(admin.ModelAdmin):
             },
         ),
     ]
-    readonly_fields = [
-        "authorizenet_id",
-        "wialon_super_user_id",
-        "wialon_end_user_id",
-        "wialon_group_id",
-        "wialon_resource_id",
-    ]
+    readonly_fields = ["authorizenet_id"]
 
 
 @admin.register(TrackerSubscription)

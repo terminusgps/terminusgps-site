@@ -1,4 +1,4 @@
-from .assets import AssetCreationForm, AssetModificationForm
+from .assets import AssetCreationForm, AssetModificationForm, AssetCommandExecutionForm
 from .payments import (
     PaymentMethodCreationForm,
     PaymentMethodDeletionForm,

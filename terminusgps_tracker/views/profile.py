@@ -3,11 +3,11 @@ from typing import Any
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.forms import Form, ValidationError
+from django.forms import ValidationError
 from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView, TemplateView, UpdateView, View
+from django.views.generic import FormView, TemplateView, View
 from wialon.api import WialonError
 
 from terminusgps.wialon import constants
@@ -41,6 +41,11 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
     raise_exception = False
     http_method_names = ["get", "post"]
 
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        with WialonSession(token=settings.WIALON_TOKEN) as session:
+            [asset.save(session) for asset in self.profile.assets.all()]
+        return super().get(request, *args, **kwargs)
+
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         try:
@@ -59,6 +64,7 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
         if self.profile is not None:
+            context["title"] = f"{self.profile.user.username}'s Profile"
             context["assets"] = TrackerAsset.objects.filter(profile=self.profile)
             context["subscription"], _ = TrackerSubscription.objects.get_or_create(
                 profile=self.profile
@@ -137,11 +143,6 @@ class TrackerProfileAssetCreationView(LoginRequiredMixin, FormView):
         )
 
     def form_valid(self, form: AssetCreationForm) -> HttpResponse:
-        if self.profile is None or self.profile.wialon_end_user_id is None:
-            form.add_error(
-                None,
-                ValidationError(_("Whoops! Couldn't find a user profile for you.")),
-            )
         try:
             with WialonSession(token=settings.WIALON_TOKEN) as session:
                 user = WialonUser(
@@ -281,47 +282,3 @@ class TrackerProfileShippingAddressDeletionView(LoginRequiredMixin, View):
         address = self.profile.addresses.get(authorizenet_id=int(id))
         address.delete()
         return HttpResponse(status=200)
-
-
-class TrackerProfileSubscriptionModificationView(LoginRequiredMixin, UpdateView):
-    content_type = "text/html"
-    context_object_name = "subscription"
-    extra_context = None
-    fields = ["id", "tier", "payment_id", "address_id"]
-    model = TrackerSubscription
-    template_name = "terminusgps_tracker/forms/profile/modify_subscription.html"
-    success_url = reverse_lazy("tracker profile")
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        self.profile = TrackerProfile.objects.get(user=request.user)
-
-    def form_valid(self, form: Form) -> HttpResponse:
-        subscription = self.get_object()
-        curr_tier = subscription.tier
-        new_tier = form.cleaned_data["tier"]
-        if curr_tier is None or curr_tier.amount < new_tier.amount:
-            subscription.upgrade(
-                new_tier,
-                form.cleaned_data.get("payment_id"),
-                form.cleaned_data.get("address_id"),
-            )
-        else:
-            subscription.downgrade(
-                new_tier,
-                form.cleaned_data.get("payment_id"),
-                form.cleaned_data.get("address_id"),
-            )
-        return super().form_valid(form)
-
-    def get_initial(self) -> dict[str, Any]:
-        initial: dict[str, Any] = super().get_initial()
-        if self.profile.payments.filter().exists():
-            initial["payment_id"] = (
-                self.profile.payments.filter(is_default=True).first().authorizenet_id
-            )
-        if self.profile.addresses.filter().exists():
-            initial["address_id"] = (
-                self.profile.addresses.filter(is_default=True).first().authorizenet_id
-            )
-        return initial

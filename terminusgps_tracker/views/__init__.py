@@ -1,3 +1,4 @@
+from .assets import AssetRemoteView
 from .profile import (
     TrackerProfileAssetCreationView,
     TrackerProfilePaymentMethodCreationView,
@@ -5,10 +6,9 @@ from .profile import (
     TrackerProfileSettingsView,
     TrackerProfileShippingAddressCreationView,
     TrackerProfileShippingAddressDeletionView,
-    TrackerProfileSubscriptionModificationView,
     TrackerProfileView,
 )
-from .views import (
+from .generic import (
     TrackerAboutView,
     TrackerBugReportView,
     TrackerContactView,
@@ -18,7 +18,10 @@ from .views import (
     TrackerPrivacyView,
     TrackerSignupView,
     TrackerSourceView,
+)
+from .subscriptions import (
     TrackerSubscriptionConfirmView,
+    TrackerSubscriptionModificationView,
     TrackerSubscriptionOptionsView,
     TrackerSubscriptionSuccessView,
 )

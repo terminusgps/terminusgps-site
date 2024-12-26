@@ -1,8 +1,46 @@
 from django.db import models, transaction
-from terminusgps.wialon.items import WialonUnit, WialonUnitGroup
+from terminusgps.wialon.constants import WialonCommandType, WialonCommandLink
 from terminusgps.wialon.session import WialonSession
-from django.conf import settings
 import terminusgps.wialon.flags as flags
+
+
+class TrackerAssetCommand(models.Model):
+    name = models.CharField(max_length=128)
+    link = models.CharField(
+        max_length=64,
+        choices=WialonCommandLink.choices,
+        default=WialonCommandLink.AUTO,
+        blank=True,
+    )
+    type = models.CharField(
+        max_length=64,
+        choices=WialonCommandType.choices,
+        default=WialonCommandType.CUSTOM_MSG,
+    )
+
+    class Meta:
+        verbose_name = "asset command"
+        verbose_name_plural = "asset commands"
+
+    def __str__(self) -> str:
+        return self.name
+
+    def execute(
+        self,
+        id: int,
+        session: WialonSession,
+        params: dict | None = None,
+        flags: int = 0,
+    ) -> None:
+        session.wialon_api.unit_exec_cmd(
+            **{
+                "itemId": str(id),
+                "commandName": self.name,
+                "linkType": self.link,
+                "param": params if params else {},
+                "flags": flags,
+            }
+        )
 
 
 class TrackerAsset(models.Model):
@@ -11,6 +49,13 @@ class TrackerAsset(models.Model):
         "terminusgps_tracker.TrackerProfile",
         on_delete=models.CASCADE,
         related_name="assets",
+    )
+    commands = models.ForeignKey(
+        "terminusgps_tracker.TrackerAssetCommand",
+        on_delete=models.CASCADE,
+        default=None,
+        null=True,
+        blank=True,
     )
 
     # Wialon data
@@ -30,29 +75,7 @@ class TrackerAsset(models.Model):
     def save(self, session: WialonSession | None = None, **kwargs) -> None:
         if session is not None:
             self.populate(session)
-            self._pop_off_unactivated_group(session)
         return super().save(**kwargs)
-
-    def execute_command(
-        self, name: str, session: WialonSession, params: dict | None = None
-    ) -> None:
-        session.wialon_api.unit_exec_cmd(
-            **{
-                "itemId": self.id,
-                "commandName": name,
-                "linkType": "",
-                "param": params if params else {},
-                "flags": 0,
-            }
-        )
-
-    def _pop_off_unactivated_group(self, session: WialonSession) -> None:
-        unactivated = WialonUnitGroup(
-            id=str(settings.WIALON_UNACTIVATED_GROUP), session=session
-        )
-        unit = WialonUnit(id=str(self.id), session=session)
-        if unit.id in unactivated.items:
-            unactivated.rm_item(unit)
 
     @transaction.atomic
     def populate(self, session: WialonSession) -> None:

@@ -17,6 +17,7 @@ urlpatterns = [
         views.TrackerSubscriptionOptionsView.as_view(),
         name="tracker subscriptions",
     ),
+    path("remote/<int:id>/", views.AssetRemoteView.as_view(), name="asset remote"),
     path(
         "profile/subscription/<int:tier>/confirm/",
         views.TrackerSubscriptionConfirmView.as_view(),
@@ -29,7 +30,7 @@ urlpatterns = [
     ),
     path(
         "profile/subscription/<int:pk>/update/",
-        views.TrackerProfileSubscriptionModificationView.as_view(),
+        views.TrackerSubscriptionModificationView.as_view(),
         name="modify subscription",
     ),
     path(

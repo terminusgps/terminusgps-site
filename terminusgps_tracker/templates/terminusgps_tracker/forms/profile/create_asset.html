@@ -5,7 +5,7 @@
     {{ form.non_field_errors }}
     {% csrf_token %}
     {% if form.errors %}
-    <ul class="bg-red-100 p-8">
+    <ul class="{% if not form.errors %}hidden{% else %}bg-red-100 p-8{% endif %}">
         {% for field in form %}
         {% for error in field.errors %}<li class="text-red-800">{{ error }}</li>{% endfor %}
         {% endfor %}

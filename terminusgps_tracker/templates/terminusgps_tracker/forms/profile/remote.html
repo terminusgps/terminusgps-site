@@ -1,0 +1,6 @@
+<form action="{% url 'execute command' %}" method="post">
+    {{ form.asset_id.as_hidden }}
+    {{ form.cmd_name }}
+    {{ form.cmd_type }}
+    {{ form.cmd_link }}
+</form>

@@ -7,6 +7,12 @@ from terminusgps_tracker.validators import (
     validate_phone,
 )
 
+from terminusgps_tracker.models.assets import TrackerAssetCommand
+
+
+class AssetCommandExecutionForm(forms.Form):
+    command = forms.ModelChoiceField(queryset=TrackerAssetCommand.objects.all())
+
 
 class AssetCreationForm(forms.Form):
     asset_name = forms.CharField(

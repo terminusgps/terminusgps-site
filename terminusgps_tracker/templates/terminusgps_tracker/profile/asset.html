@@ -1,7 +1,11 @@
-<div class="flex flex-col">
-    <div id="{{ asset.id }}" class="px-8 py-4 bg-gray-300">
-        <p>{{ asset.name }}</p>
-        <p>{{ asset.imei_number }}</p>
-        <p>{{ asset.phone_number }}</p>
-    </div>
-</div>
+<tr id="{{ asset.id }}" class="border-b bg-white dark:border-gray-700 dark:bg-gray-800">
+    <th scope="row" class="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white">
+        {{ asset.name }}
+    </th>
+    <td class="px-6 py-4">
+        {{ asset.imei_number }}
+    </td>
+    <td class="px-6 py-4">
+        <a class="hover:underline" href="{% url 'asset remote' asset.id %}">Remote Link</a>
+    </td>
+</tr>

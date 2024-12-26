@@ -3,9 +3,10 @@ import string
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
+from wialon.api import WialonError
 
 from terminusgps.wialon.session import WialonSession
-from terminusgps.wialon.items import WialonUnitGroup
+from terminusgps.wialon.items import WialonUnitGroup, WialonUnit
 from terminusgps.wialon.utils import get_id_from_iccid, is_unique
 
 
@@ -20,6 +21,19 @@ def validate_phone(value: str) -> None:
     if " " in value:
         raise ValidationError(_("Phone number cannot contain spaces."), code="invalid")
     return
+
+
+def validate_wialon_asset_id(value: str) -> None:
+    with WialonSession(token=settings.WIALON_TOKEN) as session:
+        try:
+            # Construct a unit with the id
+            WialonUnit(id=value, session=session)
+        except WialonError or ValueError:
+            raise ValidationError(
+                _("'%(value)s' was not found in the Wialon database."),
+                code="invalid",
+                params={"value": value},
+            )
 
 
 def validate_wialon_imei_number(value: str) -> None:
