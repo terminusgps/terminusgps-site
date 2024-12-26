@@ -50,12 +50,8 @@ class TrackerAsset(models.Model):
         on_delete=models.CASCADE,
         related_name="assets",
     )
-    commands = models.ForeignKey(
-        "terminusgps_tracker.TrackerAssetCommand",
-        on_delete=models.CASCADE,
-        default=None,
-        null=True,
-        blank=True,
+    commands = models.ManyToManyField(
+        "terminusgps_tracker.TrackerAssetCommand", default=None, blank=True
     )
 
     # Wialon data

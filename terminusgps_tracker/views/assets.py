@@ -39,6 +39,7 @@ class AssetRemoteView(LoginRequiredMixin, FormView):
         context["asset"] = self.asset
         context["title"] = f"{self.asset.name} Remote"
         context["current_url"] = self.get_success_url()
+        context["commands"] = self.asset.commands.filter()
         return context
 
     def form_valid(self, form: AssetCommandExecutionForm) -> HttpResponseRedirect:

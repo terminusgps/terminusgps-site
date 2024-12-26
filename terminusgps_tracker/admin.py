@@ -29,7 +29,15 @@ class TrackerShippingAddressAdmin(admin.ModelAdmin):
 @admin.register(TrackerAsset)
 class TrackerAssetAdmin(admin.ModelAdmin):
     list_display = ["id", "profile", "is_active"]
-    fields = ["id", "profile", "is_active", "hw_type", "imei_number", "phone_number"]
+    fields = [
+        "id",
+        "profile",
+        "is_active",
+        "hw_type",
+        "imei_number",
+        "phone_number",
+        "commands",
+    ]
 
 
 @admin.register(TrackerAssetCommand)
