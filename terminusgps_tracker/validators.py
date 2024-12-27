@@ -40,7 +40,9 @@ def validate_wialon_imei_number(value: str) -> None:
     """Raises `ValidationError` if the value represents an invalid Wialon IMEI #."""
     with WialonSession(token=settings.WIALON_TOKEN) as session:
         unit_id: str | None = get_id_from_iccid(iccid=value.strip(), session=session)
-        available = WialonUnitGroup(id="27890571", session=session)
+        available = WialonUnitGroup(
+            id=str(settings.WIALON_UNACTIVATED_GROUP), session=session
+        )
 
         if unit_id is None:
             raise ValidationError(
