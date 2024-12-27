@@ -10,7 +10,7 @@ from terminusgps_tracker.validators import (
 from terminusgps_tracker.models.assets import TrackerAssetCommand
 
 
-class AssetCommandExecutionForm(forms.Form):
+class CommandExecutionForm(forms.Form):
     command = forms.ModelChoiceField(queryset=TrackerAssetCommand.objects.all())
 
 
@@ -33,7 +33,7 @@ class AssetCreationForm(forms.Form):
         validators=[validate_wialon_imei_number],
         widget=widgets.NumberInput(
             attrs={
-                "placeholder": "555555555555",
+                "placeholder": "355197370064417",
                 "class": "w-full block mb-4 mt-2 p-2 rounded-md",
             }
         ),

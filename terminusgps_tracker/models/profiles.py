@@ -1,7 +1,6 @@
 from typing import Any
 
 from django.contrib.auth import get_user_model
-from django.conf import settings
 from django.db import models
 from django.forms import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -20,7 +19,6 @@ from authorizenet.apicontrollers import (
 )
 
 from terminusgps.authorizenet.auth import get_merchant_auth, get_environment
-from terminusgps.wialon.session import WialonSession
 
 
 class TrackerProfile(models.Model):
@@ -44,6 +42,10 @@ class TrackerProfile(models.Model):
     class Meta:
         verbose_name = "profile"
         verbose_name_plural = "profiles"
+        permissions = [
+            ("view_subscription_commands", "Can view subscription asset commands"),
+            ("view_destructive_commands", "Can view destructive asset commands"),
+        ]
 
     def __str__(self) -> str:
         return f"{self.user}'s Profile"

@@ -1,4 +1,4 @@
-from .assets import AssetRemoteView
+from .assets import AssetRemoteView, CommandExecutionView
 from .profile import (
     TrackerProfileAssetCreationView,
     TrackerProfilePaymentMethodCreationView,

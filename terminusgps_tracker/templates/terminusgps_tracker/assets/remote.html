@@ -1,31 +1,9 @@
 {% extends "terminusgps_tracker/layout.html" %}
 {% load static %}
 {% block content %}
-{% for command in commands %}
-<div class="flex items-center gap-2">
-    <form hx-post="{{ current_url }}" hx-indicator=".htmx_indicator" hx-swap="outerHTML">
-        {% csrf_token %}
-        {{ form.as_hidden }}
-        <button class="group rounded-full border-4 border-terminus-red-500 bg-gray-200 p-8 shadow-inner transition-colors duration-300 ease-in-out hover:bg-terminus-red-200">
-            {% if "Ignition" in command.name %}
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-16 transition-all duration-700 ease-in-out will-change-auto group-hover:animate-pulse group-hover:text-white">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9" />
-            </svg>
-            {% elif "Reboot" in command.name %}
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-16 transition-all duration-700 ease-in-out will-change-auto group-hover:animate-spin group-hover:text-white">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
-            {% else %}
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-16 group-hover:text-white">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
-            </svg>
-            {% endif %}
-        </button>
-    </form>
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="htmx-indicator size-16">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-    </svg>
-    <h2>{{ command.name }}</h2>
+<h2 class="text-center text-terminus-red-500 font-bold tracking-wide text-2xl">Remote Control</h2>
+<div class="grid grid-cols-2 grid-rows-2 gap-4 rounded bg-gray-300 p-8 md:grid-cols-3 md:gap-8">
+    {% for command in commands %}{% include "terminusgps_tracker/assets/remote_button.html" with asset=asset command=command %}{% endfor %}
+    {% for command in commands %}{% include "terminusgps_tracker/assets/remote_button.html" with asset=asset command=command %}{% endfor %}
 </div>
-{% endfor %}
 {% endblock content %}

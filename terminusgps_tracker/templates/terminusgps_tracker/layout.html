@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Terminus GPS | {{ title }}</title>
+        <title>{{ title|default:'GPS Tracking' }} | Terminus GPS</title>
         <link rel="shortcut icon" type="image/png" href="{% static 'terminusgps_tracker/logo.png' %}">
         {% tailwind_css %}
         <script src="{% static 'terminusgps_tracker/js/htmx.min.js' %}" defer></script>

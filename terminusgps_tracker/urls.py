@@ -19,6 +19,11 @@ urlpatterns = [
     ),
     path("remote/<int:id>/", views.AssetRemoteView.as_view(), name="asset remote"),
     path(
+        "remote/<int:id>/execute/",
+        views.CommandExecutionView.as_view(),
+        name="execute command",
+    ),
+    path(
         "profile/subscription/<int:tier>/confirm/",
         views.TrackerSubscriptionConfirmView.as_view(),
         name="confirm subscription",

@@ -2,6 +2,8 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
+from django.db.models import Q, QuerySet
 from django.contrib.messages.views import SuccessMessageMixin
 from django.forms import ValidationError
 from django.http import HttpRequest, HttpResponse
@@ -25,8 +27,9 @@ from terminusgps_tracker.models import (
     TrackerProfile,
     TrackerShippingAddress,
     TrackerSubscription,
+    TrackerAsset,
+    TrackerAssetCommand,
 )
-from terminusgps_tracker.models.assets import TrackerAsset
 
 
 class TrackerProfileView(LoginRequiredMixin, TemplateView):
@@ -64,7 +67,7 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
         if self.profile is not None:
-            context["title"] = f"{self.profile.user.username}'s Profile"
+            context["title"] = f"{self.profile.user.first_name}'s Profile"
             context["assets"] = TrackerAsset.objects.filter(profile=self.profile)
             context["subscription"], _ = TrackerSubscription.objects.get_or_create(
                 profile=self.profile
@@ -134,6 +137,35 @@ class TrackerProfileAssetCreationView(LoginRequiredMixin, FormView):
     http_method_names = ["get", "post"]
     success_url = reverse_lazy("tracker profile")
 
+    def get_available_commands(self) -> QuerySet:
+        queryset = TrackerAssetCommand.objects.filter()
+        if not self.profile.user.has_perm(
+            "terminusgps_tracker.view_subscription_commands"
+        ):
+            queryset.exclude(
+                Q(title__exact="Basic"),
+                Q(title__exact="Standard"),
+                Q(title__exact="Premium"),
+            )
+        return queryset
+
+    @transaction.atomic
+    def wialon_create_asset(self, id: str, name: str, session: WialonSession) -> None:
+        assert self.profile.wialon_end_user_id
+        available = WialonUnitGroup(
+            id=str(settings.WIALON_UNACTIVATED_GROUP), session=session
+        )
+        user = WialonUser(id=str(self.profile.wialon_end_user_id), session=session)
+        unit = WialonUnit(id=id, session=session)
+
+        available.rm_item(unit)
+        unit.rename(name)
+        user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
+
+        asset = TrackerAsset.objects.create(id=unit.id, profile=self.profile)
+        asset.commands.set(self.get_available_commands())
+        asset.save()
+
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = (
@@ -145,19 +177,26 @@ class TrackerProfileAssetCreationView(LoginRequiredMixin, FormView):
     def form_valid(self, form: AssetCreationForm) -> HttpResponse:
         try:
             with WialonSession(token=settings.WIALON_TOKEN) as session:
-                user = WialonUser(
-                    id=str(self.profile.wialon_end_user_id), session=session
-                )
-                unit_id: str | None = get_id_from_iccid(
-                    form.cleaned_data["imei_number"], session=session
-                )
-                if unit_id is not None:
-                    unit = WialonUnit(id=unit_id, session=session)
-                    available = WialonUnitGroup(
-                        id=str(settings.WIALON_UNACTIVATED_GROUP), session=session
+                imei_number: str = form.cleaned_data["imei_number"]
+                unit_id: str | None = get_id_from_iccid(imei_number, session=session)
+                if unit_id is None:
+                    raise ValueError(
+                        f"Failed to find Wialon unit ID via IMEI # {imei_number}"
                     )
-                    available.rm_item(unit)
-                    user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
+
+                self.wialon_create_asset(
+                    unit_id, form.cleaned_data["asset_name"], session
+                )
+        except AssertionError:
+            form.add_error(
+                None,
+                ValidationError(
+                    _(
+                        "Whoops! Couldn't find the Wialon user associated with this profile. Please try again later."
+                    )
+                ),
+            )
+            return self.form_invalid(form=form)
         except WialonError:
             form.add_error(
                 None,
