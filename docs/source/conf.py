@@ -6,6 +6,12 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path("../..", "terminusgps_tracker").resolve()))
+print(f"{sys.path = }")
+
 project = "terminusgps-site"
 copyright = "2024, Terminus GPS"
 author = "Terminus GPS"

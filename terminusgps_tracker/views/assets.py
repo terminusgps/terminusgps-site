@@ -2,7 +2,6 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q, QuerySet
 from django.forms import ValidationError
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
@@ -12,7 +11,7 @@ from django.views.generic import FormView, TemplateView
 from terminusgps.wialon.session import WialonSession
 from wialon.api import WialonError
 
-from terminusgps_tracker.models.assets import TrackerAssetCommand, TrackerAsset
+from terminusgps_tracker.models.assets import TrackerAssetCommand
 from terminusgps_tracker.models.profiles import TrackerProfile
 from terminusgps_tracker.forms import CommandExecutionForm
 

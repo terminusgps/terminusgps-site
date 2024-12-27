@@ -14,30 +14,28 @@ from terminusgps_tracker.models import (
 
 @admin.register(TrackerPaymentMethod)
 class TrackerPaymentMethodAdmin(admin.ModelAdmin):
-    list_display = ["authorizenet_id", "profile__user", "is_default"]
+    list_display = ["authorizenet_id", "profile", "is_default"]
     fields = ["authorizenet_id", "profile", "is_default"]
-    readonly_fields = ["authorizenet_id", "profile", "is_default"]
+    readonly_fields = ["authorizenet_id"]
+    list_display_links = ["profile"]
 
 
 @admin.register(TrackerShippingAddress)
 class TrackerShippingAddressAdmin(admin.ModelAdmin):
-    list_display = ["authorizenet_id", "profile__user", "is_default"]
+    list_display = ["authorizenet_id", "profile", "is_default"]
     fields = ["authorizenet_id", "profile", "is_default"]
-    readonly_fields = ["authorizenet_id", "profile", "is_default"]
+    readonly_fields = ["authorizenet_id"]
+    list_display_links = ["profile"]
 
 
 @admin.register(TrackerAsset)
 class TrackerAssetAdmin(admin.ModelAdmin):
-    list_display = ["id", "profile", "is_active"]
-    fields = [
-        "id",
-        "profile",
-        "is_active",
-        "hw_type",
-        "imei_number",
-        "phone_number",
-        "commands",
+    list_display = ["name", "profile__user", "is_active"]
+    fieldsets = [
+        ("Terminus GPS Tracker", {"fields": ["profile", "is_active", "commands"]}),
+        ("Wialon", {"fields": ["id", "imei_number", "phone_number", "hw_type"]}),
     ]
+    readonly_fields = ["is_active", "hw_type"]
 
 
 @admin.register(TrackerAssetCommand)
@@ -49,7 +47,7 @@ class TrackerAssetCommandAdmin(admin.ModelAdmin):
 @admin.register(TrackerProfile)
 class TrackerProfileAdmin(admin.ModelAdmin):
     fieldsets = [
-        ("Tracker", {"fields": ["user"]}),
+        ("Terminus GPS Tracker", {"fields": ["user"]}),
         ("Authorize.NET", {"fields": ["authorizenet_id"]}),
         (
             "Wialon",
@@ -71,7 +69,7 @@ class TrackerSubscriptionAdmin(admin.ModelAdmin):
     list_display = ["authorizenet_id", "profile__user", "status", "tier"]
     list_editable = ["tier"]
     fieldsets = [
-        ("Tracker", {"fields": ["profile", "tier", "status"]}),
+        ("Terminus GPS Tracker", {"fields": ["profile", "tier", "status"]}),
         ("Authorize.NET", {"fields": ["authorizenet_id"]}),
     ]
     readonly_fields = ["authorizenet_id", "profile", "status"]
@@ -83,12 +81,17 @@ class TrackerSubscriptionTierAdmin(admin.ModelAdmin):
     ordering = ["amount"]
     fieldsets = [
         (None, {"fields": ["name"]}),
+        (
+            "Terminus GPS Tracker",
+            {"fields": ["amount", "period", "length", "features"]},
+        ),
         ("Wialon", {"fields": ["wialon_id", "wialon_cmd"]}),
-        ("Tracker", {"fields": ["amount", "period", "length", "features"]}),
     ]
     readonly_fields = ["wialon_id"]
+    list_display_links = ["name"]
 
 
 @admin.register(TrackerSubscriptionFeature)
 class TrackerSubscriptionFeatureAdmin(admin.ModelAdmin):
     fieldsets = [(None, {"fields": ["name", "desc"]})]
+    list_display = ["name", "desc"]

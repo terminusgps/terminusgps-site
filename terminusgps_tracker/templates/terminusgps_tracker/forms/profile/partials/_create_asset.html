@@ -1,0 +1,14 @@
+<tr class="border-b bg-white dark:border-gray-700 dark:bg-gray-800">
+    <form class="m-4 dark:text-terminus-white" hx-post="{% url 'create asset' %}">
+        {% csrf_token %}
+        <th scope="row" class="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white">
+            {{ form.asset_name }}
+        </th>
+        <td class="px-6 py-4">
+            {{ form.imei_number }}
+        </td>
+        <td class="px-6 py-4">
+            <button type="submit">Submit</button>
+        </td>
+    </form>
+</tr>

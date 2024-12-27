@@ -1,6 +1,44 @@
 Models
 ======
 
+.. py:class:: TrackerAssetCommand
+
+    A Wialon unit command.
+
+    .. py:attribute:: name
+
+        **Required**. The name of the Wialon unit command.
+
+        :type: :py:obj:`str`
+
+    .. py:attribute:: link
+
+        Protocol to execute the Wialon unit command with. Default is auto (``""``).
+
+        :type: :py:obj:`str`
+        :value: ``""``
+
+    .. py:attribute:: type
+
+        Type of the Wialon unit command.
+
+        :type: :py:obj:`str`
+        :value: ``"custom_msg"``
+
+    .. py:method:: execute(id, session, [params=None, flags=0]) -> None
+
+        Executes the Wialon unit command on a Wialon unit by id.
+
+        :param id: A Wialon unit ID.
+        :type id: :py:obj:`str`
+        :param session: A valid Wialon API session.
+        :type session: `~terminusgps.wialon.session.WialonSession`
+        :param params: Additional parameters to supply to the command execution.
+        :type params: :py:obj:`dict` | :py:obj:`None` = :py:obj:`None`
+        :param flags: Flags to execute the command with.
+        :type flags: :py:obj:`int` = ``0``
+        :raises WialonError: If something goes wrong with Wialon.
+
 .. py:class:: TrackerAsset
 
     A Wialon unit.

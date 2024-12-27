@@ -3,7 +3,7 @@ from typing import Any
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Q, QuerySet
+from django.db.models import QuerySet
 from django.contrib.messages.views import SuccessMessageMixin
 from django.forms import ValidationError
 from django.http import HttpRequest, HttpResponse
@@ -30,6 +30,10 @@ from terminusgps_tracker.models import (
     TrackerAsset,
     TrackerAssetCommand,
 )
+
+
+class WialonUnitNotFoundError(Exception):
+    """Raised when a Wialon unit was not found via IMEI #."""
 
 
 class TrackerProfileView(LoginRequiredMixin, TemplateView):
@@ -127,27 +131,33 @@ class TrackerProfileSettingsView(LoginRequiredMixin, TemplateView):
         ]
 
 
-class TrackerProfileAssetCreationView(LoginRequiredMixin, FormView):
+class TrackerProfileAssetCreationView(
+    SuccessMessageMixin, LoginRequiredMixin, FormView
+):
     form_class = AssetCreationForm
     template_name = "terminusgps_tracker/forms/profile/create_asset.html"
+    partial_name = "terminusgps_tracker/forms/profile/partials/_create_asset.html"
     extra_context = {"title": "New Asset"}
     login_url = reverse_lazy("tracker login")
     permission_denied_message = "Please login and try again."
     raise_exception = True
     http_method_names = ["get", "post"]
     success_url = reverse_lazy("tracker profile")
+    success_message = "%(name)s was added successfully."
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        print(f"{request.headers.get("HX-Request") = }")
+        if request.headers.get("HX-Request"):
+            self.template_name = self.partial_name
+        response = super().get(request, *args, **kwargs)
+        return response
+
+    def get_success_message(self, cleaned_data: dict[str, Any]) -> str:
+        data: dict[str, str] = {"name": cleaned_data["asset_name"]}
+        return self.success_message % data
 
     def get_available_commands(self) -> QuerySet:
-        queryset = TrackerAssetCommand.objects.filter()
-        if not self.profile.user.has_perm(
-            "terminusgps_tracker.view_subscription_commands"
-        ):
-            queryset.exclude(
-                Q(title__exact="Basic"),
-                Q(title__exact="Standard"),
-                Q(title__exact="Premium"),
-            )
-        return queryset
+        return TrackerAssetCommand.objects.filter().exclude(pk__in=[1, 2, 3])
 
     @transaction.atomic
     def wialon_create_asset(self, id: str, name: str, session: WialonSession) -> None:
@@ -163,7 +173,8 @@ class TrackerProfileAssetCreationView(LoginRequiredMixin, FormView):
         user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
 
         asset = TrackerAsset.objects.create(id=unit.id, profile=self.profile)
-        asset.commands.set(self.get_available_commands())
+        queryset = self.get_available_commands()
+        asset.commands.set(queryset)
         asset.save()
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
@@ -175,14 +186,13 @@ class TrackerProfileAssetCreationView(LoginRequiredMixin, FormView):
         )
 
     def form_valid(self, form: AssetCreationForm) -> HttpResponse:
+        imei_number: str = form.cleaned_data["imei_number"]
+
         try:
             with WialonSession(token=settings.WIALON_TOKEN) as session:
-                imei_number: str = form.cleaned_data["imei_number"]
                 unit_id: str | None = get_id_from_iccid(imei_number, session=session)
-                if unit_id is None:
-                    raise ValueError(
-                        f"Failed to find Wialon unit ID via IMEI # {imei_number}"
-                    )
+                if not unit_id:
+                    raise WialonUnitNotFoundError()
 
                 self.wialon_create_asset(
                     unit_id, form.cleaned_data["asset_name"], session
@@ -197,22 +207,22 @@ class TrackerProfileAssetCreationView(LoginRequiredMixin, FormView):
                 ),
             )
             return self.form_invalid(form=form)
-        except WialonError:
+        except WialonUnitNotFoundError:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Unit with IMEI # '%(imei)s' may not exist, or wasn't found."),
+                    code="invalid",
+                    params={"imei": imei_number},
+                ),
+            )
+            return self.form_invalid(form=form)
+        except WialonError or ValueError:
             form.add_error(
                 None,
                 ValidationError(
                     _(
                         "Whoops! Something went wrong with Wialon. Please try again later."
-                    )
-                ),
-            )
-            return self.form_invalid(form=form)
-        except ValueError:
-            form.add_error(
-                None,
-                ValidationError(
-                    _(
-                        "Whoops! Something went wrong on our end. Please try again later."
                     )
                 ),
             )

@@ -14,4 +14,5 @@ terminusgps-tracker
 
    installation.rst
    settings.rst
+   registration.rst
    glossary/index.rst

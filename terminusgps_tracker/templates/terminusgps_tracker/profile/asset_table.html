@@ -1,20 +1,28 @@
-<div class="relative overflow-x-auto">
-    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-                <th scope="col" class="px-6 py-3">
-                    Name
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    IMEI #
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    Remote
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for asset in assets %}{% include "terminusgps_tracker/profile/asset.html" %}{% endfor %}
-        </tbody>
-    </table>
+<div class="flex flex-col items-center gap-4">
+    <div class="relative w-full overflow-x-auto">
+        <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
+            <thead class="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Name
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        IMEI #
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Remote
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="asset-list">
+                {% for asset in assets %}{% include "terminusgps_tracker/profile/asset.html" %}{% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <a class="flex flex-inline group w-full gap-2 rounded bg-red-300 p-4 transition-all duration-300 ease-in-out will-change-auto hover:scale-105 hover:cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-terminus-red-100">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <p class="font-semibold text-terminus-red-700" href="{% url 'create asset' %}" hx-get="{% url 'create asset' %}" hx-target="#asset-list" hx-swap="beforeend">Register New Asset</p>
+    </a>
 </div>

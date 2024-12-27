@@ -4,6 +4,5 @@
 <h2 class="text-center text-terminus-red-500 font-bold tracking-wide text-2xl">Remote Control</h2>
 <div class="grid grid-cols-2 grid-rows-2 gap-4 rounded bg-gray-300 p-8 md:grid-cols-3 md:gap-8">
     {% for command in commands %}{% include "terminusgps_tracker/assets/remote_button.html" with asset=asset command=command %}{% endfor %}
-    {% for command in commands %}{% include "terminusgps_tracker/assets/remote_button.html" with asset=asset command=command %}{% endfor %}
 </div>
 {% endblock content %}

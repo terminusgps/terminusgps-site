@@ -1,7 +1,8 @@
 from django.db import models, transaction
+
+import terminusgps.wialon.flags as flags
 from terminusgps.wialon.constants import WialonCommandType, WialonCommandLink
 from terminusgps.wialon.session import WialonSession
-import terminusgps.wialon.flags as flags
 
 
 class TrackerAssetCommand(models.Model):
@@ -19,8 +20,8 @@ class TrackerAssetCommand(models.Model):
     )
 
     class Meta:
-        verbose_name = "asset command"
-        verbose_name_plural = "asset commands"
+        verbose_name = "command"
+        verbose_name_plural = "commands"
 
     def __str__(self) -> str:
         return self.name
