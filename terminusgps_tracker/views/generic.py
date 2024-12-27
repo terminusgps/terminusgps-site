@@ -126,24 +126,26 @@ class TrackerSignupView(SuccessMessageMixin, FormView):
             password=profile.user.password,
             session=session,
         )
+        profile.wialon_super_user_id = owner.id
+        profile.save()
+
         end_user = WialonUser(
             owner_id=owner.id,
             name=profile.user.username,
             password=profile.user.password,
             session=session,
         )
+        profile.wialon_end_user_id = end_user.id
+        profile.save()
+
         group = WialonUnitGroup(
             owner_id=owner.id, name=f"group_{profile.user.username}", session=session
         )
+        profile.wialon_group_id = group.id
+        profile.save()
         # resource = WialonResource(
         #     owner_id=owner.id, name=f"resource_{profile.user.username}", session=session
         # )
-
-        profile.wialon_super_user_id = owner.id
-        profile.wialon_end_user_id = end_user.id
-        profile.wialon_group_id = group.id
-        # profile.wialon_resource_id = resource.id
-        profile.save()
 
 
 class TrackerBugReportView(SuccessMessageMixin, FormView):
