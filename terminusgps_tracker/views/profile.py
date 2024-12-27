@@ -146,11 +146,14 @@ class TrackerProfileAssetCreationView(
     success_message = "%(name)s was added successfully."
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        print(f"{request.headers.get("HX-Request") = }")
         if request.headers.get("HX-Request"):
             self.template_name = self.partial_name
-        response = super().get(request, *args, **kwargs)
-        return response
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if request.headers.get("HX-Request"):
+            self.template_name = self.partial_name
+        return super().post(request, *args, **kwargs)
 
     def get_success_message(self, cleaned_data: dict[str, Any]) -> str:
         data: dict[str, str] = {"name": cleaned_data["asset_name"]}
