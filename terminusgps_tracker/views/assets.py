@@ -18,7 +18,6 @@ from terminusgps_tracker.forms import CommandExecutionForm
 
 class AssetMapView(LoginRequiredMixin, TemplateView):
     content_type = "text/html"
-    extra_context = {"legal_name": settings.TRACKER_PROFILE.get("LEGAL_NAME")}
     http_method_names = ["get", "post"]
     login_url = reverse_lazy("tracker login")
     permission_denied_message = "Please login and try again."
@@ -48,7 +47,6 @@ class AssetMapView(LoginRequiredMixin, TemplateView):
 
 class CommandExecutionView(LoginRequiredMixin, FormView):
     content_type = "text/html"
-    extra_context = {"legal_name": settings.TRACKER_PROFILE.get("LEGAL_NAME")}
     http_method_names = ["get", "post"]
     form_class = CommandExecutionForm
     template_name = "terminusgps_tracker/assets/remote_button.html"
@@ -91,7 +89,6 @@ class CommandExecutionView(LoginRequiredMixin, FormView):
 
 class AssetRemoteView(LoginRequiredMixin, TemplateView):
     content_type = "text/html"
-    extra_context = {"legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"]}
     http_method_names = ["get"]
     login_url = reverse_lazy("tracker login")
     permission_denied_message = "Please login and try again."
