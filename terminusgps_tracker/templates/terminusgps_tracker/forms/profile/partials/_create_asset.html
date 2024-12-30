@@ -1,15 +1,17 @@
 <tr class="border-b bg-white dark:border-gray-700 dark:bg-gray-800" hx-swap="this">
-    <form hx-post="{% url 'create asset' %}" hx-swap="outerHTML" class="m-4 dark:text-terminus-white">
+    <form method="post" action="{% url 'create asset' %}" class="m-4 dark:text-terminus-white">
         {% csrf_token %}
-        <td scope="row" class="whitespace-nowrap bg-gray-300 px-6 py-4 font-medium text-gray-900">
+        <td class="bg-gray-300 px-6 py-4 font-medium text-gray-900 valid:bg-green-300 valid:text-green-500 invalid:bg-red-300 invalid:text-red-700">
             {{ form.asset_name }}
+            {% if "asset_name" in form.errors.keys %}<div class="-mt-4 text-sm text-terminus-red-100">{{ form.errors.asset_name }}</div>{% endif %}
         </td>
-        <td class="bg-gray-300 px-6 py-4 text-black">
+        <td class="bg-gray-300 px-6 py-4 font-medium text-gray-900 valid:bg-green-300 valid:text-green-500 invalid:bg-red-300 invalid:text-red-700">
             {{ form.imei_number }}
+            {% if "imei_number" in form.errors.keys %}<div class="-mt-4 text-sm text-terminus-red-100">{{ form.errors.imei_number }}</div>{% endif %}
         </td>
-        <td class="flex-inline flex gap-2 bg-gray-300 items-center p-8">
-            <button class="rounded bg-terminus-gray-200 p-2 text-gray-800 hover:bg-gray-50" hx-delete="{% url 'create asset' %}" hx-trigger="click" hx-swap="delete" hx-target="closest tr" type="button">Cancel</button>
-            <button class="rounded bg-terminus-red-500 p-2 text-gray-200 hover:bg-terminus-red-300" hx-trigger="click" hx-target="closest tr" type="submit">Register</button>
+        <td class="flex-inline flex items-center gap-2 bg-gray-300 p-8">
+            <input class="rounded bg-terminus-gray-200 p-2 text-gray-800 hover:cursor-pointer hover:bg-gray-50" hx-target="closest tr" hx-delete="{% url 'create asset' %}" hx-trigger="click" hx-swap="delete" type="button" value="Cancel">
+            <input class="rounded bg-terminus-red-500 p-2 text-gray-200 hover:cursor-pointer hover:bg-terminus-red-300" hx-post="{% url 'create asset' %}" hx-swap="outerHTML" hx-params="*" hx-target="closest tr" type="submit" value="Register" id="submit">
         </td>
     </form>
 </tr>

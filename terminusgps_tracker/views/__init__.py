@@ -1,4 +1,12 @@
-from .assets import AssetRemoteView, CommandExecutionView
+from .assets import (
+    AssetCreationView,
+    AssetDeletionView,
+    AssetDetailView,
+    AssetListView,
+    AssetRemoteView,
+    AssetUpdateView,
+    CommandExecutionView,
+)
 from .profile import (
     TrackerProfileAssetCreationView,
     TrackerProfilePaymentMethodCreationView,

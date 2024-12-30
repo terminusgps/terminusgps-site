@@ -12,6 +12,7 @@ urlpatterns = [
     path("logout/", views.TrackerLogoutView.as_view(), name="tracker logout"),
     path("signup/", views.TrackerSignupView.as_view(), name="tracker signup"),
     path("report/", views.TrackerBugReportView.as_view(), name="bug report"),
+    path("assets/table/", views.AssetListView.as_view(), name="asset table"),
     path(
         "subscriptions/",
         views.TrackerSubscriptionOptionsView.as_view(),

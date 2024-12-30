@@ -153,6 +153,16 @@ class TrackerProfileAssetCreationView(
             else None
         )
 
+    def form_invalid(self, form: AssetCreationForm) -> HttpResponse:
+        for field_name in form.errors.keys():
+            form.fields[field_name].widget.attrs.update(
+                {
+                    "class": "w-full block mb-4 mt-2 p-2 rounded-md bg-red-50 text-terminus-red-700 placeholder-terminus-red-300",
+                    "placeholder": "",
+                }
+            )
+        return super().form_invalid(form=form)
+
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if not request.headers.get("HX-Request"):
             return HttpResponse(status=402)
@@ -167,6 +177,7 @@ class TrackerProfileAssetCreationView(
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if request.headers.get("HX-Request"):
             self.template_name = self.partial_name
+        print(request.POST)
         return super().post(request, *args, **kwargs)
 
     def get_success_message(self, cleaned_data: dict[str, Any]) -> str:

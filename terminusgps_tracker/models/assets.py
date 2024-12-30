@@ -3,6 +3,7 @@ from django.db import models, transaction
 import terminusgps.wialon.flags as flags
 from terminusgps.wialon.constants import WialonCommandType, WialonCommandLink
 from terminusgps.wialon.session import WialonSession
+from terminusgps.wialon.utils import get_id_from_iccid
 
 
 class TrackerAssetCommand(models.Model):
@@ -70,8 +71,8 @@ class TrackerAsset(models.Model):
         return str(self.name)
 
     def save(self, session: WialonSession | None = None, **kwargs) -> None:
-        if session is not None:
-            self.populate(session)
+        if session and self.imei_number:
+            self.id = get_id_from_iccid(str(self.imei_number), session)
         return super().save(**kwargs)
 
     @transaction.atomic

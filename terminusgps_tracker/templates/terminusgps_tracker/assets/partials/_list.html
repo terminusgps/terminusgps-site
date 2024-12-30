@@ -1,0 +1,59 @@
+<div id="asset-table" class="flex flex-col items-center gap-4">
+    <div class="relative w-full overflow-x-auto">
+        <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
+            <thead class="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Name
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        IMEI #
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Remote
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="asset-list">
+                <div class="flex gap-2" hx-swap="outerHTML" hx-target="#asset-table">
+                    {% if page_obj.has_previous %}
+                    <button class="flex flex-inline" hx-get="{% url 'asset table' %}" hx-trigger="click">
+                        <span class="sr-only md:flex">First</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
+                        </svg>
+                    </button>
+                    <button class="flex flex-inline" hx-get="{% url 'asset table' %}?page={{ page_obj.previous_page_number }}" hx-trigger="click">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                        </svg>
+                        <span class="sr-only md:flex">Previous</span>
+                    </button>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                    <button class="flex flex-inline" hx-get="{% url 'asset table' %}?page={{ page_obj.next_page_number }}" hx-trigger="click">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                        </svg>
+                        <span class="sr-only md:flex">Next</span>
+                    </button>
+                    <button class="flex flex-inline" hx-get="{% url 'asset table' %}?page={{ page_obj.paginator.num_pages }}" hx-trigger="click">
+                        <span class="sr-only md:flex">Last</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                        </svg>
+                    </button>
+                    {% endif %}
+                </div>
+                {% for asset in asset_list %}{% include "terminusgps_tracker/assets/partials/_detail.html" %}{% endfor %}
+                <span class="text-sm text-center">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </tbody>
+        </table>
+    </div>
+    <a hx-trigger="click" hx-get="{% url 'create asset' %}" hx-target="#asset-list" hx-swap="beforeend" class="flex-inline group flex w-full gap-2 rounded bg-red-300 p-4 transition-all duration-300 ease-in-out will-change-auto hover:scale-105 hover:cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-terminus-red-100">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <p class="font-semibold text-terminus-red-700">Register New Asset</p>
+    </a>
+</div>
