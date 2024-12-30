@@ -1,6 +1,8 @@
 from typing import Any
 
 from django.conf import settings
+from django import forms
+from django.db import transaction
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
 from django.forms import ValidationError
@@ -18,6 +20,9 @@ from django.views.generic import (
     UpdateView,
 )
 from terminusgps.wialon.session import WialonSession
+from terminusgps.wialon.items import WialonUnit, WialonUser, WialonUnitGroup
+from terminusgps.wialon import constants
+from terminusgps.wialon.utils import get_id_from_iccid
 from wialon.api import WialonError
 
 from terminusgps_tracker.models.assets import TrackerAsset, TrackerAssetCommand
@@ -25,14 +30,19 @@ from terminusgps_tracker.models.profiles import TrackerProfile
 from terminusgps_tracker.forms import CommandExecutionForm
 
 
+class WialonUnitNotFoundError(Exception):
+    """Raised when a Wialon unit was not found via IMEI #."""
+
+
 class AssetListView(LoginRequiredMixin, ListView):
     content_type = "text/html"
-    http_method_names = ["get"]
-    template_name = "terminusgps_tracker/assets/list.html"
-    partial_name = "terminusgps_tracker/assets/partials/_list.html"
-    model = TrackerAsset
     context_object_name = "asset_list"
+    http_method_names = ["get"]
+    model = TrackerAsset
+    ordering = "-name"
     paginate_by = 6
+    partial_name = "terminusgps_tracker/assets/partials/_list.html"
+    template_name = "terminusgps_tracker/assets/list.html"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if request.headers.get("HX-Request"):
@@ -41,10 +51,14 @@ class AssetListView(LoginRequiredMixin, ListView):
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
-        self.profile = TrackerProfile.objects.get(user=request.user)
+        self.profile = (
+            TrackerProfile.objects.get(user=request.user)
+            if request.user and request.user.is_authenticated
+            else None
+        )
 
     def get_queryset(self) -> QuerySet:
-        if not self.profile.assets.exists() or self.profile.assets.all().count() < 0:
+        if not self.profile:
             return TrackerAsset.objects.none()
         return self.profile.assets.all()
 
@@ -71,6 +85,12 @@ class AssetUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "terminusgps_tracker/assets/update.html"
     partial_name = "terminusgps_tracker/assets/partials/_update.html"
     fields = ["name", "imei_number"]
+    context_object_name = "asset"
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        if request.headers.get("HX-Request"):
+            self.template_name = self.partial_name
 
 
 class AssetCreationView(LoginRequiredMixin, CreateView):
@@ -79,16 +99,91 @@ class AssetCreationView(LoginRequiredMixin, CreateView):
     template_name = "terminusgps_tracker/assets/create.html"
     partial_name = "terminusgps_tracker/assets/partials/_create.html"
     fields = ["name", "imei_number"]
+    context_object_name = "asset"
+    model = TrackerAsset
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
         if request.headers.get("HX-Request"):
             self.template_name = self.partial_name
-        return super().get(request, *args, **kwargs)
+        self.profile = TrackerProfile.objects.get(user=request.user)
 
-    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if request.headers.get("HX-Request"):
-            self.template_name = self.partial_name
-        return super().get(request, *args, **kwargs)
+    def get_available_commands(self) -> QuerySet:
+        return TrackerAssetCommand.objects.filter().exclude(pk__in=[1, 2, 3])
+
+    def get_form(self, form_class=None) -> forms.Form:
+        form = super().get_form(form_class)
+        form.fields["name"].widget = forms.TextInput(
+            {"class": "px-4 py-2 text-terminus-red-700 bg-red-100"}
+        )
+        form.fields["imei_number"].widget = forms.TextInput(
+            {"class": "px-4 py-2 text-terminus-red-700 bg-red-100"}
+        )
+        return form
+
+    @transaction.atomic
+    def wialon_create_asset(self, id: str, name: str, session: WialonSession) -> None:
+        assert self.profile.wialon_end_user_id
+        end_user_id = self.profile.wialon_end_user_id
+
+        available = WialonUnitGroup(
+            id=str(settings.WIALON_UNACTIVATED_GROUP), session=session
+        )
+        user = WialonUser(id=str(end_user_id), session=session)
+        unit = WialonUnit(id=id, session=session)
+
+        available.rm_item(unit)
+        unit.rename(name)
+        user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
+
+        asset = TrackerAsset.objects.create(id=unit.id, profile=self.profile)
+        queryset = self.get_available_commands()
+        asset.commands.set(queryset)
+        asset.save()
+
+    def form_valid(self, form: forms.Form) -> HttpResponse:
+        imei_number: str = form.cleaned_data["imei_number"]
+
+        try:
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                unit_id: str | None = get_id_from_iccid(imei_number, session=session)
+                if not unit_id:
+                    raise WialonUnitNotFoundError()
+
+                self.wialon_create_asset(
+                    unit_id, form.cleaned_data["asset_name"], session
+                )
+        except AssertionError:
+            form.add_error(
+                None,
+                ValidationError(
+                    _(
+                        "Whoops! Couldn't find the Wialon user associated with this profile. Please try again later."
+                    )
+                ),
+            )
+            return self.form_invalid(form=form)
+        except WialonUnitNotFoundError:
+            form.add_error(
+                "imei_number",
+                ValidationError(
+                    _("Unit with IMEI # '%(imei)s' may not exist, or wasn't found."),
+                    code="invalid",
+                    params={"imei": imei_number},
+                ),
+            )
+            return self.form_invalid(form=form)
+        except WialonError or ValueError:
+            form.add_error(
+                None,
+                ValidationError(
+                    _(
+                        "Whoops! Something went wrong with Wialon. Please try again later."
+                    )
+                ),
+            )
+            return self.form_invalid(form=form)
+        return super().form_valid(form=form)
 
 
 class AssetDeletionView(LoginRequiredMixin, DeleteView):
@@ -101,13 +196,12 @@ class AssetDeletionView(LoginRequiredMixin, DeleteView):
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if not request.headers.get("HX-Request"):
             return HttpResponse(status=402)
-        self.template_name = self.partial_name
         return super().delete(request, *args, **kwargs)
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
         if request.headers.get("HX-Request"):
             self.template_name = self.partial_name
-        return super().get(request, *args, **kwargs)
 
 
 class CommandExecutionView(LoginRequiredMixin, FormView):

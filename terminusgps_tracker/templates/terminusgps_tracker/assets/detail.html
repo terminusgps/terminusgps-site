@@ -1,15 +1,4 @@
 {% extends "terminusgps_tracker/layout.html" %}
-{% load static %}
 {% block content %}
-<tr id="{{ asset.id }}" class="border-b bg-white dark:border-gray-700 dark:bg-gray-800">
-    <th scope="row" class="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white">
-        {{ asset.name }}
-    </th>
-    <td class="px-6 py-4">
-        {{ asset.imei_number }}
-    </td>
-    <td class="px-6 py-4">
-        <a class="hover:underline" href="{% url 'asset remote' asset.id %}">Remote Link</a>
-    </td>
-</tr>
+{% include "terminusgps_tracker/assets/partials/_detail.html" %}
 {% endblock content %}

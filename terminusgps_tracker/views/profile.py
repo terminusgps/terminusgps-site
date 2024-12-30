@@ -32,10 +32,6 @@ from terminusgps_tracker.models import (
 )
 
 
-class WialonUnitNotFoundError(Exception):
-    """Raised when a Wialon unit was not found via IMEI #."""
-
-
 class TrackerProfileView(LoginRequiredMixin, TemplateView):
     template_name = "terminusgps_tracker/profile/profile.html"
     extra_context = {
@@ -49,8 +45,9 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
     http_method_names = ["get", "post"]
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        with WialonSession(token=settings.WIALON_TOKEN) as session:
-            [asset.save(session) for asset in self.profile.assets.all()]
+        if self.profile and self.profile.assets.exists():
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                [asset.save(session) for asset in self.profile.assets.all()]
         return super().get(request, *args, **kwargs)
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
@@ -183,73 +180,6 @@ class TrackerProfileAssetCreationView(
     def get_success_message(self, cleaned_data: dict[str, Any]) -> str:
         data: dict[str, str] = {"name": cleaned_data["asset_name"]}
         return self.success_message % data
-
-    def get_available_commands(self) -> QuerySet:
-        return TrackerAssetCommand.objects.filter().exclude(pk__in=[1, 2, 3])
-
-    @transaction.atomic
-    def wialon_create_asset(self, id: str, name: str, session: WialonSession) -> None:
-        assert self.profile.wialon_end_user_id
-        end_user_id = self.profile.wialon_end_user_id
-
-        available = WialonUnitGroup(
-            id=str(settings.WIALON_UNACTIVATED_GROUP), session=session
-        )
-        user = WialonUser(id=str(end_user_id), session=session)
-        unit = WialonUnit(id=id, session=session)
-
-        available.rm_item(unit)
-        unit.rename(name)
-        user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
-
-        asset = TrackerAsset.objects.create(id=unit.id, profile=self.profile)
-        queryset = self.get_available_commands()
-        asset.commands.set(queryset)
-        asset.save()
-
-    def form_valid(self, form: AssetCreationForm) -> HttpResponse:
-        imei_number: str = form.cleaned_data["imei_number"]
-
-        try:
-            with WialonSession(token=settings.WIALON_TOKEN) as session:
-                unit_id: str | None = get_id_from_iccid(imei_number, session=session)
-                if not unit_id:
-                    raise WialonUnitNotFoundError()
-
-                self.wialon_create_asset(
-                    unit_id, form.cleaned_data["asset_name"], session
-                )
-        except AssertionError:
-            form.add_error(
-                None,
-                ValidationError(
-                    _(
-                        "Whoops! Couldn't find the Wialon user associated with this profile. Please try again later."
-                    )
-                ),
-            )
-            return self.form_invalid(form=form)
-        except WialonUnitNotFoundError:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Unit with IMEI # '%(imei)s' may not exist, or wasn't found."),
-                    code="invalid",
-                    params={"imei": imei_number},
-                ),
-            )
-            return self.form_invalid(form=form)
-        except WialonError or ValueError:
-            form.add_error(
-                None,
-                ValidationError(
-                    _(
-                        "Whoops! Something went wrong with Wialon. Please try again later."
-                    )
-                ),
-            )
-            return self.form_invalid(form=form)
-        return super().form_valid(form=form)
 
 
 class TrackerProfilePaymentMethodCreationView(

@@ -1,3 +1,4 @@
+from .auth import TrackerLogoutView, TrackerLoginView, TrackerSignupView
 from .assets import (
     AssetCreationView,
     AssetDeletionView,
@@ -16,15 +17,12 @@ from .profile import (
     TrackerProfileShippingAddressDeletionView,
     TrackerProfileView,
 )
-from .generic import (
+from .public import (
     TrackerAboutView,
     TrackerBugReportView,
     TrackerContactView,
     TrackerLandingView,
-    TrackerLoginView,
-    TrackerLogoutView,
     TrackerPrivacyView,
-    TrackerSignupView,
     TrackerSourceView,
 )
 from .subscriptions import (

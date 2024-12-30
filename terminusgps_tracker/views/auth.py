@@ -2,64 +2,19 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
 from django.http import HttpRequest, HttpResponse
-from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import TemplateView, RedirectView, FormView
-from terminusgps.wialon.items import WialonUnitGroup, WialonUser
+from django.views.generic import FormView
+from terminusgps.wialon.items import WialonUser, WialonUnitGroup
 from terminusgps.wialon.session import WialonSession
 from wialon.api import WialonError
 
-
-from terminusgps_tracker.forms import (
-    TrackerSignupForm,
-    TrackerAuthenticationForm,
-    BugReportForm,
-)
+from terminusgps_tracker.forms import TrackerAuthenticationForm, TrackerSignupForm
 from terminusgps_tracker.models import TrackerProfile, TrackerSubscription
-
-
-class TrackerLandingView(LoginRequiredMixin, RedirectView):
-    http_method_names = ["get"]
-    permanent = True
-    url = reverse_lazy("tracker profile")
-
-
-class TrackerSourceView(RedirectView):
-    http_method_names = ["get"]
-    permanent = True
-    url = settings.TRACKER_PROFILE["GITHUB"]
-
-
-class TrackerAboutView(TemplateView):
-    content_type = "text/html"
-    extra_context = {"title": "About", "subtitle": "We know where ours are... do you?"}
-    http_method_names = ["get"]
-    template_name = "terminusgps_tracker/about.html"
-
-
-class TrackerPrivacyView(TemplateView):
-    content_type = "text/html"
-    extra_context = {"title": "Privacy Policy", "profile": settings.TRACKER_PROFILE}
-    http_method_names = ["get"]
-    template_name = "terminusgps_tracker/privacy.html"
-
-
-class TrackerContactView(TemplateView):
-    content_type = "text/html"
-    extra_context = {
-        "title": "Contact",
-        "subtitle": "Ready to get in touch?",
-        "profile": settings.TRACKER_PROFILE,
-    }
-    http_method_names = ["get"]
-    template_name = "terminusgps_tracker/contact.html"
 
 
 class TrackerLoginView(LoginView):
@@ -68,7 +23,7 @@ class TrackerLoginView(LoginView):
     extra_context = {"title": "Login", "subtitle": "We know where ours are... do you?"}
     http_method_names = ["get", "post"]
     next_page = reverse_lazy("tracker profile")
-    template_name = "terminusgps_tracker/forms/login.html"
+    template_name = "terminusgps_tracker/login.html"
 
 
 class TrackerLogoutView(LogoutView):
@@ -77,8 +32,8 @@ class TrackerLogoutView(LogoutView):
     http_method_names = ["get", "post", "options"]
     next_page = reverse_lazy("tracker login")
     success_url_allowed_hosts = settings.ALLOWED_HOSTS
-    template_name = "terminusgps_tracker/forms/logged_out.html"
-    partial_name = "terminusgps_tracker/forms/logout.html"
+    template_name = "terminusgps_tracker/logged_out.html"
+    partial_name = "terminusgps_tracker/logout.html"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if request.headers.get("HX-Request"):
@@ -147,50 +102,3 @@ class TrackerSignupView(SuccessMessageMixin, FormView):
         # resource = WialonResource(
         #     owner_id=owner.id, name=f"resource_{profile.user.username}", session=session
         # )
-
-
-class TrackerBugReportView(SuccessMessageMixin, FormView):
-    form_class = BugReportForm
-    content_type = "text/html"
-    extra_context = {"title": "Bug Report"}
-    http_method_names = ["get", "post"]
-    template_name = "terminusgps_tracker/bug_report.html"
-    success_url = reverse_lazy("tracker profile")
-    success_message = "Thank you! Your bug report was submitted successfully."
-
-    def form_valid(self, form: BugReportForm) -> HttpResponse:
-        self.send_bug_report(form)
-        return super().form_valid(form=form)
-
-    def get_initial(self) -> dict[str, Any]:
-        if self.request.user:
-            return {"user": self.request.user}
-        return {}
-
-    @staticmethod
-    def send_bug_report(form: BugReportForm) -> None:
-        text_content: str = render_to_string(
-            "terminusgps_tracker/emails/bug_report.txt",
-            context={
-                "user": form.cleaned_data["user"],
-                "text": form.cleaned_data["text"],
-                "category": form.cleaned_data["category"],
-                "now": timezone.now(),
-            },
-        )
-        # html_content: str = render_to_string(
-        #     "terminusgps/emails/bug_report.html",
-        #     context={
-        #         "user": form.cleaned_data["user"],
-        #         "text": form.cleaned_data["text"],
-        #         "category": form.cleaned_data["category"],
-        #         "now": timezone.now(),
-        #     },
-        # )
-        email: EmailMultiAlternatives = EmailMultiAlternatives(
-            f"Bug Report - {timezone.now():%d/%m/%y} - {timezone.now():%I:%M:%S%z}",
-            text_content,
-            to=["support@terminusgps.com"],
-        )
-        # email.attach_alternative(html_content, "text/html")
-        email.send(fail_silently=True)

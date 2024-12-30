@@ -1,0 +1,17 @@
+<tr class="border-b bg-white dark:border-gray-700 dark:bg-gray-800" hx-swap="this">
+    <form method="post" action="{% url 'asset create' %}" class="m-4 dark:text-terminus-white">
+        {% csrf_token %}
+        <td class="bg-gray-300 px-6 py-4 font-medium text-gray-900 valid:bg-green-300 valid:text-green-500 invalid:bg-red-300 invalid:text-red-700">
+            {{ form.name }}
+            {% if "asset_name" in form.errors.keys %}<div class="-mt-4 text-sm text-terminus-red-100">{{ form.errors.asset_name }}</div>{% endif %}
+        </td>
+        <td class="bg-gray-300 px-6 py-4 font-medium text-gray-900 valid:bg-green-300 valid:text-green-500 invalid:bg-red-300 invalid:text-red-700">
+            {{ form.imei_number }}
+            {% if "imei_number" in form.errors.keys %}<div class="-mt-4 text-sm text-terminus-red-100">{{ form.errors.imei_number }}</div>{% endif %}
+        </td>
+        <td class="flex-inline flex items-center gap-2 bg-gray-300 p-8">
+            <input class="rounded bg-terminus-gray-200 p-2 text-gray-800 hover:cursor-pointer hover:bg-gray-50" hx-target="closest tr" hx-delete="{% url 'asset create' %}" hx-trigger="click" hx-swap="delete" type="button" value="Cancel">
+            <input class="rounded bg-terminus-red-500 p-2 text-gray-200 hover:cursor-pointer hover:bg-terminus-red-300" hx-post="{% url 'asset create' %}" hx-swap="outerHTML" hx-params="*" hx-target="closest tr" type="submit" value="Register" id="submit">
+        </td>
+    </form>
+</tr>

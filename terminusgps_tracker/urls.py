@@ -13,6 +13,13 @@ urlpatterns = [
     path("signup/", views.TrackerSignupView.as_view(), name="tracker signup"),
     path("report/", views.TrackerBugReportView.as_view(), name="bug report"),
     path("assets/table/", views.AssetListView.as_view(), name="asset table"),
+    path("assets/new/", views.AssetCreationView.as_view(), name="asset create"),
+    path("assets/<int:id>/edit/", views.AssetUpdateView.as_view(), name="asset update"),
+    path(
+        "assets/<int:id>/delete/",
+        views.AssetDeletionView.as_view(),
+        name="asset delete",
+    ),
     path(
         "subscriptions/",
         views.TrackerSubscriptionOptionsView.as_view(),
@@ -63,10 +70,5 @@ urlpatterns = [
         "profile/payments/<int:id>/delete/",
         views.TrackerProfilePaymentMethodDeletionView.as_view(),
         name="delete payment",
-    ),
-    path(
-        "profile/assets/new/",
-        views.TrackerProfileAssetCreationView.as_view(),
-        name="create asset",
     ),
 ]
