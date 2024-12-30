@@ -71,18 +71,19 @@ class TrackerLoginView(LoginView):
     template_name = "terminusgps_tracker/forms/login.html"
 
 
-class TrackerLogoutView(SuccessMessageMixin, LogoutView):
+class TrackerLogoutView(LogoutView):
     content_type = "text/html"
-    template_name = "terminusgps_tracker/forms/logout.html"
     extra_context = {"title": "Logout"}
-    success_url = reverse_lazy("tracker login")
-    success_message = "You have been successfully logged out."
-    success_url_allowed_hosts = settings.ALLOWED_HOSTS
     http_method_names = ["get", "post", "options"]
+    next_page = reverse_lazy("tracker login")
+    success_url_allowed_hosts = settings.ALLOWED_HOSTS
+    template_name = "terminusgps_tracker/forms/logged_out.html"
+    partial_name = "terminusgps_tracker/forms/logout.html"
 
-    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        super().post(request, *args, **kwargs)
-        return HttpResponseRedirect(self.success_url)
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if request.headers.get("HX-Request"):
+            self.template_name = self.partial_name
+        return super().get(request, *args, **kwargs)
 
 
 class TrackerSignupView(SuccessMessageMixin, FormView):
