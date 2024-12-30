@@ -141,9 +141,23 @@ class TrackerProfileAssetCreationView(
     login_url = reverse_lazy("tracker login")
     permission_denied_message = "Please login and try again."
     raise_exception = True
-    http_method_names = ["get", "post"]
+    http_method_names = ["get", "post", "delete"]
     success_url = reverse_lazy("tracker profile")
     success_message = "%(name)s was added successfully."
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.profile = (
+            TrackerProfile.objects.get(user=request.user)
+            if request.user and request.user.is_authenticated
+            else None
+        )
+
+    def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if not request.headers.get("HX-Request"):
+            return HttpResponse(status=402)
+        self.template_name = "terminusgps_tracker/blank.html"
+        return self.render_to_response(context=self.get_context_data())
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if request.headers.get("HX-Request"):
@@ -165,10 +179,12 @@ class TrackerProfileAssetCreationView(
     @transaction.atomic
     def wialon_create_asset(self, id: str, name: str, session: WialonSession) -> None:
         assert self.profile.wialon_end_user_id
+        end_user_id = self.profile.wialon_end_user_id
+
         available = WialonUnitGroup(
             id=str(settings.WIALON_UNACTIVATED_GROUP), session=session
         )
-        user = WialonUser(id=str(self.profile.wialon_end_user_id), session=session)
+        user = WialonUser(id=str(end_user_id), session=session)
         unit = WialonUnit(id=id, session=session)
 
         available.rm_item(unit)
@@ -179,14 +195,6 @@ class TrackerProfileAssetCreationView(
         queryset = self.get_available_commands()
         asset.commands.set(queryset)
         asset.save()
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        self.profile = (
-            TrackerProfile.objects.get(user=request.user)
-            if request.user and request.user.is_authenticated
-            else None
-        )
 
     def form_valid(self, form: AssetCreationForm) -> HttpResponse:
         imei_number: str = form.cleaned_data["imei_number"]

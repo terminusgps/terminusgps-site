@@ -1,6 +1,5 @@
-<tr class="border-b bg-white dark:border-gray-700 dark:bg-gray-800">
-    <form method="post" action="{% url 'create asset' %}" class="m-4 dark:text-terminus-white">
-        {{ form.non_field_errors }}
+<tr class="border-b bg-white dark:border-gray-700 dark:bg-gray-800" hx-swap="this">
+    <form hx-post="{% url 'create asset' %}" hx-swap="outerHTML" class="m-4 dark:text-terminus-white">
         {% csrf_token %}
         <td scope="row" class="whitespace-nowrap bg-gray-300 px-6 py-4 font-medium text-gray-900">
             {{ form.asset_name }}
@@ -8,8 +7,9 @@
         <td class="bg-gray-300 px-6 py-4 text-black">
             {{ form.imei_number }}
         </td>
-        <td class="bg-gray-300 px-6 py-4">
-            <button class="rounded bg-terminus-red-700 p-2 text-gray-200 hover:scale-105" hx-post="{% url 'create asset' %}" hx-trigger="click">Register</button>
+        <td class="flex-inline flex gap-2 bg-gray-300 items-center p-8">
+            <button class="rounded bg-terminus-gray-200 p-2 text-gray-800 hover:bg-gray-50" hx-delete="{% url 'create asset' %}" hx-trigger="click" hx-swap="delete" hx-target="closest tr" type="button">Cancel</button>
+            <button class="rounded bg-terminus-red-500 p-2 text-gray-200 hover:bg-terminus-red-300" hx-trigger="click" hx-target="closest tr" type="submit">Register</button>
         </td>
     </form>
 </tr>

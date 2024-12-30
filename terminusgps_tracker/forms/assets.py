@@ -7,7 +7,7 @@ from terminusgps_tracker.validators import (
     validate_phone,
 )
 
-from terminusgps_tracker.models.assets import TrackerAssetCommand
+from terminusgps_tracker.models import TrackerAsset, TrackerAssetCommand
 
 
 class CommandExecutionForm(forms.Form):
@@ -67,17 +67,4 @@ class AssetModificationForm(forms.Form):
 
 
 class AssetDeletionForm(forms.Form):
-    asset_name = forms.CharField(
-        label="Asset Name",
-        validators=[validate_wialon_unit_name],
-        widget=widgets.TextInput({"placeholder": "My Vehicle"}),
-        min_length=4,
-        max_length=64,
-    )
-    imei_number = forms.CharField(
-        label="IMEI #",
-        validators=[validate_wialon_imei_number],
-        widget=widgets.NumberInput({"placeholder": "123412341234"}),
-        min_length=15,
-        max_length=24,
-    )
+    asset = forms.ModelChoiceField(queryset=TrackerAsset.objects.all())
