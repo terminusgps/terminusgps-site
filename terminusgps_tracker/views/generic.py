@@ -7,12 +7,12 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import TemplateView, RedirectView, FormView
-from terminusgps.wialon.items import WialonResource, WialonUnitGroup, WialonUser
+from terminusgps.wialon.items import WialonUnitGroup, WialonUser
 from terminusgps.wialon.session import WialonSession
 from wialon.api import WialonError
 
