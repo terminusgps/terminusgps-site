@@ -1,9 +1,10 @@
 from typing import Any
 
 from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.mail import EmailMultiAlternatives
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -16,7 +17,7 @@ from terminusgps_tracker.forms import BugReportForm
 class TrackerLandingView(RedirectView):
     http_method_names = ["get"]
     permanent = True
-    url = reverse_lazy("tracker profile")
+    url = reverse_lazy("tracker about")
 
 
 class TrackerSourceView(RedirectView):
@@ -50,7 +51,7 @@ class TrackerContactView(TemplateView):
     template_name = "terminusgps_tracker/contact.html"
 
 
-class TrackerBugReportView(SuccessMessageMixin, FormView):
+class TrackerBugReportView(SuccessMessageMixin, LoginRequiredMixin, FormView):
     form_class = BugReportForm
     content_type = "text/html"
     extra_context = {"title": "Bug Report"}
@@ -58,6 +59,12 @@ class TrackerBugReportView(SuccessMessageMixin, FormView):
     template_name = "terminusgps_tracker/bug_report.html"
     success_url = reverse_lazy("tracker profile")
     success_message = "Thank you! Your bug report was submitted successfully."
+    login_url = reverse_lazy("tracker login")
+    raise_exception = False
+    permission_denied_message = "Please login and try again."
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
 
     def form_valid(self, form: BugReportForm) -> HttpResponse:
         self.send_bug_report(form)

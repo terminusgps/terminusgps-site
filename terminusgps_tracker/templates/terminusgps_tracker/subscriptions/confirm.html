@@ -8,7 +8,7 @@
             {% endfor %}
         </ul>
     </div>
-    {% include "terminusgps_tracker/subscription_tier.html" with tier=tier %}
+    {% include "terminusgps_tracker/subscriptions/partials/_tier.html" with tier=tier %}
     <div class="flex flex-col gap-4 rounded bg-gray-300 p-8">
         <h2 class="text-2xl text-terminus-red-500">{{ tier.name|title }} Plan Features</h2>
         {% for feature in tier.features.values %}

@@ -9,7 +9,6 @@ from .assets import (
     CommandExecutionView,
 )
 from .profile import (
-    TrackerProfileAssetCreationView,
     TrackerProfilePaymentMethodCreationView,
     TrackerProfilePaymentMethodDeletionView,
     TrackerProfileSettingsView,
@@ -27,7 +26,7 @@ from .public import (
 )
 from .subscriptions import (
     TrackerSubscriptionConfirmView,
-    TrackerSubscriptionModificationView,
+    TrackerSubscriptionUpdateView,
     TrackerSubscriptionOptionsView,
     TrackerSubscriptionSuccessView,
 )

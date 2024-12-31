@@ -95,7 +95,7 @@ class AssetUpdateView(LoginRequiredMixin, UpdateView):
 
 class AssetCreationView(LoginRequiredMixin, CreateView):
     content_type = "text/html"
-    http_method_names = ["get", "post"]
+    http_method_names = ["get", "post", "delete"]
     template_name = "terminusgps_tracker/assets/create.html"
     partial_name = "terminusgps_tracker/assets/partials/_create.html"
     fields = ["name", "imei_number"]
@@ -107,6 +107,9 @@ class AssetCreationView(LoginRequiredMixin, CreateView):
         if request.headers.get("HX-Request"):
             self.template_name = self.partial_name
         self.profile = TrackerProfile.objects.get(user=request.user)
+
+    def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        return HttpResponse("")
 
     def get_available_commands(self) -> QuerySet:
         return TrackerAssetCommand.objects.filter().exclude(pk__in=[1, 2, 3])

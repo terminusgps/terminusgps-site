@@ -43,7 +43,7 @@ urlpatterns = [
     ),
     path(
         "profile/subscription/<int:pk>/update/",
-        views.TrackerSubscriptionModificationView.as_view(),
+        views.TrackerSubscriptionUpdateView.as_view(),
         name="modify subscription",
     ),
     path(

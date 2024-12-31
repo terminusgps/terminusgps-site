@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.forms import Form
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -23,33 +23,37 @@ class TrackerSubscriptionOptionsView(TemplateView):
     content_type = "text/html"
     extra_context = {"title": "Subscriptions"}
     http_method_names = ["get"]
-    template_name = "terminusgps_tracker/subscription_options.html"
-    partial_name = "terminusgps_tracker/_subscription_options.html"
+    template_name = "terminusgps_tracker/subscriptions/options.html"
+    partial_template_name = "terminusgps_tracker/subscriptions/partials/_options.html"
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.tiers = TrackerSubscriptionTier.objects.filter()[:3]
         if request.headers.get("HX-Request"):
-            self.template_name = self.partial_name
-        return super().get(request, *args, **kwargs)
+            self.template_name = self.partial_template_name
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["subscription_tiers"] = TrackerSubscriptionTier.objects.all()[:3]
+        context["subscription_tiers"] = self.tiers
         return context
 
 
 class TrackerSubscriptionConfirmView(LoginRequiredMixin, FormView):
     content_type = "text/html"
     extra_context = {"title": "Confirm Subscription"}
-    http_method_names = ["get", "post"]
-    template_name = "terminusgps_tracker/subscription_confirm.html"
     form_class = SubscriptionConfirmationForm
+    http_method_names = ["get", "post"]
     login_url = reverse_lazy("tracker login")
+    partial_template_name = "terminusgps_tracker/subscriptions/partials/_confirm.html"
     permission_denied_message = "Please login and try again."
     raise_exception = False
     success_url = reverse_lazy("success subscription")
+    template_name = "terminusgps_tracker/subscriptions/confirm.html"
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
+        if request.headers.get("HX-Request"):
+            self.template_name = self.partial_template_name
         self.profile = (
             TrackerProfile.objects.get(user=request.user)
             if request.user.is_authenticated
@@ -57,7 +61,7 @@ class TrackerSubscriptionConfirmView(LoginRequiredMixin, FormView):
         )
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if self.profile is not None:
+        if self.profile:
             if self.profile.payments.count() == 0:
                 messages.add_message(
                     request,
@@ -75,12 +79,12 @@ class TrackerSubscriptionConfirmView(LoginRequiredMixin, FormView):
         return super().get(request, *args, **kwargs)
 
     def get_initial(self) -> dict[str, Any]:
-        if self.profile is not None:
-            return {
-                "payment_id": self.profile.payments.filter().first().authorizenet_id,
-                "address_id": self.profile.addresses.filter().first().authorizenet_id,
-            }
-        return {}
+        if not self.profile:
+            return {}
+        return {
+            "payment_id": self.profile.payments.filter().first().authorizenet_id,
+            "address_id": self.profile.addresses.filter().first().authorizenet_id,
+        }
 
     def form_valid(self, form: SubscriptionConfirmationForm) -> HttpResponse:
         new_tier: TrackerSubscriptionTier = TrackerSubscriptionTier.objects.get(
@@ -144,22 +148,36 @@ class TrackerSubscriptionSuccessView(LoginRequiredMixin, TemplateView):
         "title": "Successfully Subscribed!",
         "subtitle": "Thanks for subscribing!",
     }
-    template_name = "terminusgps_tracker/subscription_success.html"
+    login_url = reverse_lazy("tracker login")
+    partial_template_name = "terminusgps_tracker/subscriptions/partials/_success.html"
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
     redirect_url = reverse_lazy("tracker profile")
+    template_name = "terminusgps_tracker/subscriptions/success.html"
+    partial_template_name = "terminusgps_tracker/subscriptions/partials/_success.html"
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.profile = TrackerProfile.objects.get(user=request.user)
+        if request.headers.get("HX-Request"):
+            self.template_name = self.partial_template_name
 
 
-class TrackerSubscriptionModificationView(LoginRequiredMixin, UpdateView):
+class TrackerSubscriptionUpdateView(LoginRequiredMixin, UpdateView):
     content_type = "text/html"
     context_object_name = "subscription"
     extra_context = None
     fields = ["id", "tier", "payment_id", "address_id"]
     model = TrackerSubscription
     success_url = reverse_lazy("tracker profile")
-    template_name = "terminusgps_tracker/forms/profile/modify_subscription.html"
+    template_name = "terminusgps_tracker/subscriptions/update.html"
+    partial_template_name = "terminusgps_tracker/subscriptions/partials/_update.html"
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
+        if request.headers.get("HX-Request"):
+            self.template_name = self.partial_template_name
 
     def form_valid(self, form: Form) -> HttpResponse:
         subscription = self.get_object()

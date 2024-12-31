@@ -1,41 +1,24 @@
-<form action="{% url 'create shipping' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
+<form action="{% url 'create shipping' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}" hx-target=".body">
     {{ form.non_field_errors }}
     {% csrf_token %}
-    <div class="mb-8 grid grid-rows-1 gap-8 md:grid-cols-2">
-        <div class="flex flex-col gap-4">
-            <h2 class="text-lg">Shipping Address</h2>
+    <div class="flex flex-col gap-4">
+        <div class="flex gap-2">
+            {{ form.address_first_name }}
+            {{ form.address_last_name }}
         </div>
-        <div class="flex flex-col gap-4">
-            <div class="flex gap-2">
-                {{ form.address_first_name }}
-                {{ form.address_last_name }}
-            </div>
-            {{ form.address_street }}
-            {{ form.address_city }}
-            <div class="flex gap-2">
-                {{ form.address_state }}
-                {{ form.address_country }}
-            </div>
-            <div class="flex gap-2">
-                {{ form.address_zip }}
-                {{ form.address_phone }}
-            </div>
+        {{ form.address_street }}
+        {{ form.address_city }}
+        <div class="flex gap-2">
+            {{ form.address_state }}
+            {{ form.address_country }}
         </div>
-    </div>
-    <div class="mb-8 grid grid-rows-1 gap-8 md:grid-cols-2">
-        <div class="flex flex-col gap-4">
-            <h2 class="text-lg">Set as default shipping address?:</h2>
+        <div class="flex gap-2">
+            {{ form.address_zip }}
+            {{ form.address_phone }}
+            Default: {{ form.is_default }}
         </div>
-        <div class="flex-inline bg-white block w-full p-8">
-            {{ form.is_default }}
+        <div class="flex justify-evenly gap-2">
+            <input class="grow rounded-md border border-solid border-gray-600 bg-gray-200 px-4 py-2 text-center text-gray-700 hover:cursor-pointer hover:bg-gray-50 dark:border-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-400" hx-delete="{% url 'create shipping' %}" hx-swap="delete" hx-trigger="click" hx-target="closest form" type="button" value="Cancel">
+            <input class="grow rounded-md border border-solid border-gray-600 bg-terminus-red-500 px-4 py-2 text-center text-gray-50 hover:cursor-pointer hover:bg-terminus-red-300 dark:border-gray-300" type="submit" value="Submit">
         </div>
-    </div>
-    <div class="mt-4 flex flex-grow justify-evenly gap-2">
-        <a href="{% url 'profile settings' %}" class="text-center grow rounded-md border border-solid border-gray-600 px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-50">
-            Back
-        </a>
-        <button class="grow rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-gray-50 hover:from-terminus-red-400 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
-            Submit
-        </button>
-    </div>
 </form>
