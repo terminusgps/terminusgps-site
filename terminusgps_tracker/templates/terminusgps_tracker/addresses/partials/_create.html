@@ -1,4 +1,4 @@
-<form action="{% url 'create shipping' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}" hx-target=".body">
+<form action="{% url 'create shipping' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}" hx-target="this" hx-swap="outerHTML">
     {{ form.non_field_errors }}
     {% csrf_token %}
     <div class="flex flex-col gap-4">
@@ -22,6 +22,6 @@
         </div>
         <div class="flex justify-evenly gap-2">
             <input class="grow rounded-md border border-solid border-gray-600 bg-gray-200 px-4 py-2 text-center text-gray-700 hover:cursor-pointer hover:bg-gray-50 dark:border-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-400" hx-delete="{% url 'create shipping' %}" hx-swap="innerHTML" hx-trigger="click" hx-target="closest form" type="button" value="Cancel">
-            <input class="grow rounded-md border border-solid border-gray-600 bg-terminus-red-500 px-4 py-2 text-center text-gray-50 hover:cursor-pointer hover:bg-terminus-red-300 dark:border-gray-300" type="submit" value="Submit">
+            <input class="grow rounded-md border border-solid border-gray-600 bg-terminus-red-500 px-4 py-2 text-center text-gray-50 hover:cursor-pointer hover:bg-terminus-red-300 dark:border-gray-300" type="submit" value="Submit" hx-trigger="click" hx-post="{% url 'create shipping' %}" hx-target="closest form">
         </div>
 </form>

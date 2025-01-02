@@ -2,6 +2,7 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
@@ -74,31 +75,13 @@ class TrackerProfileSettingsView(LoginRequiredMixin, TemplateView):
         return context
 
     @staticmethod
-    def get_payments(profile: TrackerProfile, total: int = 4) -> list:
+    def get_payments(profile: TrackerProfile, total: int = 4) -> QuerySet:
         if profile.payments.count() == 0:
             return []
-        return [
-            (
-                TrackerPaymentMethod.authorizenet_get_payment_profile(
-                    profile_id=profile.authorizenet_id,
-                    payment_id=payment.authorizenet_id,
-                ),
-                payment.is_default,
-            )
-            for payment in profile.payments.all()[:total]
-        ]
+        return profile.payments.filter()[:total]
 
     @staticmethod
-    def get_addresses(profile: TrackerProfile, total: int = 4) -> list:
+    def get_addresses(profile: TrackerProfile, total: int = 4) -> QuerySet:
         if profile.addresses.count() == 0:
             return []
-        return [
-            (
-                TrackerShippingAddress.authorizenet_get_shipping_address(
-                    profile_id=profile.authorizenet_id,
-                    address_id=address.authorizenet_id,
-                ),
-                address.is_default,
-            )
-            for address in profile.addresses.all()[:total]
-        ]
+        return profile.addresses.filter()[:total]

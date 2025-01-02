@@ -57,12 +57,12 @@ urlpatterns = [
         name="create shipping",
     ),
     path(
-        "profile/shipping/<int:id>/",
+        "profile/shipping/<int:pk>/",
         views.ShippingAddressDetailView.as_view(),
         name="detail shipping",
     ),
     path(
-        "profile/shipping/<int:id>/delete/",
+        "profile/shipping/<int:pk>/delete/",
         views.ShippingAddressDeleteView.as_view(),
         name="delete shipping",
     ),
@@ -72,12 +72,12 @@ urlpatterns = [
         name="create payment",
     ),
     path(
-        "profile/payments/<int:id>/",
+        "profile/payments/<int:pk>/",
         views.PaymentMethodDetailView.as_view(),
         name="detail payment",
     ),
     path(
-        "profile/payments/<int:id>/delete/",
+        "profile/payments/<int:pk>/delete/",
         views.PaymentMethodDeleteView.as_view(),
         name="delete payment",
     ),

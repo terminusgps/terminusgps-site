@@ -25,6 +25,9 @@ class ShippingAddressDetailView(LoginRequiredMixin, DetailView):
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
+        self.htmx_request = bool(request.headers.get("HX-Request"))
+        if self.htmx_request:
+            self.template_name = self.partial_template_name
 
     def get_object(self, queryset: QuerySet | None = None) -> TrackerShippingAddress:
         return self.profile.addresses.get(pk=self.kwargs["pk"])
@@ -35,7 +38,7 @@ class ShippingAddressDetailView(LoginRequiredMixin, DetailView):
         context["address"] = self.authorizenet_get_shipping_address(
             self.profile.authorizenet_id, shipping_address.authorizenet_id
         )
-        context["is_default"] = shipping_address.is_default or False
+        context["default"] = shipping_address.is_default or False
         return context
 
     @staticmethod
