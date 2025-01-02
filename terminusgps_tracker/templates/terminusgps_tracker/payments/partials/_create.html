@@ -1,7 +1,8 @@
-<form class="{{ class }}" action="{% url 'create payment' %}" method="post" hx-post="{% url 'create payment' %}" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}" hx-target=".body">
+<form action="{% url 'create payment' %}" method="post" hx-post="{% url 'create payment' %}" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
     {% csrf_token %}
+    <h2 class="text-2xl">Add a new payment method</h2>
     <div class="mt-8 flex flex-col gap-8">
-        <h2 class="text-xl">Credit Card</h2>
+        <h2 class="text-lg">Credit Card</h2>
         <div class="flex flex-col">
             {{ form.credit_card_number }}
             <div class="flex justify-evenly">
@@ -10,7 +11,7 @@
             </div>
             {{ form.credit_card_ccv }}
         </div>
-        <h2 class="text-xl">Billing Address</h2>
+        <h2 class="text-lg">Billing Address</h2>
         <div class="flex flex-col">
             <div class="flex">
                 {{ form.address_first_name }}
@@ -27,13 +28,13 @@
                 {{ form.address_phone }}
             </div>
         </div>
-        <div class="flex flex-inline">
+        <div class="flex-inline flex">
             Default: {{ form.is_default }}
             Consent: {{ form.is_consenting }}
         </div>
         <div class="flex justify-evenly gap-2">
-            <input class="grow rounded-md border border-solid border-gray-600 bg-gray-200 px-4 py-2 text-center text-gray-700 hover:cursor-pointer hover:bg-gray-50 dark:border-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-400" hx-delete="{% url 'create payment' %}" hx-swap="delete" hx-trigger="click" hx-target="closest form" type="button" value="Cancel">
-            <input class="grow rounded-md border border-solid border-gray-600 bg-terminus-red-500 px-4 py-2 text-center text-gray-50 hover:cursor-pointer hover:bg-terminus-red-300 dark:border-gray-300" type="submit" value="Submit">
+            <input class="grow rounded-md border border-solid border-gray-600 bg-gray-200 px-4 py-2 text-center text-gray-700 hover:cursor-pointer hover:bg-gray-50 dark:border-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-400" hx-delete="{% url 'create payment' %}" hx-swap="innerHTML" hx-trigger="click" hx-target="closest form" type="button" value="Cancel">
+            <input class="grow rounded-md border border-solid border-gray-600 bg-terminus-red-500 px-4 py-2 text-center text-gray-50 hover:cursor-pointer hover:bg-terminus-red-300 dark:border-gray-300" type="submit" hx-trigger="click" value="Submit">
         </div>
     </div>
 </form>

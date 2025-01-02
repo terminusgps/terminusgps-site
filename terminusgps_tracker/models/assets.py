@@ -46,7 +46,7 @@ class TrackerAssetCommand(models.Model):
 
 
 class TrackerAsset(models.Model):
-    id = models.PositiveIntegerField(primary_key=True)
+    wialon_id = models.PositiveIntegerField(default=None, blank=True, null=True)
     profile = models.ForeignKey(
         "terminusgps_tracker.TrackerProfile",
         on_delete=models.CASCADE,
@@ -70,16 +70,12 @@ class TrackerAsset(models.Model):
     def __str__(self) -> str:
         return str(self.name)
 
-    def save(self, session: WialonSession | None = None, **kwargs) -> None:
-        if session and self.imei_number:
-            self.id = get_id_from_iccid(str(self.imei_number), session)
-        return super().save(**kwargs)
-
     @transaction.atomic
     def populate(self, session: WialonSession) -> None:
+        assert self.wialon_id, "No Wialon id was set"
         data = session.wialon_api.core_search_item(
             **{
-                "id": self.id,
+                "id": self.wialon_id,
                 "flags": sum(
                     [flags.DATAFLAG_UNIT_BASE, flags.DATAFLAG_UNIT_ADVANCED_PROPERTIES]
                 ),

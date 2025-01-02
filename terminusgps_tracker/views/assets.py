@@ -1,15 +1,15 @@
 from typing import Any
 
-from django.conf import settings
 from django import forms
-from django.db import transaction
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.db.models import QuerySet
 from django.forms import ValidationError
 from django.http import HttpRequest
-from django.utils.translation import gettext_lazy as _
 from django.http.response import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -41,13 +41,8 @@ class AssetListView(LoginRequiredMixin, ListView):
     model = TrackerAsset
     ordering = "-name"
     paginate_by = 6
-    partial_name = "terminusgps_tracker/assets/partials/_list.html"
+    partial_template_name = "terminusgps_tracker/assets/partials/_list.html"
     template_name = "terminusgps_tracker/assets/list.html"
-
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if request.headers.get("HX-Request"):
-            self.template_name = self.partial_name
-        return super().get(request, *args, **kwargs)
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
@@ -56,6 +51,9 @@ class AssetListView(LoginRequiredMixin, ListView):
             if request.user and request.user.is_authenticated
             else None
         )
+        self.htmx_request = bool(request.headers.get("HX-Request"))
+        if self.htmx_request:
+            self.template_name = self.partial_template_name
 
     def get_queryset(self) -> QuerySet:
         if not self.profile:
@@ -74,6 +72,9 @@ class AssetDetailView(LoginRequiredMixin, DetailView):
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
+        self.htmx_request = bool(request.headers.get("HX-Request"))
+        if self.htmx_request:
+            self.template_name = self.partial_template_name
 
     def get_queryset(self) -> QuerySet:
         return self.profile.assets.all()
@@ -89,7 +90,8 @@ class AssetUpdateView(LoginRequiredMixin, UpdateView):
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
-        if request.headers.get("HX-Request"):
+        self.htmx_request = bool(request.headers.get("HX-Request"))
+        if self.htmx_request:
             self.template_name = self.partial_name
 
 
@@ -104,44 +106,49 @@ class AssetCreationView(LoginRequiredMixin, CreateView):
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
-        if request.headers.get("HX-Request"):
-            self.template_name = self.partial_name
         self.profile = TrackerProfile.objects.get(user=request.user)
+        self.wialon_end_user_id = self.profile.wialon_end_user_id
+        self.htmx_request = bool(request.headers.get("HX-Request"))
+        if self.htmx_request:
+            self.template_name = self.partial_name
 
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        return HttpResponse("")
+        if not self.htmx_request:
+            return HttpResponse(status=402)
+        return HttpResponse("", status=200)
 
     def get_available_commands(self) -> QuerySet:
         return TrackerAssetCommand.objects.filter().exclude(pk__in=[1, 2, 3])
 
-    def get_form(self, form_class=None) -> forms.Form:
+    def get_form(self, form_class=None):
         form = super().get_form(form_class)
-        form.fields["name"].widget = forms.TextInput(
-            {"class": "px-4 py-2 text-terminus-red-700 bg-red-100"}
-        )
-        form.fields["imei_number"].widget = forms.TextInput(
-            {"class": "px-4 py-2 text-terminus-red-700 bg-red-100"}
-        )
+        for name in form.fields.keys():
+            form.fields[name].widget.attrs.update({"class": "p-2 rounded"})
+            if name == "imei_number":
+                form.fields[name].widget.attrs.update({"placeholder": "IMEI #"})
+            if name == "name":
+                form.fields[name].widget.attrs.update({"placeholder": "Asset Name"})
         return form
 
     @transaction.atomic
-    def wialon_create_asset(self, id: str, name: str, session: WialonSession) -> None:
-        assert self.profile.wialon_end_user_id
-        end_user_id = self.profile.wialon_end_user_id
-
+    def wialon_create_asset(
+        self, unit_id: int, name: str, session: WialonSession
+    ) -> None:
+        assert self.wialon_end_user_id
         available = WialonUnitGroup(
             id=str(settings.WIALON_UNACTIVATED_GROUP), session=session
         )
-        user = WialonUser(id=str(end_user_id), session=session)
-        unit = WialonUnit(id=id, session=session)
+        user = WialonUser(id=str(self.wialon_end_user_id), session=session)
+        unit = WialonUnit(id=str(unit_id), session=session)
 
         available.rm_item(unit)
         unit.rename(name)
         user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
 
-        asset = TrackerAsset.objects.create(id=unit.id, profile=self.profile)
-        queryset = self.get_available_commands()
-        asset.commands.set(queryset)
+    @transaction.atomic
+    def tracker_create_asset(self, unit_id: int) -> None:
+        asset = TrackerAsset.objects.create(wialon_id=unit_id, profile=self.profile)
+        asset.commands.set(self.get_available_commands())
         asset.save()
 
     def form_valid(self, form: forms.Form) -> HttpResponse:
@@ -154,11 +161,12 @@ class AssetCreationView(LoginRequiredMixin, CreateView):
                     raise WialonUnitNotFoundError()
 
                 self.wialon_create_asset(
-                    unit_id, form.cleaned_data["asset_name"], session
+                    int(unit_id), form.cleaned_data["name"], session
                 )
+                self.tracker_create_asset(int(unit_id))
         except AssertionError:
             form.add_error(
-                None,
+                "imei_number",
                 ValidationError(
                     _(
                         "Whoops! Couldn't find the Wialon user associated with this profile. Please try again later."
@@ -178,7 +186,7 @@ class AssetCreationView(LoginRequiredMixin, CreateView):
             return self.form_invalid(form=form)
         except WialonError or ValueError:
             form.add_error(
-                None,
+                "imei_number",
                 ValidationError(
                     _(
                         "Whoops! Something went wrong with Wialon. Please try again later."
@@ -197,13 +205,14 @@ class AssetDeletionView(LoginRequiredMixin, DeleteView):
     fields = ["id"]
 
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not request.headers.get("HX-Request"):
+        if not self.htmx_request:
             return HttpResponse(status=402)
         return super().delete(request, *args, **kwargs)
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
-        if request.headers.get("HX-Request"):
+        self.htmx_request = bool(request.headers.get("HX-Request"))
+        if self.htmx_request:
             self.template_name = self.partial_name
 
 
@@ -212,6 +221,7 @@ class CommandExecutionView(LoginRequiredMixin, FormView):
     http_method_names = ["get", "post"]
     form_class = CommandExecutionForm
     template_name = "terminusgps_tracker/assets/remote_button.html"
+    partial_template_name = "terminusgps_tracker/assets/_remote_button.html"
     login_url = reverse_lazy("tracker login")
     permission_denied_message = "Please login and try again."
     raise_exception = True
@@ -223,10 +233,15 @@ class CommandExecutionView(LoginRequiredMixin, FormView):
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
         self.asset = self.profile.assets.filter().get(pk=self.kwargs["id"])
+        self.htmx_request = bool(request.headers.get("HX-Request"))
+        self.wialon_session = WialonSession(token=settings.WIALON_TOKEN)
+        self.wialon_session.login()
+        if self.htmx_request:
+            self.template_name = self.partial_template_name
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not request.headers.get("HX-Request"):
-            return HttpResponse(status=402)
+        if not self.htmx_request:
+            return HttpResponse(status=403)
         return super().post(request, *args, **kwargs)
 
     def form_valid(
@@ -234,8 +249,7 @@ class CommandExecutionView(LoginRequiredMixin, FormView):
     ) -> HttpResponse | HttpResponseRedirect:
         command: TrackerAssetCommand = form.cleaned_data["command"]
         try:
-            with WialonSession(token=settings.WIALON_TOKEN) as session:
-                command.execute(self.asset.id, session)
+            command.execute(self.asset.id, self.wialon_session)
         except WialonError or ValueError:
             form.add_error(
                 "command",
@@ -256,20 +270,27 @@ class AssetRemoteView(LoginRequiredMixin, TemplateView):
     permission_denied_message = "Please login and try again."
     raise_exception = False
     template_name = "terminusgps_tracker/assets/remote.html"
+    partial_template_name = "terminusgps_tracker/assets/partials/_remote.html"
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
-        self.asset = self.profile.assets.filter().get(pk=self.kwargs["id"])
-        with WialonSession(token=settings.WIALON_TOKEN) as session:
-            self.asset.save(session)
+        self.htmx_request = bool(request.headers.get("HX-Request"))
+        if self.htmx_request:
+            self.template_name = self.partial_template_name
+        try:
+            self.asset = self.profile.assets.filter().get(pk=self.kwargs["id"])
+        except TrackerAsset.DoesNotExist:
+            self.asset = None
 
     def get_success_url(self) -> str:
+        assert self.asset and self.asset.id, "Asset was not set"
         return reverse("asset remote", kwargs={"id": self.asset.id})
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["asset"] = self.asset
-        context["title"] = f"{self.asset.name} Remote"
-        context["commands"] = self.asset.commands.filter()
+        if self.asset:
+            context["asset"] = self.asset
+            context["title"] = f"{self.asset.name} Remote"
+            context["commands"] = self.asset.commands.all()
         return context

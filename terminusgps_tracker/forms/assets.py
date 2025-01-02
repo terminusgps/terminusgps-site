@@ -18,25 +18,14 @@ class AssetCreationForm(forms.Form):
     asset_name = forms.CharField(
         label="Asset Name",
         validators=[validate_wialon_unit_name],
-        widget=widgets.TextInput(
-            attrs={
-                "class": "w-full block mb-4 mt-2 p-2 rounded-md",
-                "placeholder": "My Vehicle",
-                "autofocus": True,
-            }
-        ),
+        widget=widgets.TextInput(attrs={"placeholder": "My Vehicle"}),
         min_length=4,
         max_length=64,
     )
     imei_number = forms.CharField(
         label="IMEI #",
         validators=[validate_wialon_imei_number],
-        widget=widgets.NumberInput(
-            attrs={
-                "placeholder": "355197370064417",
-                "class": "w-full block mb-4 mt-2 p-2 rounded-md",
-            }
-        ),
+        widget=widgets.NumberInput(attrs={"placeholder": "355197370064417"}),
         min_length=15,
         max_length=24,
     )

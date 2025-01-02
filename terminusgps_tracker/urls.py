@@ -53,22 +53,32 @@ urlpatterns = [
     ),
     path(
         "profile/shipping/new/",
-        views.TrackerProfileShippingAddressCreationView.as_view(),
+        views.ShippingAddressCreateView.as_view(),
         name="create shipping",
     ),
     path(
+        "profile/shipping/<int:id>/",
+        views.ShippingAddressDetailView.as_view(),
+        name="detail shipping",
+    ),
+    path(
         "profile/shipping/<int:id>/delete/",
-        views.TrackerProfileShippingAddressDeletionView.as_view(),
+        views.ShippingAddressDeleteView.as_view(),
         name="delete shipping",
     ),
     path(
         "profile/payments/new/",
-        views.TrackerProfilePaymentMethodCreationView.as_view(),
+        views.PaymentMethodCreateView.as_view(),
         name="create payment",
     ),
     path(
+        "profile/payments/<int:id>/",
+        views.PaymentMethodDetailView.as_view(),
+        name="detail payment",
+    ),
+    path(
         "profile/payments/<int:id>/delete/",
-        views.TrackerProfilePaymentMethodDeletionView.as_view(),
+        views.PaymentMethodDeleteView.as_view(),
         name="delete payment",
     ),
 ]

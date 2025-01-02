@@ -1,4 +1,9 @@
 from .auth import TrackerLogoutView, TrackerLoginView, TrackerSignupView
+from .addresses import (
+    ShippingAddressCreateView,
+    ShippingAddressDeleteView,
+    ShippingAddressDetailView,
+)
 from .assets import (
     AssetCreationView,
     AssetDeletionView,
@@ -8,14 +13,7 @@ from .assets import (
     AssetUpdateView,
     CommandExecutionView,
 )
-from .profile import (
-    TrackerProfilePaymentMethodCreationView,
-    TrackerProfilePaymentMethodDeletionView,
-    TrackerProfileSettingsView,
-    TrackerProfileShippingAddressCreationView,
-    TrackerProfileShippingAddressDeletionView,
-    TrackerProfileView,
-)
+from .profile import TrackerProfileSettingsView, TrackerProfileView
 from .public import (
     TrackerAboutView,
     TrackerBugReportView,
@@ -29,4 +27,9 @@ from .subscriptions import (
     TrackerSubscriptionUpdateView,
     TrackerSubscriptionOptionsView,
     TrackerSubscriptionSuccessView,
+)
+from .payments import (
+    PaymentMethodDetailView,
+    PaymentMethodCreateView,
+    PaymentMethodDeleteView,
 )
