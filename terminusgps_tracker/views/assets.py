@@ -85,10 +85,16 @@ class AssetUpdateView(LoginRequiredMixin, UpdateView):
     http_method_names = ["get", "post"]
     template_name = "terminusgps_tracker/assets/update.html"
     partial_name = "terminusgps_tracker/assets/partials/_update.html"
-    fields = ["name"]
+    fields = ["name", "imei_number", "profile"]
     context_object_name = "asset"
     model = TrackerAsset
     success_url = reverse_lazy("tracker profile")
+
+    def get_initial(self) -> dict[str, Any]:
+        initial: dict[str, Any] = super().get_initial()
+        initial["profile"] = self.get_object().profile
+        initial["imei_number"] = self.get_object().imei_number
+        return initial
 
     def get_queryset(self) -> QuerySet:
         if self.profile:
@@ -97,12 +103,20 @@ class AssetUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
+        default_css_class = "p-2 rounded bg-gray-200 text-gray-700"
         for name in form.fields.keys():
             form.fields[name].widget.attrs.update(
                 {"class": "p-2 rounded bg-gray-200 text-gray-700"}
             )
             if name == "name":
                 form.fields[name].widget.attrs.update({"placeholder": "Asset Name"})
+            if name == "imei_number":
+                form.fields[name].widget.attrs.update(
+                    {
+                        "disabled": True,
+                        "class": default_css_class + " hover:cursor-not-allowed",
+                    }
+                )
         return form
 
     @transaction.atomic
