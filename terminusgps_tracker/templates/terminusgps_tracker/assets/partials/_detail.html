@@ -5,7 +5,25 @@
     <td class="px-6 py-4">
         {{ asset.imei_number }}
     </td>
-    <td class="px-6 py-4">
-        <a class="font-semibold text-terminus-red-500 underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:cursor-pointer hover:text-terminus-red-300 hover:decoration-dotted" hx-get="{% url 'asset update' asset.id %}" hx-target="#{{ asset.id }}" hx-swap="outerHTML" hx-trigger="click">Edit Asset</a>
+    <td class="flex-inline flex gap-2 px-6 py-4">
+        <input
+            class="rounded border-gray-600 bg-gray-300 p-2 text-gray-700 hover:cursor-pointer hover:bg-gray-200"
+            type="button"
+            value="Delete"
+            hx-post="{% url 'asset delete' asset.id %}"
+            hx-swap="delete"
+            hx-target="closest tr"
+            hx-trigger="click"
+            hx-confirm="Are you sure you want to delete '{{ asset.name }}'?"
+        >
+        <input
+            class="rounded border-terminus-red-600 bg-terminus-red-800 p-2 text-white hover:cursor-pointer hover:bg-terminus-red-400"
+            type="button"
+            value="Edit"
+            hx-get="{% url 'asset update' asset.id %}"
+            hx-swap="outerHTML"
+            hx-target="closest tr"
+            hx-trigger="click"
+        >
     </td>
 </tr>

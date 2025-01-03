@@ -87,9 +87,43 @@ class AssetUpdateView(LoginRequiredMixin, UpdateView):
     partial_name = "terminusgps_tracker/assets/partials/_update.html"
     fields = ["name", "imei_number"]
     context_object_name = "asset"
+    model = TrackerAsset
+
+    def get_success_url(self, asset: TrackerAsset | None = None) -> str:
+        if asset is None:
+            return reverse("tracker profile")
+        return reverse("asset detail", kwargs={"pk": asset.pk})
+
+    def get_queryset(self) -> QuerySet:
+        if self.profile:
+            return self.profile.assets.filter()
+        return TrackerAsset.objects.none()
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        for name in form.fields.keys():
+            form.fields[name].widget.attrs.update(
+                {"class": "p-2 rounded bg-gray-200 text-gray-700"}
+            )
+            if name == "name":
+                form.fields[name].widget.attrs.update({"placeholder": "Asset Name"})
+        return form
+
+    @transaction.atomic
+    def form_valid(self, form: forms.Form) -> HttpResponseRedirect | HttpResponse:
+        if "name" in form.changed_data:
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                unit = WialonUnit(id=str(self.kwargs["pk"]), session=session)
+                unit.rename(form.cleaned_data["name"])
+        return super().form_valid(form=form)
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
+        self.profile = (
+            TrackerProfile.objects.get(user=request.user)
+            if request.user and request.user.is_authenticated
+            else None
+        )
         self.htmx_request = bool(request.headers.get("HX-Request"))
         if self.htmx_request:
             self.template_name = self.partial_name
