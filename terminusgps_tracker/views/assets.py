@@ -65,7 +65,7 @@ class AssetDetailView(LoginRequiredMixin, DetailView):
     content_type = "text/html"
     http_method_names = ["get"]
     template_name = "terminusgps_tracker/assets/detail.html"
-    partial_name = "terminusgps_tracker/assets/partials/_detail.html"
+    partial_template_name = "terminusgps_tracker/assets/partials/_detail.html"
     model = TrackerAsset
     context_object_name = "asset"
 
