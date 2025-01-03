@@ -4,6 +4,7 @@ import terminusgps.wialon.flags as flags
 from terminusgps.wialon.constants import WialonCommandType, WialonCommandLink
 from terminusgps.wialon.session import WialonSession
 from terminusgps.wialon.utils import get_id_from_iccid
+from django.conf import settings
 
 
 class TrackerAssetCommand(models.Model):
@@ -51,6 +52,7 @@ class TrackerAsset(models.Model):
         "terminusgps_tracker.TrackerProfile",
         on_delete=models.CASCADE,
         related_name="assets",
+        null=True,
     )
     commands = models.ManyToManyField(
         "terminusgps_tracker.TrackerAssetCommand", default=None, blank=True
@@ -69,6 +71,13 @@ class TrackerAsset(models.Model):
 
     def __str__(self) -> str:
         return str(self.name)
+
+    def save(self, **kwargs) -> None:
+        with WialonSession(token=settings.WIALON_TOKEN) as session:
+            self.wialon_id = get_id_from_iccid(self.imei_number, session)
+            if self.wialon_id is not None:
+                self.populate(session)
+        super().save(**kwargs)
 
     @transaction.atomic
     def populate(self, session: WialonSession) -> None:

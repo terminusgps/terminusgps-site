@@ -104,6 +104,11 @@ class AssetCreationView(LoginRequiredMixin, CreateView):
     context_object_name = "asset"
     model = TrackerAsset
 
+    def get_success_url(self, asset: TrackerAsset | None = None) -> str:
+        if asset is None:
+            return reverse("tracker profile")
+        return reverse("detail asset", kwargs={"pk": asset.pk})
+
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
@@ -117,42 +122,35 @@ class AssetCreationView(LoginRequiredMixin, CreateView):
             return HttpResponse(status=402)
         return HttpResponse("", status=200)
 
-    def get_available_commands(self) -> QuerySet:
-        return TrackerAssetCommand.objects.filter().exclude(pk__in=[1, 2, 3])
-
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         for name in form.fields.keys():
-            form.fields[name].widget.attrs.update({"class": "p-2 rounded"})
+            form.fields[name].widget.attrs.update({"class": "p-2 rounded bg-gray-200"})
             if name == "imei_number":
                 form.fields[name].widget.attrs.update({"placeholder": "IMEI #"})
             if name == "name":
                 form.fields[name].widget.attrs.update({"placeholder": "Asset Name"})
         return form
 
-    @transaction.atomic
-    def wialon_create_asset(
-        self, unit_id: int, name: str, session: WialonSession
-    ) -> None:
-        assert self.wialon_end_user_id
-        available = WialonUnitGroup(
-            id=str(settings.WIALON_UNACTIVATED_GROUP), session=session
-        )
-        user = WialonUser(id=str(self.wialon_end_user_id), session=session)
-        unit = WialonUnit(id=str(unit_id), session=session)
-
-        available.rm_item(unit)
-        unit.rename(name)
-        user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
-
-    @transaction.atomic
-    def tracker_create_asset(self, unit_id: int) -> None:
-        asset = TrackerAsset.objects.create(wialon_id=unit_id, profile=self.profile)
-        asset.commands.set(self.get_available_commands())
-        asset.save()
+    def form_invalid(self, form: forms.Form) -> HttpResponse:
+        for field in form.fields:
+            if field in form.errors.keys():
+                form.fields[field].widget.attrs.update(
+                    {
+                        "class": "p-2 rounded bg-red-50 text-terminus-red-700 placeholder-terminus-red-300"
+                    }
+                )
+            else:
+                form.fields[field].widget.attrs.update(
+                    {
+                        "class": "p-2 rounded bg-green-50 text-green-700 placeholder-green-300"
+                    }
+                )
+        return super().form_invalid(form=form)
 
     def form_valid(self, form: forms.Form) -> HttpResponse:
         imei_number: str = form.cleaned_data["imei_number"]
+        asset_name: str | None = form.cleaned_data["name"]
 
         try:
             with WialonSession(token=settings.WIALON_TOKEN) as session:
@@ -160,17 +158,24 @@ class AssetCreationView(LoginRequiredMixin, CreateView):
                 if not unit_id:
                     raise WialonUnitNotFoundError()
 
-                self.wialon_create_asset(
-                    int(unit_id), form.cleaned_data["name"], session
+                self.wialon_create_asset(int(unit_id), asset_name, session)
+                asset = TrackerAsset.objects.create(
+                    wialon_id=unit_id,
+                    imei_number=imei_number,
+                    name=asset_name if asset_name else imei_number,
                 )
-                self.tracker_create_asset(int(unit_id))
+                asset.profile = self.profile
+                asset.commands.set(self.get_available_commands())
+                asset.save()
         except AssertionError:
             form.add_error(
                 "imei_number",
                 ValidationError(
                     _(
-                        "Whoops! Couldn't find the Wialon user associated with this profile. Please try again later."
-                    )
+                        "Unit with IMEI # '%(value)s' appears to have already been registered. Please try again later."
+                    ),
+                    code="invalid",
+                    params={"value": imei_number},
                 ),
             )
             return self.form_invalid(form=form)
@@ -178,9 +183,9 @@ class AssetCreationView(LoginRequiredMixin, CreateView):
             form.add_error(
                 "imei_number",
                 ValidationError(
-                    _("Unit with IMEI # '%(imei)s' may not exist, or wasn't found."),
+                    _("Unit with IMEI # '%(value)s' may not exist, or wasn't found."),
                     code="invalid",
-                    params={"imei": imei_number},
+                    params={"value": imei_number},
                 ),
             )
             return self.form_invalid(form=form)
@@ -190,11 +195,31 @@ class AssetCreationView(LoginRequiredMixin, CreateView):
                 ValidationError(
                     _(
                         "Whoops! Something went wrong with Wialon. Please try again later."
-                    )
+                    ),
+                    code="wialon",
                 ),
             )
             return self.form_invalid(form=form)
         return super().form_valid(form=form)
+
+    def get_available_commands(self) -> QuerySet:
+        return TrackerAssetCommand.objects.filter().exclude(pk__in=[1, 2, 3])
+
+    @transaction.atomic
+    def wialon_create_asset(
+        self, unit_id: int, name: str | None, session: WialonSession
+    ) -> None:
+        assert self.wialon_end_user_id, "No end user id was set."
+        available = WialonUnitGroup(
+            id=str(settings.WIALON_UNACTIVATED_GROUP), session=session
+        )
+        user = WialonUser(id=str(self.wialon_end_user_id), session=session)
+        unit = WialonUnit(id=str(unit_id), session=session)
+
+        available.rm_item(unit)
+        user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
+        if name is not None:
+            unit.rename(name)
 
 
 class AssetDeletionView(LoginRequiredMixin, DeleteView):

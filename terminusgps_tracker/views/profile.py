@@ -7,13 +7,7 @@ from django.http import HttpRequest
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
-from terminusgps_tracker.models import (
-    TrackerPaymentMethod,
-    TrackerProfile,
-    TrackerShippingAddress,
-    TrackerSubscription,
-    TrackerAsset,
-)
+from terminusgps_tracker.models import TrackerProfile, TrackerSubscription, TrackerAsset
 
 
 class TrackerProfileView(LoginRequiredMixin, TemplateView):

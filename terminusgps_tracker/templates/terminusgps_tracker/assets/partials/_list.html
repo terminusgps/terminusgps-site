@@ -50,10 +50,5 @@
             </tbody>
         </table>
     </div>
-    <a hx-trigger="click" hx-get="{% url 'asset create' %}" hx-target="this" hx-swap="outerHTML" class="flex-inline group flex w-full gap-2 rounded bg-red-300 p-4 transition-all duration-300 ease-in-out will-change-auto hover:scale-105 hover:cursor-pointer">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-terminus-red-100">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
-        <p class="font-semibold text-terminus-red-700">Register New Asset</p>
-    </a>
+    {% include "terminusgps_tracker/assets/register_new_button.html" %}
 </div>
