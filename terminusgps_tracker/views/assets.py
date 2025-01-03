@@ -21,7 +21,7 @@ from django.views.generic import (
 )
 from terminusgps.wialon.session import WialonSession
 from terminusgps.wialon.items import WialonUnit, WialonUser, WialonUnitGroup
-from terminusgps.wialon import constants
+from terminusgps.wialon import flags
 from terminusgps.wialon.utils import get_id_from_iccid
 from wialon.api import WialonError
 
@@ -85,14 +85,10 @@ class AssetUpdateView(LoginRequiredMixin, UpdateView):
     http_method_names = ["get", "post"]
     template_name = "terminusgps_tracker/assets/update.html"
     partial_name = "terminusgps_tracker/assets/partials/_update.html"
-    fields = ["name", "imei_number"]
+    fields = ["name"]
     context_object_name = "asset"
     model = TrackerAsset
-
-    def get_success_url(self, asset: TrackerAsset | None = None) -> str:
-        if asset is None:
-            return reverse("tracker profile")
-        return reverse("asset detail", kwargs={"pk": asset.pk})
+    success_url = reverse_lazy("tracker profile")
 
     def get_queryset(self) -> QuerySet:
         if self.profile:
@@ -134,14 +130,10 @@ class AssetCreationView(LoginRequiredMixin, CreateView):
     http_method_names = ["get", "post", "delete"]
     template_name = "terminusgps_tracker/assets/create.html"
     partial_name = "terminusgps_tracker/assets/partials/_create.html"
+    success_url = reverse_lazy("tracker profile")
     fields = ["name", "imei_number"]
     context_object_name = "asset"
     model = TrackerAsset
-
-    def get_success_url(self, asset: TrackerAsset | None = None) -> str:
-        if asset is None:
-            return reverse("tracker profile")
-        return reverse("detail asset", kwargs={"pk": asset.pk})
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
@@ -243,25 +235,65 @@ class AssetCreationView(LoginRequiredMixin, CreateView):
     def wialon_create_asset(
         self, unit_id: int, name: str | None, session: WialonSession
     ) -> None:
-        assert self.wialon_end_user_id, "No end user id was set."
+        assert self.profile.wialon_end_user_id, "No end user id was set."
+        assert self.profile.wialon_group_id, "No profile group was set."
         available = WialonUnitGroup(
             id=str(settings.WIALON_UNACTIVATED_GROUP), session=session
         )
-        user = WialonUser(id=str(self.wialon_end_user_id), session=session)
+        user = WialonUser(id=str(self.profile.wialon_end_user_id), session=session)
         unit = WialonUnit(id=str(unit_id), session=session)
+        unit_group = WialonUnitGroup(
+            id=str(self.profile.wialon_group_id), session=session
+        )
 
         available.rm_item(unit)
-        user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
+        unit_group.add_item(unit)
         if name is not None:
             unit.rename(name)
+
+        try:
+            for item in unit, unit_group:
+                session.wialon_api.user_update_item_access(
+                    **{
+                        "userId": str(user.id),
+                        "itemId": str(item.id),
+                        "accessMask": sum(
+                            [
+                                flags.ACCESSFLAG_VIEW_ITEM_BASIC,
+                                flags.ACCESSFLAG_VIEW_ITEM_DETAILED,
+                                flags.ACCESSFLAG_RENAME_ITEM,
+                                flags.ACCESSFLAG_VIEW_CUSTOM_FIELDS,
+                                flags.ACCESSFLAG_MANAGE_CUSTOM_FIELDS,
+                                flags.ACCESSFLAG_MANAGE_ICON,
+                                flags.ACCESSFLAG_VIEW_ADMIN_FIELDS,
+                                flags.ACCESSFLAG_UNIT_IMPORT_MESSAGES,
+                                flags.ACCESSFLAG_UNIT_EXPORT_MESSAGES,
+                                flags.ACCESSFLAG_UNIT_VIEW_SERVICE_INTERVALS,
+                            ]
+                        ),
+                    }
+                )
+        except WialonError as e:
+            print(e)
+            raise
 
 
 class AssetDeletionView(LoginRequiredMixin, DeleteView):
     content_type = "text/html"
-    http_method_names = ["get", "delete"]
+    http_method_names = ["get", "post"]
     template_name = "terminusgps_tracker/assets/delete.html"
     partial_name = "terminusgps_tracker/assets/partials/_delete.html"
-    fields = ["id"]
+    model = TrackerAsset
+    success_url = reverse_lazy("tracker profile")
+
+    @staticmethod
+    def wialon_delete_asset(unit_id: int, session: WialonSession) -> None:
+        available_group_id: int = settings.WIALON_UNACTIVATED_GROUP
+
+    def get_queryset(self) -> QuerySet:
+        if self.profile is not None:
+            return self.profile.assets.filter()
+        return TrackerAsset.objects.none()
 
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if not self.htmx_request:
@@ -270,6 +302,15 @@ class AssetDeletionView(LoginRequiredMixin, DeleteView):
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
+        self.unit_id = self.kwargs.get("pk")
+        self.profile = (
+            TrackerProfile.objects.get(user=request.user)
+            if request.user and request.user.is_authenticated
+            else None
+        )
+        self.group_id = (
+            self.profile.wialon_resource_id if self.profile is not None else None
+        )
         self.htmx_request = bool(request.headers.get("HX-Request"))
         if self.htmx_request:
             self.template_name = self.partial_name

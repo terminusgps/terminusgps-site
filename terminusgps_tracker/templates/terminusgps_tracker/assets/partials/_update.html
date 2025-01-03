@@ -19,12 +19,13 @@
         <input
             class="rounded bg-terminus-red-500 p-2 text-gray-200 hover:cursor-pointer hover:bg-terminus-red-300"
             type="submit"
+            value="Save"
             hx-indicator=".htmx-indicator"
             hx-include="closest tr"
+            hx-target="closest tr"
             hx-post="{% url 'asset create' %}"
             hx-swap="outerHTML"
             hx-trigger="click"
         >
     </td>
 </tr>
-{{ form.non_field_errors }}

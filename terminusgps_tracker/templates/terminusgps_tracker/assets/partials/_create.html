@@ -1,16 +1,10 @@
-<tr id="new-asset" class="border-b bg-white dark:border-gray-700 dark:bg-gray-800">
+<tr class="border-b bg-white dark:border-gray-700 dark:bg-gray-800">
     {% csrf_token %}
-    {{ form.profile.as_hidden }}
     <td class="px-6 py-4">
         {{ form.name }}
     </td>
     <td class="px-6 py-4">
         {{ form.imei_number }}
-        {% if "imei_number" in form.errors.keys %}
-        <ul class="p-2 text-sm text-terminus-red-500">
-            {{ form.errors.imei_number }}
-        </ul>
-        {% endif %}
     </td>
     <td class="flex-inline relative flex gap-2 px-6 py-4">
         <input
@@ -24,8 +18,9 @@
         >
         <input
             class="rounded border-terminus-red-600 bg-terminus-red-800 p-2 text-white hover:cursor-pointer hover:bg-terminus-red-400"
-            type="button"
-            value="Create"
+            type="submit"
+            value="Save"
+            hx-include="closest tr"
             hx-post="{% url 'asset create' %}"
             hx-swap="outerHTML"
             hx-target="closest tr"

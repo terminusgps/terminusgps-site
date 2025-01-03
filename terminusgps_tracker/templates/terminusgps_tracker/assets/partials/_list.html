@@ -45,7 +45,13 @@
                     </button>
                     {% endif %}
                 </div>
-                {% for asset in asset_list %}{% include "terminusgps_tracker/assets/partials/_detail.html" %}{% endfor %}
+                {% for asset in asset_list %}
+                <tr hx-indicator=".htmx-indicator" id="{{ asset.wialon_id }}" hx-get="{% url 'asset detail' asset.pk %}" hx-swap="outerHTML settle:1s" hx-trigger="load" hx-target="this">
+                    <td class="animate-pulse bg-gray-300/45 px-6 py-4"></td>
+                    <td class="animate-pulse bg-gray-300/45 px-6 py-4"></td>
+                    <td class="animate-pulse bg-gray-300/45 px-6 py-4"></td>
+                </tr>
+                {% endfor %}
                 <span class="{% if page_obj.paginator.num_pages == 1 %}hidden{% endif %} text-center text-sm">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
             </tbody>
         </table>
