@@ -5,8 +5,8 @@ from .addresses import (
     ShippingAddressDetailView,
 )
 from .assets import (
-    AssetCreationView,
-    AssetDeletionView,
+    AssetCreateView,
+    AssetDeleteView,
     AssetDetailView,
     AssetListView,
     AssetRemoteView,

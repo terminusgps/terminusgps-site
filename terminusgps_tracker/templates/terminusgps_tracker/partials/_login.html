@@ -1,0 +1,14 @@
+<form action="{% url 'tracker login' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
+    {% if form.non_field_errors %}
+    <ul class="m-4 list-inside list-none rounded bg-red-100 p-4">
+        {% for error in form.non_field_errors %}<li class="text-red-700">{{ error }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+    {% csrf_token %}
+    <label>Username:</label>
+    {{ form.username }}
+    <label>Password:</label>
+    {{ form.password }}
+    <input class="block w-full grow rounded border-terminus-black bg-terminus-red-700 py-4 text-terminus-white hover:cursor-pointer hover:bg-terminus-red-400" value="Login" type="submit">
+    <input class="hidden" type="hidden" name="next" value="{{ next }}"></input>
+</form>

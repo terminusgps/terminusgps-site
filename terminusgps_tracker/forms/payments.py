@@ -74,7 +74,7 @@ class ShippingAddressCreationForm(forms.Form):
     is_default = forms.BooleanField(
         initial=False,
         required=False,
-        widget=widgets.CheckboxInput(attrs={"class": default_class}),
+        widget=widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
     )
 
 
@@ -167,14 +167,10 @@ class PaymentMethodCreationForm(forms.Form):
     is_default = forms.BooleanField(
         initial=False,
         required=False,
-        widget=widgets.CheckboxInput(
-            attrs={"class": default_class + " accent-terminus-red-700"}
-        ),
+        widget=widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
     )
     is_consenting = forms.BooleanField(
         initial=False,
         required=True,
-        widget=widgets.CheckboxInput(
-            attrs={"class": default_class + " accent-terminus-red-700"}
-        ),
+        widget=widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
     )

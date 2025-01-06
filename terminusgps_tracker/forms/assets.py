@@ -4,7 +4,6 @@ from django.forms import widgets
 from terminusgps_tracker.validators import (
     validate_wialon_unit_name,
     validate_wialon_imei_number,
-    validate_phone,
 )
 
 from terminusgps_tracker.models import TrackerAsset, TrackerAssetCommand
@@ -14,44 +13,62 @@ class CommandExecutionForm(forms.Form):
     command = forms.ModelChoiceField(queryset=TrackerAssetCommand.objects.all())
 
 
-class AssetCreationForm(forms.Form):
-    asset_name = forms.CharField(
+class TrackerAssetUpdateForm(forms.ModelForm):
+    class Meta:
+        base_class = (
+            "p-2 bg-gray-300 text-gray-800 rounded border-gray-600 placeholder-gray-400"
+        )
+        model = TrackerAsset
+        fields = ("name", "imei_number")
+        widgets = {
+            "name": widgets.TextInput(
+                attrs={"placeholder": "My Vehicle", "class": base_class}
+            ),
+            "imei_number": widgets.TextInput(
+                attrs={
+                    "placeholder": "IMEI #",
+                    "class": base_class + " hover:cursor-not-allowed select-all",
+                    "disabled": True,
+                }
+            ),
+        }
+
+
+class TrackerAssetCreateForm(forms.ModelForm):
+    class Meta:
+        base_class = (
+            "p-2 bg-gray-300 text-gray-800 rounded border-gray-600 placeholder-gray-400"
+        )
+        model = TrackerAsset
+        fields = ("name", "imei_number")
+        widgets = {
+            "name": widgets.TextInput(
+                attrs={"placeholder": "My Vehicle", "class": base_class}
+            ),
+            "imei_number": widgets.TextInput(
+                attrs={"placeholder": "IMEI #", "class": base_class}
+            ),
+        }
+
+
+class AssetUpdateForm(forms.Form):
+    name = forms.CharField(
         label="Asset Name",
         validators=[validate_wialon_unit_name],
-        widget=widgets.TextInput(attrs={"placeholder": "My Vehicle"}),
+        widget=widgets.TextInput(
+            {"placeholder": "My Vehicle", "class": "p-2 bg-gray-300 text-gray-700"}
+        ),
         min_length=4,
         max_length=64,
     )
     imei_number = forms.CharField(
         label="IMEI #",
         validators=[validate_wialon_imei_number],
-        widget=widgets.NumberInput(attrs={"placeholder": "355197370064417"}),
+        widget=widgets.NumberInput(
+            {"placeholder": "IMEI #", "class": "p-2 bg-gray-300 text-gray-700"}
+        ),
         min_length=15,
         max_length=24,
-    )
-
-
-class AssetModificationForm(forms.Form):
-    asset_name = forms.CharField(
-        label="Asset Name",
-        validators=[validate_wialon_unit_name],
-        widget=widgets.TextInput({"placeholder": "My Vehicle"}),
-        min_length=4,
-        max_length=64,
-    )
-    imei_number = forms.CharField(
-        label="IMEI #",
-        validators=[validate_wialon_imei_number],
-        widget=widgets.NumberInput({"placeholder": "123412341234"}),
-        min_length=15,
-        max_length=24,
-    )
-    phone_number = forms.CharField(
-        label="Phone #",
-        validators=[validate_phone],
-        widget=widgets.TextInput({"placeholder": "(555) 555-5555"}),
-        min_length=12,
-        max_length=19,
     )
 
 

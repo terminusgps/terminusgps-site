@@ -4,14 +4,13 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db import transaction
+from django.core.exceptions import ImproperlyConfigured
 from django.forms import ValidationError
 from django.http import HttpRequest, HttpResponse
-from django.utils.translation import gettext_lazy as _
 from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
-from terminusgps.wialon.items import WialonUser, WialonUnitGroup, WialonResource
-from terminusgps.wialon.items.account import WialonAccount
+from terminusgps.wialon.items import WialonResource, WialonUnitGroup, WialonUser
 from terminusgps.wialon.session import WialonSession
 from wialon.api import WialonError
 
@@ -34,13 +33,13 @@ class TrackerLogoutView(LogoutView):
     http_method_names = ["get", "post", "options"]
     next_page = reverse_lazy("tracker login")
     success_url_allowed_hosts = settings.ALLOWED_HOSTS
-    template_name = "terminusgps_tracker/logged_out.html"
-    partial_name = "terminusgps_tracker/logout.html"
+    template_name = "terminusgps_tracker/logout.html"
+    partial_template_name = "terminusgps_tracker/partials/_logout.html"
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
         if request.headers.get("HX-Request"):
-            self.template_name = self.partial_name
-        return super().get(request, *args, **kwargs)
+            self.template_name = self.partial_template_name
 
 
 class TrackerSignupView(SuccessMessageMixin, FormView):
@@ -53,6 +52,13 @@ class TrackerSignupView(SuccessMessageMixin, FormView):
     success_url = reverse_lazy("tracker login")
     success_message = "%(username)s's account was created succesfully"
 
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        if not hasattr(settings, "WIALON_TOKEN"):
+            raise ImproperlyConfigured("'WIALON_TOKEN' setting is required.")
+        if not hasattr(settings, "WIALON_ADMIN_ID"):
+            raise ImproperlyConfigured("'WIALON_ADMIN_ID' setting is required.")
+        return super().setup(request, *args, **kwargs)
+
     def get_success_message(self, cleaned_data: dict[str, Any]) -> str:
         return self.success_message % dict(
             cleaned_data, username=cleaned_data.get("username", "")
@@ -60,7 +66,7 @@ class TrackerSignupView(SuccessMessageMixin, FormView):
 
     def form_valid(self, form: TrackerSignupForm) -> HttpResponse:
         try:
-            ids = self.create_wialon_account(
+            ids = self.wialon_registration_flow(
                 username=form.cleaned_data["username"],
                 password=form.cleaned_data["password1"],
             )
@@ -78,50 +84,102 @@ class TrackerSignupView(SuccessMessageMixin, FormView):
             self.profile = TrackerProfile.objects.create(user=user)
             TrackerSubscription.objects.create(profile=self.profile)
             self.profile.wialon_end_user_id = ids.get("end_user")
-            self.profile.wialon_super_user_id = ids.get("super_user")
+            self.profile.wialon_group_id = ids.get("group")
             self.profile.wialon_resource_id = ids.get("resource")
-            self.profile.wialon_group_id = ids.get("unit_group")
             self.profile.save()
         return super().form_valid(form=form)
 
-    @transaction.atomic
-    def create_wialon_account(
-        self, username: str, password: str
-    ) -> dict[str, int | None]:
-        try:
-            with WialonSession(token=settings.WIALON_TOKEN) as session:
-                admin_user = WialonUser(
-                    id=str(settings.WIALON_ADMIN_ID), session=session
-                )
-                super_user = WialonUser(
-                    creator_id=admin_user.id,
-                    name=f"super_{username}",
-                    password=password,
-                    session=session,
-                )
-                unit_group = WialonUnitGroup(
-                    creator_id=super_user.id, name=f"group_{username}", session=session
-                )
-                end_user = WialonUser(
-                    creator_id=super_user.id,
-                    name=username,
-                    password=password,
-                    session=session,
-                )
-                resource = WialonResource(
-                    creator_id=end_user.id, name=username, session=session
-                )
-                return {
-                    "end_user": end_user.id,
-                    "super_user": super_user.id,
-                    "resource": resource.id,
-                    "unit_group": unit_group.id,
-                }
-        except WialonError:
-            raise ValidationError(
-                _("Whoops! Something went wrong with Wialon. Please try again later.")
+    def wialon_registration_flow(self, username: str, password: str) -> dict:
+        with WialonSession(token=settings.WIALON_TOKEN) as session:
+            admin_id = settings.WIALON_ADMIN_ID
+            end_user = self._wialon_create_user(admin_id, username, password, session)
+            user_id: int | None = end_user.id
+            group = self._wialon_create_group(admin_id, f"group_{username}", session)
+            resource = self._wialon_create_resource(
+                user_id, f"resource_{username}", session
             )
-        except AssertionError:
+
+            return {"end_user": end_user.id, "group": group.id, "resource": resource.id}
+
+    @staticmethod
+    def _wialon_create_account(
+        resource_id: int | None,
+        session: WialonSession,
+        plan: str = "terminusgps_ext_hist",
+    ) -> None:
+        try:
+            if resource_id is None:
+                raise ValueError
+
+            session.wialon_api.account_create_account(
+                **{"itemId": resource_id, "plan": plan}
+            )
+            session.wialon_api.account_enable_account(
+                **{"itemId": resource_id, "enable": int(False)}
+            )
+        except (WialonError, ValueError):
             raise ValidationError(
-                _("Whoops! Something went wrong on our end. Please try again later.")
+                _("Whoops! Failed to create Wialon account: #'%(value)s'"),
+                code="wialon",
+                params={"value": resource_id},
+            )
+
+    @staticmethod
+    def _wialon_create_resource(
+        creator_id: int | None, name: str, session: WialonSession
+    ) -> WialonResource:
+        try:
+            if creator_id is None:
+                raise ValueError
+
+            resource = WialonResource(creator_id=creator_id, name=name, session=session)
+            return resource
+        except (WialonError, ValueError) as e:
+            print(e)
+            raise ValidationError(
+                _("Whoops! Failed to create Wialon resource: '%(value)s'"),
+                code="wialon",
+                params={"value": name},
+            )
+
+    @staticmethod
+    def _wialon_create_group(
+        creator_id: int, name: str, session: WialonSession
+    ) -> WialonUnitGroup:
+        try:
+            group = WialonUnitGroup(creator_id=creator_id, name=name, session=session)
+            return group
+        except (WialonError, ValueError):
+            raise ValidationError(
+                _("Whoops! Failed to create Wialon group: '%(value)s'"),
+                code="wialon",
+                params={"value": name},
+            )
+
+    @staticmethod
+    def _wialon_create_user(
+        creator_id: int, username: str, password: str, session: WialonSession
+    ) -> WialonUser:
+        try:
+            user = WialonUser(
+                creator_id=creator_id, name=username, password=password, session=session
+            )
+            return user
+        except (WialonError, ValueError):
+            raise ValidationError(
+                _("Whoops! Failed to create Wialon user: '%(value)s'"),
+                code="wialon",
+                params={"value": username},
+            )
+
+    @staticmethod
+    def _wialon_get_user(user_id: int, session: WialonSession) -> WialonUser:
+        try:
+            user = WialonUser(id=str(user_id), session=session)
+            return user
+        except (WialonError, ValueError):
+            raise ValidationError(
+                _("Whoops! Failed to retrieve Wialon user: #'%(value)s'"),
+                code="wialon",
+                params={"value": user_id},
             )

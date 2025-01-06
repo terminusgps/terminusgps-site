@@ -1,12 +1,12 @@
 <tr class="border-b bg-white dark:border-gray-700 dark:bg-gray-800">
     {% csrf_token %}
-    <td class="px-6 py-4">
+    <td class="p-2">
         {{ form.name }}
     </td>
-    <td class="px-6 py-4">
+    <td class="p-2">
         {{ form.imei_number }}
     </td>
-    <td class="flex-inline relative flex gap-2 px-6 py-4">
+    <td class="flex-inline relative flex gap-2 p-2">
         <input
             class="rounded border-gray-600 bg-gray-300 p-2 text-gray-700 hover:cursor-pointer hover:bg-gray-200"
             type="button"

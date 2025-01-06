@@ -13,13 +13,13 @@ urlpatterns = [
     path("signup/", views.TrackerSignupView.as_view(), name="tracker signup"),
     path("report/", views.TrackerBugReportView.as_view(), name="bug report"),
     path("assets/table/", views.AssetListView.as_view(), name="asset table"),
-    path("assets/new/", views.AssetCreationView.as_view(), name="asset create"),
+    path("assets/new/", views.AssetCreateView.as_view(), name="asset create"),
     path("assets/<int:pk>/", views.AssetDetailView.as_view(), name="asset detail"),
-    path("assets/<int:pk>/edit/", views.AssetUpdateView.as_view(), name="asset update"),
     path(
-        "assets/<int:pk>/delete/",
-        views.AssetDeletionView.as_view(),
-        name="asset delete",
+        "assets/<int:pk>/update/", views.AssetUpdateView.as_view(), name="asset update"
+    ),
+    path(
+        "assets/<int:pk>/delete/", views.AssetDeleteView.as_view(), name="asset delete"
     ),
     path(
         "subscriptions/",
@@ -27,10 +27,10 @@ urlpatterns = [
         name="tracker subscriptions",
     ),
     path(
-        "assets/<int:id>/remote/", views.AssetRemoteView.as_view(), name="asset remote"
+        "assets/<int:pk>/remote/", views.AssetRemoteView.as_view(), name="asset remote"
     ),
     path(
-        "assets/<int:id>/remote/execute/",
+        "assets/<int:pk>/remote/execute/",
         views.CommandExecutionView.as_view(),
         name="execute command",
     ),

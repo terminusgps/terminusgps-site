@@ -1,17 +1,6 @@
 {% extends "terminusgps_tracker/layout.html" %}
 {% load static %}
 {% block content %}
-<form action="{% url 'tracker signup' %}" method="post" class="m-4 dark:text-terminus-white" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
-    {% csrf_token %}
-    {{ form }}
-    <input class="hidden" type="hidden" name="next" value="{{ next }}"></input>
-    <div class="flex flex-col gap-4">
-        <div class="flex">
-            <button class="grow rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-gray-50 hover:from-terminus-red-300 hover:via-terminus-red-300 hover:to-terminus-red-400" type="submit">
-                Register
-            </button>
-        </div>
-        <p class="-mb-4 mt-2 text-center text-sm">Already have an account? <a class="bg-gradient-to-r from-terminus-red-800 via-terminus-red-400 to-terminus-red-800 bg-clip-text font-semibold text-transparent underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:decoration-dotted dark:from-terminus-red-300 dark:via-terminus-red-100 dark:to-terminus-red-300" href="{% url 'tracker login' %}">Click here</a> to login.</p>
-    </div>
-</form>
+{% include "terminusgps_tracker/partials/_signup.html" %}
+<p class="text-center -mt-2 text-sm">Already have an account? <a class="bg-gradient-to-r from-terminus-red-800 via-terminus-red-400 to-terminus-red-800 bg-clip-text font-semibold text-transparent underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:decoration-dotted dark:from-terminus-red-300 dark:via-terminus-red-100 dark:to-terminus-red-300" href="{% url 'tracker login' %}">Click here</a> to login.</p>
 {% endblock content %}

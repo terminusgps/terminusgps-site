@@ -1,0 +1,15 @@
+<form
+    class="m-4 gap-4 dark:text-terminus-white"
+    action="{% url 'tracker signup' %}"
+    method="post"
+    hx-post="{% url 'tracker signup' %}"
+    hx-swap="outerHTML"
+    hx-target="this"
+    hx-indicator=".htmx-indicator"
+    hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}"
+>
+    {% csrf_token %}
+    {{ form }}
+    <input class="block w-full grow rounded border-terminus-black bg-terminus-red-700 py-4 text-terminus-white hover:cursor-pointer hover:bg-terminus-red-400" value="Sign up" type="submit">
+    <input class="hidden" type="hidden" name="next" value="{{ next }}"></input>
+</form>

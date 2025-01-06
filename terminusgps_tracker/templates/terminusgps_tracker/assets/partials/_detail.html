@@ -1,11 +1,11 @@
-<tr id="{{ asset.id }}" class="border-b bg-white dark:border-gray-700 dark:bg-gray-800">
-    <th scope="row" class="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white">
-        <a class="font-semibold text-terminus-red-500 underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:text-terminus-red-300 hover:decoration-dotted" href="{% url 'asset remote' asset.id %}">{{ asset.name }}</a>
+<tr id="{{ asset.pk }}" class="border-b bg-white dark:border-gray-700 dark:bg-gray-800">
+    <th scope="row" class="whitespace-nowrap p-2 font-medium text-gray-900 dark:text-white">
+        <a class="font-semibold text-terminus-red-500 underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:text-terminus-red-300 hover:decoration-dotted" href="{% url 'asset remote' asset.pk %}">{{ asset.name }}</a>
     </th>
-    <td class="px-6 py-4">
+    <td class="p-2">
         {{ asset.imei_number }}
     </td>
-    <td class="flex-inline flex gap-2 px-6 py-4">
+    <td class="flex-inline flex gap-2 p-2">
         <input
             class="rounded border-gray-600 bg-gray-300 p-2 text-gray-700 hover:cursor-pointer hover:bg-gray-200"
             type="button"
