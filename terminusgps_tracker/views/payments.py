@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
-from django.views.generic import DeleteView, FormView, TemplateView, DetailView
+from django.views.generic import DeleteView, FormView, DetailView
 
 from terminusgps_tracker.forms import PaymentMethodCreationForm
 from terminusgps_tracker.models import TrackerPaymentMethod, TrackerProfile
@@ -127,12 +127,15 @@ class PaymentMethodDeleteView(LoginRequiredMixin, DeleteView):
         except AssertionError:
             return HttpResponse(status=403)
 
-        last_4 = TrackerShippingAddress.authorizenet_get_shipping_address(
-            profile_id=self.profile.authorizenet_id, address_id=self.kwargs["pk"]
-        )["payment"]["creditCard"]["cardNumber"][-4:]
+        payment_method = self.get_object()
+        last_4 = str(
+            TrackerPaymentMethod.authorizenet_get_payment_profile(
+                profile_id=self.profile.authorizenet_id,
+                payment_id=payment_method.authorizenet_id,
+            )["payment"]["creditCard"]["cardNumber"]
+        )[-4:]
         if last_4 == request.headers.get("HX-Prompt"):
-            addr = self.get_object()
-            addr.delete()
+            payment_method.delete()
             return HttpResponse("", status=200)
         return HttpResponse(status=406)
 
