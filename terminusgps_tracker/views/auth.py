@@ -29,11 +29,6 @@ class TrackerLoginView(LoginView):
     success_url = reverse_lazy("tracker profile")
     redirect_authenticated_user = True
 
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        if request.headers.get("HX-Request"):
-            self.template_name = self.partial_template_name
-
 
 class TrackerLogoutView(LogoutView):
     content_type = "text/html"
