@@ -208,7 +208,9 @@ class AssetCreateView(LoginRequiredMixin, CreateView):
                 ),
             )
             return self.form_invalid(form=form)
-        return super().form_valid(form=form)
+        response = HttpResponseRedirect(self.get_success_url(asset))
+        response.headers["HX-Request"] = True
+        return response
 
     def get_available_commands(self) -> QuerySet:
         return TrackerAssetCommand.objects.filter().exclude(pk__in=[1, 2, 3])
