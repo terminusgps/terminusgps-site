@@ -1,7 +1,0 @@
-<form hx-post="{% url 'delete asset' %}" class="{{ class }}" action="{% url 'delete asset' %}" method="post" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
-    {% csrf_token %}
-    {{ form.asset_id }}
-    <button class="grow rounded-md border border-solid border-gray-600 bg-gray-200 px-4 py-2 text-center text-gray-700 hover:bg-gray-50 dark:border-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-400" type="submit">
-        Delete
-    </button>
-</form>

@@ -1,9 +1,19 @@
 <tr class="border-b bg-white dark:border-gray-700 dark:bg-gray-800">
     {% csrf_token %}
     <td class="p-2">
+        {% if "name" in form.errors %}
+        <ul class="relative bottom-0 w-full bg-red-100">
+            {% for error in form.name.errors %}<li class="text-red-700">{{ error }}</li> {% endfor %}
+        </ul>
+        {% endif %}
         {{ form.name }}
     </td>
     <td class="p-2">
+        {% if "imei_number" in form.errors %}
+        <ul class="absolute bottom-0 bg-red-100">
+            {% for error in form.imei_number.errors %}<li class="text-sm text-red-700">{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
         {{ form.imei_number }}
     </td>
     <td class="flex-inline relative flex gap-2 p-2">

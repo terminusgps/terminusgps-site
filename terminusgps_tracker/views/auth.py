@@ -25,6 +25,14 @@ class TrackerLoginView(LoginView):
     http_method_names = ["get", "post"]
     next_page = reverse_lazy("tracker profile")
     template_name = "terminusgps_tracker/login.html"
+    partial_template_name = "terminusgps_tracker/partials/_login.html"
+    success_url = reverse_lazy("tracker profile")
+    redirect_authenticated_user = True
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        if request.headers.get("HX-Request"):
+            self.template_name = self.partial_template_name
 
 
 class TrackerLogoutView(LogoutView):

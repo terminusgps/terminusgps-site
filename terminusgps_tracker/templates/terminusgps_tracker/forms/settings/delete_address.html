@@ -1,4 +1,0 @@
-<form hx-post="{% url 'delete address' %}" class="{{ class }}" action="{% url 'delete payment' %}" method="post" hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}">
-    {% csrf_token %}
-    {{ form }}
-</form>
