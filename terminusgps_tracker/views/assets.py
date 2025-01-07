@@ -273,33 +273,29 @@ class AssetDeleteView(LoginRequiredMixin, DeleteView):
     raise_exception = False
     permission_denied_message = "Please login and try again."
 
-    @staticmethod
-    def wialon_delete_asset(unit_id: int, session: WialonSession) -> None:
-        available_group_id: int = settings.WIALON_UNACTIVATED_GROUP
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        with WialonSession() as session:
+            unit_id: str = str(self.get_object().wialon_id)
+            group_id: str = str(self.profile.wialon_group_id)
+
+            unit = WialonUnit(id=unit_id, session=session)
+            user_group = WialonUnitGroup(id=group_id, session=session)
+            user_group.rm_item(unit)
+        return super().post(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet:
         if self.profile is not None:
             return self.profile.assets.filter()
         return TrackerAsset.objects.none()
 
-    def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not self.htmx_request:
-            return HttpResponse(status=402)
-        return super().delete(request, *args, **kwargs)
-
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
-        self.unit_id = self.kwargs.get("pk")
         self.profile = (
             TrackerProfile.objects.get(user=request.user)
             if request.user and request.user.is_authenticated
             else None
         )
-        self.group_id = (
-            self.profile.wialon_resource_id if self.profile is not None else None
-        )
-        self.htmx_request = bool(request.headers.get("HX-Request"))
-        if self.htmx_request:
+        if request.headers.get("HX-Request"):
             self.template_name = self.partial_name
 
 
