@@ -2,7 +2,7 @@
     {% csrf_token %}
     <td class="p-2">
         {% if "name" in form.errors %}
-        <ul class="relative bottom-0 w-full bg-red-100">
+        <ul class="absolute top-0 bg-red-100">
             {% for error in form.name.errors %}<li class="text-red-700">{{ error }}</li> {% endfor %}
         </ul>
         {% endif %}
@@ -10,7 +10,7 @@
     </td>
     <td class="p-2">
         {% if "imei_number" in form.errors %}
-        <ul class="absolute bottom-0 bg-red-100">
+        <ul class="absolute top-0 bg-red-100">
             {% for error in form.imei_number.errors %}<li class="text-sm text-red-700">{{ error }}</li>{% endfor %}
         </ul>
         {% endif %}
@@ -35,6 +35,7 @@
             hx-swap="outerHTML"
             hx-target="closest tr"
             hx-trigger="click"
+            hx-indicator=".htmx-indicator"
         >
     </td>
 </tr>
