@@ -15,14 +15,16 @@ class CommandExecutionForm(forms.Form):
 
 class TrackerAssetUpdateForm(forms.ModelForm):
     class Meta:
-        base_class = (
-            "p-2 bg-gray-300 text-gray-800 rounded border-gray-600 placeholder-gray-400"
-        )
+        base_class = "p-2 bg-gray-200 text-gray-800 rounded border-gray-600 placeholder-gray-400 valid:border-green-600 invalid:border-red-600 valid:bg-green-100 invalid:bg-red-100"
         model = TrackerAsset
         fields = ("name", "imei_number")
         widgets = {
             "name": widgets.TextInput(
-                attrs={"placeholder": "My Vehicle", "class": base_class}
+                attrs={
+                    "placeholder": "My Vehicle",
+                    "class": base_class,
+                    "pattern": "[A-Za-z0-9' ]+",
+                }
             ),
             "imei_number": widgets.TextInput(
                 attrs={

@@ -16,7 +16,6 @@ from django.views.generic import (
     DetailView,
     FormView,
     ListView,
-    TemplateView,
     UpdateView,
 )
 from terminusgps.wialon.session import WialonSession
@@ -57,14 +56,13 @@ class AssetListView(LoginRequiredMixin, ListView):
             if request.user and request.user.is_authenticated
             else None
         )
-        self.htmx_request = bool(request.headers.get("HX-Request"))
-        if self.htmx_request:
+        if request.headers.get("HX-Request"):
             self.template_name = self.partial_template_name
 
     def get_queryset(self) -> QuerySet:
         if not self.profile:
             return TrackerAsset.objects.none()
-        return self.profile.assets.filter().order_by("-name")
+        return self.profile.assets.filter().order_by("name")
 
 
 class AssetDetailView(LoginRequiredMixin, DetailView):
@@ -81,8 +79,7 @@ class AssetDetailView(LoginRequiredMixin, DetailView):
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
-        self.htmx_request = bool(request.headers.get("HX-Request"))
-        if self.htmx_request:
+        if request.headers.get("HX-Request"):
             self.template_name = self.partial_template_name
 
     def get_queryset(self) -> QuerySet:
@@ -114,13 +111,8 @@ class AssetUpdateView(LoginRequiredMixin, UpdateView):
             if request.user and request.user.is_authenticated
             else None
         )
-        self.htmx_request = bool(request.headers.get("HX-Request"))
-        if self.htmx_request:
+        if request.headers.get("HX-Request"):
             self.template_name = self.partial_name
-
-    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        print(f"{request.POST = }")
-        return super().post(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet:
         if self.profile:
@@ -129,9 +121,8 @@ class AssetUpdateView(LoginRequiredMixin, UpdateView):
 
     @transaction.atomic
     def form_valid(self, form: forms.Form) -> HttpResponseRedirect | HttpResponse:
-        with WialonSession(token=settings.WIALON_TOKEN) as session:
+        with WialonSession() as session:
             unit = WialonUnit(id=str(self.kwargs["pk"]), session=session)
-            unit.populate()
             unit.rename(form.cleaned_data["name"])
         return super().form_valid(form=form)
 
@@ -157,14 +148,12 @@ class AssetCreateView(LoginRequiredMixin, CreateView):
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
         self.profile = TrackerProfile.objects.get(user=request.user)
-        self.wialon_end_user_id = self.profile.wialon_end_user_id
-        self.htmx_request = bool(request.headers.get("HX-Request"))
-        if self.htmx_request:
+        if request.headers.get("HX-Request"):
             self.template_name = self.partial_name
 
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not self.htmx_request:
-            return HttpResponse(status=402)
+        if not request.headers.get("HX-Request"):
+            return HttpResponse(status=403)
         return HttpResponse("", status=200)
 
     def form_valid(self, form: forms.Form) -> HttpResponse:
