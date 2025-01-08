@@ -24,15 +24,10 @@ class TrackerLoginView(LoginView):
     extra_context = {"title": "Login", "subtitle": "We know where ours are... do you?"}
     http_method_names = ["get", "post"]
     next_page = reverse_lazy("tracker profile")
-    template_name = "terminusgps_tracker/login.html"
     partial_template_name = "terminusgps_tracker/partials/_login.html"
-    success_url = reverse_lazy("tracker profile")
     redirect_authenticated_user = True
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        print(f"{request.headers.get("HX-Request") = }")
-        print(f"{request.headers.get("HX-Boosted") = }")
-        return super().setup(request, *args, **kwargs)
+    success_url = reverse_lazy("tracker profile")
+    template_name = "terminusgps_tracker/login.html"
 
 
 class TrackerLogoutView(LogoutView):
@@ -40,9 +35,9 @@ class TrackerLogoutView(LogoutView):
     extra_context = {"title": "Logout"}
     http_method_names = ["get", "post", "options"]
     next_page = reverse_lazy("tracker login")
+    partial_template_name = "terminusgps_tracker/partials/_logout.html"
     success_url_allowed_hosts = settings.ALLOWED_HOSTS
     template_name = "terminusgps_tracker/logout.html"
-    partial_template_name = "terminusgps_tracker/partials/_logout.html"
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
@@ -51,14 +46,14 @@ class TrackerLogoutView(LogoutView):
 
 
 class TrackerSignupView(SuccessMessageMixin, FormView):
-    form_class = TrackerSignupForm
     content_type = "text/html"
     extra_context = {"title": "Sign Up", "subtitle": "You'll know where yours are..."}
+    form_class = TrackerSignupForm
     http_method_names = ["get", "post"]
-    template_name = "terminusgps_tracker/signup.html"
     partial_template_name = "terminusgps_tracker/partials/_signup.html"
-    success_url = reverse_lazy("tracker login")
     success_message = "%(username)s's account was created succesfully"
+    success_url = reverse_lazy("tracker login")
+    template_name = "terminusgps_tracker/signup.html"
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         if not hasattr(settings, "WIALON_TOKEN"):

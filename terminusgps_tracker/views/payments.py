@@ -9,7 +9,6 @@ from django.views.generic import DeleteView, FormView, DetailView
 
 from terminusgps_tracker.forms import PaymentMethodCreationForm
 from terminusgps_tracker.models import TrackerPaymentMethod, TrackerProfile
-from terminusgps_tracker.models.addresses import TrackerShippingAddress
 
 
 class InvalidPromptError(Exception):

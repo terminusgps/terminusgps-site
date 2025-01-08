@@ -120,7 +120,7 @@ class AssetUpdateView(LoginRequiredMixin, UpdateView):
         return TrackerAsset.objects.none()
 
     def form_valid(self, form: forms.Form) -> HttpResponseRedirect | HttpResponse:
-        with WialonSession() as session:
+        with WialonSession(token=settings.WIALON_TOKEN) as session:
             unit = WialonUnit(id=str(self.kwargs["pk"]), session=session)
             unit.rename(form.cleaned_data["name"])
         return super().form_valid(form=form)
