@@ -2,5 +2,5 @@
 {% load static %}
 {% block content %}
 {% include "terminusgps_tracker/partials/_signup.html" %}
-<p class="text-center -mt-2 text-sm">Already have an account? <a class="bg-gradient-to-r from-terminus-red-800 via-terminus-red-400 to-terminus-red-800 bg-clip-text font-semibold text-transparent underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:decoration-dotted dark:from-terminus-red-300 dark:via-terminus-red-100 dark:to-terminus-red-300" href="{% url 'tracker login' %}">Click here</a> to login.</p>
+<p class="text-center -mt-8 text-sm">Already have an account? <a class="bg-gradient-to-r from-terminus-red-800 via-terminus-red-400 to-terminus-red-800 bg-clip-text font-semibold text-transparent underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:decoration-dotted dark:from-terminus-red-300 dark:via-terminus-red-100 dark:to-terminus-red-300" href="{% url 'tracker login' %}" hx-boost="true">Click here</a> to login.</p>
 {% endblock content %}

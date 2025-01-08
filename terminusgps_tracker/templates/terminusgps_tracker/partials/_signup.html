@@ -10,6 +10,6 @@
 >
     {% csrf_token %}
     {{ form }}
-    <input class="block w-full grow rounded border-terminus-black bg-terminus-red-700 py-4 text-terminus-white hover:cursor-pointer hover:bg-terminus-red-400" value="Sign up" type="submit">
+    <input class="block w-full grow rounded border-2 border-terminus-black/60 bg-terminus-red-700 py-4 text-terminus-white hover:cursor-pointer hover:bg-terminus-red-400" value="Sign up" type="submit">
     <input class="hidden" type="hidden" name="next" value="{{ next }}"></input>
 </form>

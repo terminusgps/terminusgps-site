@@ -1,6 +1,0 @@
-{% extends "terminusgps_tracker/layout.html" %}
-{% block content %}
-<div class="flex flex-col gap-8">
-    {% for tier in subscription_tiers %}{% include "terminusgps_tracker/subscriptions/partials/_tier.html" with tier=tier select=True %}{% endfor %}
-</div>
-{% endblock content %}

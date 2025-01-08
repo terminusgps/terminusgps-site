@@ -8,7 +8,13 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import TemplateView, FormView, UpdateView
+from django.views.generic import (
+    DetailView,
+    ListView,
+    TemplateView,
+    FormView,
+    UpdateView,
+)
 
 from terminusgps_tracker.forms import SubscriptionConfirmationForm
 from terminusgps_tracker.models import (
@@ -19,23 +25,48 @@ from terminusgps_tracker.models import (
 )
 
 
-class TrackerSubscriptionOptionsView(TemplateView):
+class TrackerSubscriptionDetailView(LoginRequiredMixin, DetailView):
     content_type = "text/html"
-    extra_context = {"title": "Subscriptions"}
+    extra_context = {"title": "Your Subscription"}
     http_method_names = ["get"]
-    template_name = "terminusgps_tracker/subscriptions/options.html"
-    partial_template_name = "terminusgps_tracker/subscriptions/partials/_options.html"
+    template_name = "terminusgps_tracker/subscriptions/detail.html"
+    partial_template_name = "terminusgps_tracker/subscriptions/partials/_detail.html"
+    model = TrackerSubscription
+    queryset = TrackerSubscription.objects.none()
+    login_url = reverse_lazy("tracker login")
+    raise_exception = True
+    permission_denied_message = "Please login and try again."
+    context_object_name = "subscription"
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
-        self.tiers = TrackerSubscriptionTier.objects.filter()[:3]
+        self.profile = TrackerProfile.objects.get(
+            user=request.user
+            if request.user and request.user.is_authenticated
+            else None
+        )
         if request.headers.get("HX-Request"):
             self.template_name = self.partial_template_name
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["subscription_tiers"] = self.tiers
-        return context
+    def get_object(self, queryset=None) -> TrackerSubscription | None:
+        if self.profile is not None:
+            return self.profile.subscription
+        return super().get_object(queryset)
+
+
+class TrackerSubscriptionTierListView(ListView):
+    content_type = "text/html"
+    extra_context = {"title": "Subscription Tiers"}
+    http_method_names = ["get"]
+    template_name = "terminusgps_tracker/subscriptions/tier_list.html"
+    partial_template_name = "terminusgps_tracker/subscriptions/partials/_tier_list.html"
+    model = TrackerSubscriptionTier
+    queryset = TrackerSubscriptionTier.objects.all().order_by("-amount")[:3]
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        if request.headers.get("HX-Request"):
+            self.template_name = self.partial_template_name
 
 
 class TrackerSubscriptionConfirmView(LoginRequiredMixin, FormView):

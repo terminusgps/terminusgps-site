@@ -22,11 +22,6 @@ urlpatterns = [
         "assets/<int:pk>/delete/", views.AssetDeleteView.as_view(), name="asset delete"
     ),
     path(
-        "subscriptions/",
-        views.TrackerSubscriptionOptionsView.as_view(),
-        name="tracker subscriptions",
-    ),
-    path(
         "assets/<int:pk>/remote/", views.AssetRemoteView.as_view(), name="asset remote"
     ),
     path(
@@ -35,19 +30,14 @@ urlpatterns = [
         name="execute command",
     ),
     path(
-        "profile/subscription/<int:tier>/confirm/",
-        views.TrackerSubscriptionConfirmView.as_view(),
-        name="confirm subscription",
+        "subscriptions/",
+        views.TrackerSubscriptionTierListView.as_view(),
+        name="tracker subscriptions",
     ),
     path(
-        "profile/subscription/success/",
-        views.TrackerSubscriptionSuccessView.as_view(),
-        name="success subscription",
-    ),
-    path(
-        "profile/subscription/<int:pk>/update/",
-        views.TrackerSubscriptionUpdateView.as_view(),
-        name="modify subscription",
+        "profile/subscription/",
+        views.TrackerSubscriptionDetailView.as_view(),
+        name="subscription detail",
     ),
     path(
         "profile/settings/",

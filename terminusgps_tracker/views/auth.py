@@ -29,6 +29,11 @@ class TrackerLoginView(LoginView):
     success_url = reverse_lazy("tracker profile")
     redirect_authenticated_user = True
 
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        print(f"{request.headers.get("HX-Request") = }")
+        print(f"{request.headers.get("HX-Boosted") = }")
+        return super().setup(request, *args, **kwargs)
+
 
 class TrackerLogoutView(LogoutView):
     content_type = "text/html"
@@ -67,6 +72,11 @@ class TrackerSignupView(SuccessMessageMixin, FormView):
             cleaned_data, username=cleaned_data.get("username", "")
         )
 
+    def form_invalid(self, form: TrackerSignupForm) -> HttpResponse:
+        response = super().form_invalid(form=form)
+        response.headers["HX-Request"] = True
+        return response
+
     def form_valid(self, form: TrackerSignupForm) -> HttpResponse:
         try:
             ids = self.wialon_registration_flow(
@@ -90,17 +100,17 @@ class TrackerSignupView(SuccessMessageMixin, FormView):
             self.profile.wialon_group_id = ids.get("group")
             self.profile.wialon_resource_id = ids.get("resource")
             self.profile.save()
-        return super().form_valid(form=form)
+        response = super().form_valid(form=form)
+        response.headers["HX-Request"] = True
+        return response
 
     def wialon_registration_flow(self, username: str, password: str) -> dict:
         with WialonSession(token=settings.WIALON_TOKEN) as session:
             admin_id = settings.WIALON_ADMIN_ID
+            resource = self._wialon_create_resource(admin_id, username, session)
+            self._wialon_create_account(resource.id, session=session)
             end_user = self._wialon_create_user(admin_id, username, password, session)
-            user_id: int | None = end_user.id
             group = self._wialon_create_group(admin_id, f"group_{username}", session)
-            resource = self._wialon_create_resource(
-                user_id, f"resource_{username}", session
-            )
 
             return {"end_user": end_user.id, "group": group.id, "resource": resource.id}
 
@@ -115,12 +125,13 @@ class TrackerSignupView(SuccessMessageMixin, FormView):
                 raise ValueError
 
             session.wialon_api.account_create_account(
-                **{"itemId": resource_id, "plan": plan}
+                **{"itemId": str(resource_id), "plan": plan}
             )
             session.wialon_api.account_enable_account(
-                **{"itemId": resource_id, "enable": int(False)}
+                **{"itemId": str(resource_id), "enable": str(int(False))}
             )
-        except (WialonError, ValueError):
+        except (WialonError, ValueError) as e:
+            print(e)
             raise ValidationError(
                 _("Whoops! Failed to create Wialon account: #'%(value)s'"),
                 code="wialon",

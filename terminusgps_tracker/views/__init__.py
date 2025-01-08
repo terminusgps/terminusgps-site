@@ -25,8 +25,9 @@ from .public import (
 from .subscriptions import (
     TrackerSubscriptionConfirmView,
     TrackerSubscriptionUpdateView,
-    TrackerSubscriptionOptionsView,
+    TrackerSubscriptionTierListView,
     TrackerSubscriptionSuccessView,
+    TrackerSubscriptionDetailView,
 )
 from .payments import (
     PaymentMethodDetailView,
