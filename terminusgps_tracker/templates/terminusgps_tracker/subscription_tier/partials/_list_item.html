@@ -13,6 +13,5 @@
             {% if expanded %}<p class="text-gray-700">{{ feature.desc|truncatechars:1024 }}{% endif %}</p>
         </div>
         {% endfor %}
-        {% if select %}<button hx-get="{% url 'update subscription' tier.pk %}" hx-target="this" hx-trigger="load" hx-swap="outerHTML" class="block w-full rounded-md border border-solid border-gray-600 bg-gradient-to-l from-terminus-red-700 via-terminus-red-600 to-terminus-red-700 px-4 py-2 text-center text-gray-50 hover:from-terminus-red-400 hover:via-terminus-red-300 hover:to-terminus-red-400" type="button">Select</button>{% endif %}
     </div>
 </div>

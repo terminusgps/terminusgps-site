@@ -11,7 +11,6 @@ from .assets import (
     AssetListView,
     AssetRemoteView,
     AssetUpdateView,
-    CommandExecutionView,
 )
 from .profile import TrackerProfileSettingsView, TrackerProfileView
 from .public import (

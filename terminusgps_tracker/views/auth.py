@@ -16,10 +16,10 @@ from wialon.api import WialonError
 
 from terminusgps_tracker.forms import TrackerAuthenticationForm, TrackerSignupForm
 from terminusgps_tracker.models import TrackerProfile, TrackerSubscription
-from terminusgps_tracker.views.public import HtmxView
+from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
 
 
-class TrackerLoginView(LoginView, HtmxView):
+class TrackerLoginView(LoginView, ProfileContextMixin, HtmxMixin):
     authentication_form = TrackerAuthenticationForm
     content_type = "text/html"
     extra_context = {"title": "Login", "subtitle": "We know where ours are... do you?"}
@@ -31,7 +31,7 @@ class TrackerLoginView(LoginView, HtmxView):
     template_name = "terminusgps_tracker/login.html"
 
 
-class TrackerLogoutView(LogoutView, HtmxView):
+class TrackerLogoutView(LogoutView, ProfileContextMixin, HtmxMixin):
     content_type = "text/html"
     extra_context = {"title": "Logout"}
     http_method_names = ["get", "post", "options"]
@@ -41,7 +41,7 @@ class TrackerLogoutView(LogoutView, HtmxView):
     template_name = "terminusgps_tracker/logout.html"
 
 
-class TrackerSignupView(SuccessMessageMixin, FormView, HtmxView):
+class TrackerSignupView(FormView, SuccessMessageMixin, ProfileContextMixin, HtmxMixin):
     content_type = "text/html"
     extra_context = {"title": "Sign Up", "subtitle": "You'll know where yours are..."}
     form_class = TrackerSignupForm

@@ -1,29 +1,20 @@
 from typing import Any
 
 from django.conf import settings
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.messages.views import SuccessMessageMixin
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import TemplateView, RedirectView, FormView, View
+from django.views.generic import TemplateView, RedirectView, FormView
 
 
 from terminusgps_tracker.forms import BugReportForm
-
-
-class HtmxView(View):
-    partial_template_name: str = ""
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        htmx_request = bool(request.headers.get("HX-Request"))
-        boosted = bool(request.headers.get("HX-Boosted"))
-
-        if htmx_request and not boosted:
-            self.template_name = self.partial_template_name
-        return super().setup(request, *args, **kwargs)
+from terminusgps_tracker.views.mixins import (
+    HtmxMixin,
+    ProfileContextMixin,
+    ProfileRequiredMixin,
+)
 
 
 class TrackerLandingView(RedirectView):
@@ -38,42 +29,41 @@ class TrackerSourceView(RedirectView):
     url = settings.TRACKER_PROFILE["GITHUB"]
 
 
-class TrackerAboutView(TemplateView):
-    content_type = "text/html"
+class TrackerAboutView(TemplateView, ProfileContextMixin, HtmxMixin):
     extra_context = {"title": "About", "subtitle": "We know where ours are... do you?"}
     http_method_names = ["get"]
     template_name = "terminusgps_tracker/about.html"
+    partial_template_name = "terminusgps_tracker/partials/_about.html"
 
 
-class TrackerPrivacyView(TemplateView):
-    content_type = "text/html"
-    extra_context = {"title": "Privacy Policy", "profile": settings.TRACKER_PROFILE}
+class TrackerPrivacyView(TemplateView, ProfileContextMixin, HtmxMixin):
+    extra_context = {"title": "Privacy Policy"}
     http_method_names = ["get"]
     template_name = "terminusgps_tracker/privacy.html"
+    partial_template_name = "terminusgps_tracker/partials/_privacy.html"
 
 
-class TrackerContactView(TemplateView):
+class TrackerContactView(TemplateView, ProfileContextMixin, HtmxMixin):
     content_type = "text/html"
-    extra_context = {
-        "title": "Contact",
-        "subtitle": "Ready to get in touch?",
-        "profile": settings.TRACKER_PROFILE,
-    }
+    extra_context = {"title": "Contact", "subtitle": "Ready to get in touch?"}
     http_method_names = ["get"]
     template_name = "terminusgps_tracker/contact.html"
+    partial_template_name = "terminusgps_tracker/partials/_contact.html"
 
 
-class TrackerBugReportView(SuccessMessageMixin, LoginRequiredMixin, FormView):
-    form_class = BugReportForm
+class TrackerBugReportView(
+    FormView, ProfileRequiredMixin, ProfileContextMixin, HtmxMixin
+):
     content_type = "text/html"
-    extra_context = {"title": "Bug Report"}
+    extra_context = {"title": "Bug Report", "subtitle": "Found a bug?"}
+    form_class = BugReportForm
     http_method_names = ["get", "post"]
-    template_name = "terminusgps_tracker/bug_report.html"
-    success_url = reverse_lazy("tracker profile")
-    success_message = "Thank you! Your bug report was submitted successfully."
     login_url = reverse_lazy("tracker login")
-    raise_exception = False
     permission_denied_message = "Please login and try again."
+    raise_exception = False
+    success_message = "Thank you! Your bug report was submitted successfully."
+    success_url = reverse_lazy("tracker profile")
+    template_name = "terminusgps_tracker/bug_report.html"
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)

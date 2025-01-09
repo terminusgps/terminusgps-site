@@ -7,23 +7,29 @@ from django.http import HttpRequest
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
-from terminusgps_tracker.models import TrackerProfile, TrackerSubscription, TrackerAsset
-from terminusgps_tracker.models.addresses import TrackerShippingAddress
-from terminusgps_tracker.models.payments import TrackerPaymentMethod
+from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
+from terminusgps_tracker.models import (
+    TrackerProfile,
+    TrackerSubscription,
+    TrackerAsset,
+    TrackerShippingAddress,
+    TrackerPaymentMethod,
+)
 
 
-class TrackerProfileView(LoginRequiredMixin, TemplateView):
+class TrackerProfileView(
+    TemplateView, LoginRequiredMixin, ProfileContextMixin, HtmxMixin
+):
     content_type = "text/html"
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
     extra_context = {
         "title": "Your Profile",
         "subtitle": settings.TRACKER_PROFILE["MOTD"],
     }
-    login_url = reverse_lazy("tracker login")
-    template_name = "terminusgps_tracker/profile.html"
-    partial_template_name = "terminusgps_tracker/partials/_profile.html"
-    permission_denied_message = "Please login and try again."
-    raise_exception = False
     http_method_names = ["get", "post"]
+    partial_template_name = "terminusgps_tracker/partials/_profile.html"
+    template_name = "terminusgps_tracker/profile.html"
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         super().setup(request, *args, **kwargs)
@@ -51,23 +57,20 @@ class TrackerProfileView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class TrackerProfileSettingsView(LoginRequiredMixin, TemplateView):
-    template_name = "terminusgps_tracker/settings.html"
-    partial_template_name = "terminusgps_tracker/partials/_settings.html"
-    extra_context = {"title": "Settings"}
-    login_url = reverse_lazy("tracker login")
-    permission_denied_message = "Please login and try again."
-    raise_exception = True
+class TrackerProfileSettingsView(TemplateView, ProfileContextMixin, HtmxMixin):
+    extra_context = {
+        "title": "Settings",
+        "subtitle": "You can have up to 4 shipping addresses and up to 4 payment methods.",
+    }
     http_method_names = ["get"]
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        self.profile = TrackerProfile.objects.get(user=request.user)
+    partial_template_name = "terminusgps_tracker/partials/_settings.html"
+    template_name = "terminusgps_tracker/settings.html"
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["addresses"] = self.get_addresses(self.profile)
-        context["payments"] = self.get_payments(self.profile)
+        if self.profile is not None:
+            context["addresses"] = self.get_addresses(self.profile, total=4)
+            context["payments"] = self.get_payments(self.profile, total=4)
         return context
 
     @staticmethod

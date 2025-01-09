@@ -13,6 +13,5 @@
             {% if expanded %}<p class="text-gray-700">{{ feature.desc|truncatechars:1024 }}{% endif %}</p>
         </div>
         {% endfor %}
-        {% if select %}{% include "terminusgps_tracker/subscriptions/partials/_select.html" with tier=tier %}{% endif %}
     </div>
 </div>

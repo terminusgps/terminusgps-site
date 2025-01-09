@@ -25,11 +25,6 @@ urlpatterns = [
         "assets/<int:pk>/remote/", views.AssetRemoteView.as_view(), name="asset remote"
     ),
     path(
-        "assets/<int:pk>/remote/execute/",
-        views.CommandExecutionView.as_view(),
-        name="execute command",
-    ),
-    path(
         "subscriptions/",
         views.TrackerSubscriptionTierListView.as_view(),
         name="tracker subscriptions",

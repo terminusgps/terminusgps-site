@@ -1,31 +1,30 @@
 from typing import Any
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
-from django.http import HttpRequest, HttpResponse
+from django.forms import ValidationError
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import DeleteView, DetailView, FormView
+from django.utils.translation import gettext_lazy as _
 
 from terminusgps_tracker.forms import ShippingAddressCreationForm
-from terminusgps_tracker.models import TrackerProfile, TrackerShippingAddress
+from terminusgps_tracker.models import TrackerShippingAddress
+from terminusgps_tracker.views.mixins import (
+    HtmxMixin,
+    ProfileContextMixin,
+    ProfileRequiredMixin,
+)
 
 
-class ShippingAddressDetailView(LoginRequiredMixin, DetailView):
+class ShippingAddressDetailView(
+    DetailView, ProfileRequiredMixin, ProfileContextMixin, HtmxMixin
+):
     content_type = "text/html"
     context_object_name = "shipping_address"
-    login_url = reverse_lazy("tracker login")
-    partial_template_name = "terminusgps_tracker/addresses/partials/_detail.html"
-    permission_denied_message = "Please login and try again."
-    raise_exception = True
-    template_name = "terminusgps_tracker/addresses/detail.html"
-    model = TrackerShippingAddress
-    queryset = TrackerShippingAddress.objects.none()
     http_method_names = ["get"]
-
-    def get_queryset(self) -> QuerySet:
-        if self.profile is not None:
-            return self.profile.addresses.all()
-        return self.queryset
+    model = TrackerShippingAddress
+    partial_template_name = "terminusgps_tracker/addresses/partials/_detail.html"
+    template_name = "terminusgps_tracker/addresses/detail.html"
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
@@ -37,18 +36,9 @@ class ShippingAddressDetailView(LoginRequiredMixin, DetailView):
             )
         return context
 
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        self.profile = (
-            TrackerProfile.objects.get(user=request.user)
-            if request.user is not None and request.user.is_authenticated
-            else None
-        )
-        if request.headers.get("HX-Request"):
-            self.template_name = self.partial_template_name
 
-
-class ShippingAddressCreateView(LoginRequiredMixin, FormView):
+class ShippingAddressCreateView(FormView, ProfileContextMixin, HtmxMixin):
+    button_template_name = "terminusgps_tracker/addresses/create_button.html"
     form_class = ShippingAddressCreationForm
     http_method_names = ["get", "post", "delete"]
     login_url = reverse_lazy("tracker login")
@@ -57,32 +47,36 @@ class ShippingAddressCreateView(LoginRequiredMixin, FormView):
     raise_exception = True
     success_url = reverse_lazy("tracker settings")
     template_name = "terminusgps_tracker/addresses/create.html"
-    button_template_name = "terminusgps_tracker/addresses/create_button.html"
 
     def get_success_url(self, addr: TrackerShippingAddress | None = None) -> str:
         if addr is not None:
             return reverse("shipping detail", kwargs={"pk": addr.pk})
         return str(self.success_url)
 
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        self.profile = TrackerProfile.objects.get(user=request.user)
-        if request.headers.get("HX-Request"):
-            self.template_name = self.partial_template_name
-
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not request.headers.get("HX-Request"):
-            return HttpResponse(status=403)
         self.template_name = self.button_template_name
         return self.render_to_response(context=self.get_context_data())
 
     def form_valid(self, form: ShippingAddressCreationForm) -> HttpResponse:
-        address = TrackerShippingAddress.objects.create(profile=self.profile)
-        address.save(form)
-        return super().form_valid(form=form)
+        if self.profile is not None:
+            address = TrackerShippingAddress.objects.create(profile=self.profile)
+            address.save(form)
+            return HttpResponseRedirect(self.get_success_url(address))
+        form.add_error(
+            None,
+            ValidationError(
+                _(
+                    "Whoops! Couldn't find a profile for '%(user)s'. Please try again later."
+                ),
+                code="no_profile",
+                params={"user": self.request.user},
+            ),
+        )
+        return self.form_invalid(form=form)
 
 
-class ShippingAddressDeleteView(LoginRequiredMixin, DeleteView):
+class ShippingAddressDeleteView(DeleteView, ProfileContextMixin, HtmxMixin):
+    context_object_name = "shipping_address"
     http_method_names = ["get", "post"]
     login_url = reverse_lazy("tracker login")
     model = TrackerShippingAddress
@@ -92,11 +86,8 @@ class ShippingAddressDeleteView(LoginRequiredMixin, DeleteView):
     raise_exception = True
     success_url = reverse_lazy("tracker settings")
     template_name = "terminusgps_tracker/addresses/delete.html"
-    context_object_name = "shipping_address"
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not request.headers.get("HX-Request"):
-            return HttpResponse(status=403)
         addr = self.get_object()
         addr.delete()
         return HttpResponse("", status=200)
@@ -105,13 +96,3 @@ class ShippingAddressDeleteView(LoginRequiredMixin, DeleteView):
         if self.profile is not None:
             return self.profile.addresses.all()
         return self.queryset
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        self.profile = (
-            TrackerProfile.objects.get(user=request.user)
-            if request.user is not None and request.user.is_authenticated
-            else None
-        )
-        if request.headers.get("HX-Request"):
-            self.template_name = self.partial_template_name

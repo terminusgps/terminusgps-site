@@ -3,19 +3,22 @@ from typing import Any
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.conf import settings
 from django.db.models import QuerySet
+from django.forms import ValidationError
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, FormView, DetailView
 
 from terminusgps_tracker.forms import PaymentMethodCreationForm
-from terminusgps_tracker.models import TrackerPaymentMethod, TrackerProfile
+from terminusgps_tracker.models import TrackerPaymentMethod
+from terminusgps_tracker.views.base import TrackerBaseView
 
 
 class InvalidPromptError(Exception):
     """Raised when a provided HX-Prompt is invalid."""
 
 
-class PaymentMethodDetailView(LoginRequiredMixin, DetailView):
+class PaymentMethodDetailView(LoginRequiredMixin, DetailView, TrackerBaseView):
     content_type = "text/html"
     context_object_name = "payment_method"
     http_method_names = ["get"]
@@ -32,16 +35,6 @@ class PaymentMethodDetailView(LoginRequiredMixin, DetailView):
             return self.profile.payments.all()
         return self.queryset
 
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        self.profile = (
-            TrackerProfile.objects.get(user=request.user)
-            if request.user is not None and request.user.is_authenticated
-            else None
-        )
-        if request.headers.get("HX-Request"):
-            self.template_name = self.partial_template_name
-
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
         payment_method: TrackerPaymentMethod = self.get_object()
@@ -57,7 +50,7 @@ class PaymentMethodDetailView(LoginRequiredMixin, DetailView):
         return payment["payment"]["creditCard"]["cardNumber"][-4:]
 
 
-class PaymentMethodCreateView(LoginRequiredMixin, FormView):
+class PaymentMethodCreateView(LoginRequiredMixin, FormView, TrackerBaseView):
     button_template_name = "terminusgps_tracker/payments/create_button.html"
     extra_context = {
         "title": "New Payment",
@@ -80,24 +73,25 @@ class PaymentMethodCreateView(LoginRequiredMixin, FormView):
         return str(self.success_url)
 
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not request.headers.get("HX-Request"):
-            return HttpResponse(status=403)
         self.template_name = self.button_template_name
         return self.render_to_response(context=self.get_context_data())
 
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        self.profile = TrackerProfile.objects.get(user=request.user)
-        if request.headers.get("HX-Request"):
-            self.template_name = self.partial_template_name
-
     def form_valid(self, form: PaymentMethodCreationForm) -> HttpResponse:
-        payment_method = TrackerPaymentMethod.objects.create(profile=self.profile)
-        payment_method.save(form)
-        return HttpResponseRedirect(self.get_success_url(payment_method))
+        if self.profile is not None:
+            payment_method = TrackerPaymentMethod.objects.create(profile=self.profile)
+            payment_method.save(form)
+            return HttpResponseRedirect(self.get_success_url(payment_method))
+        form.add_error(
+            None,
+            ValidationError(
+                _("Whoops! Couldn't find your profile, please try again later."),
+                code="no_profile",
+            ),
+        )
+        return self.form_invalid(form=form)
 
 
-class PaymentMethodDeleteView(LoginRequiredMixin, DeleteView):
+class PaymentMethodDeleteView(LoginRequiredMixin, DeleteView, TrackerBaseView):
     context_object_name = "payment_method"
     http_method_names = ["get", "post"]
     login_url = reverse_lazy("tracker login")
@@ -108,19 +102,9 @@ class PaymentMethodDeleteView(LoginRequiredMixin, DeleteView):
     model = TrackerPaymentMethod
     queryset = TrackerPaymentMethod.objects.none()
 
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        self.profile = (
-            TrackerProfile.objects.get(user=request.user)
-            if request.user is not None and request.user.is_authenticated
-            else None
-        )
-        if request.headers.get("HX-Request"):
-            self.template_name = self.partial_template_name
-
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         try:
-            assert self.profile is not None, "No profile was set."
+            assert self.profile is not None, "No profile was set"
             assert request.headers.get("HX-Request")
             assert request.headers.get("HX-Prompt")
         except AssertionError:
