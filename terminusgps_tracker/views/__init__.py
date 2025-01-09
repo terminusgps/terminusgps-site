@@ -22,11 +22,17 @@ from .public import (
     TrackerSourceView,
 )
 from .subscriptions import (
-    TrackerSubscriptionConfirmView,
     TrackerSubscriptionUpdateView,
-    TrackerSubscriptionTierListView,
-    TrackerSubscriptionSuccessView,
+    TrackerSubscriptionCreateView,
+    TrackerSubscriptionDeleteView,
     TrackerSubscriptionDetailView,
+)
+from .subscription_tiers import (
+    TrackerSubscriptionTierUpdateView,
+    TrackerSubscriptionTierCreateView,
+    TrackerSubscriptionTierDeleteView,
+    TrackerSubscriptionTierDetailView,
+    TrackerSubscriptionTierListView,
 )
 from .payments import (
     PaymentMethodDetailView,

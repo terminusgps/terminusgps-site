@@ -1,6 +1,7 @@
 from django.views.generic import (
     CreateView,
     DetailView,
+    ListView,
     TemplateView,
     DeleteView,
     UpdateView,
@@ -12,6 +13,13 @@ from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
 
 class TrackerSubscriptionTierBaseView(TemplateView, ProfileContextMixin, HtmxMixin):
     model = TrackerSubscriptionTier
+
+
+class TrackerSubscriptionTierListView(ListView, TrackerSubscriptionTierBaseView):
+    template_name = "terminusgps_tracker/subscription_tier/detail.html"
+    partial_template_name = (
+        "terminusgps_tracker/subscription_tier/partials/_detail.html"
+    )
 
 
 class TrackerSubscriptionTierDetailView(DetailView, TrackerSubscriptionTierBaseView):
