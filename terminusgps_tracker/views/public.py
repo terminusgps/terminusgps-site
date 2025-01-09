@@ -8,10 +8,22 @@ from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import TemplateView, RedirectView, FormView
+from django.views.generic import TemplateView, RedirectView, FormView, View
 
 
 from terminusgps_tracker.forms import BugReportForm
+
+
+class HtmxView(View):
+    partial_template_name: str = ""
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        htmx_request = bool(request.headers.get("HX-Request"))
+        boosted = bool(request.headers.get("HX-Boosted"))
+
+        if htmx_request and not boosted:
+            self.template_name = self.partial_template_name
+        return super().setup(request, *args, **kwargs)
 
 
 class TrackerLandingView(RedirectView):

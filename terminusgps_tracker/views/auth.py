@@ -16,9 +16,10 @@ from wialon.api import WialonError
 
 from terminusgps_tracker.forms import TrackerAuthenticationForm, TrackerSignupForm
 from terminusgps_tracker.models import TrackerProfile, TrackerSubscription
+from terminusgps_tracker.views.public import HtmxView
 
 
-class TrackerLoginView(LoginView):
+class TrackerLoginView(LoginView, HtmxView):
     authentication_form = TrackerAuthenticationForm
     content_type = "text/html"
     extra_context = {"title": "Login", "subtitle": "We know where ours are... do you?"}
@@ -30,7 +31,7 @@ class TrackerLoginView(LoginView):
     template_name = "terminusgps_tracker/login.html"
 
 
-class TrackerLogoutView(LogoutView):
+class TrackerLogoutView(LogoutView, HtmxView):
     content_type = "text/html"
     extra_context = {"title": "Logout"}
     http_method_names = ["get", "post", "options"]
@@ -39,13 +40,8 @@ class TrackerLogoutView(LogoutView):
     success_url_allowed_hosts = settings.ALLOWED_HOSTS
     template_name = "terminusgps_tracker/logout.html"
 
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        if request.headers.get("HX-Request"):
-            self.template_name = self.partial_template_name
 
-
-class TrackerSignupView(SuccessMessageMixin, FormView):
+class TrackerSignupView(SuccessMessageMixin, FormView, HtmxView):
     content_type = "text/html"
     extra_context = {"title": "Sign Up", "subtitle": "You'll know where yours are..."}
     form_class = TrackerSignupForm
@@ -67,11 +63,6 @@ class TrackerSignupView(SuccessMessageMixin, FormView):
             cleaned_data, username=cleaned_data.get("username", "")
         )
 
-    def form_invalid(self, form: TrackerSignupForm) -> HttpResponse:
-        response = super().form_invalid(form=form)
-        response.headers["HX-Request"] = True
-        return response
-
     def form_valid(self, form: TrackerSignupForm) -> HttpResponse:
         try:
             ids = self.wialon_registration_flow(
@@ -91,23 +82,42 @@ class TrackerSignupView(SuccessMessageMixin, FormView):
             )
             self.profile = TrackerProfile.objects.create(user=user)
             TrackerSubscription.objects.create(profile=self.profile)
+            self.profile.wialon_super_user_id = ids.get("super_user")
             self.profile.wialon_end_user_id = ids.get("end_user")
-            self.profile.wialon_group_id = ids.get("group")
             self.profile.wialon_resource_id = ids.get("resource")
+            self.profile.wialon_group_id = ids.get("unit_group")
             self.profile.save()
-        response = super().form_valid(form=form)
-        response.headers["HX-Request"] = True
-        return response
+        return super().form_valid(form=form)
 
     def wialon_registration_flow(self, username: str, password: str) -> dict:
         with WialonSession(token=settings.WIALON_TOKEN) as session:
             admin_id = settings.WIALON_ADMIN_ID
-            resource = self._wialon_create_resource(admin_id, username, session)
-            self._wialon_create_account(resource.id, session=session)
-            end_user = self._wialon_create_user(admin_id, username, password, session)
-            group = self._wialon_create_group(admin_id, f"group_{username}", session)
+            super_user = self._wialon_create_user(
+                creator_id=admin_id,
+                username=f"account_{username}",
+                password=password,
+                session=session,
+            )
+            resource = self._wialon_create_resource(
+                creator_id=super_user.id, name=f"account_{username}", session=session
+            )
+            end_user = self._wialon_create_user(
+                creator_id=admin_id,
+                username=username,
+                password=password,
+                session=session,
+            )
+            unit_group = self._wialon_create_group(
+                creator_id=admin_id, name=f"group_{username}", session=session
+            )
+            self._wialon_create_account(resource_id=resource.id, session=session)
 
-            return {"end_user": end_user.id, "group": group.id, "resource": resource.id}
+            return {
+                "end_user": end_user.id,
+                "super_user": super_user.id,
+                "unit_group": unit_group.id,
+                "resource": resource.id,
+            }
 
     @staticmethod
     def _wialon_create_account(
