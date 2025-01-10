@@ -23,9 +23,8 @@ from .public import (
 )
 from .subscriptions import (
     TrackerSubscriptionUpdateView,
-    TrackerSubscriptionCreateView,
-    TrackerSubscriptionDeleteView,
     TrackerSubscriptionDetailView,
+    TrackerSubscriptionCancelView,
 )
 from .subscription_tiers import (
     TrackerSubscriptionTierUpdateView,

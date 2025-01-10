@@ -12,10 +12,6 @@ from .notifications import (
     NotificationDeletionForm,
     NotificationModificationForm,
 )
-from .subscriptions import (
-    SubscriptionDeletionForm,
-    SubscriptionModificationForm,
-    SubscriptionConfirmationForm,
-)
+from .subscriptions import SubscriptionCancelForm, SubscriptionUpdateForm
 from .auth import TrackerSignupForm, TrackerAuthenticationForm
 from .bug_report import BugReportForm

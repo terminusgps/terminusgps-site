@@ -30,9 +30,24 @@ urlpatterns = [
         name="tracker subscriptions",
     ),
     path(
-        "profile/subscription/",
+        "subscriptions/<int:pk>/",
+        views.TrackerSubscriptionTierDetailView.as_view(),
+        name="tier detail",
+    ),
+    path(
+        "profile/subscription/<int:pk>/",
         views.TrackerSubscriptionDetailView.as_view(),
         name="subscription detail",
+    ),
+    path(
+        "profile/subscription/<int:pk>/update/",
+        views.TrackerSubscriptionUpdateView.as_view(),
+        name="subscription update",
+    ),
+    path(
+        "profile/subscription/<int:pk>/cancel/",
+        views.TrackerSubscriptionCancelView.as_view(),
+        name="subscription cancel",
     ),
     path(
         "profile/settings/", views.TrackerProfileSettingsView.as_view(), name="settings"

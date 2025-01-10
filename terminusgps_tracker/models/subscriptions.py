@@ -161,29 +161,24 @@ class TrackerSubscription(models.Model):
         payment_id: int | None = None,
         address_id: int | None = None,
     ) -> None:
-        assert self.payment_id or payment_id, "No payment method found."
-        assert self.address_id or address_id, "No shipping method found."
+        assert payment_id or self.payment_id, "No payment method found."
+        assert address_id or self.address_id, "No shipping method found."
 
         if self.tier is None or self.authorizenet_id is None:
             self.authorizenet_id = self.authorizenet_create_subscription(
-                new_tier,
-                payment_id if payment_id is not None else self.payment_id,
-                address_id if address_id is not None else self.address_id,
+                new_tier, payment_id or self.payment_id, address_id or self.payment_id
             )
         elif self.tier and new_tier.amount < self.tier.amount:
             raise ValueError("Cannot upgrade to a lower tier.")
         else:
             self.authorizenet_update_subscription(
-                new_tier,
-                payment_id if payment_id is not None else self.payment_id,
-                address_id if address_id is not None else self.address_id,
+                new_tier, payment_id or self.payment_id, address_id or self.payment_id
             )
 
         self.tier = new_tier
+        self.payment_id = payment_id
+        self.address_id = address_id
         self.refresh_status()
-        if payment_id is not None and address_id is not None:
-            self.payment_id = payment_id
-            self.address_id = address_id
 
     @transaction.atomic
     def downgrade(
@@ -192,29 +187,24 @@ class TrackerSubscription(models.Model):
         payment_id: int | None = None,
         address_id: int | None = None,
     ) -> None:
-        assert self.payment_id or payment_id, "No payment method found."
-        assert self.address_id or address_id, "No shipping method found."
+        assert payment_id or self.payment_id, "No payment method found."
+        assert address_id or self.address_id, "No shipping method found."
 
         if self.tier is None or self.authorizenet_id is None:
             self.authorizenet_id = self.authorizenet_create_subscription(
-                new_tier,
-                payment_id if payment_id is not None else self.payment_id,
-                address_id if address_id is not None else self.address_id,
+                new_tier, payment_id or self.payment_id, address_id or self.address_id
             )
         elif self.tier and new_tier.amount > self.tier.amount:
             raise ValueError("Cannot downgrade to a higher tier.")
         else:
             self.authorizenet_update_subscription(
-                new_tier,
-                payment_id if payment_id is not None else self.payment_id,
-                address_id if address_id is not None else self.address_id,
+                new_tier, payment_id or self.payment_id, address_id or self.address_id
             )
 
         self.tier = new_tier
+        self.payment_id = payment_id
+        self.address_id = address_id
         self.refresh_status()
-        if payment_id is not None and address_id is not None:
-            self.payment_id = payment_id
-            self.address_id = address_id
 
     @transaction.atomic
     def refresh_status(self) -> None:

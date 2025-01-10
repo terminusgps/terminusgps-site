@@ -1,0 +1,11 @@
+<form
+    class="{{ class }}"
+    hx-post="{% url 'subscription cancel' subscription.pk %}"
+    hx-trigger="click"
+    hx-prompt="Are you sure you want to cancel your '{{ subscription.tier.name }}' subscription?"
+    hx-target="this"
+    hx-swap="outerHTML"
+>
+    {% csrf_token %}
+    {{ form }}
+</form>

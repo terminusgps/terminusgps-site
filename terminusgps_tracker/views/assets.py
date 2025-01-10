@@ -54,9 +54,11 @@ class AssetListView(ListView, ProfileContextMixin, ProfileRequiredMixin, HtmxMix
     partial_template_name = "terminusgps_tracker/assets/partials/_list.html"
     queryset = TrackerAsset.objects.none()
     template_name = "terminusgps_tracker/assets/list.html"
+    ordering = "name"
 
     def get_queryset(self) -> QuerySet:
-        return TrackerAsset.objects.filter(profile=self.profile)
+        ordering = self.get_ordering()
+        return TrackerAsset.objects.filter(profile=self.profile).order_by(ordering)
 
 
 class AssetDetailView(DetailView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin):

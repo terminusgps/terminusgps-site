@@ -1,12 +1,30 @@
-<div class="flex items-center justify-center rounded bg-gray-200 p-8">
+<div id="subscription" hx-target="this" hx-swap="outerHTML" class="{{ class }}">
+    <div class="flex flex-col gap-2">
     {% if subscription.tier != None %}
-    <!-- Subscribed -->
+        <!-- Subscribed -->
+        {{ profile.user.first_name }}'s {{ subscription.tier.name }} Subscription
+        {{ subscription.tier.amount }}
+        {{ subscription.tier.features }}
     {% else %}
-    <a class="flex-inline group flex w-full items-center justify-center gap-2 rounded bg-red-300 p-4 text-terminus-red-900 transition-all duration-300 ease-in-out will-change-auto hover:scale-105 hover:cursor-pointer" hx-boost="true" href="{% url 'tracker subscriptions' %}">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
-        </svg>
-        Subscribe
-    </a>
+        <!-- Not subscribed -->    
+        {{ profile.user.first_name }}'s Subscription
     {% endif %}
+        <input
+            class="cursor-hover w-full rounded bg-terminus-red-800 p-2 text-center text-white hover:bg-terminus-red-300"
+            hx-get="{% url 'subscription update' subscription.pk %}"
+            type="button"
+            value="Switch plans"
+            hx-trigger="click"
+        >
+        {% if subscription.tier != None %}
+        <input
+            class="cursor-hover w-full rounded bg-gray-300 p-2 text-center text-gray-700 hover:bg-gray-200"
+            type="button"
+            value="Cancel"
+            hx-post="{% url 'subscription cancel' subscription.pk %}"
+            hx-trigger="click"
+            hx-confirm="Are you sure you want to cancel your '{{ subscription.tier.name }}' subscription?"
+        >
+        {% endif %}
+    </div>
 </div>
