@@ -1,0 +1,12 @@
+<form class="{{ class }}" method="post" action="{% url 'bug report' %}">
+    {% csrf_token %}
+    <div class="flex flex-col gap-2">
+        {{ form.category }}
+        {{ form.text }}
+        {{ form.user.as_hidden }}
+    </div>
+    <div class="flex flex-col gap-2">
+        <input class="rounded border-terminus-red-600 bg-terminus-red-800 p-2 text-white hover:cursor-pointer hover:bg-terminus-red-400" type="submit">
+        <a href="{% url 'tracker profile' %}" hx-boost="true" class="rounded border-gray-600 bg-gray-300 p-2 text-center text-gray-700 hover:cursor-pointer hover:bg-gray-200">Cancel</a>
+    </div>
+</form>

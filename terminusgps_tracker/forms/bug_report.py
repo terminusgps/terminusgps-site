@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 class BugReportForm(forms.Form):
     class BugCategory(models.TextChoices):
-        ASSET = "AS", _("Tracker Assets")
+        ASSET = "AS", _("Assets")
         PAYMENT_METHOD = "PM", _("Payment Methods")
         SHIPPING_ADDRESS = "SA", _("Shipping Addresses")
         SUBSCRIPTION = "SB", _("Subscriptions")

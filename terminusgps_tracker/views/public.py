@@ -1,5 +1,6 @@
 from typing import Any
 
+from django import forms
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpRequest, HttpResponse
@@ -55,27 +56,30 @@ class TrackerBugReportView(
     FormView, ProfileRequiredMixin, ProfileContextMixin, HtmxMixin
 ):
     content_type = "text/html"
-    extra_context = {"title": "Bug Report", "subtitle": "Found a bug?"}
+    extra_context = {
+        "title": "Bug Report",
+        "subtitle": "Found a bug?",
+        "class": "flex flex-col gap-4 p-8 bg-gray-100 rounded border border-gray-600 drop-shadow",
+    }
     form_class = BugReportForm
     http_method_names = ["get", "post"]
-    login_url = reverse_lazy("tracker login")
-    permission_denied_message = "Please login and try again."
-    raise_exception = False
-    success_message = "Thank you! Your bug report was submitted successfully."
+    partial_template_name = "terminusgps_tracker/partials/_bug_report.html"
     success_url = reverse_lazy("tracker profile")
     template_name = "terminusgps_tracker/bug_report.html"
 
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
+    def get_form(self, form_class=None) -> forms.Form:
+        form = super().get_form(form_class)
+        form.fields["category"].widget.attrs.update(
+            {"class": "p-2 bg-gray-200 rounded"}
+        )
+        return form
 
     def form_valid(self, form: BugReportForm) -> HttpResponse:
         self.send_bug_report(form)
         return super().form_valid(form=form)
 
     def get_initial(self) -> dict[str, Any]:
-        if self.request.user:
-            return {"user": self.request.user}
-        return {}
+        return {"user": self.request.user or None}
 
     @staticmethod
     def send_bug_report(form: BugReportForm) -> None:
