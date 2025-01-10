@@ -1,11 +1,11 @@
 from typing import Any
 
 from django import forms
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.conf import settings
 from django.db import transaction
 from django.db.models import QuerySet
 from django.forms import ValidationError
-from django.http.response import HttpResponse, HttpResponseRedirect
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 from django.views.generic.list import ListView
@@ -17,48 +17,86 @@ from wialon.api import WialonError
 
 from terminusgps_tracker.models import TrackerAsset, TrackerAssetCommand
 from terminusgps_tracker.forms import TrackerAssetUpdateForm, TrackerAssetCreateForm
-from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
+from terminusgps_tracker.views.mixins import (
+    HtmxMixin,
+    ProfileContextMixin,
+    ProfileRequiredMixin,
+)
 
 
 class WialonUnitNotFoundError(Exception):
     """Raised when a Wialon unit was not found via IMEI #."""
 
 
-class AssetDeleteView(DeleteView, ProfileContextMixin, HtmxMixin):
+class AssetDeleteView(DeleteView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin):
+    context_object_name = "asset"
     http_method_names = ["get", "post"]
+    model = TrackerAsset
     partial_template_name = "terminusgps_tracker/assets/partials/_delete.html"
+    queryset = TrackerAsset.objects.none()
     template_name = "terminusgps_tracker/assets/delete.html"
-    extra_context = {"title": "Delete Asset"}
+
+    def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        return super().post(request, *args, **kwargs)
+
+    def get_queryset(self) -> QuerySet:
+        return TrackerAsset.objects.filter(profile=self.profile)
+
+    def get_object(self, queryset=None) -> TrackerAsset | None:
+        return self.get_queryset().get(pk=self.kwargs["pk"])
 
 
-class AssetListView(ListView, ProfileContextMixin, HtmxMixin):
+class AssetListView(ListView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin):
     context_object_name = "asset_list"
+    http_method_names = ["get", "post"]
+    model = TrackerAsset
     paginate_by = 6
     partial_template_name = "terminusgps_tracker/assets/partials/_list.html"
+    queryset = TrackerAsset.objects.none()
     template_name = "terminusgps_tracker/assets/list.html"
-    extra_context = {"title": "List Assets"}
+
+    def get_queryset(self) -> QuerySet:
+        return TrackerAsset.objects.filter(profile=self.profile)
 
 
-class AssetDetailView(DetailView, ProfileContextMixin, HtmxMixin):
+class AssetDetailView(DetailView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin):
+    model = TrackerAsset
+    queryset = TrackerAsset.objects.none()
     http_method_names = ["get"]
     partial_template_name = "terminusgps_tracker/assets/partials/_detail.html"
     template_name = "terminusgps_tracker/assets/detail.html"
     extra_context = {"title": "Asset Detail"}
+    context_object_name = "asset"
+
+    def get_queryset(self) -> QuerySet:
+        return TrackerAsset.objects.filter(profile=self.profile)
 
 
-class AssetRemoteView(DetailView, ProfileContextMixin, HtmxMixin):
+class AssetRemoteView(DetailView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin):
+    model = TrackerAsset
+    queryset = TrackerAsset.objects.none()
     http_method_names = ["get"]
     partial_template_name = "terminusgps_tracker/assets/partials/_remote.html"
     template_name = "terminusgps_tracker/assets/remote.html"
     extra_context = {"title": "Asset Remote"}
+    context_object_name = "asset"
+
+    def get_queryset(self) -> QuerySet:
+        return TrackerAsset.objects.filter(profile=self.profile)
 
 
-class AssetUpdateView(UpdateView, ProfileContextMixin, HtmxMixin):
+class AssetUpdateView(UpdateView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin):
+    model = TrackerAsset
+    queryset = TrackerAsset.objects.none()
     form_class = TrackerAssetUpdateForm
     http_method_names = ["get", "post"]
     partial_template_name = "terminusgps_tracker/assets/partials/_update.html"
     template_name = "terminusgps_tracker/assets/update.html"
     extra_context = {"title": "Asset Update"}
+    context_object_name = "asset"
+
+    def get_queryset(self) -> QuerySet:
+        return TrackerAsset.objects.filter(profile=self.profile)
 
     def get_initial(self) -> dict[str, Any]:
         initial: dict[str, Any] = super().get_initial()
@@ -73,10 +111,17 @@ class AssetUpdateView(UpdateView, ProfileContextMixin, HtmxMixin):
 
 
 class AssetCreateView(CreateView, ProfileContextMixin, HtmxMixin):
+    model = TrackerAsset
+    queryset = TrackerAsset.objects.none()
     form_class = TrackerAssetCreateForm
     http_method_names = ["get", "post", "delete"]
     partial_template_name = "terminusgps_tracker/assets/partials/_create.html"
     template_name = "terminusgps_tracker/assets/create.html"
+    context_object_name = "asset"
+
+    def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        # Only htmx can make DELETE requests
+        return HttpResponse(status=200 if request.headers.get("HX-Request") else 403)
 
     def get_available_commands(self) -> QuerySet:
         return TrackerAssetCommand.objects.filter().exclude(pk__in=[1, 2, 3])
@@ -91,11 +136,13 @@ class AssetCreateView(CreateView, ProfileContextMixin, HtmxMixin):
                 if not unit_id:
                     raise WialonUnitNotFoundError()
 
-                self.wialon_create_asset(int(unit_id), asset_name, session)
+                self.wialon_create_asset(
+                    int(unit_id), asset_name or imei_number, session
+                )
                 asset = TrackerAsset.objects.create(
                     wialon_id=unit_id,
                     imei_number=imei_number,
-                    name=asset_name if asset_name else imei_number,
+                    name=asset_name or imei_number,
                 )
                 asset.profile = self.profile
                 asset.commands.set(self.get_available_commands())

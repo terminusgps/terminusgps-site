@@ -1,6 +1,6 @@
 <tr id="{{ asset.pk }}" class="border-b bg-white dark:border-gray-700 dark:bg-gray-800">
     <th scope="row" class="whitespace-nowrap p-2 font-medium text-gray-900 dark:text-white">
-        <a class="font-semibold text-terminus-red-500 underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:text-terminus-red-300 hover:decoration-dotted" href="{% url 'asset remote' asset.pk %}">{{ asset.name }}</a>
+        <a class="font-semibold text-terminus-red-500 underline decoration-gray-700 decoration-solid decoration-2 underline-offset-2 hover:text-terminus-red-300 hover:decoration-dotted" href="#">{{ asset.name }}</a>
     </th>
     <td class="p-2">
         {{ asset.imei_number }}
@@ -10,7 +10,7 @@
             class="rounded border-gray-600 bg-gray-300 p-2 text-gray-700 hover:cursor-pointer hover:bg-gray-200"
             type="button"
             value="Delete"
-            hx-post="{% url 'asset delete' asset.id %}"
+            hx-post="{% url 'asset delete' asset.pk %}"
             hx-swap="delete"
             hx-target="closest tr"
             hx-trigger="click"
@@ -21,7 +21,7 @@
             class="rounded border-terminus-red-600 bg-terminus-red-800 p-2 text-white hover:cursor-pointer hover:bg-terminus-red-400"
             type="button"
             value="Edit"
-            hx-get="{% url 'asset update' asset.id %}"
+            hx-get="{% url 'asset update' asset.pk %}"
             hx-swap="outerHTML"
             hx-target="closest tr"
             hx-trigger="click"

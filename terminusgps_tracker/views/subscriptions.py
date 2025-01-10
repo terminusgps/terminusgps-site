@@ -1,10 +1,5 @@
-from django.views.generic import (
-    CreateView,
-    DeleteView,
-    DetailView,
-    TemplateView,
-    UpdateView,
-)
+from django.db.models import QuerySet
+from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 from terminusgps_tracker.models import TrackerSubscription
 from terminusgps_tracker.views.mixins import (
@@ -14,33 +9,43 @@ from terminusgps_tracker.views.mixins import (
 )
 
 
-class TrackerSubscriptionBaseView(
-    TemplateView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin
+class TrackerSubscriptionDeleteView(
+    DeleteView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin
 ):
-    """Base Subscription View"""
-
     model = TrackerSubscription
-
-    def get_object(self) -> TrackerSubscription:
-        assert self.profile.subscription is not None
-        return self.profile.subscription
-
-
-class TrackerSubscriptionDeleteView(DeleteView, TrackerSubscriptionBaseView):
-    template_name = "terminusgps_tracker/subscription/delete.html"
     partial_template_name = "terminusgps_tracker/subscription/partials/_delete.html"
+    queryset = TrackerSubscription.objects.none()
+    template_name = "terminusgps_tracker/subscription/delete.html"
 
 
-class TrackerSubscriptionCreateView(CreateView, TrackerSubscriptionBaseView):
-    template_name = "terminusgps_tracker/subscription/create.html"
+class TrackerSubscriptionCreateView(
+    CreateView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin
+):
+    model = TrackerSubscription
     partial_template_name = "terminusgps_tracker/subscription/partials/_create.html"
+    queryset = TrackerSubscription.objects.none()
+    template_name = "terminusgps_tracker/subscription/create.html"
 
 
-class TrackerSubscriptionDetailView(DetailView, TrackerSubscriptionBaseView):
-    template_name = "terminusgps_tracker/subscription/detail.html"
+class TrackerSubscriptionDetailView(
+    DetailView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin
+):
+    model = TrackerSubscription
     partial_template_name = "terminusgps_tracker/subscription/partials/_detail.html"
+    queryset = TrackerSubscription.objects.none()
+    template_name = "terminusgps_tracker/subscription/detail.html"
+
+    def get_object(
+        self, queryset: QuerySet | None = None
+    ) -> TrackerSubscription | None:
+        if self.profile is not None:
+            return self.profile.subscription
 
 
-class TrackerSubscriptionUpdateView(UpdateView, TrackerSubscriptionBaseView):
-    template_name = "terminusgps_tracker/subscription/update.html"
+class TrackerSubscriptionUpdateView(
+    UpdateView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin
+):
+    model = TrackerSubscription
     partial_template_name = "terminusgps_tracker/subscription/partials/_update.html"
+    queryset = TrackerSubscription.objects.none()
+    template_name = "terminusgps_tracker/subscription/update.html"

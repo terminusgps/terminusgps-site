@@ -35,9 +35,7 @@ urlpatterns = [
         name="subscription detail",
     ),
     path(
-        "profile/settings/",
-        views.TrackerProfileSettingsView.as_view(),
-        name="profile settings",
+        "profile/settings/", views.TrackerProfileSettingsView.as_view(), name="settings"
     ),
     path(
         "profile/shipping/new/",

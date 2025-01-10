@@ -27,13 +27,16 @@ class ProfileRequiredMixin(UserPassesTestMixin):
     permission_denied_message = "Please login and try again."
 
     def test_func(self) -> bool | None:
+        test_result = None
         if self.request.user and isinstance(self.request.user, get_user_model()):
             try:
                 assert self.request.user.is_authenticated, "User isn't authenticated"
                 TrackerProfile.objects.get(pk=self.request.user.pk)
-                return True
+                test_result = True
             except (TrackerProfile.DoesNotExist, AssertionError):
-                return False
+                test_result = False
+            finally:
+                return test_result
 
 
 class ProfileContextMixin(ContextMixin, View):

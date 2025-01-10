@@ -69,7 +69,7 @@ class PaymentMethodCreateView(
     partial_template_name = "terminusgps_tracker/payments/partials/_create.html"
     permission_denied_message = "Please login and try again."
     raise_exception = True
-    success_url = reverse_lazy("tracker settings")
+    success_url = reverse_lazy("settings")
     template_name = "terminusgps_tracker/payments/create.html"
 
     def get_success_url(
