@@ -1,5 +1,6 @@
 from typing import Any
 
+from django import forms
 from django.db.models import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
@@ -9,6 +10,7 @@ from django.core.exceptions import ValidationError
 
 from terminusgps_tracker.models import TrackerSubscription
 from terminusgps_tracker.forms import SubscriptionUpdateForm, SubscriptionCancelForm
+from terminusgps_tracker.models.subscriptions import TrackerSubscriptionTier
 from terminusgps_tracker.views.mixins import (
     HtmxMixin,
     ProfileContextMixin,
@@ -84,7 +86,7 @@ class TrackerSubscriptionUpdateView(
 
     def get_success_url(self, subscription: TrackerSubscription | None = None) -> str:
         if subscription is not None:
-            return reverse("detail subscription", kwargs={"pk": subscription.pk})
+            return reverse("subscription detail", kwargs={"pk": subscription.pk})
         return str(self.success_url)
 
     def form_valid(self, form: SubscriptionUpdateForm) -> HttpResponse:
@@ -92,16 +94,49 @@ class TrackerSubscriptionUpdateView(
         new_tier = form.cleaned_data["tier"]
         payment_id = form.cleaned_data["payment_id"]
         address_id = form.cleaned_data["address_id"]
-        upgrading = bool(
-            subscription.tier is None or subscription.tier.amount < new_tier.amount
-        )
 
+        if new_tier is None:
+            form.add_error(
+                "tier",
+                ValidationError(
+                    _("Please select a subscription tier."), code="invalid"
+                ),
+            )
+        if form.cleaned_data["address_id"] is None:
+            form.add_error(
+                None,
+                ValidationError(
+                    _(
+                        "Whoops! Couldn't find a shipping address. Please try again later."
+                    ),
+                    code="invalid",
+                ),
+            )
+        if form.cleaned_data["payment_id"] is None:
+            form.add_error(
+                None,
+                ValidationError(
+                    _(
+                        "Whoops! Couldn't find a payment profile. Please try again later."
+                    ),
+                    code="invalid",
+                ),
+            )
+
+        if not form.is_valid():
+            return self.form_invalid(form=form)
         try:
+            upgrading = bool(
+                subscription.tier is None or subscription.tier.amount < new_tier.amount
+            )
+
             subscription.upgrade(
                 new_tier=new_tier, payment_id=payment_id, address_id=address_id
             ) if upgrading else subscription.downgrade(
                 new_tier=new_tier, payment_id=payment_id, address_id=address_id
             )
+            subscription.save()
+            return HttpResponseRedirect(self.get_success_url(subscription))
         except ValueError as e:
             print(e)
             form.add_error(
@@ -113,6 +148,4 @@ class TrackerSubscriptionUpdateView(
                     code="invalid",
                 ),
             )
-        else:
-            subscription.save()
-        return HttpResponseRedirect(self.get_success_url(subscription))
+            return self.form_invalid(form=form)

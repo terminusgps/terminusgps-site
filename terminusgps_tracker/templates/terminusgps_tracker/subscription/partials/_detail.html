@@ -1,4 +1,4 @@
-<div id="subscription" hx-target="this" hx-swap="outerHTML" class="{{ class }}">
+<div id="subscription" hx-indicator=".htmx-indicator" hx-target="this" hx-swap="outerHTML" class="{{ class }}">
     <div class="flex flex-col gap-2">
     {% if subscription.tier != None %}
         <!-- Subscribed -->
@@ -10,7 +10,7 @@
         {{ profile.user.first_name }}'s Subscription
     {% endif %}
         <input
-            class="cursor-hover w-full rounded bg-terminus-red-800 p-2 text-center text-white hover:bg-terminus-red-300"
+            class="w-full cursor-pointer rounded bg-terminus-red-800 p-2 text-center text-white hover:bg-terminus-red-300"
             hx-get="{% url 'subscription update' subscription.pk %}"
             type="button"
             value="Switch plans"
@@ -18,7 +18,7 @@
         >
         {% if subscription.tier != None %}
         <input
-            class="cursor-hover w-full rounded bg-gray-300 p-2 text-center text-gray-700 hover:bg-gray-200"
+            class="w-full cursor-pointer rounded bg-gray-300 p-2 text-center text-gray-700 hover:bg-gray-200"
             type="button"
             value="Cancel"
             hx-post="{% url 'subscription cancel' subscription.pk %}"
