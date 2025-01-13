@@ -169,6 +169,7 @@ class TrackerSubscription(models.Model):
                 )
         except ValueError as e:
             print(e)
+            raise
         else:
             self.tier = new_tier
             self.payment_id = payment_id
@@ -190,6 +191,7 @@ class TrackerSubscription(models.Model):
                 )
         except ValueError as e:
             print(e)
+            raise
         else:
             self.tier = new_tier
             self.payment_id = payment_id
