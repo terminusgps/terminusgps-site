@@ -42,6 +42,9 @@ class AssetDeleteView(DeleteView, ProfileContextMixin, HtmxMixin):
     def get_object(self, queryset=None) -> TrackerAsset | None:
         return self.get_queryset().get(pk=self.kwargs["pk"])
 
+    def get_success_url(self) -> str:
+        return reverse("tracker profile")
+
 
 class AssetListView(ListView, ProfileContextMixin, HtmxMixin):
     context_object_name = "asset_list"
