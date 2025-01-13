@@ -19,7 +19,7 @@ from terminusgps_tracker.models import TrackerProfile, TrackerSubscription
 from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
 
 
-class TrackerLoginView(LoginView, ProfileContextMixin, HtmxMixin):
+class TrackerLoginView(LoginView, HtmxMixin):
     authentication_form = TrackerAuthenticationForm
     content_type = "text/html"
     extra_context = {"title": "Login", "subtitle": "We know where ours are... do you?"}
@@ -41,7 +41,7 @@ class TrackerLogoutView(LogoutView, ProfileContextMixin, HtmxMixin):
     template_name = "terminusgps_tracker/logout.html"
 
 
-class TrackerSignupView(FormView, SuccessMessageMixin, ProfileContextMixin, HtmxMixin):
+class TrackerSignupView(FormView, SuccessMessageMixin, HtmxMixin):
     content_type = "text/html"
     extra_context = {"title": "Sign Up", "subtitle": "You'll know where yours are..."}
     form_class = TrackerSignupForm
