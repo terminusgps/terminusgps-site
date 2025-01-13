@@ -51,10 +51,7 @@ class PaymentMethodDetailView(DetailView, ProfileContextMixin, HtmxMixin):
 
 class PaymentMethodCreateView(FormView, ProfileContextMixin, HtmxMixin):
     button_template_name = "terminusgps_tracker/payments/create_button.html"
-    extra_context = {
-        "title": "New Payment",
-        "legal_name": settings.TRACKER_PROFILE["LEGAL_NAME"],
-    }
+    extra_context = {"title": "New Payment"}
     form_class = PaymentMethodCreationForm
     http_method_names = ["get", "post", "delete"]
     login_url = reverse_lazy("tracker login")
