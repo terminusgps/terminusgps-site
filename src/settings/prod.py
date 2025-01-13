@@ -53,38 +53,83 @@ DEFAULT_FROM_EMAIL = "support@terminusgps.com"
 
 TRACKER_PROFILE = {
     "DISPLAY_NAME": "Terminus GPS",
-    "EMAIL": {"SUPPORT": "support@terminusgps.com", "SALES": "sales@terminusgps.com"},
-    "GITHUB": "https://github.com/terminus-gps/terminusgps-site/",
-    "MOTD": "Check out the Terminus GPS mobile app!",
+    "GITHUB": "https://github.com/terminusgps/terminusgps-site/",
+    "MOTD": "Check out the Terminus GPS mobile app today!",
     "LEGAL_NAME": "Terminus GPS, LLC",
-    "PHONE": {"OFFICE": "+17139045262", "SALES": "+17139045262"},
-    "ADDRESS": {
-        "STREET": "17240 Huffmeister Road, Suite 103",
-        "CITY": "Cypress",
-        "STATE": "Texas",
-        "ZIP": "77429",
-        "COUNTRY": "USA",
-    },
-    "SOCIALS": {
-        "FACEBOOK": {
-            "display_name": "Terminus GPS",
-            "profile_link": "https://www.facebook.com/TerminusGPSllc",
-            "username": "TerminusGPSllc",
+    "ADDRESSES": [
+        {
+            "NAME": "OFFICE1",
+            "OPTIONS": {
+                "street": "17240 Huffmeister Road, Suite 103",
+                "city": "Cypress",
+                "state": "Texas",
+                "zip": "77429",
+                "country": "USA",
+            },
         },
-        "INSTAGRAM": None,
-        "NEXTDOOR": {
-            "display_name": "TerminusGPS",
-            "profile_link": "https://nextdoor.com/pages/terminusgps-cypress-tx/",
-            "username": "TerminusGPS",
+        {
+            "NAME": "OFFICE2",
+            "OPTIONS": {
+                "street": "17240 Huffmeister Road, Suite 103",
+                "city": "Cypress",
+                "state": "Texas",
+                "zip": "77429",
+                "country": "USA",
+            },
         },
-        "TIKTOK": {
-            "display_name": "TerminusGps",
-            "profile_link": "https://www.tiktok.com/@terminusgps",
-            "username": "terminusgps",
+    ],
+    "PHONES": [
+        {"OFFICE": "+17139045262"},
+        {"SALES": "+17139045262"},
+        {"SUPPORT": "+17139045262"},
+    ],
+    "EMAILS": [
+        {
+            "NAME": "SALES",
+            "OPTIONS": {
+                "address": "sales@terminusgps.com",
+                "link": "mailto:sales@terminusgps.com",
+            },
         },
-        "TWITTER": None,
-        "YOUTUBE": None,
-    },
+        {
+            "NAME": "SUPPORT",
+            "OPTIONS": {
+                "address": "support@terminusgps.com",
+                "link": "mailto:support@terminusgps.com",
+            },
+        },
+    ],
+    "SOCIALS": [
+        {
+            "NAME": "Facebook",
+            "OPTIONS": {
+                "display_name": "Terminus GPS",
+                "profile_link": "https://www.facebook.com/TerminusGPSllc",
+                "username": "TerminusGPSllc",
+            },
+        },
+        {
+            "NAME": "TikTok",
+            "OPTIONS": {
+                "display_name": "TerminusGps",
+                "profile_link": "https://www.tiktok.com/@terminusgps",
+                "username": "terminusgps",
+            },
+        },
+        {
+            "NAME": "Nextdoor",
+            "OPTIONS": {
+                "display_name": "TerminusGPS",
+                "profile_link": "https://nextdoor.com/pages/terminusgps-cypress-tx/",
+                "username": "TerminusGPS",
+            },
+        },
+    ],
+    "SUBSCRIPTIONS": [
+        {"NAME": "Basic", "OPTIONS": {"cmd": "Basic", "amount": "19.99"}},
+        {"NAME": "Standard", "OPTIONS": {"cmd": "Standard", "amount": "29.99"}},
+        {"NAME": "Premium", "OPTIONS": {"cmd": "Premium", "amount": "39.99"}},
+    ],
 }
 
 LOGGING = {

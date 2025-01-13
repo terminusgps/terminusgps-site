@@ -18,7 +18,7 @@
     </td>
     <td class="flex-inline relative flex gap-2 p-2">
         <input
-            class="rounded border-gray-600 bg-gray-300 p-2 text-gray-700 hover:cursor-pointer hover:bg-gray-200"
+            class="cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 hover:bg-gray-200"
             type="button"
             value="Cancel"
             hx-delete="{% url 'asset create' %}"
@@ -27,7 +27,7 @@
             hx-trigger="click"
         >
         <input
-            class="rounded border-terminus-red-600 bg-terminus-red-800 p-2 text-white hover:cursor-pointer hover:bg-terminus-red-400"
+            class="cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white hover:bg-terminus-red-400"
             type="submit"
             value="Save"
             hx-include="closest tr"

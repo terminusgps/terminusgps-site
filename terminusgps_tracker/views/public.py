@@ -42,7 +42,13 @@ class TrackerPrivacyView(TemplateView, ProfileContextMixin, HtmxMixin):
 
 class TrackerContactView(TemplateView, ProfileContextMixin, HtmxMixin):
     content_type = "text/html"
-    extra_context = {"title": "Contact", "subtitle": "Ready to get in touch?"}
+    extra_context = {
+        "title": "Contact",
+        "subtitle": "Ready to get in touch?",
+        "socials": settings.TRACKER_PROFILE["SOCIALS"],
+        "emails": settings.TRACKER_PROFILE["EMAILS"],
+        "phones": settings.TRACKER_PROFILE["PHONES"],
+    }
     http_method_names = ["get"]
     template_name = "terminusgps_tracker/contact.html"
     partial_template_name = "terminusgps_tracker/partials/_contact.html"
@@ -53,7 +59,7 @@ class TrackerBugReportView(FormView, ProfileContextMixin, HtmxMixin):
     extra_context = {
         "title": "Bug Report",
         "subtitle": "Found a bug?",
-        "class": "flex flex-col gap-4 p-8 bg-gray-100 rounded border border-gray-600 drop-shadow",
+        "class": "flex flex-col gap-4 p-8 bg-gray-400 rounded border border-gray-600 shadow-lg",
     }
     form_class = BugReportForm
     http_method_names = ["get", "post"]
@@ -64,7 +70,7 @@ class TrackerBugReportView(FormView, ProfileContextMixin, HtmxMixin):
     def get_form(self, form_class=None) -> forms.Form:
         form = super().get_form(form_class)
         form.fields["category"].widget.attrs.update(
-            {"class": "p-2 bg-gray-200 rounded"}
+            {"class": "p-2 bg-stone-100 rounded"}
         )
         return form
 
