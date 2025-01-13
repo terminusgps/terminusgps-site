@@ -97,6 +97,15 @@ class AssetUpdateView(UpdateView, ProfileContextMixin, HtmxMixin):
     extra_context = {"title": "Asset Update"}
     context_object_name = "asset"
 
+    def get_success_url(self, asset: TrackerAsset | None = None) -> str:
+        if asset is not None:
+            return asset.get_absolute_url()
+        return reverse("tracker profile")
+
+    def get_object(self) -> TrackerAsset:
+        queryset = self.get_queryset()
+        return queryset.get(pk=self.kwargs["pk"])
+
     def get_queryset(self) -> QuerySet:
         return TrackerAsset.objects.filter(profile=self.profile)
 
