@@ -52,9 +52,7 @@ class TrackerSubscriptionUpdateView(UpdateView, ProfileContextMixin, HtmxMixin):
     template_name = "terminusgps_tracker/subscription/update.html"
     fields = ["tier", "payment_id", "address_id"]
     context_object_name = "subscription"
-    extra_context = {
-        "class": "rounded bg-gray-100 p-8 shadow border-terminus-gray-600 border"
-    }
+    extra_context = {"class": "rounded bg-gray-100 p-8 shadow border-gray-600 border"}
 
     def get_initial(self) -> dict[str, Any]:
         initial: dict[str, Any] = super().get_initial()
