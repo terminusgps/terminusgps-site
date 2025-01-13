@@ -39,9 +39,7 @@ class TrackerSubscriptionDetailView(DetailView, ProfileContextMixin, HtmxMixin):
     queryset = TrackerSubscription.objects.none()
     template_name = "terminusgps_tracker/subscription/detail.html"
     context_object_name = "subscription"
-    extra_context = {
-        "class": "rounded bg-gray-100 p-8 shadow border-terminus-gray-600 border"
-    }
+    extra_context = {"class": "rounded bg-gray-100 p-8 shadow border-gray-600 border"}
 
     def get_object(self, queryset: QuerySet | None = None) -> TrackerSubscription:
         return self.profile.subscription
