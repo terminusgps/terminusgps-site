@@ -4,6 +4,7 @@ from django import forms
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.conf import settings
 from django.db import transaction
+from django.urls import reverse
 from django.db.models import QuerySet
 from django.forms import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -116,6 +117,11 @@ class AssetCreateView(CreateView, ProfileContextMixin, HtmxMixin):
     partial_template_name = "terminusgps_tracker/assets/partials/_create.html"
     template_name = "terminusgps_tracker/assets/create.html"
     context_object_name = "asset"
+
+    def get_success_url(self, asset: TrackerAsset | None = None) -> str:
+        if asset is not None:
+            return asset.get_absolute_url()
+        return reverse("tracker profile")
 
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         # Only htmx can make DELETE requests

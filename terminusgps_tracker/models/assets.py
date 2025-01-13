@@ -1,5 +1,6 @@
 from django.db import models, transaction
 
+from django.urls import reverse
 import terminusgps.wialon.flags as flags
 from terminusgps.wialon.constants import WialonCommandType, WialonCommandLink
 from terminusgps.wialon.session import WialonSession
@@ -78,6 +79,9 @@ class TrackerAsset(models.Model):
             if self.wialon_id is not None:
                 self.populate(session)
         super().save(**kwargs)
+
+    def get_absolute_url(self) -> str:
+        return reverse("asset detail", kwargs={"pk": self.pk})
 
     @transaction.atomic
     def populate(self, session: WialonSession) -> None:
