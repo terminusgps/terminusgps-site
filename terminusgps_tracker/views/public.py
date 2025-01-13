@@ -3,7 +3,7 @@ from typing import Any
 from django import forms
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -11,11 +11,7 @@ from django.views.generic import TemplateView, RedirectView, FormView
 
 
 from terminusgps_tracker.forms import BugReportForm
-from terminusgps_tracker.views.mixins import (
-    HtmxMixin,
-    ProfileContextMixin,
-    ProfileRequiredMixin,
-)
+from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
 
 
 class TrackerLandingView(RedirectView):
@@ -52,9 +48,7 @@ class TrackerContactView(TemplateView, ProfileContextMixin, HtmxMixin):
     partial_template_name = "terminusgps_tracker/partials/_contact.html"
 
 
-class TrackerBugReportView(
-    FormView, ProfileRequiredMixin, ProfileContextMixin, HtmxMixin
-):
+class TrackerBugReportView(FormView, ProfileContextMixin, HtmxMixin):
     content_type = "text/html"
     extra_context = {
         "title": "Bug Report",
@@ -107,4 +101,4 @@ class TrackerBugReportView(
             to=["support@terminusgps.com"],
         )
         # email.attach_alternative(html_content, "text/html")
-        email.send(fail_silently=True)
+        email.send()

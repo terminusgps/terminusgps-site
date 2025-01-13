@@ -10,20 +10,14 @@ from django.views.generic import DeleteView, FormView, DetailView
 
 from terminusgps_tracker.forms import PaymentMethodCreationForm
 from terminusgps_tracker.models import TrackerPaymentMethod
-from terminusgps_tracker.views.mixins import (
-    HtmxMixin,
-    ProfileContextMixin,
-    ProfileRequiredMixin,
-)
+from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
 
 
 class InvalidPromptError(Exception):
     """Raised when a provided HX-Prompt is invalid."""
 
 
-class PaymentMethodDetailView(
-    DetailView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin
-):
+class PaymentMethodDetailView(DetailView, ProfileContextMixin, HtmxMixin):
     content_type = "text/html"
     context_object_name = "payment_method"
     http_method_names = ["get"]
@@ -55,9 +49,7 @@ class PaymentMethodDetailView(
         return payment["payment"]["creditCard"]["cardNumber"][-4:]
 
 
-class PaymentMethodCreateView(
-    FormView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin
-):
+class PaymentMethodCreateView(FormView, ProfileContextMixin, HtmxMixin):
     button_template_name = "terminusgps_tracker/payments/create_button.html"
     extra_context = {
         "title": "New Payment",
@@ -98,9 +90,7 @@ class PaymentMethodCreateView(
         return self.form_invalid(form=form)
 
 
-class PaymentMethodDeleteView(
-    DeleteView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin
-):
+class PaymentMethodDeleteView(DeleteView, ProfileContextMixin, HtmxMixin):
     context_object_name = "payment_method"
     http_method_names = ["get", "post"]
     login_url = reverse_lazy("tracker login")

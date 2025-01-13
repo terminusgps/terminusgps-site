@@ -17,18 +17,14 @@ from wialon.api import WialonError
 
 from terminusgps_tracker.models import TrackerAsset, TrackerAssetCommand
 from terminusgps_tracker.forms import TrackerAssetUpdateForm, TrackerAssetCreateForm
-from terminusgps_tracker.views.mixins import (
-    HtmxMixin,
-    ProfileContextMixin,
-    ProfileRequiredMixin,
-)
+from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
 
 
 class WialonUnitNotFoundError(Exception):
     """Raised when a Wialon unit was not found via IMEI #."""
 
 
-class AssetDeleteView(DeleteView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin):
+class AssetDeleteView(DeleteView, ProfileContextMixin, HtmxMixin):
     context_object_name = "asset"
     http_method_names = ["get", "post"]
     model = TrackerAsset
@@ -46,7 +42,7 @@ class AssetDeleteView(DeleteView, ProfileContextMixin, ProfileRequiredMixin, Htm
         return self.get_queryset().get(pk=self.kwargs["pk"])
 
 
-class AssetListView(ListView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin):
+class AssetListView(ListView, ProfileContextMixin, HtmxMixin):
     context_object_name = "asset_list"
     http_method_names = ["get", "post"]
     model = TrackerAsset
@@ -61,7 +57,7 @@ class AssetListView(ListView, ProfileContextMixin, ProfileRequiredMixin, HtmxMix
         return TrackerAsset.objects.filter(profile=self.profile).order_by(ordering)
 
 
-class AssetDetailView(DetailView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin):
+class AssetDetailView(DetailView, ProfileContextMixin, HtmxMixin):
     model = TrackerAsset
     queryset = TrackerAsset.objects.none()
     http_method_names = ["get"]
@@ -74,7 +70,7 @@ class AssetDetailView(DetailView, ProfileContextMixin, ProfileRequiredMixin, Htm
         return TrackerAsset.objects.filter(profile=self.profile)
 
 
-class AssetRemoteView(DetailView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin):
+class AssetRemoteView(DetailView, ProfileContextMixin, HtmxMixin):
     model = TrackerAsset
     queryset = TrackerAsset.objects.none()
     http_method_names = ["get"]
@@ -87,7 +83,7 @@ class AssetRemoteView(DetailView, ProfileContextMixin, ProfileRequiredMixin, Htm
         return TrackerAsset.objects.filter(profile=self.profile)
 
 
-class AssetUpdateView(UpdateView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin):
+class AssetUpdateView(UpdateView, ProfileContextMixin, HtmxMixin):
     model = TrackerAsset
     queryset = TrackerAsset.objects.none()
     form_class = TrackerAssetUpdateForm

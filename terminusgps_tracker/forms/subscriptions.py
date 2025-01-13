@@ -5,11 +5,15 @@ from terminusgps_tracker.models.subscriptions import TrackerSubscriptionTier
 
 
 class SubscriptionCancelForm(forms.Form):
-    subscription = forms.ModelChoiceField(queryset=TrackerSubscription.objects.all())
+    subscription = forms.ModelChoiceField(
+        queryset=TrackerSubscription.objects.all(), required=True, initial=1
+    )
 
 
 class SubscriptionUpdateForm(forms.Form):
     subscription = forms.ModelChoiceField(queryset=TrackerSubscription.objects.all())
-    tier = forms.ModelChoiceField(queryset=TrackerSubscriptionTier.objects.all())
+    tier = forms.ModelChoiceField(
+        queryset=TrackerSubscriptionTier.objects.all(), required=True, initial=1
+    )
     payment_id = forms.CharField(max_length=9, required=False)
     address_id = forms.CharField(max_length=9, required=False)

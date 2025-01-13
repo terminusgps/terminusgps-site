@@ -7,16 +7,10 @@ from django.views.generic import DeleteView, DetailView, FormView
 
 from terminusgps_tracker.forms import ShippingAddressCreationForm
 from terminusgps_tracker.models import TrackerShippingAddress
-from terminusgps_tracker.views.mixins import (
-    HtmxMixin,
-    ProfileContextMixin,
-    ProfileRequiredMixin,
-)
+from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
 
 
-class ShippingAddressDetailView(
-    DetailView, ProfileRequiredMixin, ProfileContextMixin, HtmxMixin
-):
+class ShippingAddressDetailView(DetailView, ProfileContextMixin, HtmxMixin):
     content_type = "text/html"
     context_object_name = "shipping_address"
     http_method_names = ["get"]
@@ -35,9 +29,7 @@ class ShippingAddressDetailView(
         return context
 
 
-class ShippingAddressCreateView(
-    FormView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin
-):
+class ShippingAddressCreateView(FormView, ProfileContextMixin, HtmxMixin):
     button_template_name = "terminusgps_tracker/addresses/create_button.html"
     content_type = "text/html"
     form_class = ShippingAddressCreationForm
@@ -64,9 +56,7 @@ class ShippingAddressCreateView(
         return HttpResponseRedirect(self.get_success_url(address))
 
 
-class ShippingAddressDeleteView(
-    DeleteView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin
-):
+class ShippingAddressDeleteView(DeleteView, ProfileContextMixin, HtmxMixin):
     content_type = "text/html"
     context_object_name = "shipping_address"
     http_method_names = ["get", "post"]

@@ -1,6 +1,5 @@
 from typing import Any
 
-from django import forms
 from django.db.models import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
@@ -8,19 +7,12 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, UpdateView
 from django.core.exceptions import ValidationError
 
-from terminusgps_tracker.models import TrackerSubscription
+from terminusgps_tracker.models import TrackerSubscription, TrackerSubscriptionTier
 from terminusgps_tracker.forms import SubscriptionUpdateForm, SubscriptionCancelForm
-from terminusgps_tracker.models.subscriptions import TrackerSubscriptionTier
-from terminusgps_tracker.views.mixins import (
-    HtmxMixin,
-    ProfileContextMixin,
-    ProfileRequiredMixin,
-)
+from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
 
 
-class TrackerSubscriptionCancelView(
-    FormView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin
-):
+class TrackerSubscriptionCancelView(FormView, ProfileContextMixin, HtmxMixin):
     partial_template_name = "terminusgps_tracker/subscription/partials/_cancel.html"
     template_name = "terminusgps_tracker/subscription/cancel.html"
     form_class = SubscriptionCancelForm
@@ -41,9 +33,7 @@ class TrackerSubscriptionCancelView(
         return HttpResponseRedirect(self.get_success_url(subscription))
 
 
-class TrackerSubscriptionDetailView(
-    DetailView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin
-):
+class TrackerSubscriptionDetailView(DetailView, ProfileContextMixin, HtmxMixin):
     model = TrackerSubscription
     partial_template_name = "terminusgps_tracker/subscription/partials/_detail.html"
     queryset = TrackerSubscription.objects.none()
@@ -57,9 +47,7 @@ class TrackerSubscriptionDetailView(
         return self.profile.subscription
 
 
-class TrackerSubscriptionUpdateView(
-    UpdateView, ProfileContextMixin, ProfileRequiredMixin, HtmxMixin
-):
+class TrackerSubscriptionUpdateView(UpdateView, ProfileContextMixin, HtmxMixin):
     model = TrackerSubscription
     partial_template_name = "terminusgps_tracker/subscription/partials/_update.html"
     queryset = TrackerSubscription.objects.none()
@@ -78,7 +66,7 @@ class TrackerSubscriptionUpdateView(
         initial["payment_id"] = (
             self.profile.payments.filter(is_default=True).first().authorizenet_id
         )
-        initial["tier"] = self.profile.subscription.tier
+        initial["tier"] = TrackerSubscriptionTier.objects.get(name="Standard")
         return initial
 
     def get_object(self, queryset: QuerySet | None = None) -> TrackerSubscription:

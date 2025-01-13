@@ -27,10 +27,6 @@ class TrackerSubscriptionTierDetailView(DetailView, ProfileContextMixin, HtmxMix
         "terminusgps_tracker/subscription_tier/partials/_detail.html"
     )
 
-    def get_context_data(self, **kwargs):
-        print(super().get_context_data(**kwargs))
-        return super().get_context_data(**kwargs)
-
 
 class TrackerSubscriptionTierCreateView(CreateView, ProfileContextMixin, HtmxMixin):
     model = TrackerSubscriptionTier

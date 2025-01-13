@@ -17,7 +17,7 @@ class BugReportForm(forms.Form):
         widget=forms.widgets.Textarea(
             attrs={
                 "placeholder": "I clicked the 'Delete' button on a payment method and it didn't do anything...",
-                "class": "p-2 rounded text-black",
+                "class": "p-2 rounded text-gray-900",
                 "rows": 10,
                 "wrap": "soft",
             }

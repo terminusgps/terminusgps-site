@@ -3,7 +3,6 @@ from typing import Any
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
-from django.http import HttpRequest
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
@@ -30,21 +29,6 @@ class TrackerProfileView(
     http_method_names = ["get", "post"]
     partial_template_name = "terminusgps_tracker/partials/_profile.html"
     template_name = "terminusgps_tracker/profile.html"
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        try:
-            self.profile = (
-                TrackerProfile.objects.get(user=request.user)
-                if request.user and request.user.is_authenticated
-                else None
-            )
-        except TrackerProfile.DoesNotExist:
-            self.profile = (
-                TrackerProfile.objects.create(user=request.user)
-                if request.user and request.user.is_authenticated
-                else None
-            )
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
