@@ -158,37 +158,43 @@ class TrackerSubscription(models.Model):
     def upgrade(
         self, new_tier: TrackerSubscriptionTier, payment_id: int, address_id: int
     ) -> None:
-        if self.tier is None or self.authorizenet_id is None:
-            self.authorizenet_id = self.authorizenet_create_subscription(
-                tier=new_tier, payment_id=payment_id, address_id=address_id
-            )
-        elif self.tier and new_tier.amount > self.tier.amount:
-            self.authorizenet_update_subscription(
-                tier=new_tier, payment_id=payment_id, address_id=address_id
-            )
-
-        self.tier = new_tier
-        self.payment_id = payment_id
-        self.address_id = address_id
-        self.refresh_status()
+        try:
+            if self.tier is None or self.authorizenet_id is None:
+                self.authorizenet_id = self.authorizenet_create_subscription(
+                    tier=new_tier, payment_id=payment_id, address_id=address_id
+                )
+            elif self.tier and new_tier.amount > self.tier.amount:
+                self.authorizenet_update_subscription(
+                    tier=new_tier, payment_id=payment_id, address_id=address_id
+                )
+        except ValueError as e:
+            print(e)
+        else:
+            self.tier = new_tier
+            self.payment_id = payment_id
+            self.address_id = address_id
+            self.refresh_status()
 
     @transaction.atomic
     def downgrade(
         self, new_tier: TrackerSubscriptionTier, payment_id: int, address_id: int
     ) -> None:
-        if self.tier is None or self.authorizenet_id is None:
-            self.authorizenet_id = self.authorizenet_create_subscription(
-                tier=new_tier, payment_id=payment_id, address_id=address_id
-            )
-        elif self.tier and new_tier.amount < self.tier.amount:
-            self.authorizenet_update_subscription(
-                tier=new_tier, payment_id=payment_id, address_id=address_id
-            )
-
-        self.tier = new_tier
-        self.payment_id = payment_id
-        self.address_id = address_id
-        self.refresh_status()
+        try:
+            if self.tier is None or self.authorizenet_id is None:
+                self.authorizenet_id = self.authorizenet_create_subscription(
+                    tier=new_tier, payment_id=payment_id, address_id=address_id
+                )
+            elif self.tier and new_tier.amount < self.tier.amount:
+                self.authorizenet_update_subscription(
+                    tier=new_tier, payment_id=payment_id, address_id=address_id
+                )
+        except ValueError as e:
+            print(e)
+        else:
+            self.tier = new_tier
+            self.payment_id = payment_id
+            self.address_id = address_id
+            self.refresh_status()
 
     @transaction.atomic
     def refresh_status(self) -> None:
