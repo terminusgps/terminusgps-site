@@ -1,5 +1,5 @@
-<div aria-expanded="false" hx-on:click="expanded=this.getAttribute('aria-expanded');this.setAttribute('aria-expanded', expanded === 'true' ? 'false' : 'true');" id="{{ feature.name|lower }}" class="group cursor-pointer select-none items-center justify-between space-y-4 rounded border border-terminus-red-600 bg-red-300 p-8 text-terminus-red-900">
-    <li class="flex-inline flex cursor-pointer justify-between font-semibold">
+<div aria-expanded="false" hx-on:click="expanded=this.getAttribute('aria-expanded');this.setAttribute('aria-expanded', expanded === 'true' ? 'false' : 'true');" class="group cursor-pointer items-center justify-between space-y-4 rounded border border-terminus-red-600 bg-red-300 p-8 text-terminus-red-900">
+    <li class="flex-inline flex cursor-pointer select-none justify-between font-semibold">
         {{ feature.name }}
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex size-6 group-aria-expanded:hidden">
             <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
@@ -8,5 +8,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 15.75 7.5-7.5 7.5 7.5" />
         </svg>
     </li>
-    <p class="hidden rounded p-2 indent-4 text-gray-900 group-aria-expanded:flex">{{ feature.desc }}</p>
+    <div class="hidden w-full flex-col gap-2 p-2 text-gray-700 group-aria-expanded:flex">
+        <p class="indent-4 text-gray-900">{{ feature.desc }}</p>
+        <p class="hidden">Less emphasized text</p>
+    </div>
 </div>
