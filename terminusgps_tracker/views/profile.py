@@ -34,7 +34,8 @@ class TrackerProfileView(
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        if self.profile is not None:
+        if self.profile:
+            print(f"{self.profile = }")
             context["title"] = f"{self.profile.user.first_name}'s Profile"
             context["assets"] = TrackerAsset.objects.filter(profile=self.profile)
             context["subscription"], _ = TrackerSubscription.objects.get_or_create(

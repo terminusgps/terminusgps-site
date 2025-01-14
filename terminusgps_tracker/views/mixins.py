@@ -21,11 +21,10 @@ class HtmxMixin(TemplateResponseMixin, View):
 
 class ProfileContextMixin(ContextMixin, View):
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        self.profile = (
-            TrackerProfile.objects.get_or_create(user=request.user)
-            if request.user and request.user.is_authenticated
-            else None
-        )
+        if request.user and request.user.is_authenticated:
+            self.profile, _ = TrackerProfile.objects.get_or_create(user=request.user)
+        else:
+            self.profile = None
         return super().setup(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
