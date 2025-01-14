@@ -89,7 +89,7 @@ class TrackerSubscriptionTierAdmin(admin.ModelAdmin):
         ),
         ("Wialon", {"fields": ["wialon_id", "wialon_cmd"]}),
     ]
-    readonly_fields = ["wialon_id"]
+    readonly_fields = ["wialon_id", "period", "length"]
     list_display_links = ["name"]
 
 
