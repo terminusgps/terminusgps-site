@@ -9,7 +9,6 @@ from django.core.exceptions import ValidationError
 
 from terminusgps_tracker.models import TrackerSubscription, TrackerSubscriptionTier
 from terminusgps_tracker.forms import SubscriptionUpdateForm, SubscriptionCancelForm
-from terminusgps_tracker.models.subscriptions import TrackerSubscriptionFeature
 from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
 
 

@@ -2,6 +2,11 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path(
+        "upload_email_template/",
+        views.EmailTemplateUploadView.as_view(),
+        name="upload email template",
+    ),
     path("", views.TrackerLandingView.as_view(), name="tracker landing"),
     path("profile/", views.TrackerProfileView.as_view(), name="tracker profile"),
     path("about/", views.TrackerAboutView.as_view(), name="tracker about"),
