@@ -10,7 +10,6 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path("../..", "terminusgps_tracker").resolve()))
-print(f"{sys.path = }")
 
 project = "terminusgps-site"
 copyright = "2024, Terminus GPS"
@@ -20,7 +19,7 @@ release = "1.0.0"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx_rtd_theme", "sphinx.ext.intersphinx"]
+extensions = ["sphinx_rtd_theme", "sphinx.ext.intersphinx", "sphinx.ext.autodoc"]
 
 templates_path = ["_templates"]
 exclude_patterns = []
@@ -31,6 +30,8 @@ intersphinx_mapping = {
         "https://docs.djangoproject.com/en/5.1/_objects/",
     ),
 }
+
+autodoc_mock_imports = ["django", "boto3"]
 
 
 # -- Options for HTML output -------------------------------------------------

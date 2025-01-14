@@ -33,7 +33,7 @@ from authorizenet.apicontractsv1 import (
 
 class TrackerSubscriptionFeature(models.Model):
     name = models.CharField(max_length=256)
-    desc = models.CharField(max_length=2048, default=None, null=True, blank=True)
+    desc = models.TextField(max_length=2048, default=None, null=True, blank=True)
 
     class Meta:
         verbose_name = "subscription feature"
