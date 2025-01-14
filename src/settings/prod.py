@@ -54,7 +54,7 @@ DEFAULT_FROM_EMAIL = "support@terminusgps.com"
 TRACKER_PROFILE = {
     "DISPLAY_NAME": "Terminus GPS",
     "GITHUB": "https://github.com/terminusgps/terminusgps-site/",
-    "MOTD": "Check out the Terminus GPS mobile app today!",
+    "MOTD": "Check out the Terminus GPS mobile app!",
     "LEGAL_NAME": "Terminus GPS, LLC",
     "ADDRESSES": [
         {
@@ -106,6 +106,7 @@ TRACKER_PROFILE = {
                 "display_name": "Terminus GPS",
                 "profile_link": "https://www.facebook.com/TerminusGPSllc",
                 "username": "TerminusGPSllc",
+                "icon": "terminusgps_tracker/icons/facebook.svg",
             },
         },
         {
@@ -114,6 +115,7 @@ TRACKER_PROFILE = {
                 "display_name": "TerminusGps",
                 "profile_link": "https://www.tiktok.com/@terminusgps",
                 "username": "terminusgps",
+                "icon": "terminusgps_tracker/icons/tiktok.svg",
             },
         },
         {
@@ -122,6 +124,7 @@ TRACKER_PROFILE = {
                 "display_name": "TerminusGPS",
                 "profile_link": "https://nextdoor.com/pages/terminusgps-cypress-tx/",
                 "username": "TerminusGPS",
+                "icon": "terminusgps_tracker/icons/nextdoor.svg",
             },
         },
     ],
