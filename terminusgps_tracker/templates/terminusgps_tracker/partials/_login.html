@@ -5,10 +5,9 @@
     </ul>
     {% endif %}
     {% csrf_token %}
-    <label>Username:</label>
     {{ form.username }}
-    <label>Password:</label>
     {{ form.password }}
-    <input class="block w-full grow rounded border-2 border-terminus-black/60 bg-terminus-red-700 py-4 text-terminus-white hover:cursor-pointer hover:bg-terminus-red-400" value="Login" type="submit">
+    <input class="block w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white hover:cursor-pointer hover:bg-terminus-red-400" value="Login" type="submit">
+    <p class="mt-4 text-center text-sm">Don't have an account? <a class="font-semibold text-terminus-red-800 underline decoration-terminus-black decoration-2 underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted" href="{% url 'tracker signup' %}">Click here</a> to signup.</p>
     <input class="hidden" type="hidden" name="next" value="{{ next }}"></input>
 </form>

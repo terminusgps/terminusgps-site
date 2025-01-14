@@ -11,20 +11,20 @@ from terminusgps_tracker.validators import (
 
 class TrackerSignupForm(UserCreationForm):
     field_order = ["first_name", "last_name", "username", "password1", "password2"]
-    default_css_class = "w-full block mt-2 mb-4 p-2 rounded-md text-black dark:bg-gray-800 dark:text-white"
+    default_css_class = "w-full block rounded p-2"
 
     first_name = forms.CharField(
         label="First Name",
         max_length=64,
         widget=widgets.TextInput(
-            attrs={"class": default_css_class, "placeholder": "First"}
+            attrs={"class": default_css_class, "placeholder": "First Name"}
         ),
     )
     last_name = forms.CharField(
         label="Last Name",
         max_length=64,
         widget=widgets.TextInput(
-            attrs={"class": default_css_class, "placeholder": "Last"}
+            attrs={"class": default_css_class, "placeholder": "Last Name"}
         ),
     )
     username = forms.CharField(
@@ -33,17 +33,20 @@ class TrackerSignupForm(UserCreationForm):
         max_length=150,
         validators=[validate_email, validate_wialon_username],
         widget=widgets.EmailInput(
-            attrs={"class": default_css_class, "placeholder": "email@terminusgps.com"}
+            attrs={"class": default_css_class, "placeholder": "Email Address"}
         ),
     )
     password1 = forms.CharField(
-        label="Password",
-        widget=widgets.PasswordInput(attrs={"class": default_css_class}),
+        widget=widgets.PasswordInput(
+            attrs={"class": default_css_class, "placeholder": "Password"}
+        ),
         validators=[validate_wialon_password],
     )
     password2 = forms.CharField(
         label="Confirm Password",
-        widget=widgets.PasswordInput(attrs={"class": default_css_class}),
+        widget=widgets.PasswordInput(
+            attrs={"class": default_css_class, "placeholder": "Confirm Password"}
+        ),
         validators=[validate_wialon_password],
     )
 
@@ -54,21 +57,21 @@ class TrackerAuthenticationForm(AuthenticationForm):
         "invalid_login": "Couldn't find a user with those credentials. Please try again."
     }
     username = forms.CharField(
-        label="Email Address",
         min_length=4,
         max_length=150,
         validators=[validate_email],
         widget=widgets.EmailInput(
             attrs={
                 "class": default_css_class,
-                "placeholder": "email@terminusgps.com",
+                "placeholder": "dylan@terminusgps.com",
                 "autofocus": True,
             }
         ),
     )
     password = forms.CharField(
-        label="Password",
         min_length=8,
         max_length=32,
-        widget=widgets.PasswordInput(attrs={"class": default_css_class}),
+        widget=widgets.PasswordInput(
+            attrs={"class": default_css_class, "placeholder": "••••••••••••••••"}
+        ),
     )
