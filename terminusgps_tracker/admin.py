@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.db import models
+from django.forms import widgets
 
 from terminusgps_tracker.models import (
     TrackerAsset,
@@ -95,3 +97,6 @@ class TrackerSubscriptionTierAdmin(admin.ModelAdmin):
 class TrackerSubscriptionFeatureAdmin(admin.ModelAdmin):
     fieldsets = [(None, {"fields": ["name", "desc"]})]
     list_display = ["name", "desc"]
+    formfield_overrides = {
+        models.TextField: {"widget": widgets.Textarea(attrs={"rows": 4, "cols": 40})}
+    }
