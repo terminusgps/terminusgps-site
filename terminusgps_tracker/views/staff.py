@@ -13,6 +13,7 @@ class EmailTemplateUploadView(FormView, StaffRequiredMixin, HtmxMixin):
     extra_context = {
         "title": "Upload Email Template",
         "subtitle": "Add a name, subject line and file, then click submit!",
+        "class": "p-8 bg-gray-200 rounded border border-terminus-black",
     }
     form_class = EmailTemplateUploadForm
     http_method_names = ["get", "post"]

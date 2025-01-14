@@ -5,13 +5,13 @@ class EmailTemplateUploadForm(forms.Form):
     name = forms.CharField(
         max_length=256,
         widget=forms.widgets.TextInput(
-            attrs={"class": "w-full block p-2", "placeholder": "Name"}
+            attrs={"class": "w-full block p-2 rounded", "placeholder": "Name"}
         ),
     )
     subject = forms.CharField(
         max_length=256,
         widget=forms.widgets.TextInput(
-            attrs={"class": "w-full block p-2", "placeholder": "Subject"}
+            attrs={"class": "w-full block p-2 rounded", "placeholder": "Subject"}
         ),
     )
     text_content = forms.FileField(
