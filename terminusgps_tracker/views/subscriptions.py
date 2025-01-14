@@ -9,10 +9,12 @@ from django.core.exceptions import ValidationError
 
 from terminusgps_tracker.models import TrackerSubscription, TrackerSubscriptionTier
 from terminusgps_tracker.forms import SubscriptionUpdateForm, SubscriptionCancelForm
+from terminusgps_tracker.models.subscriptions import TrackerSubscriptionFeature
 from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
 
 
 class TrackerSubscriptionCancelView(FormView, ProfileContextMixin, HtmxMixin):
+    http_method_names = ["get", "post"]
     partial_template_name = "terminusgps_tracker/subscription/partials/_cancel.html"
     template_name = "terminusgps_tracker/subscription/cancel.html"
     form_class = SubscriptionCancelForm
@@ -46,11 +48,7 @@ class TrackerSubscriptionDetailView(DetailView, ProfileContextMixin, HtmxMixin):
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        tier = self.get_object().tier
-        if tier is not None:
-            context["features"] = {
-                feature.name: feature.desc for feature in tier.features.all()
-            }
+        context["features"] = self.get_object().tier.features.all()
         return context
 
 
