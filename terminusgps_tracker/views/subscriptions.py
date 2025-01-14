@@ -62,7 +62,7 @@ class TrackerSubscriptionUpdateView(UpdateView, ProfileContextMixin, HtmxMixin):
         initial["payment_id"] = (
             self.profile.payments.filter(is_default=True).first().authorizenet_id
         )
-        initial["tier"] = TrackerSubscriptionTier.objects.get(name="Standard")
+        initial["tier"] = TrackerSubscriptionTier.objects.get(pk=2)
         return initial
 
     def get_object(self, queryset: QuerySet | None = None) -> TrackerSubscription:

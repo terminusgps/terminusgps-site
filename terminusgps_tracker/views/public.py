@@ -3,7 +3,7 @@ from typing import Any
 from django import forms
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils import timezone
