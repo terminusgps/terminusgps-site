@@ -2,8 +2,10 @@
     <div class="flex flex-col gap-4">
     {% if subscription.tier != None %}
     <!-- Subscribed -->
-    {{ profile.user.first_name }}'s {{ subscription.tier.name }} Subscription
-    {{ subscription.tier.amount }}
+    <div class="mb-4 flex items-center justify-between text-xl">
+        <h2 class="font-semibold tracking-wide md:text-2xl">{{ profile.user.first_name }}'s {{ subscription.tier.name }} Subscription</h2>
+        <h3 class="font-serif tracking-wider">${{ subscription.tier.amount }}/mo</h3>
+    </div>
     <div class="flex flex-col gap-2">
         <ul class="flex list-inside list-none flex-col gap-2">
             {% for feature in features %}{% include "terminusgps_tracker/subscription/partials/_feature.html" %}{% endfor %}
