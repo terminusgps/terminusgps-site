@@ -1,35 +1,44 @@
 <div id="subscription" hx-indicator=".htmx-indicator" hx-target="this" hx-swap="outerHTML" class="{{ class }}">
-    <div class="flex flex-col items-center gap-4">
+    <div class="flex flex-col gap-4">
     {% if subscription.tier != None %}
-        <!-- Subscribed -->
-        {{ profile.user.first_name }}'s {{ subscription.tier.name }} Subscription
-        {{ subscription.tier.amount }}
-        {{ subscription.tier.features }}
+    <!-- Subscribed -->
+    {{ profile.user.first_name }}'s {{ subscription.tier.name }} Subscription
+    {{ subscription.tier.amount }}
+    <div class="flex flex-col gap-2">
+        <ul class="list-inside list-disc transition-all duration-500 ease-in-out will-change-auto">
+            {% for name, desc in features.items %}
+            <div class="group flex flex-col gap-2">
+                <li class="cursor-pointer">{{ name }}</li>
+                <p class="hidden rounded bg-gray-300 p-2 indent-4 hover:flex group-hover:flex">{{ desc }}</p>
+            </div>
+            {% endfor %}
+        </ul>
+    </div>
     {% else %}
-        <!-- Not subscribed -->    
-        <div class="flex-inline flex items-center gap-2 rounded border border-gray-800 bg-gray-200 p-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-            </svg>
-            <h3 class="md:text-xl">You are not currently subscribed.</h3>
-        </div>
+    <!-- Not subscribed -->    
+    <div class="flex-inline flex items-center gap-2 rounded border border-gray-800 bg-gray-200 p-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+        </svg>
+        <h3 class="md:text-xl">You are not currently subscribed.</h3>
+    </div>
     {% endif %}
-        <input
-            class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white hover:cursor-pointer hover:bg-terminus-red-400"
-            type="button"
-            value="Switch plans"
-            hx-get="{% url 'subscription update' subscription.pk %}"
-            hx-trigger="click"
-        >
-        {% if subscription.tier != None %}
-        <input
-            class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 hover:bg-gray-200"
-            type="button"
-            value="Cancel Subscription"
-            hx-post="{% url 'subscription cancel' subscription.pk %}"
-            hx-trigger="click"
-            hx-confirm="Are you sure you want to cancel your '{{ subscription.tier.name }}' subscription?"
-        >
-        {% endif %}
+    <input
+        class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white hover:cursor-pointer hover:bg-terminus-red-400"
+        type="button"
+        value="Switch plans"
+        hx-get="{% url 'subscription update' subscription.pk %}"
+        hx-trigger="click"
+    >
+    {% if subscription.tier != None %}
+    <input
+        class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 hover:bg-gray-200"
+        type="button"
+        value="Cancel Subscription"
+        hx-post="{% url 'subscription cancel' subscription.pk %}"
+        hx-trigger="click"
+        hx-confirm="Are you sure you want to cancel your '{{ subscription.tier.name }}' subscription?"
+    >
+    {% endif %}
     </div>
 </div>

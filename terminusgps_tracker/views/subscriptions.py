@@ -44,6 +44,15 @@ class TrackerSubscriptionDetailView(DetailView, ProfileContextMixin, HtmxMixin):
     def get_object(self, queryset: QuerySet | None = None) -> TrackerSubscription:
         return self.profile.subscription
 
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        tier = self.get_object().tier
+        if tier is not None:
+            context["features"] = {
+                feature.name: feature.desc for feature in tier.features.all()
+            }
+        return context
+
 
 class TrackerSubscriptionUpdateView(UpdateView, ProfileContextMixin, HtmxMixin):
     model = TrackerSubscription
