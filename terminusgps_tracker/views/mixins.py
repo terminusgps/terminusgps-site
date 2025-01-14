@@ -21,8 +21,8 @@ class HtmxMixin(TemplateResponseMixin, View):
 
 class ProfileContextMixin(ContextMixin, View):
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        self.profile = TrackerProfile.objects.get_or_create(
-            user=request.user
+        self.profile = (
+            TrackerProfile.objects.get_or_create(user=request.user)
             if request.user and request.user.is_authenticated
             else None
         )
