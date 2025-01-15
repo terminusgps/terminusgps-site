@@ -51,13 +51,6 @@ class TrackerSignupView(FormView, SuccessMessageMixin, HtmxMixin):
     success_url = reverse_lazy("tracker login")
     template_name = "terminusgps_tracker/signup.html"
 
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        if not hasattr(settings, "WIALON_TOKEN"):
-            raise ImproperlyConfigured("'WIALON_TOKEN' setting is required.")
-        if not hasattr(settings, "WIALON_ADMIN_ID"):
-            raise ImproperlyConfigured("'WIALON_ADMIN_ID' setting is required.")
-        return super().setup(request, *args, **kwargs)
-
     def get_success_message(self, cleaned_data: dict[str, Any]) -> str:
         return self.success_message % dict(
             cleaned_data, username=cleaned_data.get("username", "")

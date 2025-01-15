@@ -1,6 +1,6 @@
 import string
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from wialon.api import WialonError
@@ -24,7 +24,10 @@ def validate_phone(value: str) -> None:
 
 
 def validate_wialon_asset_id(value: str) -> None:
-    with WialonSession(token=settings.WIALON_TOKEN) as session:
+    if not hasattr(settings, "WIALON_TOKEN"):
+        raise ImproperlyConfigured("'WIALON_TOKEN' setting is required.")
+
+    with WialonSession() as session:
         try:
             # Construct a unit with the id
             WialonUnit(id=value, session=session)
@@ -38,7 +41,12 @@ def validate_wialon_asset_id(value: str) -> None:
 
 def validate_wialon_imei_number(value: str) -> None:
     """Raises `ValidationError` if the value represents an invalid Wialon IMEI #."""
-    with WialonSession(token=settings.WIALON_TOKEN) as session:
+    if not hasattr(settings, "WIALON_TOKEN"):
+        raise ImproperlyConfigured("'WIALON_TOKEN' setting is required.")
+    if not hasattr(settings, "WIALON_UNACTIVATED_GROUP"):
+        raise ImproperlyConfigured("'WIALON_UNACTIVATED_GROUP' setting is required.")
+
+    with WialonSession() as session:
         unit_id: str | None = get_id_from_iccid(iccid=value.strip(), session=session)
         available = WialonUnitGroup(
             id=str(settings.WIALON_UNACTIVATED_GROUP), session=session
@@ -61,6 +69,9 @@ def validate_wialon_imei_number(value: str) -> None:
 
 def validate_wialon_unit_name(value: str) -> None:
     """Raises `ValidationError` if the value represents a non-unique asset name in Wialon."""
+    if not hasattr(settings, "WIALON_TOKEN"):
+        raise ImproperlyConfigured("'WIALON_TOKEN' setting is required.")
+
     with WialonSession(token=settings.WIALON_TOKEN) as session:
         if not is_unique(value, session, items_type="avl_unit"):
             raise ValidationError(
@@ -71,7 +82,10 @@ def validate_wialon_unit_name(value: str) -> None:
 
 def validate_wialon_username(value: str) -> None:
     """Raises `ValidationError` if the value represents a non-unique user name in Wialon."""
-    with WialonSession(token=settings.WIALON_TOKEN) as session:
+    if not hasattr(settings, "WIALON_TOKEN"):
+        raise ImproperlyConfigured("'WIALON_TOKEN' setting is required.")
+
+    with WialonSession() as session:
         if not is_unique(value, session, items_type="user"):
             raise ValidationError(
                 _("'%(value)s' is taken."), code="invalid", params={"value": value}
@@ -81,7 +95,10 @@ def validate_wialon_username(value: str) -> None:
 
 def validate_wialon_resource_name(value: str) -> None:
     """Raises `ValidationError` if the value represents a non-unique user name in Wialon."""
-    with WialonSession(token=settings.WIALON_TOKEN) as session:
+    if not hasattr(settings, "WIALON_TOKEN"):
+        raise ImproperlyConfigured("'WIALON_TOKEN' setting is required.")
+
+    with WialonSession() as session:
         if not is_unique(value, session, items_type="avl_resource"):
             raise ValidationError(
                 _("'%(value)s' is taken."), code="invalid", params={"value": value}
