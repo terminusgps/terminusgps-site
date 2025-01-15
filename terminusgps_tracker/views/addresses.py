@@ -36,6 +36,9 @@ class ShippingAddressCreateView(FormView, ProfileContextMixin, HtmxMixin):
     http_method_names = ["get", "post", "delete"]
     login_url = reverse_lazy("tracker login")
     partial_template_name = "terminusgps_tracker/addresses/partials/_create.html"
+    extra_context = {
+        "class": "p-4 border border-gray-600 bg-gray-200 rounded flex flex-col gap-4"
+    }
     permission_denied_message = "Please login and try again."
     raise_exception = True
     success_url = reverse_lazy("settings")

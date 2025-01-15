@@ -29,7 +29,11 @@ class TrackerRegistrationView(RedirectView):
 class TrackerLoginView(LoginView, HtmxMixin):
     authentication_form = TrackerAuthenticationForm
     content_type = "text/html"
-    extra_context = {"title": "Login", "subtitle": "We know where ours are... do you?"}
+    extra_context = {
+        "title": "Login",
+        "subtitle": "We know where ours are... do you?",
+        "class": "p-4 flex flex-col gap-4",
+    }
     http_method_names = ["get", "post"]
     next_page = reverse_lazy("tracker profile")
     partial_template_name = "terminusgps_tracker/partials/_login.html"
@@ -50,7 +54,11 @@ class TrackerLogoutView(LogoutView, ProfileContextMixin, HtmxMixin):
 
 class TrackerSignupView(FormView, SuccessMessageMixin, HtmxMixin):
     content_type = "text/html"
-    extra_context = {"title": "Sign Up", "subtitle": "You'll know where yours are..."}
+    extra_context = {
+        "title": "Sign Up",
+        "subtitle": "You'll know where yours are...",
+        "class": "p-4 flex flex-col gap-4",
+    }
     form_class = TrackerSignupForm
     http_method_names = ["get", "post"]
     partial_template_name = "terminusgps_tracker/partials/_signup.html"

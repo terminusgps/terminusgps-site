@@ -5,12 +5,11 @@
     hx-swap="outerHTML"
     hx-target="this"
     hx-post="{% url 'create payment' %}"
-    hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}"
     hx-indicator=".htmx-indicator"
 >
     {{ form.errors }}
     {% csrf_token %}
-    <div class="m-4 flex flex-col gap-2">
+    <div class="flex flex-col gap-2">
         {{ form.credit_card_number }}
         <div class="flex gap-1">
             {{ form.credit_card_expiry_month }}
@@ -18,7 +17,7 @@
         </div>
         {{ form.credit_card_ccv }}
     </div>
-    <div class="m-4 flex flex-col gap-2">
+    <div class="flex flex-col gap-2">
         <div class="flex gap-1">
             {{ form.address_first_name }}
             {{ form.address_last_name }}
@@ -34,7 +33,7 @@
             {{ form.address_phone }}
         </div>
     </div>
-    <div class="m-4 flex flex-col gap-2">
+    <div class="flex flex-col gap-2">
         <div class="flex-inline flex gap-2">
             {{ form.is_default }}
             <label for="is_default" class="ms-2 text-sm text-terminus-gray-900">Set as default?</label>

@@ -1,6 +1,5 @@
 from typing import Any
 
-from django.conf import settings
 from django.db.models import QuerySet
 from django.forms import ValidationError
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -30,28 +29,25 @@ class PaymentMethodDetailView(DetailView, ProfileContextMixin, HtmxMixin):
     template_name = "terminusgps_tracker/payments/detail.html"
 
     def get_queryset(self) -> QuerySet:
-        if self.profile is not None:
-            return self.profile.payments.all()
-        return self.queryset
+        return self.profile.payments.all() if self.profile else self.queryset
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        payment_method: TrackerPaymentMethod = self.get_object()
-        if self.profile is not None:
+        if self.profile:
+            payment_method = self.get_object()
             context["default"] = payment_method.is_default or False
             context["payment"] = payment_method.authorizenet_get_payment_profile(
                 self.profile.authorizenet_id, payment_method.authorizenet_id
             )
         return context
 
-    @staticmethod
-    def get_last_4(payment: dict) -> str:
-        return payment["payment"]["creditCard"]["cardNumber"][-4:]
-
 
 class PaymentMethodCreateView(FormView, ProfileContextMixin, HtmxMixin):
     button_template_name = "terminusgps_tracker/payments/create_button.html"
-    extra_context = {"title": "New Payment"}
+    extra_context = {
+        "title": "New Payment",
+        "class": "p-4 border border-gray-600 bg-gray-200 rounded flex flex-col gap-4",
+    }
     form_class = PaymentMethodCreationForm
     http_method_names = ["get", "post", "delete"]
     login_url = reverse_lazy("tracker login")
@@ -73,18 +69,18 @@ class PaymentMethodCreateView(FormView, ProfileContextMixin, HtmxMixin):
         return self.render_to_response(context=self.get_context_data())
 
     def form_valid(self, form: PaymentMethodCreationForm) -> HttpResponse:
-        if self.profile is not None:
-            payment_method = TrackerPaymentMethod.objects.create(profile=self.profile)
-            payment_method.save(form)
-            return HttpResponseRedirect(self.get_success_url(payment_method))
-        form.add_error(
-            None,
-            ValidationError(
-                _("Whoops! Couldn't find your profile, please try again later."),
-                code="no_profile",
-            ),
-        )
-        return self.form_invalid(form=form)
+        if not self.profile:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! Couldn't find your profile, please try again later."),
+                    code="no_profile",
+                ),
+            )
+            return self.form_invalid(form=form)
+        payment_method = TrackerPaymentMethod.objects.create(profile=self.profile)
+        payment_method.save(form)
+        return HttpResponseRedirect(self.get_success_url(payment_method))
 
 
 class PaymentMethodDeleteView(DeleteView, ProfileContextMixin, HtmxMixin):
