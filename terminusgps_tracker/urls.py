@@ -3,12 +3,18 @@ from . import views
 
 urlpatterns = [
     path(
-        "upload_email_template/",
+        "emails/upload/",
         views.EmailTemplateUploadView.as_view(),
         name="upload email template",
     ),
+    path(
+        "emails/renderer/",
+        views.EmailTemplateRendererView.as_view(),
+        name="render email template",
+    ),
     path("", views.TrackerLandingView.as_view(), name="tracker landing"),
     path("profile/", views.TrackerProfileView.as_view(), name="tracker profile"),
+    path("register/", views.TrackerRegistrationView.as_view(), name="tracker register"),
     path("about/", views.TrackerAboutView.as_view(), name="tracker about"),
     path("contact/", views.TrackerContactView.as_view(), name="tracker contact"),
     path("source/", views.TrackerSourceView.as_view(), name="tracker source"),

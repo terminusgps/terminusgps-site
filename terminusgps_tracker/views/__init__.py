@@ -1,4 +1,9 @@
-from .auth import TrackerLogoutView, TrackerLoginView, TrackerSignupView
+from .auth import (
+    TrackerLogoutView,
+    TrackerLoginView,
+    TrackerSignupView,
+    TrackerRegistrationView,
+)
 from .addresses import (
     ShippingAddressCreateView,
     ShippingAddressDeleteView,
@@ -38,4 +43,4 @@ from .payments import (
     PaymentMethodCreateView,
     PaymentMethodDeleteView,
 )
-from .staff import EmailTemplateUploadView
+from .staff import EmailTemplateUploadView, EmailTemplateRendererView

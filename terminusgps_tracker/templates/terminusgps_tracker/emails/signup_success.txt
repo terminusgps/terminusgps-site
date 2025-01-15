@@ -1,0 +1,3 @@
+Thanks for signing up for the Terminus GPS Tracker application!
+
+On {{ now|date:'l, F jS' }} at {{ now|time:'P' }} you created an account for {{ email }}.

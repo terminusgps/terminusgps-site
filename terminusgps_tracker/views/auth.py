@@ -4,12 +4,14 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.exceptions import ImproperlyConfigured
+from django.template.loader import render_to_string
 from django.forms import ValidationError
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpResponse
 from django.urls import reverse_lazy
+from django.core.mail import EmailMultiAlternatives
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView
+from django.views.generic import FormView, RedirectView
 from terminusgps.wialon.items import WialonResource, WialonUnitGroup, WialonUser
 from terminusgps.wialon.session import WialonSession
 from wialon.api import WialonError
@@ -17,6 +19,11 @@ from wialon.api import WialonError
 from terminusgps_tracker.forms import TrackerAuthenticationForm, TrackerSignupForm
 from terminusgps_tracker.models import TrackerProfile, TrackerSubscription
 from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
+
+
+class TrackerRegistrationView(RedirectView):
+    url = reverse_lazy("tracker signup")
+    permanent = True
 
 
 class TrackerLoginView(LoginView, HtmxMixin):
@@ -81,6 +88,26 @@ class TrackerSignupView(FormView, SuccessMessageMixin, HtmxMixin):
             self.profile.wialon_group_id = ids.get("unit_group")
             self.profile.save()
         return super().form_valid(form=form)
+
+    # TODO: retrieve templates from AWS
+    @staticmethod
+    def send_verification_email(to_addr: str) -> None:
+        now = timezone.now()
+        text_content: str = render_to_string(
+            "terminusgps_tracker/emails/signup_success.txt",
+            context={"email": to_addr, "now": now},
+        )
+        html_content: str = render_to_string(
+            "terminusgps/emails/signup_success.html",
+            context={"email": to_addr, "now": now},
+        )
+        email: EmailMultiAlternatives = EmailMultiAlternatives(
+            f"Bug Report - {timezone.now():%d/%m/%y} - {timezone.now():%I:%M:%S%z}",
+            text_content,
+            to=[to_addr],
+        )
+        email.attach_alternative(html_content, "text/html")
+        email.send()
 
     def wialon_registration_flow(self, username: str, password: str) -> dict:
         with WialonSession(token=settings.WIALON_TOKEN) as session:

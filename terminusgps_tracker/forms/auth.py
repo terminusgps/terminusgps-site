@@ -11,7 +11,7 @@ from terminusgps_tracker.validators import (
 
 class TrackerSignupForm(UserCreationForm):
     field_order = ["first_name", "last_name", "username", "password1", "password2"]
-    default_css_class = "w-full block rounded p-2"
+    default_css_class = "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100"
 
     first_name = forms.CharField(
         label="First Name",
@@ -52,7 +52,7 @@ class TrackerSignupForm(UserCreationForm):
 
 
 class TrackerAuthenticationForm(AuthenticationForm):
-    default_css_class = "w-full block mt-2 mb-4 p-2 rounded-md text-black dark:bg-gray-800 dark:text-white"
+    default_css_class = "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100"
     error_messages = {
         "invalid_login": "Couldn't find a user with those credentials. Please try again."
     }
