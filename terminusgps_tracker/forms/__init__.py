@@ -1,4 +1,4 @@
-from .assets import TrackerAssetCreateForm, TrackerAssetUpdateForm, CommandExecutionForm
+from .assets import TrackerAssetCreateForm, TrackerAssetUpdateForm
 from .payments import (
     PaymentMethodCreationForm,
     PaymentMethodDeletionForm,
