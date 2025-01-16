@@ -1,5 +1,7 @@
 from typing import Any, Callable
 
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpRequest
 from django.views.generic import View
 from django.views.generic.base import ContextMixin, TemplateResponseMixin
@@ -7,6 +9,20 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import UserPassesTestMixin
 
 from terminusgps_tracker.models import TrackerProfile
+from terminusgps.wialon.session import WialonSession
+
+
+class WialonSessionMixin(View):
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        if not hasattr(settings, "WIALON_TOKEN"):
+            raise ImproperlyConfigured("'WIALON_TOKEN' setting is required.")
+
+        if not request.session.get("wialon_sid"):
+            session = WialonSession()
+            session.login(token=settings.WIALON_TOKEN)
+            request.session["wialon_sid"] = session.id
+        self.wialon_sid = request.session["wialon_sid"]
+        return super().setup(request, *args, **kwargs)
 
 
 class StaffRequiredMixin(UserPassesTestMixin):

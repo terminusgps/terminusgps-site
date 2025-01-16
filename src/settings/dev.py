@@ -128,6 +128,15 @@ TRACKER_PROFILE = {
         {"NAME": "Standard", "OPTIONS": {"cmd": "Standard", "amount": "29.99"}},
         {"NAME": "Premium", "OPTIONS": {"cmd": "Premium", "amount": "39.99"}},
     ],
+    "WIALON": [
+        {
+            "GROUPS": [
+                {"NAME": "Unactivated Inv", "ID": "26844191"},
+                {"NAME": "Non Payment", "ID": "26844191"},
+            ]
+        },
+        {"USERS": [{"NAME": ""}]},
+    ],
 }
 
 

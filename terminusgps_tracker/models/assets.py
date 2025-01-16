@@ -73,11 +73,12 @@ class TrackerAsset(models.Model):
     def __str__(self) -> str:
         return str(self.name)
 
-    def save(self, **kwargs) -> None:
-        with WialonSession(token=settings.WIALON_TOKEN) as session:
+    def save(self, session: WialonSession | None = None, **kwargs) -> None:
+        if session and self.imei_number and not self.wialon_id:
             self.wialon_id = get_id_from_iccid(self.imei_number, session)
-            if self.wialon_id is not None:
-                self.populate(session)
+            self.populate(session)
+        elif session:
+            self.populate(session)
         super().save(**kwargs)
 
     def get_absolute_url(self) -> str:

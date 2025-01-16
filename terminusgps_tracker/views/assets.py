@@ -89,6 +89,12 @@ class AssetDetailView(DetailView, ProfileContextMixin, HtmxMixin):
     extra_context = {"title": "Asset Detail"}
     context_object_name = "asset"
 
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        self.object = self.get_object()
+        self.object.save(WialonSession().login(token=settings.WIALON_TOKEN))
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
     def get_queryset(self) -> QuerySet:
         return TrackerAsset.objects.filter(profile=self.profile)
 

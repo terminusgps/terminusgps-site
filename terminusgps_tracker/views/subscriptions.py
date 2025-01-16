@@ -47,7 +47,8 @@ class TrackerSubscriptionDetailView(DetailView, ProfileContextMixin, HtmxMixin):
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["features"] = self.get_object().tier.features.all()
+        if self.get_object().tier is not None:
+            context["features"] = self.get_object().tier.features.all()
         return context
 
 
