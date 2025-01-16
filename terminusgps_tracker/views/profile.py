@@ -3,8 +3,7 @@ from typing import Any
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
-from django.http import HttpRequest, HttpResponse
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
 from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
@@ -47,10 +46,7 @@ class TrackerProfileSettingsView(
     TemplateView, LoginRequiredMixin, ProfileContextMixin, HtmxMixin
 ):
     content_type = "text/html"
-    extra_context = {
-        "title": "Settings",
-        "subtitle": "You can have up to 4 shipping addresses and up to 4 payment methods.",
-    }
+    extra_context = {"title": "Settings", "subtitle": settings.TRACKER_PROFILE["MOTD"]}
     http_method_names = ["get"]
     login_url = reverse_lazy("tracker login")
     partial_template_name = "terminusgps_tracker/partials/_settings.html"

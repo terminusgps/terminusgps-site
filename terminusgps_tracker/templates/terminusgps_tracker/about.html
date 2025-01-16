@@ -1,13 +1,4 @@
 {% extends "terminusgps_tracker/layout.html" %}
-{% load static %}
 {% block content %}
-<div class="flex flex-col gap-16">
-    <div class="flex flex-col gap-4">
-        <div class="flex flex-col items-center gap-2 text-center">
-            <h3 class="bg-gradient-to-tr from-terminus-red-800 via-terminus-red-100 to-terminus-red-800 bg-clip-text text-xl font-bold text-transparent md:text-4xl">Founded by a parent, for parents<h3>
-            <h2 class="text-lg font-semibold text-gray-700 md:text-2xl dark:text-gray-300">Stay informed with the TerminusGPS mobile app<h2>
-        </div>
-        <img src={% static 'terminusgps_tracker/phone-mockup.png' %} alt="Terminus GPS Mobile app mock-up">
-    </div>
-</div>
+{% include "terminusgps_tracker/partials/_about.html" %}
 {% endblock content %}
