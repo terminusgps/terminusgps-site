@@ -1,10 +1,11 @@
 from typing import Any
 
 from django import forms
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.conf import settings
 from django.db import transaction
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.db.models import QuerySet
 from django.forms import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -121,14 +122,30 @@ class AssetUpdateView(UpdateView, ProfileContextMixin, HtmxMixin):
         return HttpResponseRedirect(self.get_success_url(self.get_object()))
 
 
-class AssetCreateView(CreateView, ProfileContextMixin, HtmxMixin):
-    model = TrackerAsset
-    queryset = TrackerAsset.objects.none()
+class AssetCreateView(CreateView, LoginRequiredMixin, ProfileContextMixin, HtmxMixin):
+    context_object_name = "asset"
+    extra_context = {
+        "title": "New Asset",
+        "subtitle": "Please enter a new name for your asset and an IMEI #",
+    }
     form_class = TrackerAssetCreateForm
     http_method_names = ["get", "post", "delete"]
+    login_url = reverse_lazy("tracker login")
+    model = TrackerAsset
     partial_template_name = "terminusgps_tracker/assets/partials/_create.html"
+    permission_denied_message = "Please login and try again."
+    queryset = TrackerAsset.objects.none()
+    raise_exception = False
     template_name = "terminusgps_tracker/assets/create.html"
-    context_object_name = "asset"
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        self.imei_number = request.GET.get("imei", "")
+        return super().setup(request, *args, **kwargs)
+
+    def get_initial(self) -> dict[str, Any]:
+        if self.imei_number:
+            return {"imei_number": self.imei_number}
+        return super().get_initial()
 
     def get_success_url(self, asset: TrackerAsset | None = None) -> str:
         if asset is not None:

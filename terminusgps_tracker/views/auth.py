@@ -22,8 +22,10 @@ from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
 
 
 class TrackerRegistrationView(RedirectView):
-    url = reverse_lazy("tracker signup")
+    http_method_names = ["get"]
     permanent = True
+    query_string = True
+    url = reverse_lazy("asset create")
 
 
 class TrackerLoginView(LoginView, HtmxMixin):
