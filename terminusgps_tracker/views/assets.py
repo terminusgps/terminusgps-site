@@ -28,13 +28,31 @@ class WialonUnitNotFoundError(Exception):
 
 class AssetDeleteView(DeleteView, ProfileContextMixin, HtmxMixin):
     context_object_name = "asset"
-    http_method_names = ["get", "post"]
+    http_method_names = ["post"]
     model = TrackerAsset
     partial_template_name = "terminusgps_tracker/assets/partials/_delete.html"
     queryset = TrackerAsset.objects.none()
     template_name = "terminusgps_tracker/assets/delete.html"
 
-    def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        try:
+            with WialonSession() as session:
+                unit = WialonUnit(id=self.get_object().wialon_id, session=session)
+                user = WialonUser(id=self.profile.wialon_end_user_id, session=session)
+                group = WialonUnitGroup(
+                    id=self.profile.wialon_group_id, session=session
+                )
+                imei_number = str(
+                    {key.lower(): value for key, value in unit.cfields.items()}.get(
+                        "iccid"
+                    )
+                )
+
+                unit.rename(imei_number)
+                group.rm_item(unit)
+                user.grant_access(unit, access_mask=0)
+        except WialonError:
+            return self.render_to_response(context=self.get_context_data())
         return super().post(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet:
@@ -196,7 +214,9 @@ class AssetCreateView(CreateView, LoginRequiredMixin, ProfileContextMixin, HtmxM
             form.add_error(
                 "imei_number",
                 ValidationError(
-                    _("Unit with IMEI # '%(value)s' may not exist, or wasn't found."),
+                    _(
+                        "Unit with IMEI # '%(value)s' may not exist, or wasn't found. Please verify IMEI #."
+                    ),
                     code="invalid",
                     params={"value": imei_number},
                 ),
