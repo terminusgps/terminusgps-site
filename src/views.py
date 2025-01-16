@@ -19,7 +19,9 @@ from terminusgps_tracker.validators import (
 
 
 class TerminusRegistrationForm(forms.Form):
-    default_css_class = "m-4 p-4 bg-white text-gray-800 dark:bg-gray-700 dark:text-white rounded w-full border border-gray-300 dark:border-gray-600"
+    default_css_class = (
+        "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100 bg-white"
+    )
 
     imei_number = forms.CharField(
         widget=widgets.TextInput(

@@ -15,9 +15,7 @@ class CommandExecutionForm(forms.Form):
 
 class TrackerAssetUpdateForm(forms.ModelForm):
     class Meta:
-        base_class = (
-            "p-2 bg-gray-200 text-gray-800 rounded border-gray-600 placeholder-gray-400"
-        )
+        base_class = "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100 bg-white border border-gray-600"
         model = TrackerAsset
         fields = ("name", "imei_number")
         widgets = {
@@ -36,9 +34,7 @@ class TrackerAssetUpdateForm(forms.ModelForm):
 
 class TrackerAssetCreateForm(forms.ModelForm):
     class Meta:
-        base_class = (
-            "p-2 bg-gray-300 text-gray-800 rounded border-gray-600 placeholder-gray-400"
-        )
+        base_class = "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100 bg-white border border-gray-600"
         model = TrackerAsset
         fields = ("name", "imei_number")
         widgets = {
