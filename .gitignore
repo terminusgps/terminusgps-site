@@ -8,7 +8,6 @@ build/
 !.gitignore
 
 *.jpg
-*.jpeg
 *.mp4
 *.webm
 *.csv
