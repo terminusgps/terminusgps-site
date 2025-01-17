@@ -3,7 +3,7 @@ from typing import Any
 from django import forms
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -27,7 +27,11 @@ class TrackerSourceView(RedirectView):
 
 
 class TrackerAboutView(TemplateView, ProfileContextMixin, HtmxMixin):
-    extra_context = {"title": "About", "subtitle": "We know where ours are... do you?"}
+    extra_context = {
+        "title": "About",
+        "subtitle": "We know where ours are... do you?",
+        "tracker_profile": settings.TRACKER_PROFILE,
+    }
     http_method_names = ["get"]
     template_name = "terminusgps_tracker/about.html"
     partial_template_name = "terminusgps_tracker/partials/_about.html"
@@ -45,9 +49,7 @@ class TrackerContactView(TemplateView, ProfileContextMixin, HtmxMixin):
     extra_context = {
         "title": "Contact",
         "subtitle": "Ready to get in touch?",
-        "socials": settings.TRACKER_PROFILE["SOCIALS"],
-        "emails": settings.TRACKER_PROFILE["EMAILS"],
-        "phones": settings.TRACKER_PROFILE["PHONES"],
+        "tracker_profile": settings.TRACKER_PROFILE,
     }
     http_method_names = ["get"]
     template_name = "terminusgps_tracker/contact.html"

@@ -127,6 +127,15 @@ TRACKER_PROFILE = {
                 "icon": "terminusgps_tracker/icons/nextdoor.svg",
             },
         },
+        {
+            "NAME": "Twitter",
+            "OPTIONS": {
+                "display_name": "TERMINUSGPS",
+                "profile_link": "https://x.com/TERMINUSGPS",
+                "username": "TERMINUSGPS",
+                "icon": "terminusgps_tracker/icons/twitter.svg",
+            },
+        },
     ],
     "SUBSCRIPTIONS": [
         {"NAME": "Basic", "OPTIONS": {"cmd": "Basic", "amount": "19.99"}},

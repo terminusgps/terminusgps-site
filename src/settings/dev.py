@@ -122,20 +122,20 @@ TRACKER_PROFILE = {
                 "icon": "terminusgps_tracker/icons/nextdoor.svg",
             },
         },
+        {
+            "NAME": "Twitter",
+            "OPTIONS": {
+                "display_name": "TERMINUSGPS",
+                "profile_link": "https://x.com/TERMINUSGPS",
+                "username": "TERMINUSGPS",
+                "icon": "terminusgps_tracker/icons/twitter.svg",
+            },
+        },
     ],
     "SUBSCRIPTIONS": [
         {"NAME": "Basic", "OPTIONS": {"cmd": "Basic", "amount": "19.99"}},
         {"NAME": "Standard", "OPTIONS": {"cmd": "Standard", "amount": "29.99"}},
         {"NAME": "Premium", "OPTIONS": {"cmd": "Premium", "amount": "39.99"}},
-    ],
-    "WIALON": [
-        {
-            "GROUPS": [
-                {"NAME": "Unactivated Inv", "ID": "26844191"},
-                {"NAME": "Non Payment", "ID": "26844191"},
-            ]
-        },
-        {"USERS": [{"NAME": ""}]},
     ],
 }
 

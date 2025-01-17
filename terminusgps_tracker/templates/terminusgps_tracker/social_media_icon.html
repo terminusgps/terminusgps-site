@@ -1,0 +1,6 @@
+{% if social.OPTIONS %}
+<a id="{{ social.NAME|lower }}" href="{{ social.OPTIONS.profile_link }}">
+    {% include social.OPTIONS.icon with class="size-8 hover:fill-terminus-red-200 transition-colors duration-500 ease-in-out fill-terminus-red-800" %}
+    <span class="sr-only">{{ social.OPTIONS.username }} on {{ social.NAME|title }}</span>
+</a>
+{% endif %}
