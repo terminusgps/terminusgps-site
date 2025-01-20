@@ -7,19 +7,27 @@ os.umask(0)
 secret: dict[str, str] = get_secret("terminusgps-site-live-env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 ALLOWED_HOSTS = [".terminusgps.com"]
-CLIENT_NAME = "Terminus GPS"
+BASE_DIR = Path(__file__).resolve().parent.parent
 CSRF_COOKIE_SECURE = True
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_FROM_EMAIL = "support@terminusgps.com"
 DOCS_ACCESS = "staff"
 DOCS_ROOT = BASE_DIR.parent / "docs/build/html"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
+EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_USER = secret.get("EMAIL_HOST_USER")
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 INTERNAL_IPS = ["127.0.0.1", "0.0.0.0"]
 LANGUAGE_CODE = "en-us"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
+MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
+MERCHANT_AUTH_TRANSACTION_KEY = secret.get("MERCHANT_AUTH_TRANSACTION_KEY")
+SECRET_KEY = secret.get("SECRET_KEY")
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = True
@@ -28,28 +36,16 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = "/var/www/terminusgps-site/static/"
 STATIC_URL = "/static/"
 TIME_ZONE = "America/Chicago"
+TWILIO_FROM_NUMBER = secret.get("TWILIO_FROM_NUMBER")
+TWILIO_MESSAGING_SID = secret.get("TWILIO_MESSAGING_SID")
+TWILIO_SID = secret.get("TWILIO_SID")
+TWILIO_TOKEN = secret.get("TWILIO_TOKEN")
 USE_I18N = True
 USE_TZ = True
-
-SECRET_KEY = secret.get("SECRET_KEY")
-MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
-MERCHANT_AUTH_TRANSACTION_KEY = secret.get("MERCHANT_AUTH_TRANSACTION_KEY")
-TWILIO_TOKEN = secret.get("TWILIO_TOKEN")
-TWILIO_SID = secret.get("TWILIO_SID")
-TWILIO_MESSAGING_SID = secret.get("TWILIO_MESSAGING_SID")
-TWILIO_FROM_NUMBER = secret.get("TWILIO_FROM_NUMBER")
-WIALON_TOKEN = secret.get("WIALON_TOKEN")
-WIALON_HOST = secret.get("WIALON_HOST")
 WIALON_ADMIN_ID = secret.get("WIALON_ADMIN_ID")
+WIALON_HOST = secret.get("WIALON_HOST")
+WIALON_TOKEN = secret.get("WIALON_TOKEN")
 WIALON_UNACTIVATED_GROUP = secret.get("WIALON_UNACTIVATED_GROUP")
-EMAIL_HOST_USER = secret.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")
-
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = "support@terminusgps.com"
 
 TRACKER_PROFILE = {
     "DISPLAY_NAME": "Terminus GPS",

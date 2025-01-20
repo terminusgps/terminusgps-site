@@ -31,11 +31,28 @@ class StaffRequiredMixin(UserPassesTestMixin):
 
     def get_test_func(self) -> Callable:
         def user_is_staff() -> bool:
-            if self.request.user and hasattr(self.request.user, "is_staff"):
+            if self.request.user and self.request.user.is_authenticated:
                 return self.request.user.is_staff
             return False
 
         return user_is_staff
+
+
+class SubscriptionRequiredMixin(UserPassesTestMixin):
+    login_url = reverse_lazy("settings")
+    permission_denied_message = "Please activate a subscription to perform this action."
+
+    def get_test_func(self) -> Callable:
+        def user_is_subscribed() -> bool:
+            if self.request.user and self.request.user.is_authenticated:
+                profile = TrackerProfile.objects.get(user=self.request.user)
+                return (
+                    profile.subscription.status.upper() == "ACTIVE"
+                    or self.request.user.is_staff
+                )
+            return False
+
+        return user_is_subscribed
 
 
 class HtmxMixin(TemplateResponseMixin, View):

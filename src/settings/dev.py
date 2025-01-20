@@ -3,47 +3,66 @@ from pathlib import Path
 
 os.umask(0)
 
+secret: dict[str, str | None] = {
+    "SECRET_KEY": os.getenv("SECRET_KEY"),
+    "CONNECT_SECRET": os.getenv("CONNECT_SECRET"),
+    "MERCHANT_AUTH_LOGIN_ID": os.getenv("MERCHANT_AUTH_LOGIN_ID"),
+    "MERCHANT_AUTH_TRANSACTION_KEY": os.getenv("MERCHANT_AUTH_TRANSACTION_KEY"),
+    "TWILIO_TOKEN": os.getenv("TWILIO_TOKEN"),
+    "TWILIO_SID": os.getenv("TWILIO_SID"),
+    "TWILIO_MESSAGING_SID": os.getenv("TWILIO_MESSAGING_SID"),
+    "TWILIO_FROM_NUMBER": os.getenv("TWILIO_FROM_NUMBER"),
+    "WIALON_TOKEN": os.getenv("WIALON_TOKEN"),
+    "WIALON_HOST": os.getenv("WIALON_HOST"),
+    "WIALON_ADMIN_ID": os.getenv("WIALON_ADMIN_ID"),
+    "WIALON_UNACTIVATED_GROUP": os.getenv("WIALON_UNACTIVATED_GROUP"),
+    "EMAIL_HOST_USER": os.getenv("EMAIL_HOST_USER"),
+    "EMAIL_HOST_PASSWORD": os.getenv("EMAIL_HOST_PASSWORD"),
+}
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+BASE_DIR = Path(__file__).resolve().parent.parent
+CONNECT_SECRET = secret.get("CONNECT_SECRET")
 CORS_ORIGIN_ALLOW_ALL = True
 DEBUG = True
-DOCS_ACCESS = "staff"
-DOCS_ROOT = BASE_DIR.parent / "docs/build/html"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FROM_EMAIL = "no-reply@terminusgps.com"
+DOCS_ACCESS = "staff"
+DOCS_ROOT = BASE_DIR.parent / "docs/build/html"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
+EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_USER = secret.get("EMAIL_HOST_USER")
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 INTERNAL_IPS = ["127.0.0.1", "0.0.0.0"]
 LANGUAGE_CODE = "en-us"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
+MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
+MERCHANT_AUTH_TRANSACTION_KEY = secret.get("MERCHANT_AUTH_TRANSACTION_KEY")
 MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
+ROOT_URLCONF = "src.urls"
+SECRET_KEY = secret.get("SECRET_KEY")
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "static/"
 TAILWIND_APP_NAME = "theme"
 TIME_ZONE = "America/Chicago"
+TWILIO_FROM_NUMBER = secret.get("TWILIO_FROM_NUMBER")
+TWILIO_MESSAGING_SID = secret.get("TWILIO_MESSAGING_SID")
+TWILIO_SID = secret.get("TWILIO_SID")
+TWILIO_TOKEN = secret.get("TWILIO_TOKEN")
 USE_I18N = True
 USE_TZ = True
-
-SECRET_KEY = os.getenv("SECRET_KEY")
-CONNECT_SECRET = os.getenv("CONNECT_SECRET")
-MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
-MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
-TWILIO_TOKEN = os.getenv("TWILIO_TOKEN")
-TWILIO_SID = os.getenv("TWILIO_SID")
-TWILIO_MESSAGING_SID = os.getenv("TWILIO_MESSAGING_SID")
-TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER")
-WIALON_TOKEN = os.getenv("WIALON_TOKEN")
-WIALON_HOST = os.getenv("WIALON_HOST")
-WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID")
-WIALON_UNACTIVATED_GROUP = os.getenv("WIALON_UNACTIVATED_GROUP")
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+WIALON_ADMIN_ID = secret.get("WIALON_ADMIN_ID")
+WIALON_HOST = secret.get("WIALON_HOST")
+WIALON_TOKEN = secret.get("WIALON_TOKEN")
+WIALON_UNACTIVATED_GROUP = secret.get("WIALON_UNACTIVATED_GROUP")
+WSGI_APPLICATION = "src.wsgi.application"
 
 
 TRACKER_PROFILE = {
@@ -155,11 +174,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.forms",
     "django_browser_reload",
-    "django_htmx",
     "docs",
     "tailwind",
-    "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
     "theme",
+    "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
 ]
 
 MIDDLEWARE = [
@@ -174,7 +192,6 @@ MIDDLEWARE = [
     "django_htmx.middleware.HtmxMiddleware",
 ]
 
-ROOT_URLCONF = "src.urls"
 
 TEMPLATES = [
     {
@@ -192,7 +209,6 @@ TEMPLATES = [
     }
 ]
 
-WSGI_APPLICATION = "src.wsgi.application"
 
 DATABASES = {
     "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}

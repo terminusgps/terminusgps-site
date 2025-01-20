@@ -19,7 +19,11 @@ from wialon.api import WialonError
 
 from terminusgps_tracker.models import TrackerAsset, TrackerAssetCommand
 from terminusgps_tracker.forms import TrackerAssetUpdateForm, TrackerAssetCreateForm
-from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
+from terminusgps_tracker.views.mixins import (
+    HtmxMixin,
+    ProfileContextMixin,
+    SubscriptionRequiredMixin,
+)
 
 
 class WialonUnitNotFoundError(Exception):
@@ -146,7 +150,13 @@ class AssetUpdateView(UpdateView, ProfileContextMixin, HtmxMixin):
         return HttpResponseRedirect(self.get_success_url(self.get_object()))
 
 
-class AssetCreateView(CreateView, LoginRequiredMixin, ProfileContextMixin, HtmxMixin):
+class AssetCreateView(
+    CreateView,
+    LoginRequiredMixin,
+    ProfileContextMixin,
+    SubscriptionRequiredMixin,
+    HtmxMixin,
+):
     context_object_name = "asset"
     extra_context = {
         "title": "New Asset",
@@ -157,7 +167,9 @@ class AssetCreateView(CreateView, LoginRequiredMixin, ProfileContextMixin, HtmxM
     login_url = reverse_lazy("tracker login")
     model = TrackerAsset
     partial_template_name = "terminusgps_tracker/assets/partials/_create.html"
-    permission_denied_message = "Please login and try again."
+    permission_denied_message = (
+        "You must have an active subscription in order to add an asset."
+    )
     queryset = TrackerAsset.objects.none()
     raise_exception = False
     template_name = "terminusgps_tracker/assets/create.html"

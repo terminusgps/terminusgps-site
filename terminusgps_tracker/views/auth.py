@@ -101,22 +101,23 @@ class TrackerSignupView(FormView, SuccessMessageMixin, HtmxMixin):
 
     # TODO: retrieve templates from AWS
     @staticmethod
-    def send_verification_email(to_addr: str) -> None:
+    def send_verification_email(to_addr: str, html: bool = False) -> None:
         now = timezone.now()
         text_content: str = render_to_string(
             "terminusgps_tracker/emails/signup_success.txt",
             context={"email": to_addr, "now": now},
         )
-        html_content: str = render_to_string(
-            "terminusgps/emails/signup_success.html",
-            context={"email": to_addr, "now": now},
-        )
         email: EmailMultiAlternatives = EmailMultiAlternatives(
-            f"Bug Report - {timezone.now():%d/%m/%y} - {timezone.now():%I:%M:%S%z}",
+            f"{settings.TRACKER_PROFILE["DISPLAY_NAME"]} - Your Account Was Created",
             text_content,
             to=[to_addr],
         )
-        email.attach_alternative(html_content, "text/html")
+        if html:
+            html_content: str = render_to_string(
+                "terminusgps_tracker/emails/signup_success.html",
+                context={"email": to_addr, "now": now},
+            )
+            email.attach_alternative(html_content, "text/html")
         email.send()
 
     def wialon_registration_flow(self, username: str, password: str) -> dict:
