@@ -6,7 +6,7 @@ from django.db.models import QuerySet
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
-from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
+from terminusgps_tracker.views.base import TrackerBaseView
 from terminusgps_tracker.models import (
     TrackerAsset,
     TrackerPaymentMethod,
@@ -16,9 +16,7 @@ from terminusgps_tracker.models import (
 )
 
 
-class TrackerProfileView(
-    TemplateView, LoginRequiredMixin, ProfileContextMixin, HtmxMixin
-):
+class TrackerProfileView(TrackerBaseView):
     content_type = "text/html"
     extra_context = {
         "title": "Your Profile",
@@ -43,9 +41,7 @@ class TrackerProfileView(
         return context
 
 
-class TrackerProfileSettingsView(
-    TemplateView, LoginRequiredMixin, ProfileContextMixin, HtmxMixin
-):
+class TrackerProfileSettingsView(TrackerBaseView):
     content_type = "text/html"
     extra_context = {"title": "Settings", "subtitle": settings.TRACKER_PROFILE["MOTD"]}
     http_method_names = ["get"]

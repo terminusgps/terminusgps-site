@@ -7,11 +7,11 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.views.generic import TemplateView, RedirectView, FormView
+from django.views.generic import RedirectView
 
 
 from terminusgps_tracker.forms import BugReportForm
-from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
+from terminusgps_tracker.views.base import TrackerBaseView
 
 
 class TrackerLandingView(RedirectView):
@@ -26,7 +26,7 @@ class TrackerSourceView(RedirectView):
     url = settings.TRACKER_PROFILE["GITHUB"]
 
 
-class TrackerAboutView(TemplateView, ProfileContextMixin, HtmxMixin):
+class TrackerAboutView(TrackerBaseView):
     extra_context = {
         "title": "About",
         "subtitle": "We know where ours are... do you?",
@@ -37,14 +37,14 @@ class TrackerAboutView(TemplateView, ProfileContextMixin, HtmxMixin):
     partial_template_name = "terminusgps_tracker/partials/_about.html"
 
 
-class TrackerPrivacyView(TemplateView, ProfileContextMixin, HtmxMixin):
+class TrackerPrivacyView(TrackerBaseView):
     extra_context = {"title": "Privacy Policy"}
     http_method_names = ["get"]
     template_name = "terminusgps_tracker/privacy.html"
     partial_template_name = "terminusgps_tracker/partials/_privacy.html"
 
 
-class TrackerContactView(TemplateView, ProfileContextMixin, HtmxMixin):
+class TrackerContactView(TrackerBaseView):
     content_type = "text/html"
     extra_context = {
         "title": "Contact",
@@ -56,7 +56,7 @@ class TrackerContactView(TemplateView, ProfileContextMixin, HtmxMixin):
     partial_template_name = "terminusgps_tracker/partials/_contact.html"
 
 
-class TrackerBugReportView(FormView, ProfileContextMixin, HtmxMixin):
+class TrackerBugReportView(TrackerBaseView):
     content_type = "text/html"
     extra_context = {
         "title": "Bug Report",

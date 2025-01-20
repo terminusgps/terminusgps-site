@@ -4,13 +4,14 @@ from botocore.exceptions import ClientError
 from django.forms import ValidationError
 from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
-from django.views.generic import FormView, TemplateView
+from django.views.generic import FormView
 from django.utils.translation import gettext_lazy as _
 from terminusgps_tracker.forms import EmailTemplateUploadForm
-from terminusgps_tracker.views.mixins import HtmxMixin, StaffRequiredMixin
+from terminusgps_tracker.views.mixins import StaffRequiredMixin
+from terminusgps_tracker.views.base import TrackerBaseView
 
 
-class EmailTemplateRendererView(TemplateView, StaffRequiredMixin):
+class EmailTemplateRendererView(TrackerBaseView, StaffRequiredMixin):
     extra_context = {
         "title": "Email Renderer",
         "subtitle": "Preview an email template before upload",
@@ -22,7 +23,7 @@ class EmailTemplateRendererView(TemplateView, StaffRequiredMixin):
     http_method_names = ["get"]
 
 
-class EmailTemplateUploadView(FormView, StaffRequiredMixin, HtmxMixin):
+class EmailTemplateUploadView(FormView, TrackerBaseView, StaffRequiredMixin):
     extra_context = {
         "title": "Upload Email Template",
         "subtitle": "Add a name, subject line and file, then click submit!",

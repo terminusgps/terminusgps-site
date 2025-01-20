@@ -9,10 +9,10 @@ from django.core.exceptions import ValidationError
 
 from terminusgps_tracker.models import TrackerSubscription, TrackerSubscriptionTier
 from terminusgps_tracker.forms import SubscriptionUpdateForm, SubscriptionCancelForm
-from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
+from terminusgps_tracker.views.base import TrackerBaseView
 
 
-class TrackerSubscriptionCancelView(FormView, ProfileContextMixin, HtmxMixin):
+class TrackerSubscriptionCancelView(FormView, TrackerBaseView):
     http_method_names = ["get", "post"]
     partial_template_name = "terminusgps_tracker/subscription/partials/_cancel.html"
     template_name = "terminusgps_tracker/subscription/cancel.html"
@@ -34,7 +34,7 @@ class TrackerSubscriptionCancelView(FormView, ProfileContextMixin, HtmxMixin):
         return HttpResponseRedirect(self.get_success_url(subscription))
 
 
-class TrackerSubscriptionDetailView(DetailView, ProfileContextMixin, HtmxMixin):
+class TrackerSubscriptionDetailView(DetailView, TrackerBaseView):
     model = TrackerSubscription
     partial_template_name = "terminusgps_tracker/subscription/partials/_detail.html"
     queryset = TrackerSubscription.objects.none()
@@ -46,13 +46,14 @@ class TrackerSubscriptionDetailView(DetailView, ProfileContextMixin, HtmxMixin):
         return self.profile.subscription
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
+        self.object = self.get_object()
         context: dict[str, Any] = super().get_context_data(**kwargs)
         if self.get_object().tier is not None:
             context["features"] = self.get_object().tier.features.all()
         return context
 
 
-class TrackerSubscriptionUpdateView(UpdateView, ProfileContextMixin, HtmxMixin):
+class TrackerSubscriptionUpdateView(UpdateView, TrackerBaseView):
     model = TrackerSubscription
     partial_template_name = "terminusgps_tracker/subscription/partials/_update.html"
     queryset = TrackerSubscription.objects.none()

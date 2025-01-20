@@ -7,10 +7,10 @@ from django.views.generic import (
 )
 
 from terminusgps_tracker.models import TrackerSubscriptionTier
-from terminusgps_tracker.views.mixins import HtmxMixin, ProfileContextMixin
+from terminusgps_tracker.views.base import TrackerBaseView
 
 
-class TrackerSubscriptionTierListView(ListView, ProfileContextMixin, HtmxMixin):
+class TrackerSubscriptionTierListView(ListView, TrackerBaseView):
     model = TrackerSubscriptionTier
     context_object_name = "tiers"
     ordering = "amount"
@@ -20,7 +20,7 @@ class TrackerSubscriptionTierListView(ListView, ProfileContextMixin, HtmxMixin):
     )
 
 
-class TrackerSubscriptionTierDetailView(DetailView, ProfileContextMixin, HtmxMixin):
+class TrackerSubscriptionTierDetailView(DetailView, TrackerBaseView):
     model = TrackerSubscriptionTier
     template_name = "terminusgps_tracker/subscription_tier/detail.html"
     partial_template_name = (
@@ -28,7 +28,7 @@ class TrackerSubscriptionTierDetailView(DetailView, ProfileContextMixin, HtmxMix
     )
 
 
-class TrackerSubscriptionTierCreateView(CreateView, ProfileContextMixin, HtmxMixin):
+class TrackerSubscriptionTierCreateView(CreateView, TrackerBaseView):
     model = TrackerSubscriptionTier
     template_name = "terminusgps_tracker/subscription_tier/create.html"
     partial_template_name = (
@@ -36,7 +36,7 @@ class TrackerSubscriptionTierCreateView(CreateView, ProfileContextMixin, HtmxMix
     )
 
 
-class TrackerSubscriptionTierDeleteView(DeleteView, ProfileContextMixin, HtmxMixin):
+class TrackerSubscriptionTierDeleteView(DeleteView, TrackerBaseView):
     model = TrackerSubscriptionTier
     template_name = "terminusgps_tracker/subscription_tier/create.html"
     partial_template_name = (
@@ -44,7 +44,7 @@ class TrackerSubscriptionTierDeleteView(DeleteView, ProfileContextMixin, HtmxMix
     )
 
 
-class TrackerSubscriptionTierUpdateView(UpdateView, ProfileContextMixin, HtmxMixin):
+class TrackerSubscriptionTierUpdateView(UpdateView, TrackerBaseView):
     model = TrackerSubscriptionTier
     template_name = "terminusgps_tracker/subscription_tier/update.html"
     partial_template_name = (
