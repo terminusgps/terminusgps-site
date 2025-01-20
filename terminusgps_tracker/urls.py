@@ -2,6 +2,12 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path("inquiry/", views.TrackerEmailInquiryView.as_view(), name="email inquiry"),
+    path(
+        "newsletter/new/",
+        views.TrackerNewsletterSignupView.as_view(),
+        name="newsletter signup",
+    ),
     path(
         "emails/upload/",
         views.EmailTemplateUploadView.as_view(),

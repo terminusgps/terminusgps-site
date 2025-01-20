@@ -1,0 +1,11 @@
+<form
+    method="post"
+    action="{% url 'email inquiry' %}"
+    class="{{ class }}"
+    hx-boost="true"
+>
+    {% csrf_token %}
+    {{ form.email }}
+    {{ form.text }}
+    <input class="rounded border border-terminus-black bg-terminus-red-800 p-2 text-white hover:cursor-pointer hover:bg-terminus-red-400" type="submit">
+</form>

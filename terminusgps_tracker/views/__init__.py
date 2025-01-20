@@ -25,6 +25,8 @@ from .public import (
     TrackerLandingView,
     TrackerPrivacyView,
     TrackerSourceView,
+    TrackerEmailInquiryView,
+    TrackerNewsletterSignupView,
 )
 from .subscriptions import (
     TrackerSubscriptionUpdateView,
