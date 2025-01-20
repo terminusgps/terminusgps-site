@@ -176,6 +176,10 @@ class AssetCreateView(CreateView, TrackerBaseView, SubscriptionRequiredMixin):
         self.imei_number = request.GET.get("imei", "")
         return super().setup(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        self.object = self.get_object()
+        return super().get_context_data(**kwargs)
+
     def get_initial(self) -> dict[str, Any]:
         if self.imei_number:
             return {"imei_number": self.imei_number}
