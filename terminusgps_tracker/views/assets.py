@@ -177,7 +177,7 @@ class AssetCreateView(CreateView, TrackerBaseView, SubscriptionRequiredMixin):
         return super().setup(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
-        self.object = self.get_object()
+        self.object = None
         return super().get_context_data(**kwargs)
 
     def get_initial(self) -> dict[str, Any]:
