@@ -29,16 +29,15 @@ class PaymentMethodDetailView(DetailView, TrackerBaseView):
     template_name = "terminusgps_tracker/payments/detail.html"
 
     def get_queryset(self) -> QuerySet:
-        return self.profile.payments.all() if self.profile else self.queryset
+        return self.profile.payments.all()
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
+        self.object = self.get_object()
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        if self.profile:
-            payment_method = self.get_object()
-            context["default"] = payment_method.is_default or False
-            context["payment"] = payment_method.authorizenet_get_payment_profile(
-                self.profile.authorizenet_id, payment_method.authorizenet_id
-            )
+        context["default"] = self.object.is_default or False
+        context["payment"] = self.object.authorizenet_get_payment_profile(
+            self.profile.authorizenet_id, self.object.authorizenet_id
+        )
         return context
 
 

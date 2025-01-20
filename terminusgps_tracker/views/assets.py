@@ -33,12 +33,10 @@ class AssetDeleteView(DeleteView, TrackerBaseView):
     partial_template_name = "terminusgps_tracker/assets/partials/_delete.html"
     queryset = TrackerAsset.objects.none()
     template_name = "terminusgps_tracker/assets/delete.html"
+    success_url = reverse_lazy("tracker profile")
 
     def get_queryset(self) -> QuerySet:
         return TrackerAsset.objects.filter(profile=self.profile)
-
-    def get_success_url(self) -> str:
-        return reverse("tracker profile")
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         self.object = self.get_object()
@@ -50,8 +48,9 @@ class AssetDeleteView(DeleteView, TrackerBaseView):
             unit = WialonUnit(id=self.get_object().wialon_id, session=session)
             user = WialonUser(id=self.profile.wialon_end_user_id, session=session)
             group = WialonUnitGroup(id=self.profile.wialon_group_id, session=session)
+            fields = unit.cfields | unit.afields
             imei_number = str(
-                {key.lower(): value for key, value in unit.cfields.items()}.get("iccid")
+                {key.lower(): value for key, value in fields.items()}.get("iccid")
             )
 
             unit.rename(imei_number)
@@ -100,8 +99,7 @@ class AssetDetailView(DetailView, TrackerBaseView):
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         asset = self.get_object()
         asset.save(session=WialonSession(sid=self.wialon_sid))
-        context = self.get_context_data(object=asset)
-        return self.render_to_response(context)
+        return self.render_to_response(self.get_context_data(**kwargs))
 
 
 class AssetRemoteView(DetailView, TrackerBaseView):

@@ -12,40 +12,16 @@ from terminusgps.wialon.session import WialonSession
 
 class WialonSessionView(View):
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        """Initializes and/or refreshes a Wialon session for use in the view."""
+        """Initializes a Wialon session for use in the view."""
         if not hasattr(settings, "WIALON_TOKEN"):
             raise ImproperlyConfigured("'WIALON_TOKEN' setting is required.")
 
-        if not request.session.get("wialon_sid"):
-            session = WialonSession()
+        session = WialonSession(sid=request.session.get("wialon_sid"))
+        if not session.active:
             session.login(token=settings.WIALON_TOKEN)
             request.session["wialon_sid"] = session.id
         self.wialon_sid = request.session["wialon_sid"]
-
-        if not self.wialon_active_session:
-            self.wialon_refresh_session()
         return super().setup(request, *args, **kwargs)
-
-    @property
-    def wialon_active_session(self) -> bool:
-        """
-        Whether or not the Wialon session is currently active.
-
-        :type: :py:obj:`bool`
-
-        """
-        return WialonSession(sid=self.wialon_sid).active
-
-    def wialon_refresh_session(self) -> None:
-        """
-        Refreshes the Wialon session while keeping the current session id valid.
-
-        :returns: Nothing.
-        :rtype: :py:obj:`None`
-
-        """
-        session = WialonSession(sid=self.wialon_sid)
-        session.login(token=settings.WIALON_TOKEN)
 
 
 class HtmxTemplateView(TemplateView):
