@@ -1,7 +1,0 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-.prose-terminus code {
-    @apply text-sm px-1 py-0.5 rounded-sm bg-terminus-gray-700 text-terminus-white dark:bg-terminus-gray-200 dark:text-terminus-gray-900;
-}

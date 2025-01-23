@@ -50,7 +50,6 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "static/"
-TAILWIND_APP_NAME = "theme"
 TIME_ZONE = "America/Chicago"
 TWILIO_FROM_NUMBER = secret.get("TWILIO_FROM_NUMBER")
 TWILIO_MESSAGING_SID = secret.get("TWILIO_MESSAGING_SID")
@@ -173,10 +172,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
-    "django_browser_reload",
     "docs",
-    "tailwind",
-    "theme",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
 ]
 
@@ -188,8 +184,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django_browser_reload.middleware.BrowserReloadMiddleware",
-    "django_htmx.middleware.HtmxMiddleware",
 ]
 
 

@@ -21,7 +21,7 @@
     </div>
     {% endif %}
     <input
-        class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white hover:cursor-pointer hover:bg-terminus-red-400"
+        class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out"
         type="button"
         value="Switch plans"
         hx-get="{% url 'subscription update' subscription.pk %}"

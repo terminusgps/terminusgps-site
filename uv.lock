@@ -499,19 +499,6 @@ wheels = [
 ]
 
 [[package]]
-name = "django-browser-reload"
-version = "1.13.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "asgiref" },
-    { name = "django" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/d6/5a/4f3855b6f26445aa41cf0a506be737526a546f1ba14e894cb0bcd6f4c2f2/django_browser_reload-1.13.0.tar.gz", hash = "sha256:4e3507c10518f4c7439588aaed2f0c21b503878ecea7b18893f1e635e0cbe3ab", size = 14339 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/4f/60/765775f5ae43d0ef041d219b9866e02724c5d65eba588e73f3d43d62b77e/django_browser_reload-1.13.0-py3-none-any.whl", hash = "sha256:5c1705eb29f0b72808b702484f10a8d5da9cd9243e55ab81446cb697e96b3e8c", size = 12229 },
-]
-
-[[package]]
 name = "django-cors-headers"
 version = "4.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -674,18 +661,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/39/8e/ebe7a551511b4034ad4fe9c3d5333650e4d0d1d8700fd458ed64647394d9/django_stubs_ext-5.0.2.tar.gz", hash = "sha256:409c62585d7f996cef5c760e6e27ea3ff29f961c943747e67519c837422cad32", size = 9467 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3c/bb/8846460aae8b9ae6601dc33cd7bc9d1f96baac607474a468e9f474317513/django_stubs_ext-5.0.2-py3-none-any.whl", hash = "sha256:8d8efec5a86241266bec94a528fe21258ad90d78c67307f3ae5f36e81de97f12", size = 8922 },
-]
-
-[[package]]
-name = "django-tailwind"
-version = "3.8.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "django" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/3c/ee/1065c57c87213f566d76b398f8391cd544380ef9661f7fdacdfe4264633c/django_tailwind-3.8.0.tar.gz", hash = "sha256:31c2f4a7879d685c2de0feaf0b63f246200b37337bea4d7dbafb59bc3f10c008", size = 8969 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/cf/14/20c40882d9ee91f7a2a20d3c0175cf813340c02ae31c975ce567de2c7c67/django_tailwind-3.8.0-py3-none-any.whl", hash = "sha256:fa969c5b95d314b173fe2b2ed2cb2c03f2e2c94fdc2c01ff73a993fa159085da", size = 12936 },
 ]
 
 [[package]]
@@ -1850,7 +1825,6 @@ dependencies = [
     { name = "django" },
     { name = "django-allauth" },
     { name = "django-appconf" },
-    { name = "django-browser-reload" },
     { name = "django-cors-headers" },
     { name = "django-cryptography" },
     { name = "django-docs" },
@@ -1863,7 +1837,6 @@ dependencies = [
     { name = "django-storages" },
     { name = "django-stubs" },
     { name = "django-stubs-ext" },
-    { name = "django-tailwind" },
     { name = "djangorestframework" },
     { name = "docopt" },
     { name = "docutils" },
@@ -2003,7 +1976,6 @@ requires-dist = [
     { name = "django", specifier = "==5.1.5" },
     { name = "django-allauth", specifier = "==0.63.6" },
     { name = "django-appconf", specifier = "==1.0.6" },
-    { name = "django-browser-reload", specifier = "==1.13.0" },
     { name = "django-cors-headers", specifier = "==4.4.0" },
     { name = "django-cryptography", specifier = "==1.1" },
     { name = "django-docs", specifier = ">=0.3.3" },
@@ -2016,7 +1988,6 @@ requires-dist = [
     { name = "django-storages", specifier = ">=1.14.4" },
     { name = "django-stubs", specifier = "==5.0.2" },
     { name = "django-stubs-ext", specifier = "==5.0.2" },
-    { name = "django-tailwind", specifier = "==3.8.0" },
     { name = "djangorestframework", specifier = "==3.15.2" },
     { name = "docopt", specifier = "==0.6.2" },
     { name = "docutils", specifier = "==0.21.2" },
