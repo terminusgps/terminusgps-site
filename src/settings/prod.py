@@ -1,6 +1,5 @@
 import os
-from pathlib import Path
-
+import pathlib
 from terminusgps.aws.secrets import get_secret
 
 os.umask(0)
@@ -8,7 +7,7 @@ secret: dict[str, str] = get_secret("terminusgps-site-live-env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 ALLOWED_HOSTS = [".terminusgps.com"]
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 CSRF_COOKIE_SECURE = True
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -178,8 +177,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.forms",
     "docs",
-    "tailwind",
-    "theme",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
 ]
 
