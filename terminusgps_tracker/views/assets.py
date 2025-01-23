@@ -19,14 +19,18 @@ from wialon.api import WialonError
 from terminusgps_tracker.models import TrackerAsset, TrackerAssetCommand
 from terminusgps_tracker.forms import TrackerAssetUpdateForm, TrackerAssetCreateForm
 from terminusgps_tracker.views.base import TrackerBaseView
-from terminusgps_tracker.views.mixins import SubscriptionRequiredMixin
+from terminusgps_tracker.views.mixins import (
+    SubscriptionRequiredMixin,
+    TrackerProfileSingleObjectMixin,
+    TrackerProfileMultipleObjectMixin,
+)
 
 
 class WialonUnitNotFoundError(Exception):
     """Raised when a Wialon unit was not found via IMEI #."""
 
 
-class AssetDeleteView(DeleteView, TrackerBaseView):
+class AssetDeleteView(DeleteView, TrackerBaseView, TrackerProfileSingleObjectMixin):
     context_object_name = "asset"
     http_method_names = ["post"]
     model = TrackerAsset
@@ -34,13 +38,6 @@ class AssetDeleteView(DeleteView, TrackerBaseView):
     queryset = TrackerAsset.objects.none()
     template_name = "terminusgps_tracker/assets/delete.html"
     success_url = reverse_lazy("tracker profile")
-
-    def get_queryset(self) -> QuerySet:
-        return TrackerAsset.objects.filter(profile=self.profile)
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        self.object = self.get_object()
-        return super().get_context_data(**kwargs)
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         try:
@@ -61,7 +58,7 @@ class AssetDeleteView(DeleteView, TrackerBaseView):
         return super().post(request, *args, **kwargs)
 
 
-class AssetListView(ListView, TrackerBaseView):
+class AssetListView(ListView, TrackerBaseView, TrackerProfileMultipleObjectMixin):
     context_object_name = "asset_list"
     http_method_names = ["get", "post"]
     model = TrackerAsset
@@ -71,16 +68,8 @@ class AssetListView(ListView, TrackerBaseView):
     template_name = "terminusgps_tracker/assets/list.html"
     ordering = "name"
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        self.object_list = self.get_queryset()
-        return super().get_context_data(**kwargs)
 
-    def get_queryset(self) -> QuerySet:
-        ordering = self.get_ordering()
-        return TrackerAsset.objects.filter(profile=self.profile).order_by(ordering)
-
-
-class AssetDetailView(DetailView, TrackerBaseView):
+class AssetDetailView(DetailView, TrackerBaseView, TrackerProfileSingleObjectMixin):
     model = TrackerAsset
     queryset = TrackerAsset.objects.none()
     http_method_names = ["get"]
@@ -89,20 +78,13 @@ class AssetDetailView(DetailView, TrackerBaseView):
     extra_context = {"title": "Asset Detail"}
     context_object_name = "asset"
 
-    def get_queryset(self) -> QuerySet:
-        return TrackerAsset.objects.filter(profile=self.profile)
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        self.object = self.get_object()
-        return super().get_context_data(**kwargs)
-
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         asset = self.get_object()
         asset.save(session=WialonSession(sid=self.wialon_sid))
         return self.render_to_response(self.get_context_data(**kwargs))
 
 
-class AssetRemoteView(DetailView, TrackerBaseView):
+class AssetRemoteView(DetailView, TrackerBaseView, TrackerProfileSingleObjectMixin):
     model = TrackerAsset
     queryset = TrackerAsset.objects.none()
     http_method_names = ["get"]
@@ -111,15 +93,8 @@ class AssetRemoteView(DetailView, TrackerBaseView):
     extra_context = {"title": "Asset Remote"}
     context_object_name = "asset"
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        self.object = self.get_object()
-        return super().get_context_data(**kwargs)
 
-    def get_queryset(self) -> QuerySet:
-        return TrackerAsset.objects.filter(profile=self.profile)
-
-
-class AssetUpdateView(UpdateView, TrackerBaseView):
+class AssetUpdateView(UpdateView, TrackerBaseView, TrackerProfileSingleObjectMixin):
     model = TrackerAsset
     queryset = TrackerAsset.objects.none()
     form_class = TrackerAssetUpdateForm
@@ -129,32 +104,34 @@ class AssetUpdateView(UpdateView, TrackerBaseView):
     extra_context = {"title": "Asset Update"}
     context_object_name = "asset"
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        self.object = self.get_object()
-        return super().get_context_data(**kwargs)
-
     def get_success_url(self, asset: TrackerAsset | None = None) -> str:
-        if asset is not None:
+        if asset:
             return asset.get_absolute_url()
         return reverse("tracker profile")
 
-    def get_queryset(self) -> QuerySet:
-        return TrackerAsset.objects.filter(profile=self.profile)
-
     def get_initial(self) -> dict[str, Any]:
+        asset = self.get_object()
+
         initial: dict[str, Any] = super().get_initial()
-        initial["imei_number"] = self.get_object().imei_number
+        initial["imei_number"] = asset.imei_number
+        initial["name"] = asset.name
         return initial
 
     def form_valid(self, form: forms.Form) -> HttpResponseRedirect | HttpResponse:
         asset = self.get_object()
         session = WialonSession(sid=self.wialon_sid)
+
         unit = WialonUnit(id=str(asset.wialon_id), session=session)
         unit.rename(form.cleaned_data["name"])
         return HttpResponseRedirect(self.get_success_url(asset))
 
 
-class AssetCreateView(CreateView, TrackerBaseView, SubscriptionRequiredMixin):
+class AssetCreateView(
+    CreateView,
+    TrackerBaseView,
+    SubscriptionRequiredMixin,
+    TrackerProfileSingleObjectMixin,
+):
     context_object_name = "asset"
     extra_context = {
         "title": "New Asset",

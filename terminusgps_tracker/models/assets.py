@@ -5,7 +5,6 @@ import terminusgps.wialon.flags as flags
 from terminusgps.wialon.constants import WialonCommandType, WialonCommandLink
 from terminusgps.wialon.session import WialonSession
 from terminusgps.wialon.utils import get_id_from_iccid
-from django.conf import settings
 
 
 class TrackerAssetCommand(models.Model):

@@ -10,9 +10,12 @@ from django.core.exceptions import ValidationError
 from terminusgps_tracker.models import TrackerSubscription, TrackerSubscriptionTier
 from terminusgps_tracker.forms import SubscriptionUpdateForm, SubscriptionCancelForm
 from terminusgps_tracker.views.base import TrackerBaseView
+from terminusgps_tracker.views.mixins import TrackerProfileSingleObjectMixin
 
 
-class TrackerSubscriptionCancelView(FormView, TrackerBaseView):
+class TrackerSubscriptionCancelView(
+    FormView, TrackerBaseView, TrackerProfileSingleObjectMixin
+):
     http_method_names = ["get", "post"]
     partial_template_name = "terminusgps_tracker/subscription/partials/_cancel.html"
     template_name = "terminusgps_tracker/subscription/cancel.html"
@@ -34,7 +37,9 @@ class TrackerSubscriptionCancelView(FormView, TrackerBaseView):
         return HttpResponseRedirect(self.get_success_url(subscription))
 
 
-class TrackerSubscriptionDetailView(DetailView, TrackerBaseView):
+class TrackerSubscriptionDetailView(
+    DetailView, TrackerBaseView, TrackerProfileSingleObjectMixin
+):
     model = TrackerSubscription
     partial_template_name = "terminusgps_tracker/subscription/partials/_detail.html"
     queryset = TrackerSubscription.objects.none()
@@ -48,12 +53,14 @@ class TrackerSubscriptionDetailView(DetailView, TrackerBaseView):
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         self.object = self.get_object()
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        if self.get_object().tier is not None:
-            context["features"] = self.get_object().tier.features.all()
+        if self.object.tier is not None:
+            context["features"] = self.object.tier.features.all()
         return context
 
 
-class TrackerSubscriptionUpdateView(UpdateView, TrackerBaseView):
+class TrackerSubscriptionUpdateView(
+    UpdateView, TrackerBaseView, TrackerProfileSingleObjectMixin
+):
     model = TrackerSubscription
     partial_template_name = "terminusgps_tracker/subscription/partials/_update.html"
     queryset = TrackerSubscription.objects.none()
@@ -86,51 +93,18 @@ class TrackerSubscriptionUpdateView(UpdateView, TrackerBaseView):
         new_tier = form.cleaned_data["tier"]
         payment_id = form.cleaned_data["payment_id"]
         address_id = form.cleaned_data["address_id"]
-
-        if new_tier is None:
-            form.add_error(
-                "tier",
-                ValidationError(
-                    _("Please select a subscription tier."), code="invalid"
-                ),
-            )
-        if form.cleaned_data["address_id"] is None:
-            form.add_error(
-                None,
-                ValidationError(
-                    _(
-                        "Whoops! Couldn't find a shipping address. Please try again later."
-                    ),
-                    code="invalid",
-                ),
-            )
-        if form.cleaned_data["payment_id"] is None:
-            form.add_error(
-                None,
-                ValidationError(
-                    _(
-                        "Whoops! Couldn't find a payment profile. Please try again later."
-                    ),
-                    code="invalid",
-                ),
-            )
-
-        if not form.is_valid():
-            return self.form_invalid(form=form)
         try:
             upgrading = bool(
                 subscription.tier is None or subscription.tier.amount < new_tier.amount
             )
 
-            subscription.upgrade(
-                new_tier=new_tier, payment_id=payment_id, address_id=address_id
-            ) if upgrading else subscription.downgrade(
-                new_tier=new_tier, payment_id=payment_id, address_id=address_id
-            )
+            if upgrading:
+                subscription.upgrade(new_tier, payment_id, address_id)
+            else:
+                subscription.downgrade(new_tier, payment_id, address_id)
             subscription.save()
             return HttpResponseRedirect(self.get_success_url(subscription))
-        except ValueError as e:
-            print(e)
+        except ValueError:
             form.add_error(
                 None,
                 ValidationError(

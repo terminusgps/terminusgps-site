@@ -1,9 +1,40 @@
-from typing import Callable
+from typing import Any, Callable
 
+from django.db.models import QuerySet
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.list import MultipleObjectMixin
 
 from terminusgps_tracker.models import TrackerProfile
+
+
+class TrackerProfileSingleObjectMixin(SingleObjectMixin):
+    def get_queryset(self) -> QuerySet:
+        if not hasattr(self, "profile"):
+            raise ValueError("'profile' was not set")
+
+        if self.profile:
+            return self.model.objects.filter(profile=self.profile)
+        return self.model.objects.none()
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        self.object = self.get_object()
+        return super().get_context_data(**kwargs)
+
+
+class TrackerProfileMultipleObjectMixin(MultipleObjectMixin):
+    def get_queryset(self) -> QuerySet:
+        if not hasattr(self, "profile"):
+            raise ValueError("'profile' was not set")
+
+        if self.profile:
+            return self.model.objects.filter(profile=self.profile)
+        return self.model.objects.none()
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        self.object_list = self.get_queryset().order_by(self.get_ordering())
+        return super().get_context_data(**kwargs)
 
 
 class StaffRequiredMixin(UserPassesTestMixin):

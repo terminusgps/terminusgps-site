@@ -1,22 +1,22 @@
 from typing import Any
 
-from django.db.models import QuerySet
-from django.forms import ValidationError
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, FormView, DetailView
 
 from terminusgps_tracker.forms import PaymentMethodCreationForm
 from terminusgps_tracker.models import TrackerPaymentMethod
 from terminusgps_tracker.views.base import TrackerBaseView
+from terminusgps_tracker.views.mixins import TrackerProfileSingleObjectMixin
 
 
 class InvalidPromptError(Exception):
     """Raised when a provided HX-Prompt is invalid."""
 
 
-class PaymentMethodDetailView(DetailView, TrackerBaseView):
+class PaymentMethodDetailView(
+    DetailView, TrackerBaseView, TrackerProfileSingleObjectMixin
+):
     content_type = "text/html"
     context_object_name = "payment_method"
     http_method_names = ["get"]
@@ -28,11 +28,7 @@ class PaymentMethodDetailView(DetailView, TrackerBaseView):
     raise_exception = True
     template_name = "terminusgps_tracker/payments/detail.html"
 
-    def get_queryset(self) -> QuerySet:
-        return self.profile.payments.all()
-
     def get_context_data(self, **kwargs) -> dict[str, Any]:
-        self.object = self.get_object()
         context: dict[str, Any] = super().get_context_data(**kwargs)
         context["default"] = self.object.is_default or False
         context["payment"] = self.object.authorizenet_get_payment_profile(
@@ -41,7 +37,9 @@ class PaymentMethodDetailView(DetailView, TrackerBaseView):
         return context
 
 
-class PaymentMethodCreateView(FormView, TrackerBaseView):
+class PaymentMethodCreateView(
+    FormView, TrackerBaseView, TrackerProfileSingleObjectMixin
+):
     button_template_name = "terminusgps_tracker/payments/create_button.html"
     extra_context = {
         "title": "New Payment",
@@ -56,6 +54,10 @@ class PaymentMethodCreateView(FormView, TrackerBaseView):
     success_url = reverse_lazy("settings")
     template_name = "terminusgps_tracker/payments/create.html"
 
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        self.object = None
+        return super().get_context_data(**kwargs)
+
     def get_success_url(
         self, payment_method: TrackerPaymentMethod | None = None
     ) -> str:
@@ -68,21 +70,14 @@ class PaymentMethodCreateView(FormView, TrackerBaseView):
         return self.render_to_response(context=self.get_context_data())
 
     def form_valid(self, form: PaymentMethodCreationForm) -> HttpResponse:
-        if not self.profile:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Whoops! Couldn't find your profile, please try again later."),
-                    code="no_profile",
-                ),
-            )
-            return self.form_invalid(form=form)
         payment_method = TrackerPaymentMethod.objects.create(profile=self.profile)
         payment_method.save(form)
         return HttpResponseRedirect(self.get_success_url(payment_method))
 
 
-class PaymentMethodDeleteView(DeleteView, TrackerBaseView):
+class PaymentMethodDeleteView(
+    DeleteView, TrackerBaseView, TrackerProfileSingleObjectMixin
+):
     context_object_name = "payment_method"
     http_method_names = ["get", "post"]
     login_url = reverse_lazy("tracker login")
@@ -95,7 +90,6 @@ class PaymentMethodDeleteView(DeleteView, TrackerBaseView):
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         try:
-            assert self.profile is not None, "No profile was set"
             assert request.headers.get("HX-Request")
             assert request.headers.get("HX-Prompt")
         except AssertionError:
@@ -112,8 +106,3 @@ class PaymentMethodDeleteView(DeleteView, TrackerBaseView):
             payment_method.delete()
             return HttpResponse("", status=200)
         return HttpResponse(status=406)
-
-    def get_queryset(self) -> QuerySet:
-        if self.profile is not None:
-            return self.profile.payments.all()
-        return self.queryset

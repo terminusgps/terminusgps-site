@@ -47,15 +47,10 @@
                             {% if subtitle %}<h2 class="text-md font-light text-terminus-gray-700 md:text-xl md:tracking-wide dark:text-terminus-gray-200">{{ subtitle|safe }}</h2>{% endif %}
                         </div>
                     </div>
-                    {% if exception %}
-                    <div class="block w-full border-red-300 bg-red-200/80 p-4 text-red-700">
-                        <p>{{ exception }}</p>
-                    </div>
-                    {% endif %}
                     {% if messages %}
-                    <div class="block w-full border-green-300 bg-green-200/80 p-4 text-green-700">
-                        <ul class="list-inside list-none">
-                            {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
+                    <div class="mx-auto container">
+                        <ul class="">
+                            {% for message in messages %}<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>{% endfor %}
                         </ul>
                     </div>
                     {% endif %}
