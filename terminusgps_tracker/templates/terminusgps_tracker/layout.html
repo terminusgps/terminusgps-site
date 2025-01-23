@@ -1,4 +1,4 @@
-{% load static tailwind_tags %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -6,24 +6,14 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ title|default:'GPS Tracking' }} | Terminus GPS</title>
         <link rel="shortcut icon" type="image/png" href="{% static 'terminusgps_tracker/logo.png' %}">
-        {% tailwind_css %}
+        <link rel="stylesheet" type="text/css" href="{% static 'terminusgps/css/styles.css' %}">
         <script src="{% static 'terminusgps_tracker/js/htmx.min.js' %}" defer></script>
     </head>
-    <body class="h-fit bg-gradient-to-b from-terminus-red-300 to-terminus-red-900 bg-no-repeat">
-        <div class="htmx-indicator absolute inset-0">
-            <div class="relative z-50 flex h-full flex-col items-center justify-center">
-                <div class="flex-inline flex items-center gap-2 rounded border border-gray-600 bg-gray-300 p-4 text-gray-800 shadow-xl">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 animate-spin">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-                    </svg>
-                    <p>Please wait...</p>
-                </div>
-            </div>
-        </div>
-        <nav class="flex justify-between bg-stone-100 py-4 drop-shadow dark:bg-terminus-gray-900">
+    <body class="h-fit bg-gradient-to-b from-terminus-red-100 to-terminus-red-900 bg-no-repeat text-gray-800 dark:text-white">
+        <nav class="flex justify-between bg-stone-100 py-4 drop-shadow dark:bg-terminus-gray-900 text-gray-800">
             <a href="{% url 'tracker landing' %}" class="flex items-center space-x-1">
                 {% include "terminusgps_tracker/logo.svg" with class="size-12 dark:fill-terminus-white" %}
-                <h2 class="text-xl font-semibold tracking-wide text-terminus-black dark:text-terminus-white">Terminus GPS Tracker</h2>
+                <h2 class="text-xl font-semibold tracking-wide">Terminus GPS Tracker</h2>
             </a>
             {% if user and user.is_authenticated %}
             <div class="flex">
@@ -38,8 +28,8 @@
             {% endif %}
         </nav>
         <main>
-            <div class="container mx-auto">
-                <div class="mx-8 border bg-stone-100 drop-shadow dark:border-b-black dark:border-t-black dark:bg-terminus-gray-900">
+            <div class="container mx-auto -mt-2">
+                <div class="mx-8 bg-stone-100 border-lr border-gray-600">
                     <div class="m-2 flex flex-row items-center p-4">
                         {% include "terminusgps_tracker/logo.svg" with class="size-32 dark:fill-terminus-white" %}
                         <div class="flex flex-col">
