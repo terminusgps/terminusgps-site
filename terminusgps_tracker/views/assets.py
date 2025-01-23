@@ -163,12 +163,11 @@ class AssetCreateView(
         return super().get_initial()
 
     def get_success_url(self, asset: TrackerAsset | None = None) -> str:
-        if asset is not None:
+        if asset:
             return asset.get_absolute_url()
         return reverse("tracker profile")
 
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        # Only htmx can make DELETE requests
         return HttpResponse(status=200 if request.headers.get("HX-Request") else 403)
 
     def get_available_commands(self) -> QuerySet:

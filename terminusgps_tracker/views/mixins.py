@@ -3,6 +3,7 @@ from typing import Any, Callable
 from django.db.models import QuerySet
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.views.generic import CreateView
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.list import MultipleObjectMixin
 
@@ -10,6 +11,11 @@ from terminusgps_tracker.models import TrackerProfile
 
 
 class TrackerProfileSingleObjectMixin(SingleObjectMixin):
+    def get_object(self) -> Any | None:
+        if not isinstance(self, CreateView):
+            return super().get_object()
+        return None
+
     def get_queryset(self) -> QuerySet:
         if not hasattr(self, "profile"):
             raise ValueError("'profile' was not set")
