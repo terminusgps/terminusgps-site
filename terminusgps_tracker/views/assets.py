@@ -4,8 +4,10 @@ from django import forms
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.db import transaction
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, DetailView, UpdateView
 from django.views.generic.list import ListView
+from wialon.api import WialonError
 
 from terminusgps.wialon.session import WialonSession
 from terminusgps.wialon.items import WialonUnit, WialonUnitGroup, WialonUser
@@ -59,8 +61,29 @@ class AssetCreateView(CreateView, TrackerBaseView, TrackerProfileSingleObjectMix
         return HttpResponse(status=200 if request.headers.get("HX-Request") else 403)
 
     @transaction.atomic
-    def form_valid(self, form: TrackerAssetCreateForm) -> HttpResponseRedirect:
-        session = WialonSession(sid=self.wialon_sid)
+    def form_valid(
+        self, form: TrackerAssetCreateForm
+    ) -> HttpResponse | HttpResponseRedirect:
+        try:
+            session = WialonSession(sid=self.wialon_sid)
+            user = WialonUser(id=str(self.profile.wialon_end_user_id), session=session)
+            unit = WialonUnit(
+                id=get_id_from_iccid(form.cleaned_data["imei_number"], session=session),
+                session=session,
+            )
+            user.grant_access(unit)
+            unit.rename(form.cleaned_data["name"])
+        except (WialonError, ValueError):
+            form.add_error(
+                None,
+                forms.ValidationError(
+                    _(
+                        "Whoops! Something went wrong on our end. Please try again later."
+                    )
+                ),
+            )
+            return self.form_invalid(form=form)
+
         asset = TrackerAsset.objects.create(
             profile=self.profile, imei_number=form.cleaned_data["imei_number"]
         )
