@@ -58,22 +58,14 @@ class AssetCreateView(CreateView, TrackerBaseView, TrackerProfileSingleObjectMix
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         return HttpResponse(status=200 if request.headers.get("HX-Request") else 403)
 
+    @transaction.atomic
     def form_valid(self, form: TrackerAssetCreateForm) -> HttpResponseRedirect:
-        asset_name = form.cleaned_data["name"]
-        imei_number = form.cleaned_data["imei_number"]
         session = WialonSession(sid=self.wialon_sid)
-        end_user = WialonUser(id=str(self.profile.wialon_end_user_id), session=session)
-        user_group = WialonUnitGroup(
-            id=str(self.profile.wialon_group_id), session=session
+        asset = TrackerAsset.objects.create(
+            profile=self.profile, imei_number=form.cleaned_data["imei_number"]
         )
-        unit_id: str | None = get_id_from_iccid(imei_number, session=session)
-
-        if unit_id is not None:
-            unit = WialonUnit(id=unit_id, session=session)
-            unit.rename(asset_name)
-            end_user.grant_access(unit)
-            user_group.add_item(unit)
-        return HttpResponseRedirect(self.get_success_url(self.get_object()))
+        asset.save(session)
+        return HttpResponseRedirect(self.get_success_url(asset))
 
     def get_success_url(self, asset: TrackerAsset | None = None) -> str:
         if asset is not None:
