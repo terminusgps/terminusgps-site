@@ -64,11 +64,11 @@ WIALON_UNACTIVATED_GROUP = secret.get("WIALON_UNACTIVATED_GROUP")
 WSGI_APPLICATION = "src.wsgi.application"
 
 
-TRACKER_PROFILE = {
+TRACKER_APP_CONFIG = {
     "DISPLAY_NAME": "Terminus GPS",
-    "GITHUB": "https://github.com/terminusgps/terminusgps-site/",
-    "MOTD": "Check out the Terminus GPS mobile app!",
     "LEGAL_NAME": "Terminus GPS, LLC",
+    "MOTD": "Check out the Terminus GPS mobile app!",
+    "REPOSITORY_URL": "https://github.com/terminusgps/terminusgps-site/",
     "ADDRESSES": [
         {
             "NAME": "OFFICE1",
@@ -149,11 +149,6 @@ TRACKER_PROFILE = {
                 "icon": "terminusgps_tracker/icons/twitter.svg",
             },
         },
-    ],
-    "SUBSCRIPTIONS": [
-        {"NAME": "Basic", "OPTIONS": {"cmd": "Basic", "amount": "19.99"}},
-        {"NAME": "Standard", "OPTIONS": {"cmd": "Standard", "amount": "29.99"}},
-        {"NAME": "Premium", "OPTIONS": {"cmd": "Premium", "amount": "39.99"}},
     ],
 }
 

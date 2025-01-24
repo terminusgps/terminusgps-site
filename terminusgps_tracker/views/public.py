@@ -25,7 +25,7 @@ class TrackerLandingView(RedirectView):
 class TrackerSourceView(RedirectView):
     http_method_names = ["get"]
     permanent = True
-    url = settings.TRACKER_PROFILE["GITHUB"]
+    url = settings.TRACKER_APP_CONFIG["REPOSITORY_URL"]
 
 
 class TrackerAboutView(TrackerBaseView):

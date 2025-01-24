@@ -28,17 +28,11 @@ urlpatterns = [
     path("login/", views.TrackerLoginView.as_view(), name="tracker login"),
     path("logout/", views.TrackerLogoutView.as_view(), name="tracker logout"),
     path("signup/", views.TrackerSignupView.as_view(), name="tracker signup"),
-    path("assets/table/", views.AssetListView.as_view(), name="asset table"),
+    path("assets/table/", views.AssetTableView.as_view(), name="asset table"),
     path("assets/new/", views.AssetCreateView.as_view(), name="asset create"),
     path("assets/<int:pk>/", views.AssetDetailView.as_view(), name="asset detail"),
     path(
         "assets/<int:pk>/update/", views.AssetUpdateView.as_view(), name="asset update"
-    ),
-    path(
-        "assets/<int:pk>/delete/", views.AssetDeleteView.as_view(), name="asset delete"
-    ),
-    path(
-        "assets/<int:pk>/remote/", views.AssetRemoteView.as_view(), name="asset remote"
     ),
     path(
         "subscriptions/",

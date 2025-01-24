@@ -1,42 +1,29 @@
-<tr class="border-b bg-white dark:border-gray-700 dark:bg-gray-800">
+<tr
+    class="group bg-gray-100 odd:bg-gray-200 text-gray-800 text-left"
+    hx-target="this"
+    hx-include="this"
+    hx-swap="outerHTML"
+>
     {% csrf_token %}
-    <td class="p-2">
-        {% if "name" in form.errors %}
-        <ul class="absolute top-0 bg-red-100">
-            {% for error in form.name.errors %}<li class="text-red-700">{{ error }}</li> {% endfor %}
-        </ul>
-        {% endif %}
-        {{ form.name }}
-    </td>
-    <td class="p-2">
-        {% if "imei_number" in form.errors %}
-        <ul class="absolute top-0 bg-red-100">
-            {% for error in form.imei_number.errors %}<li class="text-sm text-red-700">{{ error }}</li>{% endfor %}
-        </ul>
-        {% endif %}
-        {{ form.imei_number }}
-    </td>
-    <td class="flex-inline relative flex gap-2 p-2">
-        <input
-            class="cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 hover:bg-gray-200 transition-colors duration-300 ease-in-out"
-            type="button"
-            value="Cancel"
-            hx-delete="{% url 'asset create' %}"
-            hx-swap="delete"
-            hx-target="closest tr"
-            hx-trigger="click"
-        >
-        <input
-            class="cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out"
-            type="submit"
-            value="Save"
-            hx-include="closest tr"
-            hx-post="{% url 'asset create' %}"
-            hx-swap="outerHTML"
-            hx-target="closest tr"
-            hx-trigger="click"
-            hx-indicator=".htmx-indicator"
-        >
+    <td class="p-2 border border-gray-600">{{ form.name }}</td>
+    <td class="p-2 border border-gray-600">{{ form.imei_number }}</td>
+    <td class="p-2 border border-gray-600">
+        <div class="flex gap-2">
+            <input
+                class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 hover:bg-gray-200 transition-colors duration-300 ease-in-out"
+                type="button"
+                value="Cancel"
+                hx-delete="{% url 'asset create' %}"
+                hx-swap="delete"
+                hx-trigger="click"
+            >
+            <input
+                class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out"
+                type="submit"
+                value="Save"
+                hx-post="{% url 'asset create' %}"
+                hx-trigger="click"
+            >
+        </div>
     </td>
 </tr>
-{{ form.non_field_errors }}

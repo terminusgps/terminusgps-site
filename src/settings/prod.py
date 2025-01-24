@@ -46,11 +46,11 @@ WIALON_HOST = secret.get("WIALON_HOST")
 WIALON_TOKEN = secret.get("WIALON_TOKEN")
 WIALON_UNACTIVATED_GROUP = secret.get("WIALON_UNACTIVATED_GROUP")
 
-TRACKER_PROFILE = {
+TRACKER_APP_CONFIG = {
     "DISPLAY_NAME": "Terminus GPS",
-    "GITHUB": "https://github.com/terminusgps/terminusgps-site/",
-    "MOTD": "Check out the Terminus GPS mobile app!",
     "LEGAL_NAME": "Terminus GPS, LLC",
+    "MOTD": "Check out the Terminus GPS mobile app!",
+    "REPOSITORY_URL": "https://github.com/terminusgps/terminusgps-site/",
     "ADDRESSES": [
         {
             "NAME": "OFFICE1",

@@ -18,7 +18,7 @@ class TrackerProfileView(TrackerBaseView):
     content_type = "text/html"
     extra_context = {
         "title": "Your Profile",
-        "subtitle": settings.TRACKER_PROFILE["MOTD"],
+        "subtitle": settings.TRACKER_APP_CONFIG["MOTD"],
     }
     http_method_names = ["get", "post"]
     login_url = reverse_lazy("tracker login")

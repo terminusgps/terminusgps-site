@@ -1,0 +1,93 @@
+<table id="asset-table" class="table-fixed border-collapse">
+    <thead>
+        <tr class="bg-red-200 text-gray-900 text-left">
+            <th class="p-2 border border-gray-800">Name</th>
+            <th class="p-2 border border-gray-800">IMEI #</th>
+            <th class="p-2 border border-gray-800"></th>
+        </tr>
+    </thead>
+    <tbody id="table-body" hx-target="closest tr" hx-swap="outerHTML" hx-indicator=".htmx-indicator">
+        {% for asset in asset_list %}
+        <tr class="group bg-gray-200 text-gray-800 text-left" id="{{ asset.pk }}" hx-get="{% url 'asset detail' asset.pk %}" hx-swap="outerHTML" hx-trigger="load" hx-target="this">
+            <td class="htmx-indicator animate-pulse bg-gray-300/45 p-2 border border-gray-600/45"></td>
+            <td class="htmx-indicator animate-pulse bg-gray-300/45 p-2 border border-gray-600/45"></td>
+            <td class="htmx-indicator animate-pulse bg-gray-300/45 p-2 border border-gray-600/45"></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a hx-trigger="click" hx-get="{% url 'asset create' %}" hx-target="#table-body" hx-swap="beforeend" class="flex-inline group flex w-full cursor-pointer gap-2 rounded border border-terminus-red-600 bg-red-300 p-4 text-terminus-red-900 transition-colors duration-300 ease-in-out will-change-auto hover:bg-red-200 select-none">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    </svg>
+    <p class="font-semibold text-terminus-red-700">Register New Asset</p>
+</a>
+<div class="flex justify-between" hx-swap="outerHTML" hx-target="#asset-table">
+    {% if page_obj.has_previous %}
+    <div class="flex gap-2">
+        <button hx-get="{% url 'asset table' %}?page=1" hx-trigger="click">
+            <span class="sr-only md:flex">First</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
+            </svg>
+        </button>
+        <button hx-get="{% url 'asset table' %}?page={{ page_obj.previous_page_number }}" hx-trigger="click">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+            <span class="sr-only md:flex">Previous</span>
+        </button>
+    </div>
+    {% else %}
+    <div class="flex gap-2">
+        <button class="cursor-disabled">
+            <span class="sr-only md:flex">First</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-gray-300/45">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5" />
+            </svg>
+        </button>
+        <button class="cursor-disabled">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-gray-300/45">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+            <span class="sr-only md:flex">Previous</span>
+        </button>
+    </div>
+    {% endif %}
+    <span class="{% if page_obj.paginator.num_pages == 1 %}hidden{% endif %} text-center text-sm">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <div class="flex gap-2">
+        <button class="flex-inline flex gap-2" hx-get="{% url 'asset table' %}?page={{ page_obj.next_page_number }}" hx-trigger="click">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+            <span class="sr-only md:flex">Next</span>
+        </button>
+    </div>
+    <div class="flex gap-2">
+        <button class="flex-inline flex gap-2" hx-get="{% url 'asset table' %}?page={{ page_obj.paginator.num_pages }}" hx-trigger="click">
+            <span class="sr-only md:flex">Last</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+            </svg>
+        </button>
+    </div>
+    {% else %}
+    <div class="flex gap-2">
+        <button class="flex-inline flex gap-2 cursor-disabled" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-gray-300/45">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+            <span class="sr-only md:flex">Next</span>
+        </button>
+    </div>
+    <div class="flex gap-2">
+        <button class="flex-inline flex gap-2 cursor-disabled" type="button">
+            <span class="sr-only md:flex">Last</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-gray-300/45">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+            </svg>
+        </button>
+    </div>
+    {% endif %}
+</div>

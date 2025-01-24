@@ -11,8 +11,9 @@ from terminusgps.wialon.session import WialonSession
 
 
 class WialonSessionView(View):
+    """Creates or continues a Wialon API session."""
+
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        """Initializes a Wialon session for use in the view."""
         if not hasattr(settings, "WIALON_TOKEN"):
             raise ImproperlyConfigured("'WIALON_TOKEN' setting is required.")
 
@@ -25,7 +26,9 @@ class WialonSessionView(View):
 
 
 class HtmxTemplateView(TemplateView):
-    partial_template_name: str = ""
+    """Renders a partial HTML template depending on HTTP headers."""
+
+    partial_template_name: str | None = None
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         htmx_request = bool(request.headers.get("HX-Request"))
@@ -37,6 +40,8 @@ class HtmxTemplateView(TemplateView):
 
 
 class ProfileContextView(ContextMixin, View):
+    """Adds a user profile into the view context."""
+
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         if request.user and request.user.is_authenticated:
             self.profile, _ = TrackerProfile.objects.get_or_create(user=request.user)
@@ -50,19 +55,24 @@ class ProfileContextView(ContextMixin, View):
         return context
 
 
-class TrackerProfileContextView(ContextMixin, View):
+class TrackerAppConfigContextMixin(ContextMixin, View):
+    """Adds a tracker app configuration into the view context."""
+
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        if not hasattr(settings, "TRACKER_PROFILE"):
-            raise ImproperlyConfigured("'TRACKER_PROFILE' setting is required.")
+        if not hasattr(settings, "TRACKER_APP_CONFIG"):
+            raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
         return super().setup(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["tracker_profile"] = settings.TRACKER_PROFILE
+        context["tracker_config"] = settings.TRACKER_APP_CONFIG
         return context
 
 
 class TrackerBaseView(
-    HtmxTemplateView, WialonSessionView, ProfileContextView, TrackerProfileContextView
+    HtmxTemplateView,
+    WialonSessionView,
+    ProfileContextView,
+    TrackerAppConfigContextMixin,
 ):
     """Terminus GPS Tracker base view. Includes HTMX functionality, a Wialon session, the tracker profile and user profile."""

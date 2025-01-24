@@ -1,22 +1,4 @@
 {% extends "terminusgps_tracker/layout.html" %}
-{% load static %}
 {% block content %}
-<form
-    class="flex flex-col gap-4"
-    method="post"
-    action="{% url 'asset create' %}"
->
-    {{ form.non_field_errors }}
-    {% csrf_token %}
-    <div class="flex flex-col gap-2">
-        {{ form.name }}
-        {{ form.name.errors }}
-        {{ form.imei_number }}
-        {{ form.imei_number.errors }}
-    </div>
-    <div class="flex flex-col gap-2">
-        <input class="cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white hover:bg-terminus-red-400" value="Submit" type="submit">
-        <a class="cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-center text-gray-700 hover:bg-gray-200" href="{% url 'tracker profile' %}">Cancel</a>
-    </div>
-</form>
+{% include "terminusgps_tracker/assets/partials/_create.html" %}
 {% endblock content %}

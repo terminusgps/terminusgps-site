@@ -108,7 +108,7 @@ class TrackerSignupView(FormView, SuccessMessageMixin, HtmxTemplateView):
             context={"email": to_addr, "now": now},
         )
         email: EmailMultiAlternatives = EmailMultiAlternatives(
-            f"{settings.TRACKER_PROFILE["DISPLAY_NAME"]} - Your Account Was Created",
+            f"{settings.TRACKER_APP_CONFIG['DISPLAY_NAME']} - Your Account Was Created",
             text_content,
             to=[to_addr],
         )
