@@ -37,6 +37,9 @@ urlpatterns = [
     path("assets/new/", views.AssetCreateView.as_view(), name="asset create"),
     path("assets/<int:pk>/", views.AssetDetailView.as_view(), name="asset detail"),
     path(
+        "assets/<int:pk>/remote/", views.AssetRemoteView.as_view(), name="asset remote"
+    ),
+    path(
         "assets/<int:pk>/update/", views.AssetUpdateView.as_view(), name="asset update"
     ),
     path(

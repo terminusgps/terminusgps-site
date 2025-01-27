@@ -1,6 +1,7 @@
 from typing import Any
 
 from django import forms
+from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.db import transaction
@@ -10,13 +11,14 @@ from django.views.generic.list import ListView
 from wialon.api import WialonError
 
 from terminusgps.wialon.session import WialonSession
-from terminusgps.wialon.items import WialonUnit, WialonUser
+from terminusgps.wialon.items import WialonUnit, WialonUnitGroup, WialonUser
 from terminusgps.wialon.utils import get_id_from_iccid
 from terminusgps_tracker.forms.assets import (
     TrackerAssetCreateForm,
     TrackerAssetUpdateForm,
 )
 from terminusgps_tracker.models import TrackerAsset
+from terminusgps_tracker.models.assets import TrackerAssetCommand
 from terminusgps_tracker.views.base import TrackerBaseView
 from terminusgps_tracker.views.mixins import (
     TrackerProfileSingleObjectMixin,
@@ -125,7 +127,6 @@ class AssetUpdateView(UpdateView, TrackerBaseView, TrackerProfileSingleObjectMix
     http_method_names = ["get", "post", "delete"]
     form_class = TrackerAssetUpdateForm
     model = TrackerAsset
-    queryset = TrackerAsset.objects.none()
     template_name = "terminusgps_tracker/assets/update.html"
     partial_template_name = "terminusgps_tracker/assets/partials/_update.html"
     success_url = reverse_lazy("tracker profile")
@@ -153,3 +154,44 @@ class AssetUpdateView(UpdateView, TrackerBaseView, TrackerProfileSingleObjectMix
         if asset is not None:
             return asset.get_absolute_url()
         return super().get_success_url()
+
+
+class AssetRemoteView(DetailView, TrackerBaseView, TrackerProfileSingleObjectMixin):
+    content_type = "text/html"
+    context_object_name = "asset"
+    extra_context = {"subtitle": "Send a command or update notifications"}
+    http_method_names = ["get"]
+    model = TrackerAsset
+    template_name = "terminusgps_tracker/assets/remote.html"
+    partial_template_name = "terminusgps_tracker/assets/partials/_remote.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["title"] = f"{self.get_object().name} Remote"
+        context["commands"] = self.get_object().commands.all()
+        return context
+
+
+class AssetCommandExecutionView(DetailView, TrackerBaseView):
+    content_type = "text/html"
+    context_object_name = "cmd"
+    http_method_names = ["get", "post"]
+    model = TrackerAssetCommand
+    template_name = "terminusgps_tracker/assets/execute_command.html"
+    partial_template_name = "terminusgps_tracker/assets/partials/_execute_command.html"
+
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if not request.headers.get("HX-Request"):
+            return HttpResponse(status=403)
+        return self.render_to_response(context=self.get_context_data())
+
+    def get_queryset(self) -> QuerySet:
+        asset = TrackerAsset.objects.get(pk=self.kwargs["asset_pk"])
+        return asset.commands.filter()
+
+    def get_object(self) -> TrackerAssetCommand | None:
+        return self.get_queryset().get(pk=self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        self.object = self.get_object()
+        return super().get_context_data(**kwargs)

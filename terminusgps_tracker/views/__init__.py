@@ -9,7 +9,13 @@ from .addresses import (
     ShippingAddressDeleteView,
     ShippingAddressDetailView,
 )
-from .assets import AssetCreateView, AssetDetailView, AssetUpdateView, AssetTableView
+from .assets import (
+    AssetCreateView,
+    AssetDetailView,
+    AssetUpdateView,
+    AssetTableView,
+    AssetRemoteView,
+)
 from .profile import TrackerProfileSettingsView, TrackerProfileView
 from .public import (
     TrackerAboutView,

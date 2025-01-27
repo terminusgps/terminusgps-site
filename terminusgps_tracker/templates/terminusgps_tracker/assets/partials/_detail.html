@@ -1,6 +1,6 @@
 <tr class="group bg-gray-100 odd:bg-gray-200 text-gray-800 text-left" hx-target="this" id="{{ asset.pk }}">
     <td class="p-2 border border-gray-600">
-        <a href="#" class="font-semibold text-terminus-red-600 underline decoration-terminus-black decoration-2 underline-offset-2 hover:text-terminus-red-300 hover:decoration-dotted">
+        <a href="{% url 'asset remote' asset.pk %}" class="font-semibold text-terminus-red-600 underline decoration-terminus-black decoration-2 underline-offset-2 hover:text-terminus-red-300 hover:decoration-dotted">
             {{ asset.name }}
         </a>
     </td>
