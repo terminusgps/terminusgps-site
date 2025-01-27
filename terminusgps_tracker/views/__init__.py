@@ -20,6 +20,7 @@ from .public import (
     TrackerSourceView,
     TrackerEmailInquiryView,
     TrackerNewsletterSignupView,
+    TrackerMapView,
 )
 from .subscriptions import (
     TrackerSubscriptionUpdateView,

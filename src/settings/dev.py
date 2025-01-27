@@ -92,9 +92,9 @@ TRACKER_APP_CONFIG = {
         },
     ],
     "PHONES": [
-        {"OFFICE": "+17139045262"},
-        {"SALES": "+17139045262"},
-        {"SUPPORT": "+17139045262"},
+        {"NAME": "SALES", "OPTIONS": {"num": "+17139045262"}},
+        {"NAME": "OFFICE", "OPTIONS": {"num": "+17139045262"}},
+        {"NAME": "SUPPORT", "OPTIONS": {"num": "+17139045262"}},
     ],
     "EMAILS": [
         {

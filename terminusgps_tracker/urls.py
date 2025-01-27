@@ -4,6 +4,11 @@ from . import views
 urlpatterns = [
     path("inquiry/", views.TrackerEmailInquiryView.as_view(), name="email inquiry"),
     path(
+        "render_map/<int:x>_<int:y>_<int:zoom>/<str:sid>/",
+        views.TrackerMapView.as_view(),
+        name="render map",
+    ),
+    path(
         "newsletter/new/",
         views.TrackerNewsletterSignupView.as_view(),
         name="newsletter signup",

@@ -3,7 +3,7 @@ from typing import Any
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import FormView, RedirectView
 
@@ -14,6 +14,32 @@ from terminusgps_tracker.forms import (
     EmailInquiryForm,
 )
 from terminusgps_tracker.views.base import TrackerBaseView
+
+
+class TrackerMapView(TrackerBaseView):
+    http_method_names = ["get"]
+    template_name = "terminusgps_tracker/map.html"
+    partial_template_name = "terminusgps_tracker/partials/_map.html"
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        self._base_url = (
+            "http://hst-api.wialon.com/avl_render/%(x)s_%(y)s_%(z)s/%(sid)s.png"
+        )
+        return super().setup(request, *args, **kwargs)
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        map_url = self._base_url % {
+            "x": self.kwargs["x"],
+            "y": self.kwargs["y"],
+            "z": self.kwargs["zoom"],
+            "sid": self.kwargs["sid"],
+        }
+        return self.render_to_response(context=self.get_context_data(map_url))
+
+    def get_context_data(self, map_url: str | None = None, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["map_url"] = map_url
+        return context
 
 
 class TrackerLandingView(RedirectView):

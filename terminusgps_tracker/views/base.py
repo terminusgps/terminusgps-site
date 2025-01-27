@@ -10,7 +10,7 @@ from terminusgps_tracker.models import TrackerProfile
 from terminusgps.wialon.session import WialonSession
 
 
-class WialonSessionView(View):
+class WialonSessionView(ContextMixin, View):
     """Creates or continues a Wialon API session."""
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
@@ -23,6 +23,11 @@ class WialonSessionView(View):
             request.session["wialon_sid"] = session.id
         self.wialon_sid = request.session["wialon_sid"]
         return super().setup(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["wialon_sid"] = self.wialon_sid
+        return context
 
 
 class HtmxTemplateView(TemplateView):
