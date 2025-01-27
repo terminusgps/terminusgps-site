@@ -10,7 +10,7 @@ from django.views.generic.list import ListView
 from wialon.api import WialonError
 
 from terminusgps.wialon.session import WialonSession
-from terminusgps.wialon.items import WialonUnit, WialonUnitGroup, WialonUser
+from terminusgps.wialon.items import WialonUnit, WialonUser
 from terminusgps.wialon.utils import get_id_from_iccid
 from terminusgps_tracker.forms.assets import (
     TrackerAssetCreateForm,
@@ -19,7 +19,6 @@ from terminusgps_tracker.forms.assets import (
 from terminusgps_tracker.models import TrackerAsset
 from terminusgps_tracker.views.base import TrackerBaseView
 from terminusgps_tracker.views.mixins import (
-    SubscriptionRequiredMixin,
     TrackerProfileSingleObjectMixin,
     TrackerProfileMultipleObjectMixin,
 )
@@ -36,7 +35,7 @@ class AssetTableView(ListView, TrackerBaseView, TrackerProfileMultipleObjectMixi
     http_method_names = ["get"]
     model = TrackerAsset
     ordering = "name"
-    paginate_by = 6
+    paginate_by = 8
     queryset = TrackerAsset.objects.none()
     template_name = "terminusgps_tracker/assets/table.html"
     partial_template_name = "terminusgps_tracker/assets/partials/_table.html"

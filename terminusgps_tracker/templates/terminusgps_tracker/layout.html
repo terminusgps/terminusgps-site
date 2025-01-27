@@ -5,15 +5,15 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ title|default:'GPS Tracking' }} | Terminus GPS</title>
-        <link rel="shortcut icon" type="image/png" href="{% static 'terminusgps_tracker/logo.png' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'terminusgps/css/styles.css' %}">
+        <link href="{% static 'terminusgps_tracker/logo.png' %}" rel="shortcut icon" type="image/png">
+        <link href="{% static 'terminusgps/css/styles.css' %}" rel="stylesheet" type="text/css">
         <script src="{% static 'terminusgps_tracker/js/htmx.min.js' %}" defer></script>
     </head>
     <body class="h-fit bg-gradient-to-b from-terminus-red-100 to-terminus-red-900 bg-no-repeat text-gray-800 dark:text-white">
         <nav class="flex justify-between bg-stone-100 py-4 drop-shadow dark:bg-terminus-gray-900 text-gray-800">
             <a href="{% url 'tracker landing' %}" class="flex items-center space-x-1">
                 {% include "terminusgps_tracker/logo.svg" with class="size-12 dark:fill-terminus-white" %}
-                <h2 class="text-xl font-semibold tracking-wide">Terminus GPS Tracker</h2>
+                <h2 class="text-xl font-semibold tracking-wide dark:text-terminus-gray-100">Terminus GPS Tracker</h2>
             </a>
             {% if user and user.is_authenticated %}
             <div class="flex">
@@ -29,7 +29,7 @@
         </nav>
         <main>
             <div class="container mx-auto -mt-2">
-                <div class="mx-8 bg-stone-100 border-lr border-gray-600">
+                <div class="mx-8 bg-stone-100 border-lr border-gray-600 dark:bg-terminus-gray-800">
                     <div class="m-2 flex flex-row items-center p-4">
                         {% include "terminusgps_tracker/logo.svg" with class="size-32 dark:fill-terminus-white" %}
                         <div class="flex flex-col">
