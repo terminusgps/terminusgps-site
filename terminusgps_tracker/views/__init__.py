@@ -45,4 +45,3 @@ from .payments import (
     PaymentMethodCreateView,
     PaymentMethodDeleteView,
 )
-from .staff import EmailTemplateUploadView, EmailTemplateRendererView

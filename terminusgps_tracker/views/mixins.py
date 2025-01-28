@@ -12,9 +12,9 @@ from terminusgps_tracker.models import TrackerProfile
 
 class TrackerProfileSingleObjectMixin(SingleObjectMixin):
     def get_object(self) -> Any | None:
-        if not isinstance(self, CreateView):
-            return super().get_object()
-        return None
+        if isinstance(self, CreateView):
+            return
+        return super().get_object()
 
     def get_queryset(self) -> QuerySet:
         if not hasattr(self, "profile"):

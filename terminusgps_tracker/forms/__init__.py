@@ -15,5 +15,4 @@ from .notifications import (
 from .subscriptions import SubscriptionCancelForm, SubscriptionUpdateForm
 from .auth import TrackerSignupForm, TrackerAuthenticationForm
 from .bug_report import BugReportForm
-from .staff import EmailTemplateUploadForm
 from .public import EmailInquiryForm, EmailNewsletterForm
