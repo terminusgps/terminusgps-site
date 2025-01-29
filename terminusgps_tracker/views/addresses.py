@@ -11,7 +11,7 @@ from terminusgps_tracker.models import TrackerShippingAddress
 from terminusgps_tracker.views.base import TrackerBaseView
 
 
-class ShippingAddressDetailView(DetailView, TrackerBaseView, LoginRequiredMixin):
+class ShippingAddressDetailView(LoginRequiredMixin, DetailView, TrackerBaseView):
     content_type = "text/html"
     context_object_name = "shipping_address"
     http_method_names = ["get"]
@@ -36,7 +36,7 @@ class ShippingAddressDetailView(DetailView, TrackerBaseView, LoginRequiredMixin)
         return context
 
 
-class ShippingAddressCreateView(FormView, TrackerBaseView, LoginRequiredMixin):
+class ShippingAddressCreateView(LoginRequiredMixin, FormView, TrackerBaseView):
     button_template_name = "terminusgps_tracker/addresses/create_button.html"
     content_type = "text/html"
     extra_context = {
@@ -66,7 +66,7 @@ class ShippingAddressCreateView(FormView, TrackerBaseView, LoginRequiredMixin):
         return HttpResponseRedirect(self.get_success_url(address))
 
 
-class ShippingAddressDeleteView(DeleteView, TrackerBaseView, LoginRequiredMixin):
+class ShippingAddressDeleteView(LoginRequiredMixin, DeleteView, TrackerBaseView):
     content_type = "text/html"
     context_object_name = "shipping_address"
     http_method_names = ["get", "post"]

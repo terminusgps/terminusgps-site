@@ -3,6 +3,7 @@ from typing import Any
 from django.conf import settings
 from django.db.models import QuerySet
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from terminusgps_tracker.views.base import TrackerBaseView
 from terminusgps_tracker.models import (
@@ -14,7 +15,7 @@ from terminusgps_tracker.models import (
 )
 
 
-class TrackerProfileView(TrackerBaseView):
+class TrackerProfileView(LoginRequiredMixin, TrackerBaseView):
     content_type = "text/html"
     extra_context = {
         "title": "Your Profile",
@@ -38,7 +39,7 @@ class TrackerProfileView(TrackerBaseView):
         return context
 
 
-class TrackerProfileSettingsView(TrackerBaseView):
+class TrackerProfileSettingsView(LoginRequiredMixin, TrackerBaseView):
     content_type = "text/html"
     extra_context = {"title": "Settings"}
     http_method_names = ["get"]

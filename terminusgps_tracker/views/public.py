@@ -2,7 +2,6 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.messages.views import SuccessMessageMixin
 from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import FormView, RedirectView
@@ -72,7 +71,7 @@ class TrackerContactView(TrackerBaseView):
     partial_template_name = "terminusgps_tracker/partials/_contact.html"
 
 
-class TrackerBugReportView(FormView, TrackerBaseView, LoginRequiredMixin):
+class TrackerBugReportView(LoginRequiredMixin, FormView, TrackerBaseView):
     content_type = "text/html"
     extra_context = {
         "title": "Bug Report",

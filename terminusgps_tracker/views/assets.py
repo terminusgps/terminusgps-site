@@ -11,7 +11,7 @@ from django.views.generic.list import ListView
 from wialon.api import WialonError
 
 from terminusgps.wialon.session import WialonSession
-from terminusgps.wialon.items import WialonUnit, WialonUnitGroup, WialonUser
+from terminusgps.wialon.items import WialonUnit, WialonUser
 from terminusgps.wialon.utils import get_id_from_iccid
 from terminusgps_tracker.forms.assets import (
     TrackerAssetCreateForm,
