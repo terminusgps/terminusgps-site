@@ -35,7 +35,10 @@ class TrackerAssetAdmin(admin.ModelAdmin):
     list_display = ["name", "profile__user", "is_active"]
     fieldsets = [
         ("Terminus GPS Tracker", {"fields": ["profile", "is_active", "commands"]}),
-        ("Wialon", {"fields": ["wialon_id", "imei_number", "phone_number", "hw_type"]}),
+        (
+            "Wialon",
+            {"fields": ["wialon_id", "imei_number", "phone_number", "hw_type", "icon"]},
+        ),
     ]
     readonly_fields = ["is_active", "hw_type"]
 

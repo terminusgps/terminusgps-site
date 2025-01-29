@@ -3,17 +3,6 @@ from . import views
 
 urlpatterns = [
     path("", views.TrackerLandingView.as_view(), name="tracker landing"),
-    path("inquiry/", views.TrackerEmailInquiryView.as_view(), name="email inquiry"),
-    path(
-        "render_map/<int:x>_<int:y>_<int:zoom>/<str:sid>/",
-        views.TrackerMapView.as_view(),
-        name="render map",
-    ),
-    path(
-        "newsletter/new/",
-        views.TrackerNewsletterSignupView.as_view(),
-        name="newsletter signup",
-    ),
     path("profile/", views.TrackerProfileView.as_view(), name="tracker profile"),
     path("register/", views.TrackerRegistrationView.as_view(), name="tracker register"),
     path("about/", views.TrackerAboutView.as_view(), name="tracker about"),
@@ -90,5 +79,10 @@ urlpatterns = [
         "profile/payments/<int:pk>/delete/",
         views.PaymentMethodDeleteView.as_view(),
         name="delete payment",
+    ),
+    path(
+        "render_map/<int:x>_<int:y>_<int:zoom>/<str:sid>/",
+        views.TrackerMapView.as_view(),
+        name="render map",
     ),
 ]
