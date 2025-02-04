@@ -17,7 +17,7 @@
             <button
                 type="button"
                 class="max-w-4 text-left text-sm text-gray-400 hover:underline cursor-pointer"
-                hx-post="{% url 'delete payment' payment_method.pk %}"
+                hx-post="{% url 'delete payment' payment_obj.pk %}"
                 hx-swap="delete"
                 hx-prompt="Type the last 4 digits of the card to delete it.">
                 Delete

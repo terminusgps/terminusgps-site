@@ -1,12 +1,6 @@
 from .assets import TrackerAssetCreateForm, TrackerAssetUpdateForm
-from .payments import (
-    PaymentMethodCreationForm,
-    PaymentMethodDeletionForm,
-    PaymentMethodSetDefaultForm,
-    ShippingAddressCreationForm,
-    ShippingAddressDeletionForm,
-    ShippingAddressSetDefaultForm,
-)
+from .payments import PaymentMethodCreationForm
+from .addresses import ShippingAddressCreationForm
 from .notifications import (
     NotificationCreationForm,
     NotificationDeletionForm,

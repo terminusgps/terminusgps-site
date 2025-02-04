@@ -1,13 +1,16 @@
 from typing import Any
 
+from authorizenet.apicontractsv1 import customerAddressType
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import DeleteView, DetailView, FormView
 
+from terminusgps.authorizenet.profiles.addresses import AddressProfile
 from terminusgps_tracker.forms import ShippingAddressCreationForm
 from terminusgps_tracker.models import TrackerShippingAddress
+from terminusgps_tracker.models.profiles import TrackerProfile
 from terminusgps_tracker.views.base import TrackerBaseView
 
 
@@ -29,10 +32,8 @@ class ShippingAddressDetailView(LoginRequiredMixin, DetailView, TrackerBaseView)
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         self.object = self.get_object()
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["default"] = self.object.is_default or False
-        context["address"] = self.object.authorizenet_get_shipping_address(
-            self.profile.authorizenet_id, self.object.authorizenet_id
-        )
+        context["default"] = self.object.default
+        context["address"] = self.object.address_profile.get_details().address
         return context
 
 
@@ -40,7 +41,7 @@ class ShippingAddressCreateView(LoginRequiredMixin, FormView, TrackerBaseView):
     button_template_name = "terminusgps_tracker/addresses/create_button.html"
     content_type = "text/html"
     extra_context = {
-        "class": "p-4 border border-gray-600 bg-gray-200 rounded flex flex-col gap-4"
+        "class": "p-4 border border-gray-600 bg-gray-200 rounded grid grid-cols-1 md:grid-cols-2 gap-2"
     }
     form_class = ShippingAddressCreationForm
     http_method_names = ["get", "post", "delete"]
@@ -51,11 +52,6 @@ class ShippingAddressCreateView(LoginRequiredMixin, FormView, TrackerBaseView):
     success_url = reverse_lazy("settings")
     template_name = "terminusgps_tracker/addresses/create.html"
 
-    def get_success_url(self, addr: TrackerShippingAddress | None = None) -> str:
-        if addr is not None:
-            return reverse("detail shipping", kwargs={"pk": addr.pk})
-        return str(self.success_url)
-
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         self.template_name = self.button_template_name
         return self.render_to_response(context=self.get_context_data())
@@ -63,7 +59,7 @@ class ShippingAddressCreateView(LoginRequiredMixin, FormView, TrackerBaseView):
     def form_valid(self, form: ShippingAddressCreationForm) -> HttpResponse:
         address = TrackerShippingAddress.objects.create(profile=self.profile)
         address.save(form)
-        return HttpResponseRedirect(self.get_success_url(address))
+        return super().form_valid(form=form)
 
 
 class ShippingAddressDeleteView(LoginRequiredMixin, DeleteView, TrackerBaseView):
@@ -78,6 +74,11 @@ class ShippingAddressDeleteView(LoginRequiredMixin, DeleteView, TrackerBaseView)
     raise_exception = True
     success_url = reverse_lazy("settings")
     template_name = "terminusgps_tracker/addresses/delete.html"
+
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        shipping_address = self.get_object()
+        shipping_address.delete()
+        return self.render_to_response(context=self.get_context_data())
 
     def get_queryset(self) -> QuerySet:
         return self.profile.addresses.all()

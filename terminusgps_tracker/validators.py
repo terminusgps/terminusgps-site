@@ -1,161 +1,140 @@
 import string
 
-from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from django.conf import settings
 from wialon.api import WialonError
 
-from terminusgps.wialon.session import WialonSession
-from terminusgps.wialon.items import WialonUnitGroup, WialonUnit
-from terminusgps.wialon.utils import get_id_from_iccid, is_unique
+from terminusgps.wialon.session import WialonSession, WialonSessionManager
+from terminusgps.wialon.utils import is_unique, get_wialon_cls
 
 
-def validate_phone(value: str) -> None:
-    """Raises `ValidationError` if the value does not represent a valid phone number."""
-    if not value.startswith("+"):
-        raise ValidationError(
-            _("Phone number must begin with a '+', got: '(value)%s'"),
-            code="invalid",
-            params={"value": value},
-        )
-    if " " in value:
-        raise ValidationError(_("Phone number cannot contain spaces."), code="invalid")
-    return
+session_manager = WialonSessionManager()
 
 
-def validate_wialon_asset_id(value: str) -> None:
-    if not hasattr(settings, "WIALON_TOKEN"):
-        raise ImproperlyConfigured("'WIALON_TOKEN' setting is required.")
+class WialonValidatorBase:
+    def __init__(self) -> None:
+        self.session: WialonSession = session_manager.get_session()
 
-    with WialonSession() as session:
+    def __call__(self, value: str) -> None:
+        raise NotImplementedError("Subclasses must implement this method.")
+
+
+class WialonObjectConstructableValidator(WialonValidatorBase):
+    def __init__(self, items_type: str, **kwargs) -> None:
+        self.items_type = items_type
+        return super().__init__(**kwargs)
+
+    def __call__(self, value: str) -> None:
+        if isinstance(value, str) and not value.isdigit():
+            raise ValidationError(
+                _("ID must be a digit, got '%(value)s'"),
+                code="invalid",
+                params={"value": value},
+            )
+
         try:
-            # Construct a unit with the id
-            WialonUnit(id=value, session=session)
-        except WialonError or ValueError:
+            # Construct an object with the id and populate it
+            wialon_cls = get_wialon_cls(self.items_type)
+            wialon_cls(id=value, session=self.session).populate()
+        except (WialonError, ValueError) as e:
             raise ValidationError(
-                _("'%(value)s' was not found in the Wialon database."),
+                _("Object was not constructed with '%(value)s': '%(error)s'."),
                 code="invalid",
-                params={"value": value},
+                params={"value": value, "error": e},
             )
 
 
-def validate_wialon_imei_number(value: str) -> None:
-    """Raises `ValidationError` if the value represents an invalid Wialon IMEI #."""
-    if not hasattr(settings, "WIALON_TOKEN"):
-        raise ImproperlyConfigured("'WIALON_TOKEN' setting is required.")
-    if not hasattr(settings, "WIALON_UNACTIVATED_GROUP"):
-        raise ImproperlyConfigured("'WIALON_UNACTIVATED_GROUP' setting is required.")
+class WialonNameUniqueValidator(WialonValidatorBase):
+    def __init__(self, items_type: str, **kwargs) -> None:
+        self.items_type = items_type
+        return super().__init__(**kwargs)
 
-    with WialonSession() as session:
-        unit_id: str | None = get_id_from_iccid(iccid=value.strip(), session=session)
-        available = WialonUnitGroup(
-            id=str(settings.WIALON_UNACTIVATED_GROUP), session=session
-        )
-
-        if unit_id is None:
-            raise ValidationError(
-                _("'%(value)s' was not found in the Terminus GPS database."),
-                code="invalid",
-                params={"value": value},
-            )
-        elif str(unit_id) not in available.items:
-            raise ValidationError(
-                _("'%(value)s' has already been registered."),
-                code="invalid",
-                params={"value": value},
-            )
-    return
-
-
-def validate_wialon_unit_name(value: str) -> None:
-    """Raises `ValidationError` if the value represents a non-unique asset name in Wialon."""
-    if not hasattr(settings, "WIALON_TOKEN"):
-        raise ImproperlyConfigured("'WIALON_TOKEN' setting is required.")
-
-    with WialonSession(token=settings.WIALON_TOKEN) as session:
-        if not is_unique(value, session, items_type="avl_unit"):
+    def __call__(self, value: str) -> None:
+        if not is_unique(value, self.session, items_type=self.items_type):
             raise ValidationError(
                 _("'%(value)s' is taken."), code="invalid", params={"value": value}
             )
-    return
 
 
-def validate_wialon_username(value: str) -> None:
-    """Raises `ValidationError` if the value represents a non-unique user name in Wialon."""
-    if not hasattr(settings, "WIALON_TOKEN"):
-        raise ImproperlyConfigured("'WIALON_TOKEN' setting is required.")
-
-    with WialonSession() as session:
-        if not is_unique(value, session, items_type="user"):
-            raise ValidationError(
-                _("'%(value)s' is taken."), code="invalid", params={"value": value}
-            )
-    return
+def validate_wialon_user_id(value: str) -> None:
+    """Raises :py:exec:`ValidationError` if a :py:obj:`WialonUser` cannot be constructed from the value."""
+    return WialonObjectConstructableValidator(items_type="user")(value)
 
 
-def validate_wialon_resource_name(value: str) -> None:
-    """Raises `ValidationError` if the value represents a non-unique user name in Wialon."""
-    if not hasattr(settings, "WIALON_TOKEN"):
-        raise ImproperlyConfigured("'WIALON_TOKEN' setting is required.")
+def validate_wialon_unit_id(value: str) -> None:
+    """Raises :py:exec:`ValidationError` if a :py:obj:`WialonUnit` cannot be constructed from the value."""
+    return WialonObjectConstructableValidator(items_type="avl_unit")(value)
 
-    with WialonSession() as session:
-        if not is_unique(value, session, items_type="avl_resource"):
-            raise ValidationError(
-                _("'%(value)s' is taken."), code="invalid", params={"value": value}
-            )
-    return
+
+def validate_wialon_unit_group_id(value: str) -> None:
+    """Raises :py:exec:`ValidationError` if a :py:obj:`WialonUnitGroup` cannot be constructed from the value."""
+    return WialonObjectConstructableValidator(items_type="avl_unit_group")(value)
+
+
+def validate_wialon_resource_id(value: str) -> None:
+    """Raises :py:exec:`ValidationError` if a :py:obj:`WialonResource` cannot be constructed from the value."""
+    return WialonObjectConstructableValidator(items_type="avl_resource")(value)
+
+
+def validate_wialon_unit_name_unique(value: str) -> None:
+    """Raises :py:exec:`ValidationError` if the value is a non-unique Wialon asset name."""
+    return WialonNameUniqueValidator(items_type="avl_unit")(value)
+
+
+def validate_wialon_user_name_unique(value: str) -> None:
+    """Raises :py:exec:`ValidationError` if the value is a non-unique Wialon user name."""
+    return WialonNameUniqueValidator(items_type="user")(value)
+
+
+def validate_wialon_resource_name_unique(value: str) -> None:
+    """Raises :py:exec:`ValidationError` if the value is a non-unique Wialon resource name."""
+    return WialonNameUniqueValidator(items_type="avl_resource")(value)
+
+
+def validate_unit_group_name_unique(value: str) -> None:
+    """Raises :py:exec:`ValidationError` if the value is a non-unique Wialon unit group name."""
+    return WialonNameUniqueValidator(items_type="avl_unit_group")(value)
 
 
 def validate_wialon_password(value: str) -> None:
-    """Raises `ValidationError` if the value represents an invalid Wialon password."""
+    """Raises :py:exec:`ValidationError` if the value represents an invalid Wialon password."""
+    special_symbols_0: list[str] = ["!", "@", "#", "$", "%", "^", "*"]
+    special_symbols_1: list[str] = ["(", ")", "[", "]", "-", "_", "+"]
     forbidden_symbols: list[str] = [",", ":", "&", "<", ">", "'"]
-    special_symbols: list[str] = [
-        "!",
-        "@",
-        "#",
-        "$",
-        "%",
-        "^",
-        "*",
-        "(",
-        ")",
-        "[",
-        "]",
-        "-",
-        "_",
-        "+",
-    ]
-    if value.startswith(" ") or value.endswith(" "):
-        raise ValidationError(_("Cannot start or end with a space."), code="invalid")
+    value = value.strip() if " " in value else value
+
     if len(value) < 4:
         raise ValidationError(
-            _("Must be at least 4 chars in length. Got '%(len)s'."),
+            _("Password cannot be less than 4 characters in length. Got '%(len)s'."),
             code="invalid",
             params={"len": len(value)},
         )
-    elif len(value) > 32:
+    if len(value) > 64:
         raise ValidationError(
-            _("Cannot be longer than 32 chars. Got '%(len)s'."),
+            _(
+                "Password cannot be greater than 64 characters in length. Got '%(len)s'."
+            ),
             code="invalid",
             params={"len": len(value)},
         )
     if not any([char for char in value if char in string.ascii_uppercase]):
         raise ValidationError(
-            _("Must contain at least one uppercase letter."), code="invalid"
+            _("Password must contain at least one uppercase letter."), code="invalid"
         )
     if not any([char for char in value if char in string.ascii_lowercase]):
         raise ValidationError(
-            _("Must contain at least one lowercase letter."), code="invalid"
+            _("Password must contain at least one lowercase letter."), code="invalid"
         )
-    if not any([char for char in value if char in special_symbols]):
+    if not any(
+        [char for char in value if char in special_symbols_0 + special_symbols_1]
+    ):
         raise ValidationError(
-            _("Must contain at least one special symbol."), code="invalid"
+            _("Password must contain at least one special symbol."), code="invalid"
         )
     for char in value:
         if char in forbidden_symbols:
             raise ValidationError(
-                _("Cannot contain forbidden '%(char)s' character."),
+                _("Password cannot contain forbidden character '%(char)s'."),
                 code="invalid",
                 params={"char": char},
             )
-    return

@@ -1,54 +1,27 @@
-<form
-    class="{{ class }}"
-    action="{% url 'create shipping' %}"
-    method="post"
-    hx-post="{% url 'create shipping' %}"
-    hx-headers="{'X-CSRFToken': '{{ csrf_token }}'}"
-    hx-swap="outerHTML"
-    hx-target="this"
-    hx-indicator=".htmx-indicator"
->
-    {% csrf_token %}
-    <div class="m-4 flex flex-col gap-2">
-        <div class="flex gap-1">
-            {{ form.address_first_name }}
-            {{ form.address_last_name }}
-        </div>
-        {{ form.address_street }}
-        <div class="flex gap-1">
-            {{ form.address_city }}
-            {{ form.address_state }}
-            {{ form.address_zip }}
-        </div>
-        <div class="flex gap-1">
-            {{ form.address_country }}
-            {{ form.address_phone }}
+<form action="{% url 'create shipping' %}" method="post" hx-target="this">
+    <h2 class="mb-4 text-xl text-center text-terminus-red-800">New Shipping Address</h2>
+    <div class="{{ class }}">
+        {% csrf_token %}
+        {{ form.address }}
+        <div class="flex flex-inline gap-2 items-center accent-terminus-red-600">
+            <label class="text-sm">Set as default shipping address?</label>
+            {{ form.default }}
         </div>
     </div>
-    <div class="flex-inline m-4 flex gap-2">
-        {{ form.is_default }}
-        <label for="is_default" class="ms-2 text-sm text-terminus-gray-900">Set as default?</label>
-    </div>
-    <div class="flex flex-col gap-2">
+    <div class="mt-4 flex flex-col gap-2">
         <input
-            class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white hover:bg-terminus-red-400"
+            class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out"
             type="submit"
             value="Submit"
-        >
-        <input
-            class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 hover:bg-gray-200"
-            type="button"
-            value="Cancel"
-            hx-delete="{% url 'create shipping' %}"
-            hx-swap="outerHTML"
-            hx-target="closest form"
+            hx-boost="true"
             hx-trigger="click"
         >
-    </div>
-    <div class="flex-inline htmx-indicator flex gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 animate-spin">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-        </svg>
-        <p class="text-terminus-gray-600">Please wait...</p>
+        <input 
+            class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 hover:bg-gray-200 transition-colors duration-300 ease-in-out"
+            type="button"
+            value="Cancel"
+            hx-trigger="click"
+            hx-delete="{% url 'create shipping' %}"
+        >
     </div>
 </form>

@@ -16,16 +16,16 @@ from terminusgps_tracker.models import (
 
 @admin.register(TrackerPaymentMethod)
 class TrackerPaymentMethodAdmin(admin.ModelAdmin):
-    list_display = ["authorizenet_id", "profile", "is_default"]
-    fields = ["authorizenet_id", "profile", "is_default"]
+    list_display = ["authorizenet_id", "profile", "default"]
+    fields = ["authorizenet_id", "profile", "default"]
     readonly_fields = ["authorizenet_id"]
     list_display_links = ["profile"]
 
 
 @admin.register(TrackerShippingAddress)
 class TrackerShippingAddressAdmin(admin.ModelAdmin):
-    list_display = ["authorizenet_id", "profile", "is_default"]
-    fields = ["authorizenet_id", "profile", "is_default"]
+    list_display = ["authorizenet_id", "profile", "default"]
+    fields = ["authorizenet_id", "profile", "default"]
     readonly_fields = ["authorizenet_id"]
     list_display_links = ["profile"]
 

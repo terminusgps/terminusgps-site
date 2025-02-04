@@ -1,13 +1,28 @@
 from typing import Any, Callable
 
+from django.conf import settings
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.core.exceptions import ImproperlyConfigured
 from django.db.models import QuerySet
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import CreateView
+from django.views.generic.base import ContextMixin
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic.list import MultipleObjectMixin
 
 from terminusgps_tracker.models import TrackerProfile
+
+if not hasattr(settings, "TRACKER_APP_CONFIG"):
+    raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
+
+
+class TrackerAppConfigContextMixin(ContextMixin):
+    """Adds a tracker app configuration into the view context."""
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["tracker_config"] = settings.TRACKER_APP_CONFIG
+        return context
 
 
 class TrackerProfileSingleObjectMixin(SingleObjectMixin):

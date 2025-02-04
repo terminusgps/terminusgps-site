@@ -2,12 +2,17 @@ import requests
 from urllib.parse import urlencode
 from django.db import models, transaction
 
-from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
-import terminusgps.wialon.flags as flags
+from django.urls import reverse
 from terminusgps.wialon.constants import WialonCommandType, WialonCommandLink
 from terminusgps.wialon.session import WialonSession
 from terminusgps.wialon.utils import get_id_from_iccid
+import terminusgps.wialon.flags as flags
+
+from terminusgps_tracker.validators import (
+    validate_wialon_unit_name_unique,
+    validate_wialon_unit_id,
+)
 
 
 class TrackerAssetCommand(models.Model):
@@ -50,23 +55,34 @@ class TrackerAssetCommand(models.Model):
 
 
 class TrackerAsset(models.Model):
-    wialon_id = models.PositiveIntegerField(default=None, blank=True, null=True)
+    wialon_id = models.PositiveIntegerField(
+        default=None, blank=True, null=True, validators=[validate_wialon_unit_id]
+    )
+    imei_number = models.PositiveIntegerField(default=None, null=True, blank=True)
     profile = models.ForeignKey(
         "terminusgps_tracker.TrackerProfile",
         on_delete=models.CASCADE,
         related_name="assets",
         null=True,
     )
+    notifications = models.ManyToManyField(
+        "terminusgps_tracker.TrackerNotification", default=None, blank=True
+    )
     commands = models.ManyToManyField(
         "terminusgps_tracker.TrackerAssetCommand", default=None, blank=True
     )
 
     # Wialon data
-    name = models.CharField(max_length=64, default=None, null=True, blank=True)
+    name = models.CharField(
+        max_length=64,
+        default=None,
+        null=True,
+        blank=True,
+        validators=[validate_wialon_unit_name_unique],
+    )
     hw_type = models.CharField(max_length=64, default=None, null=True, blank=True)
     is_active = models.BooleanField(default=None, null=True, blank=True)
     phone_number = models.CharField(max_length=64, default=None, null=True, blank=True)
-    imei_number = models.PositiveIntegerField(default=None, null=True, blank=True)
     icon = models.FileField(upload_to="icon/", default=None, null=True, blank=True)
 
     class Meta:
@@ -76,11 +92,13 @@ class TrackerAsset(models.Model):
     def __str__(self) -> str:
         return str(self.name)
 
-    def save(self, session: WialonSession | None = None, **kwargs) -> None:
+    def save(
+        self, session: WialonSession | None = None, populate: bool = False, **kwargs
+    ) -> None:
         if session and self.imei_number and not self.wialon_id:
             self.wialon_id = get_id_from_iccid(self.imei_number, session)
             self.populate(session)
-        elif session:
+        elif session and populate:
             self.populate(session)
         super().save(**kwargs)
 

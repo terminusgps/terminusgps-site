@@ -5,7 +5,7 @@ from django.forms import widgets
 
 from terminusgps_tracker.validators import (
     validate_wialon_password,
-    validate_wialon_username,
+    validate_wialon_user_name_unique,
 )
 
 
@@ -33,7 +33,7 @@ class TrackerSignupForm(UserCreationForm):
         label="Email Address",
         min_length=4,
         max_length=150,
-        validators=[validate_email, validate_wialon_username],
+        validators=[validate_email, validate_wialon_user_name_unique],
         widget=widgets.EmailInput(
             attrs={"class": default_css_class, "placeholder": "Email Address"}
         ),

@@ -1,7 +1,7 @@
 <input
     type="button"
     class="{{ class|default:'max-w-4 text-left text-sm text-gray-400 hover:underline' }}"
-    hx-post="{% url 'delete payment' tracker_payment.pk %}"
+    hx-post="{% url 'delete payment' tracker_payment_method.pk %}"
     hx-swap="delete"
     hx-prompt="Type the last 4 digits of the card to delete it."
     hx-trigger="click"
