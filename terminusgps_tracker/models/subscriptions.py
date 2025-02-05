@@ -167,14 +167,13 @@ class TrackerSubscription(models.Model):
                 self.authorizenet_update_subscription(
                     tier=new_tier, payment_id=payment_id, address_id=address_id
                 )
-        except ValueError as e:
-            print(e)
-            raise
-        else:
             self.tier = new_tier
             self.payment_id = payment_id
             self.address_id = address_id
             self.refresh_status()
+        except ValueError as e:
+            print(e)
+            raise
 
     @transaction.atomic
     def downgrade(
@@ -189,14 +188,13 @@ class TrackerSubscription(models.Model):
                 self.authorizenet_update_subscription(
                     tier=new_tier, payment_id=payment_id, address_id=address_id
                 )
-        except ValueError as e:
-            print(e)
-            raise
-        else:
             self.tier = new_tier
             self.payment_id = payment_id
             self.address_id = address_id
             self.refresh_status()
+        except ValueError as e:
+            print(e)
+            raise
 
     @transaction.atomic
     def refresh_status(self) -> None:
@@ -208,6 +206,11 @@ class TrackerSubscription(models.Model):
         assert self.authorizenet_id, "No subscription to cancel"
         self.authorizenet_cancel_subscription(self.authorizenet_id)
         self.refresh_status()
+
+    def authorizenet_execute_controller(self, controller) -> dict | None:
+        controller.setenvironment(get_environment())
+        controller.execute()
+        return controller.getresponse()
 
     @classmethod
     def authorizenet_get_subscription_status(cls, subscription_id: int) -> str:
@@ -242,22 +245,7 @@ class TrackerSubscription(models.Model):
         if response.messages.resultCode != "Ok":
             raise ValueError(response.messages.message[0]["text"].text)
 
-        return {
-            "subscription": {
-                "name": response.subscription.name,
-                "paymentSchedule": {
-                    "intervalLength": response.subscription.paymentSchedule.interval.length,
-                    "intervalUnit": response.subscription.paymentSchedule.interval.unit,
-                    "startDate": response.subscription.paymentSchedule.startDate,
-                    "totalOccurrences": response.subscription.paymentSchedule.totalOccurrences,
-                    "trialOccurrences": response.subscription.paymentSchedule.trialOccurrences,
-                },
-                "amount": response.subscription.amount,
-                "trialAmount": response.subscription.trialAmount,
-                "status": response.subscription.status,
-                "arbTransactions": response.arbTransactions,
-            }
-        }
+        return response.subscription
 
     @classmethod
     def authorizenet_cancel_subscription(cls, subscription_id: int) -> None:

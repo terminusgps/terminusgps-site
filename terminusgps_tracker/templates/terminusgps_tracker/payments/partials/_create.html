@@ -1,4 +1,10 @@
-<form action="{% url 'create payment' %}" method="post" hx-target="this">
+<form
+    action="{% url 'create payment' %}"
+    method="post"
+    hx-include="this"
+    hx-target="this"
+    hx-boost="true"
+>
     <h2 class="mb-4 text-xl text-center text-terminus-red-800">New Payment Method</h2>
     <div class="{{ class }}">
         {% csrf_token %}
@@ -14,7 +20,6 @@
             class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out"
             type="submit"
             value="Submit"
-            hx-boost="true"
             hx-trigger="click"
         >
         <input 

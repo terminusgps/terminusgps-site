@@ -1435,7 +1435,7 @@ wheels = [
 
 [[package]]
 name = "python-terminusgps"
-version = "1.9.6"
+version = "1.9.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "argparse" },
@@ -1444,9 +1444,9 @@ dependencies = [
     { name = "django" },
     { name = "python-wialon" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ab/fd/1109a56fa9fb98c844072333499ec9fe23da7ec87592f49a3c61c03edc9d/python_terminusgps-1.9.6.tar.gz", hash = "sha256:143d65033d9d60fc3cff04152b4bc96aadc86376348f90bcfdcd48d31895393e", size = 45889 }
+sdist = { url = "https://files.pythonhosted.org/packages/11/7a/2f3602a71674da61ec620ca1b26c157cfd129a1bcd3b30ee5cbe6692d211/python_terminusgps-1.9.8.tar.gz", hash = "sha256:3f4e777b5187119782ec9049463fcff110153180def8ef16e57bcfdd7a1cd594", size = 45893 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/02/1e/bbf78b34cdade856ab7ce92a2af53f9ee230bc49fafda7cec296d39406fa/python_terminusgps-1.9.6-py3-none-any.whl", hash = "sha256:ac03274525a7f5c075a0b4e114c1bf2c10462b901609bf6f9a96fd9f91548720", size = 36953 },
+    { url = "https://files.pythonhosted.org/packages/14/c3/28d03445b126f57b7e4f2faa6974cd1a02edf88ecb337bc28684f845fb65/python_terminusgps-1.9.8-py3-none-any.whl", hash = "sha256:52273d9413c098aa515f2d1cf7db11e136b1161e6c7f0b70c6371992591c1ac7", size = 37326 },
 ]
 
 [[package]]
@@ -2048,7 +2048,7 @@ requires-dist = [
     { name = "python-jose", specifier = "==3.3.0" },
     { name = "python-quickbooks", specifier = "==0.9.9" },
     { name = "python-slugify", specifier = "==8.0.4" },
-    { name = "python-terminusgps", specifier = "==1.9.6" },
+    { name = "python-terminusgps", specifier = "==1.9.8" },
     { name = "python-wialon", specifier = "==1.2.4" },
     { name = "pytz", specifier = "==2024.1" },
     { name = "pyxb-x", specifier = "==1.2.6.2" },
