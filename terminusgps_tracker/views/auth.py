@@ -38,7 +38,7 @@ def send_confirmation_email(email: str) -> None:
         subject, text_content, "support@terminusgps.com", [email]
     )
     msg.attach_alternative(html_content, "text/html")
-    msg.send(fail_silently=False)
+    msg.send(fail_silently=True)
 
 
 class TrackerRegistrationView(RedirectView):
