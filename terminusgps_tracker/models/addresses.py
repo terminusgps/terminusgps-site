@@ -1,3 +1,4 @@
+from authorizenet.apicontractsv1 import customerAddressType
 from django import forms
 from django.db import models
 
@@ -28,13 +29,24 @@ class TrackerShippingAddress(models.Model):
                 assert self.profile.authorizenet_id, (
                     f"Authorizenet customer profile was not set for '{self.profile}'"
                 )
-                self.default = form.cleaned_data["default"]
-                self.authorizenet_id = AddressProfile(
+                address = customerAddressType(
+                    firstName=form.cleaned_data["first_name"],
+                    lastName=form.cleaned_data["last_name"],
+                    address=form.cleaned_data["address"]["street"],
+                    city=form.cleaned_data["address"]["city"],
+                    state=form.cleaned_data["address"]["state"],
+                    country=form.cleaned_data["address"]["country"],
+                    zip=form.cleaned_data["address"]["zip"],
+                    phoneNumber=form.cleaned_data["phone"],
+                )
+                address_profile = AddressProfile(
                     customer_profile_id=self.profile.authorizenet_id,
                     default=form.cleaned_data["default"],
                     merchant_id=self.profile.user.pk,
-                    shipping_addr=form.cleaned_data["address"],
-                ).id
+                    shipping_addr=address,
+                )
+                self.default = form.cleaned_data["default"]
+                self.authorizenet_id = address_profile.id
         return super().save(**kwargs)
 
     def delete(self, *args, **kwargs):
