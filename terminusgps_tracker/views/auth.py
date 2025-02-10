@@ -1,13 +1,17 @@
 from typing import Any
 
 from django.conf import settings
+from django.utils import timezone
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
+from django.template.loader import render_to_string
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LoginView, LogoutView
 from django.utils.translation import gettext_lazy as _
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import transaction
 from django.forms import ValidationError
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import FormView, RedirectView
 from wialon.api import WialonError
@@ -21,6 +25,20 @@ from terminusgps_tracker.views.base import (
     TrackerBaseView,
     WialonSessionView,
 )
+
+
+def send_confirmation_email(email: str) -> None:
+    subject = "Signed up! - Terminus GPS"
+    html_content = render_to_string(
+        "terminusgps_tracker/emails/signup_success.html",
+        {"email": email, "now": timezone.now()},
+    )
+    text_content = strip_tags(html_content)
+    msg = EmailMultiAlternatives(
+        subject, text_content, "support@terminusgps.com", [email]
+    )
+    msg.attach_alternative(html_content, "text/html")
+    msg.send(fail_silently=False)
 
 
 class TrackerRegistrationView(RedirectView):
@@ -110,6 +128,7 @@ class TrackerSignupView(
         profile.wialon_resource_id = ids.get("resource")
         profile.wialon_group_id = ids.get("unit_group")
         profile.save()
+        send_confirmation_email(form.cleaned_data["username"])
         return super().form_valid(form=form)
 
     @staticmethod

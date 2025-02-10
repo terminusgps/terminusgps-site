@@ -16,6 +16,7 @@
                 hx-delete="{% url 'asset create' %}"
                 hx-swap="delete"
                 hx-trigger="click"
+                hx-target="closest tr"
             >
             <input
                 class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out"
@@ -23,6 +24,7 @@
                 value="Save"
                 hx-post="{% url 'asset create' %}"
                 hx-trigger="click"
+                hx-target="closest tr"
             >
         </div>
     </td>

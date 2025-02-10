@@ -1,23 +1,15 @@
 from typing import Any
 
-from django import forms
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.db import transaction
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, DetailView, UpdateView
 from django.views.generic.list import ListView
 from terminusgps.wialon import constants
-from wialon.api import WialonError
 
 from terminusgps.wialon.session import WialonSession
-from terminusgps.wialon.items import (
-    WialonResource,
-    WialonUnit,
-    WialonUnitGroup,
-    WialonUser,
-)
+from terminusgps.wialon.items import WialonResource, WialonUnit, WialonUser
 from terminusgps.wialon.utils import get_id_from_iccid
 from terminusgps_tracker.forms.assets import (
     TrackerAssetCreateForm,
@@ -75,21 +67,21 @@ class AssetCreateView(CreateView, TrackerBaseView, TrackerProfileSingleObjectMix
         )
         if unit_id is not None:
             unit = WialonUnit(id=unit_id, session=self.wialon_session)
-            user = WialonUser(
-                id=str(self.profile.wialon_end_user_id), session=self.wialon_session
+            super_user = WialonUser(
+                id=self.profile.wialon_super_user_id, session=self.wialon_session
+            )
+            end_user = WialonUser(
+                id=self.profile.wialon_end_user_id, session=self.wialon_session
             )
             resource = WialonResource(
-                id=str(self.profile.wialon_resource_id), session=self.wialon_session
+                id=self.profile.wialon_resource_id, session=self.wialon_session
             )
+
+            super_user.grant_access(
+                unit, access_mask=constants.ACCESSMASK_UNIT_MIGRATION
+            )
+            end_user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
             resource.migrate_unit(unit)
-            user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
-            TrackerAsset.objects.create(
-                name=form.cleaned_data["name"],
-                imei_number=form.cleaned_data["imei_number"],
-                wialon_id=unit.id,
-                session=self.wialon_session,
-                populate=True,
-            )
             return super().form_valid(form=form)
         return super().form_valid(form=form)
 

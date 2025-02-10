@@ -1,13 +1,13 @@
-<div class="flex flex-col gap-4 rounded border border-terminus-red-500 bg-red-200 p-4">
-    <div class="flex-inline flex items-center gap-2">
-        {% include "terminusgps_tracker/logo.svg" with class="size-24" %}
-        <div class="flex flex-col">
-            <h2 class="text-xl text-gray-900">Terminus GPS</h2>
-            <h3 class="text-gray-700">We know where ours are... do you?</h3>
-        </div>
+<div style="display: flex; flex-direction: column; padding: 1rem; background-color: oklch(0.129 0.042 264.695); color: #fff; border-radius: 0.25rem;">
+    <h2 style="text-align: center; font-size: 1.875rem; line-height: 2.25rem; letter-spacing: 0.05em; color: oklch(46.16% 0.1749 26.64);">Terminus GPS, LLC</h2>
+</div>
+<div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: center;">
+    <div style="padding: 1rem; font-family: ui-sans-serif, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';">
+        <h2>Thanks for signing up for the <a style="text-decoration: underline;" href="https://app.terminusgps.com/about/">Terminus GPS Tracker application</a>!</h2>
+        <h3>On {{ now|date:'l, F jS' }} at {{ now|time:'P' }} you created an account using '{{ email }}'.</h3>
     </div>
-    <div class="rounded bg-gray-300 p-4 text-gray-800">
-        <h2>Thanks for signing up for the <a class="text-terminus-red-900 hover:underline" href="https://app.terminusgps.com/about/">Terminus GPS Tracker application</a>!</h2>
-        <h3>On {{ now|date:'l, F jS' }} at {{ now|time:'P' }} you created an account for {{ email }}.</h3>
-    </div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 0.5rem; align-items: center;">
+    <a style="width: 40%; display: block; text-align: center; padding: 0.5rem; background-color: oklch(46.16% 0.1749 26.64); color: #fff; border-radius: 0.25rem; border-width: 1px; border-color: oklch(43.02% 0.163 26.83);" href="https://app.terminusgps.com/login/">Login</a>
+    <a style="width: 40%; display: block; text-align: center; padding: 0.5rem; background-color: oklch(46.16% 0.1749 26.64); color: #fff; border-radius: 0.25rem; border-width: 1px; border-color: oklch(43.02% 0.163 26.83);" href="https://www.youtube.com/playlist?list=PLY2DuqkfvdzWDzoyMQ5eCPNoZCtXQemkn">Video Tutorials</a>
 </div>
