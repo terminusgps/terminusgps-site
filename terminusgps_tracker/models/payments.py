@@ -1,4 +1,4 @@
-from authorizenet.apicontractsv1 import paymentType
+from authorizenet.apicontractsv1 import creditCardType, customerAddressType, paymentType
 from django import forms
 from django.db import models
 
@@ -29,8 +29,19 @@ class TrackerPaymentMethod(models.Model):
                 assert self.profile.authorizenet_id, (
                     f"Authorizenet customer profile was not set for '{self.profile}'"
                 )
+                print(f"{form.cleaned_data["credit_card"].expirationDate = }")
+                address = customerAddressType(
+                    firstName=form.cleaned_data["first_name"],
+                    lastName=form.cleaned_data["last_name"],
+                    address=form.cleaned_data["address"]["street"],
+                    city=form.cleaned_data["address"]["city"],
+                    state=form.cleaned_data["address"]["state"],
+                    country=form.cleaned_data["address"]["country"],
+                    zip=form.cleaned_data["address"]["zip"],
+                    phoneNumber=form.cleaned_data["phone"],
+                )
                 payment_profile = PaymentProfile(
-                    billing_addr=form.cleaned_data["address"],
+                    billing_addr=address,
                     customer_profile_id=self.profile.authorizenet_id,
                     default=form.cleaned_data["default"],
                     merchant_id=self.profile.user.pk,

@@ -158,16 +158,12 @@ class CreditCardField(forms.MultiValueField):
                 ],
             ),
             forms.IntegerField(
-                label="Card Expiration Month",
-                max_value=12,
-                min_value=1,
-                validators=[MinLengthValidator(2), MaxLengthValidator(2)],
+                label="Card Expiration Month", max_value=12, min_value=1
             ),
             forms.IntegerField(
                 label="Card Expiration Year",
                 max_value=99,
                 min_value=int(f"{timezone.now():%y}"),  # Current year
-                validators=[MinLengthValidator(2), MaxLengthValidator(2)],
             ),
             forms.CharField(
                 label="Card CCV #",
@@ -179,6 +175,6 @@ class CreditCardField(forms.MultiValueField):
     def compress(self, data_list) -> creditCardType:
         return creditCardType(
             cardNumber=data_list[0],
-            expirationDate=f"{data_list[1]}-20{data_list[2]}",
+            expirationDate=f"20{data_list[2]}-{data_list[1]:02d}",
             cardCode=data_list[3],
         )
