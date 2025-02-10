@@ -14,6 +14,7 @@ from django.forms import ValidationError
 from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import FormView, RedirectView
+from terminusgps.wialon import constants
 from wialon.api import WialonError
 
 from terminusgps.wialon.items import WialonResource, WialonUnitGroup, WialonUser
@@ -156,6 +157,8 @@ class TrackerSignupView(
         resource = WialonResource(
             creator_id=super_user.id, name=f"account_{username}", session=session
         )
+        super_user.grant_access(end_user, access_mask=constants.ACCESSMASK_UNIT_FULL)
+        end_user.grant_access(resource, access_mask=constants.ACCESSMASK_UNIT_BASIC)
         session.wialon_api.account_create_account(
             **{"itemId": resource.id, "plan": "terminusgps_ext_hist"}
         )
