@@ -7,7 +7,6 @@ from django.urls import reverse_lazy
 from django.views.generic import FormView, RedirectView
 
 
-from terminusgps_tracker.forms import BugReportForm
 from terminusgps_tracker.views.base import TrackerBaseView
 
 
@@ -84,23 +83,3 @@ class TrackerContactView(TrackerBaseView):
     http_method_names = ["get"]
     template_name = "terminusgps_tracker/contact.html"
     partial_template_name = "terminusgps_tracker/partials/_contact.html"
-
-
-class TrackerBugReportView(LoginRequiredMixin, FormView, TrackerBaseView):
-    content_type = "text/html"
-    extra_context = {
-        "title": "Bug Report",
-        "subtitle": "Found a bug?",
-        "class": "flex flex-col gap-2 p-4 bg-gray-300 rounded caret-terminus-red-600 border border-gray-600",
-    }
-    form_class = BugReportForm
-    http_method_names = ["get", "post"]
-    partial_template_name = "terminusgps_tracker/partials/_bug_report.html"
-    success_url = reverse_lazy("tracker profile")
-    template_name = "terminusgps_tracker/bug_report.html"
-    login_url = reverse_lazy("login")
-    raise_exception = False
-    permission_denied_message = "Please login and try again."
-
-    def get_initial(self) -> dict[str, Any]:
-        return {"user": self.request.user}

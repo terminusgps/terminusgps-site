@@ -19,7 +19,6 @@ from .assets import (
 from .profile import TrackerProfileSettingsView, TrackerProfileView
 from .public import (
     TrackerAboutView,
-    TrackerBugReportView,
     TrackerContactView,
     TrackerLandingView,
     TrackerPrivacyView,

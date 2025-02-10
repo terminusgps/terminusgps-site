@@ -1,5 +1,0 @@
-Report created on {{ now|date:'l, F jS, Y' }} at {{ now|date:'p' }}.
-User: {{ user.username }}
-Category: {{ category }}
-
-{{ text }}

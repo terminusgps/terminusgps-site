@@ -3,12 +3,10 @@ from . import views
 
 urlpatterns = [
     path("", views.TrackerLandingView.as_view(), name="tracker landing"),
-    path(
-        "search/address/",
-        views.WialonAddressSearchView.as_view(),
-        name="search address",
-    ),
     path("profile/", views.TrackerProfileView.as_view(), name="tracker profile"),
+    path(
+        "profile/settings/", views.TrackerProfileSettingsView.as_view(), name="settings"
+    ),
     path("register/", views.TrackerRegistrationView.as_view(), name="tracker register"),
     path("about/", views.TrackerAboutView.as_view(), name="tracker about"),
     path("contact/", views.TrackerContactView.as_view(), name="tracker contact"),
@@ -36,7 +34,6 @@ urlpatterns = [
         views.TrackerSubscriptionTierDetailView.as_view(),
         name="tier detail",
     ),
-    path("profile/report/", views.TrackerBugReportView.as_view(), name="bug report"),
     path(
         "profile/subscription/<int:pk>/",
         views.TrackerSubscriptionDetailView.as_view(),
@@ -51,9 +48,6 @@ urlpatterns = [
         "profile/subscription/<int:pk>/cancel/",
         views.TrackerSubscriptionCancelView.as_view(),
         name="subscription cancel",
-    ),
-    path(
-        "profile/settings/", views.TrackerProfileSettingsView.as_view(), name="settings"
     ),
     path(
         "profile/shipping/new/",
@@ -84,10 +78,5 @@ urlpatterns = [
         "profile/payments/<int:pk>/delete/",
         views.PaymentMethodDeleteView.as_view(),
         name="delete payment",
-    ),
-    path(
-        "render_map/<int:x>_<int:y>_<int:zoom>/<str:sid>/",
-        views.TrackerMapView.as_view(),
-        name="render map",
     ),
 ]
