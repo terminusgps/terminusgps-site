@@ -17,7 +17,7 @@ class BugReportForm(forms.Form):
         widget=forms.widgets.Textarea(
             attrs={
                 "placeholder": "I clicked the 'Delete' button on a payment method and it didn't do anything...",
-                "class": "p-2 rounded bg-white text-gray-800",
+                "class": "p-2 rounded bg-white text-gray-800 border border-gray-300",
                 "rows": 10,
                 "wrap": "soft",
             }
@@ -26,7 +26,7 @@ class BugReportForm(forms.Form):
     category = forms.ChoiceField(
         choices=BugCategory.choices,
         widget=forms.widgets.Select(
-            attrs={"class": "p-2 rounded bg-white text-gray-800"}
+            attrs={"class": "p-2 rounded bg-white text-gray-800 border border-gray-300"}
         ),
     )
     user = forms.ModelChoiceField(queryset=get_user_model().objects.filter())

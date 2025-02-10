@@ -8,6 +8,7 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import CreateView, DetailView, UpdateView
 from django.views.generic.list import ListView
+from terminusgps.wialon import constants
 from wialon.api import WialonError
 
 from terminusgps.wialon.session import WialonSession
@@ -66,45 +67,31 @@ class AssetCreateView(CreateView, TrackerBaseView, TrackerProfileSingleObjectMix
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         return HttpResponse(status=200 if request.headers.get("HX-Request") else 403)
 
-    @transaction.atomic
     def form_valid(
         self, form: TrackerAssetCreateForm
     ) -> HttpResponse | HttpResponseRedirect:
-        try:
-            user_id: str = str(self.profile.wialon_end_user_id)
-            group_id: str = str(self.profile.wialon_group_id)
-            resource_id: str = str(self.profile.wialon_resource_id)
-            unit_id: str | None = get_id_from_iccid(
-                form.cleaned_data["imei_number"], session=self.wialon_session
-            )
-            group = WialonUnitGroup(id=group_id, session=self.wialon_session)
-            user = WialonUser(id=user_id, session=self.wialon_session)
+        unit_id: str | None = get_id_from_iccid(
+            form.cleaned_data["imei_number"], self.wialon_session
+        )
+        if unit_id is not None:
             unit = WialonUnit(id=unit_id, session=self.wialon_session)
-            resource = WialonResource(id=resource_id, session=self.wialon_session)
-
-            group.add_item(unit)
-            user.grant_access(unit)
-            unit.rename(form.cleaned_data["name"])
-            asset = TrackerAsset.objects.create(
-                profile=self.profile, imei_number=form.cleaned_data["imei_number"]
+            user = WialonUser(
+                id=str(self.profile.wialon_end_user_id), session=self.wialon_session
             )
-            asset.save(self.wialon_session)
-        except (WialonError, ValueError):
-            form.add_error(
-                None,
-                forms.ValidationError(
-                    _(
-                        "Whoops! Something went wrong on our end. Please try again later."
-                    )
-                ),
+            resource = WialonResource(
+                id=str(self.profile.wialon_resource_id), session=self.wialon_session
             )
-            return self.form_invalid(form=form)
-        return HttpResponseRedirect(self.get_success_url(asset))
-
-    def get_success_url(self, asset: TrackerAsset | None = None) -> str:
-        if asset is not None:
-            return asset.get_absolute_url()
-        return self.success_url
+            resource.migrate_unit(unit)
+            user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
+            TrackerAsset.objects.create(
+                name=form.cleaned_data["name"],
+                imei_number=form.cleaned_data["imei_number"],
+                wialon_id=unit.id,
+                session=self.wialon_session,
+                populate=True,
+            )
+            return super().form_valid(form=form)
+        return super().form_valid(form=form)
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         self.object = None

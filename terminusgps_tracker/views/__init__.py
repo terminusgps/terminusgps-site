@@ -25,6 +25,7 @@ from .public import (
     TrackerPrivacyView,
     TrackerSourceView,
     TrackerMapView,
+    WialonAddressSearchView,
 )
 from .subscriptions import (
     TrackerSubscriptionUpdateView,

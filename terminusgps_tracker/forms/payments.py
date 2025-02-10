@@ -1,9 +1,37 @@
 from django import forms
 
-from .fields import AddressField, CreditCardField
+from terminusgps_tracker.forms.fields.credit_card import CreditCardField
 
 
 class PaymentMethodCreationForm(forms.Form):
-    default = forms.BooleanField(initial=False, required=False)
+    first_name = forms.CharField(
+        max_length=64,
+        widget=forms.widgets.TextInput(
+            attrs={
+                "class": "p-2 w-full border border-gray-600 rounded bg-gray-50 aria-[invalid]:bg-red-50 aria-[invalid]:text-red-700 aria-[invalid]:border-red-600",
+                "placeholder": "First Name",
+                "maxlength": 64,
+            }
+        ),
+    )
+    last_name = forms.CharField(
+        max_length=64,
+        widget=forms.widgets.TextInput(
+            attrs={
+                "class": "p-2 w-full border border-gray-600 rounded bg-gray-50 aria-[invalid]:bg-red-50 aria-[invalid]:text-red-700 aria-[invalid]:border-red-600",
+                "placeholder": "Last Name",
+                "maxlength": 64,
+            }
+        ),
+    )
+    phone = forms.CharField(
+        max_length=20,
+        widget=forms.widgets.TextInput(
+            attrs={
+                "class": "p-2 w-full border border-gray-600 rounded bg-gray-50 aria-[invalid]:bg-red-50 aria-[invalid]:text-red-700 aria-[invalid]:border-red-600",
+                "placeholder": "Phone #",
+                "maxlength": 20,
+            }
+        ),
+    )
     credit_card = CreditCardField()
-    address = AddressField()

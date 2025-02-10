@@ -15,7 +15,7 @@ class PaymentMethodCreateView(LoginRequiredMixin, FormView, TrackerBaseView):
     button_template_name = "terminusgps_tracker/payments/create_button.html"
     content_type = "text/html"
     extra_context = {
-        "class": "p-4 border border-gray-600 bg-gray-200 rounded grid grid-cols-1 md:grid-cols-2 gap-2"
+        "class": "p-4 border border-gray-600 bg-gray-200 rounded flex flex-col gap-1"
     }
     form_class = PaymentMethodCreationForm
     http_method_names = ["get", "post", "delete"]
@@ -27,6 +27,10 @@ class PaymentMethodCreateView(LoginRequiredMixin, FormView, TrackerBaseView):
     template_name = "terminusgps_tracker/payments/create.html"
     invalid_field_class = ""
     valid_field_class = ""
+
+    def post(self, request, *args, **kwargs):
+        print(f"{request.POST = }")
+        return super().post(request, *args, **kwargs)
 
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         self.template_name = self.button_template_name

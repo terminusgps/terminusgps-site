@@ -23,3 +23,14 @@
     --color-terminus-red-100: oklch(58.34% 0.2065 25.73);
     --color-terminus-red-50: oklch(60.82% 0.209 25.26);
 }
+
+@layer base {
+    input::-webkit-out-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-apperance: none;
+        margin: 0;
+    }
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+}

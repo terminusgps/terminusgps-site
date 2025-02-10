@@ -6,7 +6,7 @@ from terminusgps_tracker.models.subscriptions import TrackerSubscriptionTier
 
 class SubscriptionCancelForm(forms.Form):
     subscription = forms.ModelChoiceField(
-        queryset=TrackerSubscription.objects.all(), required=True, initial=1
+        queryset=TrackerSubscription.objects.all(), required=True
     )
 
 

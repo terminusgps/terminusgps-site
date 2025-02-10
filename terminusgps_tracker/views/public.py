@@ -11,6 +11,21 @@ from terminusgps_tracker.forms import BugReportForm
 from terminusgps_tracker.views.base import TrackerBaseView
 
 
+class WialonAddressSearchView(TrackerBaseView):
+    http_method_names = ["post"]
+    template_name = "terminusgps_tracker/search_address.html"
+    partial_template_name = "terminusgps_tracker/partials/_search_address.html"
+
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        base_url = (
+            "https://search-maps.wialon.com/hst-api.wialon.com/gis_searchintelli?"
+        )
+        params = {}
+        print(f"{request.POST = }")
+        print(f"{request.POST.get("address") = }")
+        return HttpResponse(status=200)
+
+
 class TrackerMapView(TrackerBaseView):
     http_method_names = ["get"]
     template_name = "terminusgps_tracker/map.html"
@@ -76,7 +91,7 @@ class TrackerBugReportView(LoginRequiredMixin, FormView, TrackerBaseView):
     extra_context = {
         "title": "Bug Report",
         "subtitle": "Found a bug?",
-        "class": "flex flex-col gap-2 p-4 bg-gray-300 rounded caret-terminus-red-600",
+        "class": "flex flex-col gap-2 p-4 bg-gray-300 rounded caret-terminus-red-600 border border-gray-600",
     }
     form_class = BugReportForm
     http_method_names = ["get", "post"]

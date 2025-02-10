@@ -1,21 +1,37 @@
-<form
-    class="{{ class }}"
-    action="{% url 'tracker signup' %}"
-    method="post"
-    hx-boost="true"
->
+<form class="{{ class }}" action="{% url 'tracker signup' %}" method="post" hx-boost="true">
+    {{ form.non_field_errors }}
     {% csrf_token %}
-    {{ form.username }}
-    <div class="flex gap-2">
-        {{ form.first_name }}
-        {{ form.last_name }}
+    <div class="flex flex-col gap-1 w-full p-2">
+        {{ form.username.label }}
+        {{ form.username }}
+        {{ form.username.errors }}
     </div>
-    <div class="flex gap-2">
-        {{ form.password1 }}
-        {{ form.password2 }}
+    <div class="flex">
+        <div class="flex flex-col gap-1 w-full p-2">
+            {{ form.first_name.label }}
+            {{ form.first_name }}
+            {{ form.first_name.errors }}
+        </div>
+        <div class="flex flex-col gap-1 w-full p-2">
+            {{ form.last_name.label }}
+            {{ form.last_name }}
+            {{ form.last_name.errors }}
+        </div>
     </div>
-    <div class="flex flex-col gap-4">
-        <input class="block w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white hover:cursor-pointer hover:bg-terminus-red-400" type="submit">
+    <div class="flex">
+        <div class="flex flex-col gap-1 w-full p-2">
+            {{ form.password1.label }}
+            {{ form.password1 }}
+            {{ form.password1.errors }}
+        </div>
+        <div class="flex flex-col gap-1 w-full p-2">
+            {{ form.password2.label }}
+            {{ form.password2 }}
+            {{ form.password2.errors }}
+        </div>
+    </div>
+    <div class="flex flex-col gap-4 mt-4">
+        <input class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out" type="submit" value="Register">
         <p class="text-center text-sm dark:text-gray-200">Already have an account? <a class="font-semibold text-terminus-red-800 underline decoration-terminus-black decoration-2 underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted" href="{% url 'tracker login' %}">Click here</a> to login.</p>
         <input class="hidden" type="hidden" name="next" value="{{ next }}"></input>
     </div>

@@ -3,6 +3,11 @@ from . import views
 
 urlpatterns = [
     path("", views.TrackerLandingView.as_view(), name="tracker landing"),
+    path(
+        "search/address/",
+        views.WialonAddressSearchView.as_view(),
+        name="search address",
+    ),
     path("profile/", views.TrackerProfileView.as_view(), name="tracker profile"),
     path("register/", views.TrackerRegistrationView.as_view(), name="tracker register"),
     path("about/", views.TrackerAboutView.as_view(), name="tracker about"),

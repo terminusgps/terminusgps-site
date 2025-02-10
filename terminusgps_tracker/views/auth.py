@@ -1,20 +1,19 @@
 from typing import Any
 
 from django.conf import settings
-from django.db import transaction
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LoginView, LogoutView
+from django.utils.translation import gettext_lazy as _
 from django.contrib.messages.views import SuccessMessageMixin
-from django.template.loader import render_to_string
+from django.db import transaction
 from django.forms import ValidationError
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.core.mail import EmailMultiAlternatives
-from django.utils import timezone
 from django.views.generic import FormView, RedirectView
+from wialon.api import WialonError
+
 from terminusgps.wialon.items import WialonResource, WialonUnitGroup, WialonUser
 from terminusgps.wialon.session import WialonSession
-
 from terminusgps_tracker.forms import TrackerAuthenticationForm, TrackerSignupForm
 from terminusgps_tracker.models import TrackerProfile, TrackerSubscription
 from terminusgps_tracker.views.base import (
@@ -37,7 +36,7 @@ class TrackerLoginView(LoginView, HtmxTemplateView):
     extra_context = {
         "title": "Login",
         "subtitle": "We know where ours are... do you?",
-        "class": "p-4 flex flex-col gap-4",
+        "class": "p-4 flex flex-col gap-2",
     }
     http_method_names = ["get", "post"]
     next_page = reverse_lazy("tracker profile")
@@ -64,7 +63,7 @@ class TrackerSignupView(
     extra_context = {
         "title": "Sign Up",
         "subtitle": "You'll know where yours are...",
-        "class": "p-4 flex flex-col gap-4",
+        "class": "p-4 flex flex-col gap-2",
     }
     form_class = TrackerSignupForm
     http_method_names = ["get", "post"]
@@ -83,79 +82,71 @@ class TrackerSignupView(
             ids = self.wialon_registration_flow(
                 username=form.cleaned_data["username"],
                 password=form.cleaned_data["password1"],
+                session=self.wialon_session,
             )
-        except ValidationError as e:
-            form.add_error(None, e)
+        except (ValueError, WialonError) as e:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! Something went wrong with Wialon: '%(error)s'."),
+                    code="wialon",
+                    params={"error": e},
+                ),
+            )
             return self.form_invalid(form=form)
-        else:
-            user = get_user_model().objects.create_user(
+
+        profile = TrackerProfile.objects.create(
+            user=get_user_model().objects.create_user(
                 first_name=form.cleaned_data["first_name"],
                 last_name=form.cleaned_data["last_name"],
                 username=form.cleaned_data["username"],
                 password=form.cleaned_data["password1"],
                 email=form.cleaned_data["username"],
             )
-            self.profile = TrackerProfile.objects.create(user=user)
-            TrackerSubscription.objects.create(profile=self.profile)
-            self.profile.wialon_super_user_id = ids.get("super_user")
-            self.profile.wialon_end_user_id = ids.get("end_user")
-            self.profile.wialon_resource_id = ids.get("resource")
-            self.profile.wialon_group_id = ids.get("unit_group")
-            self.profile.save()
+        )
+        TrackerSubscription.objects.create(profile=profile)
+        profile.wialon_super_user_id = ids.get("super_user")
+        profile.wialon_end_user_id = ids.get("end_user")
+        profile.wialon_resource_id = ids.get("resource")
+        profile.wialon_group_id = ids.get("unit_group")
+        profile.save()
         return super().form_valid(form=form)
 
-    # TODO: retrieve templates from AWS
     @staticmethod
-    def send_verification_email(to_addr: str, html: bool = False) -> None:
-        now = timezone.now()
-        text_content: str = render_to_string(
-            "terminusgps_tracker/emails/signup_success.txt",
-            context={"email": to_addr, "now": now},
-        )
-        email: EmailMultiAlternatives = EmailMultiAlternatives(
-            f"{settings.TRACKER_APP_CONFIG['DISPLAY_NAME']} - Your Account Was Created",
-            text_content,
-            to=[to_addr],
-        )
-        if html:
-            html_content: str = render_to_string(
-                "terminusgps_tracker/emails/signup_success.html",
-                context={"email": to_addr, "now": now},
-            )
-            email.attach_alternative(html_content, "text/html")
-        email.send()
-
     @transaction.atomic
-    def wialon_registration_flow(self, username: str, password: str) -> None:
-        with WialonSession(sid=self.wialon_sid) as session:
-            super_user = WialonUser(
-                creator_id=settings.WIALON_ADMIN_ID,
-                username=f"account_{username}",  # account_email@domain.com
-                password=password,
-                session=session,
-            )
-            end_user = WialonUser(
-                creator_id=settings.WIALON_ADMIN_ID,
-                username=username,  # email@domain.com
-                password=password,
-                session=session,
-            )
-            unit_group = WialonUnitGroup(
-                creator_id=settings.WIALON_ADMIN_ID,
-                name=f"group_{username}",  # group_email@domain.com
-                session=session,
-            )
-            resource = WialonResource(
-                creator_id=super_user.id, name=f"account_{username}", session=session
-            )
-            session.wialon_api.account_create_account(
-                **{"itemId": resource.id, "plan": "terminusgps_ext_hist"}
-            )
-            session.wialon_api.account_enable_account(
-                **{"itemId": resource.id, "enable": int(True)}
-            )
+    def wialon_registration_flow(
+        username: str, password: str, session: WialonSession
+    ) -> dict[str, int | None]:
+        super_user = WialonUser(
+            creator_id=settings.WIALON_ADMIN_ID,
+            name=f"account_{username}",  # account_email@domain.com
+            password=password,
+            session=session,
+        )
+        end_user = WialonUser(
+            creator_id=settings.WIALON_ADMIN_ID,
+            name=username,  # email@domain.com
+            password=password,
+            session=session,
+        )
+        unit_group = WialonUnitGroup(
+            creator_id=settings.WIALON_ADMIN_ID,
+            name=f"group_{username}",  # group_email@domain.com
+            session=session,
+        )
+        resource = WialonResource(
+            creator_id=super_user.id, name=f"account_{username}", session=session
+        )
+        session.wialon_api.account_create_account(
+            **{"itemId": resource.id, "plan": "terminusgps_ext_hist"}
+        )
+        session.wialon_api.account_enable_account(
+            **{"itemId": resource.id, "enable": int(True)}
+        )
 
-            self.profile.wialon_end_user_id = end_user.id
-            self.profile.wialon_super_user_id = super_user.id
-            self.profile.wialon_resource_id = resource.id
-            self.profile.wialon_group_id = unit_group.id
+        return {
+            "super_user": super_user.id,
+            "end_user": end_user.id,
+            "resource": resource.id,
+            "unit_group": unit_group.id,
+        }
