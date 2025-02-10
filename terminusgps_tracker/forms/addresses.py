@@ -1,5 +1,7 @@
 from django import forms
 
+from terminusgps_tracker.forms.fields import AddressField
+
 
 class ShippingAddressCreationForm(forms.Form):
     default_field_class = "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100 bg-white border border-gray-600"
@@ -21,7 +23,7 @@ class ShippingAddressCreationForm(forms.Form):
             attrs={"class": default_field_class, "placeholder": "+15555555555"}
         ),
     )
-    # address = AddressField(label="Address")
+    address = AddressField(label="Address")
     default = forms.BooleanField(
         label="Set as default shipping address?",
         required=False,

@@ -25,8 +25,6 @@ class PaymentMethodCreateView(LoginRequiredMixin, FormView, TrackerBaseView):
     raise_exception = True
     success_url = reverse_lazy("settings")
     template_name = "terminusgps_tracker/payments/create.html"
-    invalid_field_class = ""
-    valid_field_class = ""
 
     def post(self, request, *args, **kwargs):
         print(f"{request.POST = }")
@@ -34,16 +32,6 @@ class PaymentMethodCreateView(LoginRequiredMixin, FormView, TrackerBaseView):
 
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         self.template_name = self.button_template_name
-        return self.render_to_response(context=self.get_context_data())
-
-    def form_invalid(self, form: PaymentMethodCreationForm) -> HttpResponse:
-        for name in form.fields.keys():
-            if name in form.errors:
-                form.fields[name].widget.attrs.update(
-                    {"class": self.invalid_field_class}
-                )
-            else:
-                form.fields[name].widget.attrs.update({"class": self.valid_field_class})
         return self.render_to_response(context=self.get_context_data())
 
     def form_valid(self, form: PaymentMethodCreationForm) -> HttpResponse:

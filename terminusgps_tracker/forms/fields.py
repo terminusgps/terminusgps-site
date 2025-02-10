@@ -1,15 +1,123 @@
-from authorizenet.apicontractsv1 import creditCardType, customerAddressType
+from typing import Any, Collection
+
+from authorizenet.apicontractsv1 import creditCardType
 from django import forms
 from django.core.validators import MinLengthValidator, MaxLengthValidator
+from django.forms import widgets as base_widgets
+from django.utils import timezone
 
 from terminusgps_tracker.validators import validate_credit_card_number
 
-from .widgets import (
-    AddressWidget,
-    CreditCardWidget,
-    ShippingAddressWidget,
-    BillingAddressWidget,
-)
+
+class AddressWidget(base_widgets.MultiWidget):
+    template_name = "terminusgps_tracker/widgets/address.html"
+
+    def __init__(self, widgets: Collection = (), *args, **kwargs) -> None:
+        if not widgets:
+            widgets = {
+                "street": base_widgets.TextInput(
+                    attrs={
+                        "class": "p-2 w-full border border-gray-600 rounded bg-gray-50",
+                        "placeholder": "Street",
+                        "maxlength": 128,
+                    }
+                ),
+                "city": base_widgets.TextInput(
+                    attrs={
+                        "class": "p-2 w-full border border-gray-600 rounded bg-gray-50",
+                        "placeholder": "City",
+                        "maxlength": 128,
+                    }
+                ),
+                "state": base_widgets.TextInput(
+                    attrs={
+                        "class": "p-2 w-full border border-gray-600 rounded bg-gray-50",
+                        "placeholder": "State",
+                        "maxlength": 64,
+                    }
+                ),
+                "country": base_widgets.TextInput(
+                    attrs={
+                        "class": "p-2 w-full border border-gray-600 rounded bg-gray-50",
+                        "placeholder": "Country",
+                        "maxlength": 64,
+                    }
+                ),
+                "zip": base_widgets.TextInput(
+                    attrs={
+                        "class": "p-2 w-full border border-gray-600 rounded bg-gray-50",
+                        "placeholder": "Zip #",
+                        "maxlength": 12,
+                    }
+                ),
+            }
+        super().__init__(widgets=widgets, *args, **kwargs)
+
+    def decompress(self, value: Any):
+        if value is None:
+            return [None] * len(self.widgets)
+
+        return {
+            "street": value.address,
+            "city": value.city,
+            "state": value.state,
+            "country": value.country,
+            "zip": value.zip,
+        }
+
+
+class CreditCardWidget(base_widgets.MultiWidget):
+    template_name = "terminusgps_tracker/widgets/credit_card.html"
+
+    def __init__(self, widgets: Collection = (), *args, **kwargs) -> None:
+        if not widgets:
+            widgets = {
+                "number": base_widgets.TextInput(
+                    attrs={
+                        "class": "p-2 w-full border border-gray-600 rounded bg-gray-50",
+                        "placeholder": "Card #",
+                        "minlength": 16,
+                        "maxlength": 19,
+                    }
+                ),
+                "expiry_month": base_widgets.TextInput(
+                    attrs={
+                        "class": "p-2 w-full border border-gray-600 rounded bg-gray-50",
+                        "placeholder": "MM",
+                        "minlength": 2,
+                        "maxlength": 2,
+                    }
+                ),
+                "expiry_year": base_widgets.TextInput(
+                    attrs={
+                        "class": "p-2 w-full border border-gray-600 rounded bg-gray-50",
+                        "placeholder": "YY",
+                        "minlength": 2,
+                        "maxlength": 2,
+                    }
+                ),
+                "ccv": base_widgets.TextInput(
+                    attrs={
+                        "class": "p-2 w-full border border-gray-600 rounded bg-gray-50",
+                        "placeholder": "CCV #",
+                        "minlength": 3,
+                        "maxlength": 4,
+                    }
+                ),
+            }
+        super().__init__(widgets=widgets, *args, **kwargs)
+
+    def decompress(self, value: Any):
+        if value is None:
+            return [None] * len(self.widgets)
+
+        expiry = value.cardExpiration.split("-")
+        month, year = expiry[0], expiry[1][2:]
+        return {
+            "number": value.cardNumber,
+            "expiry": {"month": month, "year": year},
+            "ccv": value.cardCode,
+        }
 
 
 class AddressField(forms.MultiValueField):
@@ -35,73 +143,30 @@ class AddressField(forms.MultiValueField):
         }
 
 
-class BillingAddressField(forms.MultiValueField):
-    widget = BillingAddressWidget
-
-    def __init__(self, addr_label: str = "Billing Address", **kwargs) -> None:
-        fields = (
-            forms.CharField(label="First Name"),
-            forms.CharField(label="Last Name"),
-            forms.CharField(label="Phone #"),
-            AddressField(label=addr_label),
-        )
-        return super().__init__(fields, **kwargs)
-
-    def compress(self, data_list) -> customerAddressType:
-        addr_dict = data_list[3]
-        return customerAddressType(
-            firstName=data_list[0],
-            lastName=data_list[1],
-            address=addr_dict["street"],
-            city=addr_dict["city"],
-            state=addr_dict["state"],
-            country=addr_dict["country"],
-            zip=addr_dict["zip"],
-            phoneNumber=data_list[2],
-        )
-
-
-class ShippingAddressField(forms.MultiValueField):
-    widget = ShippingAddressWidget
-
-    def __init__(self, addr_label: str = "Shipping Address", **kwargs) -> None:
-        fields = (
-            forms.CharField(label="First Name"),
-            forms.CharField(label="Last Name"),
-            forms.CharField(label="Phone #"),
-            AddressField(label=addr_label),
-        )
-        return super().__init__(fields, **kwargs)
-
-    def compress(self, data_list) -> customerAddressType:
-        addr_dict = data_list[3]
-        return customerAddressType(
-            firstName=data_list[0],
-            lastName=data_list[1],
-            address=addr_dict["street"],
-            city=addr_dict["city"],
-            state=addr_dict["state"],
-            country=addr_dict["country"],
-            zip=addr_dict["zip"],
-            phoneNumber=data_list[2],
-        )
-
-
 class CreditCardField(forms.MultiValueField):
+    field_class: str = "p-2 w-full border border-gray-600 rounded bg-gray-50"
     widget = CreditCardWidget
 
     def __init__(self, **kwargs) -> None:
         fields = (
             forms.CharField(
                 label="Card #",
-                validators=[MaxLengthValidator(16), validate_credit_card_number],
+                validators=[
+                    MinLengthValidator(16),
+                    MaxLengthValidator(19),
+                    validate_credit_card_number,
+                ],
             ),
-            forms.CharField(
+            forms.IntegerField(
                 label="Card Expiration Month",
+                max_value=12,
+                min_value=1,
                 validators=[MinLengthValidator(2), MaxLengthValidator(2)],
             ),
-            forms.CharField(
+            forms.IntegerField(
                 label="Card Expiration Year",
+                max_value=99,
+                min_value=int(f"{timezone.now():%y}"),  # Current year
                 validators=[MinLengthValidator(2), MaxLengthValidator(2)],
             ),
             forms.CharField(

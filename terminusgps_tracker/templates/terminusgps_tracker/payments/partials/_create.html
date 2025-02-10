@@ -4,7 +4,6 @@
     method="post"
     hx-include="this"
     hx-swap="outerHTML"
-    hx-target="#payment-form"
 >
     <h2 class="mb-4 text-xl text-center text-terminus-red-800">New Payment Method</h2>
     <div class="{{ class }}">
@@ -18,6 +17,7 @@
             value="Submit"
             hx-trigger="click"
             hx-post="{% url 'create payment' %}"
+            hx-target="#payment-form"
         >
         <input 
             class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 hover:bg-gray-200 transition-colors duration-300 ease-in-out"
@@ -25,6 +25,7 @@
             value="Cancel"
             hx-trigger="click"
             hx-delete="{% url 'create payment' %}"
+            hx-target="#payment-form"
         >
     </div>
 </form>

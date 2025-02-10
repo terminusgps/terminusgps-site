@@ -1,6 +1,6 @@
 from django import forms
 
-from terminusgps_tracker.forms.fields.credit_card import CreditCardField
+from terminusgps_tracker.forms.fields import AddressField, CreditCardField
 
 
 class PaymentMethodCreationForm(forms.Form):
@@ -35,3 +35,10 @@ class PaymentMethodCreationForm(forms.Form):
         ),
     )
     credit_card = CreditCardField()
+    address = AddressField()
+    default = forms.BooleanField(
+        label="Set as payment method?",
+        required=False,
+        initial=False,
+        widget=forms.widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
+    )

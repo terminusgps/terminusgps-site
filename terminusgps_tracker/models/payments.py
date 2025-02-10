@@ -29,14 +29,16 @@ class TrackerPaymentMethod(models.Model):
                 assert self.profile.authorizenet_id, (
                     f"Authorizenet customer profile was not set for '{self.profile}'"
                 )
-                self.default = form.cleaned_data["default"]
-                self.authorizenet_id = PaymentProfile(
+                payment_profile = PaymentProfile(
                     billing_addr=form.cleaned_data["address"],
                     customer_profile_id=self.profile.authorizenet_id,
                     default=form.cleaned_data["default"],
                     merchant_id=self.profile.user.pk,
                     payment=paymentType(creditCard=form.cleaned_data["credit_card"]),
-                ).id
+                )
+
+                self.default = form.cleaned_data["default"]
+                self.authorizenet_id = payment_profile.id
         return super().save(**kwargs)
 
     def delete(self, *args, **kwargs):
