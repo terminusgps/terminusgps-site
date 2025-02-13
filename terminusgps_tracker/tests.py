@@ -23,7 +23,7 @@ class TrackerProfileTestCase(TestCase):
         # Create common variables
         self.test_timestamp = f"{timezone.now():%Y_%m_%d_%H:%M:%S}"
         self.test_billing_plan = settings.WIALON_DEFAULT_PLAN
-        self.test_session = session_manager.get_session(log_level=logging.DEBUG)
+        self.test_session = session_manager.get_session(log_level=logging.INFO)
         self.test_session.login(self.test_session.token)
 
         # Create common Wialon objects
@@ -54,16 +54,29 @@ class TrackerProfileTestCase(TestCase):
         )
         self.test_resource.create_account(billing_plan=self.test_billing_plan)
         self.test_resource.enable_account()
-        print("TrackerProfileTestCase.setUp() complete...")
-        print(f"Called Wialon API {self.test_session.wialon_api.num_calls} times.")
+        self.test_resource.set_settings_flags()
 
     def tearDown(self) -> None:
-        self.test_resource.delete()
+        # self.test_resource.delete()
         self.test_session.logout()
-        print("TrackerProfileTestCase.tearDown() complete...")
 
-    def test_wialon_unit_can_be_migrated(self) -> None:
+    def test_wialon_account_can_migrate_unit(self) -> None:
+        """Fails if a Wialon unit cannot be migrated into the test account."""
         try:
             self.test_resource.migrate_unit(unit=self.test_unit)
-        except WialonError as e:
+        except (WialonError, ValueError) as e:
+            self.fail(e)
+
+    def test_wialon_account_can_add_days(self) -> None:
+        """Fails if days cannot be added to the test account."""
+        try:
+            self.test_resource.add_days(30)
+        except (WialonError, ValueError) as e:
+            self.fail(e)
+
+    def test_wialon_account_can_set_minimum_days(self) -> None:
+        """Fails if minimum days cannot be set on the test account."""
+        try:
+            self.test_resource.set_minimum_days(0)
+        except (WialonError, ValueError) as e:
             self.fail(e)
