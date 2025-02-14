@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import transaction
 from django.forms import ValidationError
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import FormView, RedirectView
 from terminusgps.wialon import constants
@@ -20,7 +20,7 @@ from wialon.api import WialonError
 from terminusgps.wialon.items import WialonResource, WialonUnitGroup, WialonUser
 from terminusgps.wialon.session import WialonSession
 from terminusgps_tracker.forms import TrackerAuthenticationForm, TrackerSignupForm
-from terminusgps_tracker.models import TrackerProfile, TrackerSubscription
+from terminusgps_tracker.models import TrackerProfile
 from terminusgps_tracker.views.base import (
     HtmxTemplateView,
     TrackerBaseView,
@@ -96,6 +96,7 @@ class TrackerSignupView(
             cleaned_data, username=cleaned_data.get("username", "")
         )
 
+    @transaction.atomic
     def form_valid(self, form: TrackerSignupForm) -> HttpResponse:
         try:
             ids = self.wialon_registration_flow(
@@ -113,24 +114,21 @@ class TrackerSignupView(
                 ),
             )
             return self.form_invalid(form=form)
-
-        profile = TrackerProfile.objects.create(
-            user=get_user_model().objects.create_user(
+        else:
+            user = get_user_model().objects.create_user(
                 first_name=form.cleaned_data["first_name"],
                 last_name=form.cleaned_data["last_name"],
                 username=form.cleaned_data["username"],
                 password=form.cleaned_data["password1"],
                 email=form.cleaned_data["username"],
             )
-        )
-        TrackerSubscription.objects.create(profile=profile)
-        profile.wialon_super_user_id = ids.get("super_user")
-        profile.wialon_end_user_id = ids.get("end_user")
-        profile.wialon_resource_id = ids.get("resource")
-        profile.wialon_group_id = ids.get("unit_group")
-        profile.save()
-        send_confirmation_email(form.cleaned_data["username"])
-        return super().form_valid(form=form)
+
+            profile = TrackerProfile.objects.create(user=user)
+            profile.wialon_end_user_id = ids.get("wialon_end_user_id")
+            profile.wialon_group_id = ids.get("wialon_group_id")
+            profile.wialon_resource_id = ids.get("wialon_resource_id")
+            profile.wialon_super_user_id = ids.get("wialon_super_user_id")
+            return super().form_valid(form=form)
 
     @staticmethod
     @transaction.atomic
@@ -138,37 +136,42 @@ class TrackerSignupView(
         username: str, password: str, session: WialonSession
     ) -> dict[str, int | None]:
         super_user = WialonUser(
+            id=None,
+            session=session,
             creator_id=settings.WIALON_ADMIN_ID,
-            name=f"account_{username}",  # account_email@domain.com
+            name=f"super_{username}",  # super_email@domain.com
             password=password,
-            session=session,
-        )
-        end_user = WialonUser(
-            creator_id=settings.WIALON_ADMIN_ID,
-            name=username,  # email@domain.com
-            password=password,
-            session=session,
-        )
-        unit_group = WialonUnitGroup(
-            creator_id=settings.WIALON_ADMIN_ID,
-            name=f"group_{username}",  # group_email@domain.com
-            session=session,
         )
         resource = WialonResource(
-            creator_id=super_user.id, name=f"account_{username}", session=session
+            id=None,
+            session=session,
+            creator_id=super_user.id,
+            name=f"account_{username}",  # account_email@domain.com
         )
-        super_user.grant_access(end_user, access_mask=constants.ACCESSMASK_UNIT_FULL)
-        end_user.grant_access(resource, access_mask=constants.ACCESSMASK_UNIT_BASIC)
-        session.wialon_api.account_create_account(
-            **{"itemId": resource.id, "plan": "terminusgps_ext_hist"}
+        end_user = WialonUser(
+            id=None,
+            session=session,
+            creator_id=super_user.id,
+            name=username,  # email@domain.com
+            password=password,
         )
-        session.wialon_api.account_enable_account(
-            **{"itemId": resource.id, "enable": int(True)}
+        unit_group = WialonUnitGroup(
+            id=None,
+            session=session,
+            creator_id=super_user.id,
+            name=f"group_{username}",  # group_email@domain.com
         )
 
+        end_user.grant_access(unit_group, access_mask=constants.ACCESSMASK_UNIT_BASIC)
+        end_user.grant_access(resource, access_mask=constants.ACCESSMASK_RESOURCE_BASIC)
+        resource.create_account("terminusgps_ext_hist")
+        resource.enable_account()
+        resource.set_settings_flags()
+        resource.add_days(7)
+
         return {
-            "super_user": super_user.id,
-            "end_user": end_user.id,
-            "resource": resource.id,
-            "unit_group": unit_group.id,
+            "wialon_end_user_id": end_user.id,
+            "wialon_group_id": unit_group.id,
+            "wialon_resource_id": resource.id,
+            "wialon_super_user_id": super_user.id,
         }

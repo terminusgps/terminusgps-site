@@ -1,6 +1,5 @@
 from typing import Any
 
-from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.db import transaction
@@ -16,7 +15,6 @@ from terminusgps_tracker.forms.assets import (
     TrackerAssetUpdateForm,
 )
 from terminusgps_tracker.models import TrackerAsset
-from terminusgps_tracker.models.assets import TrackerAssetCommand
 from terminusgps_tracker.views.base import TrackerBaseView
 from terminusgps_tracker.views.mixins import (
     TrackerProfileSingleObjectMixin,
@@ -66,7 +64,7 @@ class AssetCreateView(CreateView, TrackerBaseView, TrackerProfileSingleObjectMix
             form.cleaned_data["imei_number"], self.wialon_session
         )
         if unit_id is not None:
-            unit = WialonUnit(id=unit_id, session=self.wialon_session)
+            new_unit = WialonUnit(id=unit_id, session=self.wialon_session)
             super_user = WialonUser(
                 id=self.profile.wialon_super_user_id, session=self.wialon_session
             )
@@ -78,11 +76,10 @@ class AssetCreateView(CreateView, TrackerBaseView, TrackerProfileSingleObjectMix
             )
 
             super_user.grant_access(
-                unit, access_mask=constants.ACCESSMASK_UNIT_MIGRATION
+                new_unit, access_mask=constants.ACCESSMASK_UNIT_MIGRATION
             )
-            end_user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
-            resource.migrate_unit(unit)
-            return super().form_valid(form=form)
+            end_user.grant_access(new_unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
+            resource.migrate_unit(new_unit)
         return super().form_valid(form=form)
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
@@ -157,30 +154,4 @@ class AssetRemoteView(DetailView, TrackerBaseView, TrackerProfileSingleObjectMix
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
         context["title"] = f"{self.get_object().name} Remote"
-        context["commands"] = self.get_object().commands.all()
         return context
-
-
-class AssetCommandExecutionView(DetailView, TrackerBaseView):
-    content_type = "text/html"
-    context_object_name = "cmd"
-    http_method_names = ["get", "post"]
-    model = TrackerAssetCommand
-    template_name = "terminusgps_tracker/assets/execute_command.html"
-    partial_template_name = "terminusgps_tracker/assets/partials/_execute_command.html"
-
-    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not request.headers.get("HX-Request"):
-            return HttpResponse(status=403)
-        return self.render_to_response(context=self.get_context_data())
-
-    def get_queryset(self) -> QuerySet:
-        asset = TrackerAsset.objects.get(pk=self.kwargs["asset_pk"])
-        return asset.commands.filter()
-
-    def get_object(self) -> TrackerAssetCommand | None:
-        return self.get_queryset().get(pk=self.kwargs["pk"])
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        self.object = self.get_object()
-        return super().get_context_data(**kwargs)

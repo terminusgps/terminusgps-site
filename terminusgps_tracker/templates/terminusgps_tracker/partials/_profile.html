@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-24">
         <div class="flex flex-col gap-4">
             <h2 class="border-b-2 border-terminus-red-300 pb-2 text-2xl font-bold tracking-wider dark:text-terminus-white">Your Assets</h2>
-            <a id="asset-table" hx-get="{% url 'asset table' %}" hx-trigger="load" hx-swap="outerHTML" hx-target="this"></a>
+            <a id="card-list" hx-get="{% url 'card list' %}" hx-trigger="load" hx-swap="outerHTML" hx-target="this"></a>
         </div>
         <div class="flex flex-col gap-4">
             <h2 class="border-b-2 border-terminus-red-300 pb-2 text-2xl font-bold tracking-wider dark:text-terminus-white">Your Subscription</h2>

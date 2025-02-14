@@ -1,31 +1,23 @@
-<tr
-    class="group bg-gray-100 odd:bg-gray-200 text-gray-800 text-left"
-    hx-target="this"
-    hx-include="this"
-    hx-swap="outerHTML"
->
+<form class="{{ class }}" hx-target="this" hx-include="this" hx-swap="outerHTML">
     {% csrf_token %}
-    <td class="p-2 border border-gray-600">{{ form.name }}</td>
-    <td class="p-2 border border-gray-600">{{ form.imei_number }}</td>
-    <td class="p-2 border border-gray-600">
-        <div class="flex gap-2">
-            <input
-                class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 hover:bg-gray-200 transition-colors duration-300 ease-in-out"
-                type="button"
-                value="Cancel"
-                hx-delete="{% url 'asset create' %}"
-                hx-swap="delete"
-                hx-trigger="click"
-                hx-target="closest tr"
-            >
-            <input
-                class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out"
-                type="submit"
-                value="Save"
-                hx-post="{% url 'asset create' %}"
-                hx-trigger="click"
-                hx-target="closest tr"
-            >
-        </div>
-    </td>
-</tr>
+    {{ form }}
+    <div class="flex gap-2">
+        <input
+            class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 hover:bg-gray-200 transition-colors duration-300 ease-in-out"
+            type="button"
+            value="Cancel"
+            hx-delete="{% url 'asset create' %}"
+            hx-swap="delete"
+            hx-trigger="click"
+            hx-target="closest form"
+        >
+        <input
+            class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out"
+            type="submit"
+            value="Save"
+            hx-post="{% url 'asset create' %}"
+            hx-trigger="click"
+            hx-target="closest form"
+        >
+    </div>
+</form>

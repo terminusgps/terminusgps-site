@@ -1,4 +1,4 @@
-from authorizenet.apicontractsv1 import creditCardType, customerAddressType, paymentType
+from authorizenet.apicontractsv1 import customerAddressType, paymentType
 from django import forms
 from django.db import models
 

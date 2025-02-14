@@ -21,7 +21,7 @@ class WialonSessionView(ContextMixin, View):
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         self.wialon_session = WialonSession(sid=request.session.get("wialon_sid"))
 
-        if not self.wialon_session.active:
+        if not request.session.get("wialon_sid"):
             self.wialon_session.login(token=settings.WIALON_TOKEN)
             request.session["wialon_sid"] = self.wialon_session.id
         self.wialon_sid = request.session["wialon_sid"]

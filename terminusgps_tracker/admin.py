@@ -4,7 +4,6 @@ from django.forms import widgets
 
 from terminusgps_tracker.models import (
     TrackerAsset,
-    TrackerAssetCommand,
     TrackerPaymentMethod,
     TrackerProfile,
     TrackerShippingAddress,
@@ -41,12 +40,6 @@ class TrackerAssetAdmin(admin.ModelAdmin):
         ),
     ]
     readonly_fields = ["is_active", "hw_type"]
-
-
-@admin.register(TrackerAssetCommand)
-class TrackerAssetCommandAdmin(admin.ModelAdmin):
-    list_display = ["name", "type", "link"]
-    fields = ["name", "type", "link"]
 
 
 @admin.register(TrackerProfile)
