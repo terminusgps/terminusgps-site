@@ -1,17 +1,4 @@
-<tr class="group bg-gray-100 odd:bg-gray-200 text-gray-800 text-left" hx-target="this" id="{{ asset.pk }}">
-    <td class="p-2 border border-gray-600">
-        <a href="{% url 'asset remote' asset.pk %}" class="font-semibold text-terminus-red-600 underline decoration-terminus-black decoration-2 underline-offset-2 hover:text-terminus-red-300 hover:decoration-dotted">
-            {{ asset.name }}
-        </a>
-    </td>
-    <td class="p-2 border border-gray-600 select-all">{{ asset.imei_number }}</td>
-    <td class="p-2 border border-gray-600">
-        <input
-            class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out"
-            type="button"
-            value="Edit"
-            hx-get="{% url 'asset update' asset.pk %}"
-            hx-trigger="click"
-        >
-    </td>
-</tr>
+<div id="{{ asset.pk }}">
+    <span>{{ asset.imei_number }}</span>
+    <h2>{{ asset.name }}</h2>
+</div>

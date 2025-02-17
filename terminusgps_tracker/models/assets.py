@@ -1,8 +1,5 @@
-import requests
-from urllib.parse import urlencode
 from django.db import models, transaction
 
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from terminusgps.wialon.session import WialonSession
 from terminusgps.wialon.utils import get_id_from_iccid
@@ -15,10 +12,10 @@ from terminusgps_tracker.validators import (
 
 
 class TrackerAsset(models.Model):
+    imei_number = models.PositiveIntegerField()
     wialon_id = models.PositiveIntegerField(
         default=None, blank=True, null=True, validators=[validate_wialon_unit_id]
     )
-    imei_number = models.PositiveIntegerField(default=None, null=True, blank=True)
     profile = models.ForeignKey(
         "terminusgps_tracker.TrackerProfile",
         on_delete=models.CASCADE,

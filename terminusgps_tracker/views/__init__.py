@@ -10,11 +10,10 @@ from .addresses import (
     ShippingAddressDetailView,
 )
 from .assets import (
-    AssetCreateView,
-    AssetDetailView,
-    AssetUpdateView,
-    AssetTableView,
-    AssetRemoteView,
+    TrackerAssetCreateView,
+    TrackerAssetDetailView,
+    TrackerAssetUpdateView,
+    TrackerAssetListView,
 )
 from .profile import TrackerProfileSettingsView, TrackerProfileView
 from .public import (

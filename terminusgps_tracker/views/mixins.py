@@ -28,14 +28,16 @@ class TrackerAppConfigContextMixin(ContextMixin):
 class TrackerProfileSingleObjectMixin(SingleObjectMixin):
     def get_object(self) -> Any | None:
         if isinstance(self, CreateView):
-            return
+            return None
         return super().get_object()
 
     def get_queryset(self) -> QuerySet:
         if not hasattr(self, "profile"):
             raise ValueError("'profile' was not set")
+        if not hasattr(self, "model"):
+            raise ValueError("'model' was not set")
 
-        if self.profile:
+        if self.profile is not None:
             return self.model.objects.filter(profile=self.profile)
         return self.model.objects.none()
 
@@ -48,8 +50,10 @@ class TrackerProfileMultipleObjectMixin(MultipleObjectMixin):
     def get_queryset(self) -> QuerySet:
         if not hasattr(self, "profile"):
             raise ValueError("'profile' was not set")
+        if not hasattr(self, "model"):
+            raise ValueError("'model' was not set")
 
-        if self.profile:
+        if self.profile is not None:
             return self.model.objects.filter(profile=self.profile)
         return self.model.objects.none()
 
@@ -80,7 +84,7 @@ class SubscriptionRequiredMixin(UserPassesTestMixin):
             if self.request.user and self.request.user.is_authenticated:
                 profile = TrackerProfile.objects.get(user=self.request.user)
                 return (
-                    profile.subscription.status.upper() == "ACTIVE"
+                    profile.subscription.status.lower() == "active"
                     or self.request.user.is_staff
                 )
             return False

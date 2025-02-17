@@ -1,157 +1,122 @@
-from typing import Any
-
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.forms import ValidationError
+from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.db import transaction
-from django.views.generic import CreateView, DetailView, UpdateView
-from django.views.generic.list import ListView
-from terminusgps.wialon import constants
+from django.views.generic import CreateView, DetailView, UpdateView, ListView
+from wialon.api import WialonError
+from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
-from terminusgps.wialon.session import WialonSession
-from terminusgps.wialon.items import WialonResource, WialonUnit, WialonUser
-from terminusgps.wialon.utils import get_id_from_iccid
-from terminusgps_tracker.forms.assets import (
-    TrackerAssetCreateForm,
-    TrackerAssetUpdateForm,
-)
-from terminusgps_tracker.models import TrackerAsset
+from terminusgps.wialon import constants
+from terminusgps.wialon.items import WialonUnit, WialonUnitGroup
+
 from terminusgps_tracker.views.base import TrackerBaseView
 from terminusgps_tracker.views.mixins import (
     TrackerProfileSingleObjectMixin,
     TrackerProfileMultipleObjectMixin,
 )
+from terminusgps_tracker.models import TrackerAsset
+from terminusgps_tracker.forms import TrackerAssetCreateForm, TrackerAssetUpdateForm
 
 
-class AssetTableView(ListView, TrackerBaseView, TrackerProfileMultipleObjectMixin):
+class TrackerAssetDetailView(
+    DetailView, TrackerBaseView, TrackerProfileSingleObjectMixin
+):
+    model = TrackerAsset
+    partial_template_name = "terminusgps_tracker/assets/partials/_detail.html"
+    template_name = "terminusgps_tracker/assets/detail.html"
+
+
+class TrackerAssetListView(
+    ListView, TrackerBaseView, TrackerProfileMultipleObjectMixin
+):
     allow_empty = True
-    context_object_name = "asset_list"
-    content_type = "text/html"
-    extra_context = {
-        "title": "Your Assets",
-        "subtitle": "Add or modify your registered assets below",
-    }
-    http_method_names = ["get"]
     model = TrackerAsset
     ordering = "name"
-    paginate_by = 8
-    queryset = TrackerAsset.objects.none()
-    template_name = "terminusgps_tracker/assets/table.html"
-    partial_template_name = "terminusgps_tracker/assets/partials/_table.html"
+    paginate_by = 3
+    partial_template_name = "terminusgps_tracker/assets/partials/_list.html"
+    template_name = "terminusgps_tracker/assets/list.html"
 
 
-class AssetCreateView(CreateView, TrackerBaseView, TrackerProfileSingleObjectMixin):
-    content_type = "text/html"
-    context_object_name = "asset"
+class TrackerAssetCreateView(
+    CreateView, TrackerBaseView, TrackerProfileSingleObjectMixin
+):
     extra_context = {
-        "title": "New Asset",
-        "subtitle": "Fill in a name and the IMEI # for your new asset",
+        "class": "flex flex-col p-4 gap-8 bg-gray-100 rounded border shadow"
     }
     form_class = TrackerAssetCreateForm
-    http_method_names = ["get", "post", "delete"]
     model = TrackerAsset
-    queryset = TrackerAsset.objects.none()
-    template_name = "terminusgps_tracker/assets/create.html"
     partial_template_name = "terminusgps_tracker/assets/partials/_create.html"
-    success_url = reverse_lazy("tracker profile")
+    success_url = reverse_lazy("asset list")
+    template_name = "terminusgps_tracker/assets/create.html"
 
-    def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        return HttpResponse(status=200 if request.headers.get("HX-Request") else 403)
+    def form_valid(self, form: TrackerAssetUpdateForm) -> HttpResponse:
+        imei_number = form.cleaned_data["imei_number"]
+        new_name = form.cleaned_data["name"] or form.cleaned_data["imei_number"]
 
-    def form_valid(
-        self, form: TrackerAssetCreateForm
-    ) -> HttpResponse | HttpResponseRedirect:
-        unit_id: str | None = get_id_from_iccid(
-            form.cleaned_data["imei_number"], self.wialon_session
+        try:
+            asset = TrackerAsset.objects.create(imei_number=imei_number)
+            asset.save(session=self.wialon_session, populate=False)
+            self.wialon_asset_registration_flow(asset, new_name=new_name)
+            asset.save(session=self.wialon_session, populate=True)
+            return super().form_valid(form=form)
+        except WialonError as e:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! Something went wrong with Wialon: '%(error)s'"),
+                    code="invalid",
+                    params={"error": e},
+                ),
+            )
+        except (AssertionError, ValueError) as e:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! Something went wrong on our end: '%(error)s'"),
+                    code="invalid",
+                    params={"error": e},
+                ),
+            )
+        return super().form_invalid(form=form)
+
+    def wialon_asset_registration_flow(
+        self, asset: TrackerAsset, new_name: str | None = None
+    ) -> None:
+        try:
+            assert self.profile, "User profile was not set."
+            assert asset.wialon_id, "Asset wialon id was not set."
+            super_user = self.profile.get_super_user(self.wialon_session)
+            end_user = self.profile.get_end_user(self.wialon_session)
+            resource = self.profile.get_resource(self.wialon_session)
+            unit_group = self.profile.get_group(self.wialon_session)
+            unit = WialonUnit(id=asset.wialon_id, session=self.wialon_session)
+        except AssertionError:
+            raise
+
+        super_user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_MIGRATION)
+        end_user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
+        resource.migrate_unit(unit)
+        unit_group.add_item(unit)
+
+        available = WialonUnitGroup(
+            id=settings.WIALON_UNACTIVATED_GROUP, session=self.wialon_session
         )
-        if unit_id is not None:
-            new_unit = WialonUnit(id=unit_id, session=self.wialon_session)
-            super_user = WialonUser(
-                id=self.profile.wialon_super_user_id, session=self.wialon_session
-            )
-            end_user = WialonUser(
-                id=self.profile.wialon_end_user_id, session=self.wialon_session
-            )
-            resource = WialonResource(
-                id=self.profile.wialon_resource_id, session=self.wialon_session
-            )
-
-            super_user.grant_access(
-                new_unit, access_mask=constants.ACCESSMASK_UNIT_MIGRATION
-            )
-            end_user.grant_access(new_unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
-            resource.migrate_unit(new_unit)
-        return super().form_valid(form=form)
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        self.object = None
-        return super().get_context_data(**kwargs)
-
-    def get_initial(self, **kwargs) -> dict[str, Any]:
-        initial = super().get_initial(**kwargs)
-        initial["imei_number"] = self.request.GET.get("imei")
-        return initial
+        if unit.id in available.items:
+            available.rm_item(unit)
+        if new_name is not None:
+            unit.rename(new_name)
 
 
-class AssetDetailView(DetailView, TrackerBaseView, TrackerProfileSingleObjectMixin):
-    content_type = "text/html"
-    context_object_name = "asset"
-    http_method_names = ["get"]
-    model = TrackerAsset
-    queryset = TrackerAsset.objects.none()
-    template_name = "terminusgps_tracker/assets/detail.html"
-    partial_template_name = "terminusgps_tracker/assets/partials/_detail.html"
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["title"] = self.get_object().name.title()
-        return context
-
-
-class AssetUpdateView(UpdateView, TrackerBaseView, TrackerProfileSingleObjectMixin):
-    content_type = "text/html"
-    context_object_name = "asset"
-    http_method_names = ["get", "post", "delete"]
+class TrackerAssetUpdateView(
+    UpdateView, TrackerBaseView, TrackerProfileSingleObjectMixin
+):
     form_class = TrackerAssetUpdateForm
     model = TrackerAsset
-    template_name = "terminusgps_tracker/assets/update.html"
     partial_template_name = "terminusgps_tracker/assets/partials/_update.html"
-    success_url = reverse_lazy("tracker profile")
+    success_url = reverse_lazy("asset list")
+    template_name = "terminusgps_tracker/assets/update.html"
 
-    def get_initial(self) -> dict[str, Any]:
-        initial: dict[str, Any] = super().get_initial()
-        asset = self.get_object()
-        if asset is not None:
-            initial["name"] = asset.name
-            initial["imei_number"] = asset.imei_number
-        return initial
-
-    @transaction.atomic
-    def form_valid(self, form: TrackerAssetUpdateForm) -> HttpResponseRedirect:
-        asset = self.get_object()
-
-        if asset is not None:
-            session = WialonSession(sid=self.wialon_sid)
-            unit = WialonUnit(id=asset.wialon_id, session=session)
-            unit.rename(form.cleaned_data["name"])
-            asset.save(session)
-        return HttpResponseRedirect(self.get_success_url(self.get_object()))
-
-    def get_success_url(self, asset: TrackerAsset | None = None) -> str:
-        if asset is not None:
-            return asset.get_absolute_url()
-        return super().get_success_url()
-
-
-class AssetRemoteView(DetailView, TrackerBaseView, TrackerProfileSingleObjectMixin):
-    content_type = "text/html"
-    context_object_name = "asset"
-    extra_context = {"subtitle": "Send a command or update notifications"}
-    http_method_names = ["get"]
-    model = TrackerAsset
-    template_name = "terminusgps_tracker/assets/remote.html"
-    partial_template_name = "terminusgps_tracker/assets/partials/_remote.html"
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["title"] = f"{self.get_object().name} Remote"
-        return context
+    def form_valid(self, form: TrackerAssetUpdateForm) -> HttpResponse:
+        self.object = self.get_object()
+        self.object.save(profile=self.profile, form=form, session=self.wialon_session)
+        return super().form_valid(form=form)

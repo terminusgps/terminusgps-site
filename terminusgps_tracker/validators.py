@@ -5,16 +5,14 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from wialon.api import WialonError
 
-from terminusgps.wialon.session import WialonSession, WialonSessionManager
+from terminusgps.wialon.session import WialonSession
 from terminusgps.wialon.utils import is_unique, get_wialon_cls
-
-
-session_manager = WialonSessionManager()
 
 
 class WialonValidatorBase:
     def __init__(self) -> None:
-        self.session: WialonSession = session_manager.get_session()
+        self.session: WialonSession = WialonSession()
+        self.session.login(self.session.token)
 
     def __call__(self, value: str) -> None:
         raise NotImplementedError("Subclasses must implement this method.")
@@ -83,13 +81,19 @@ def validate_credit_card_expiry_month(value: str) -> None:
     months = [str(num + 1) for num in range(12)]
     if not value.isdigit():
         raise ValidationError(
-            _("Month must be a digit. Got '%(value)s'."),
+            _("Month must be a digit, got '%(value)s'."),
             code="invalid",
             params={"value": value},
         )
+    if not len(value) == 2:
+        raise ValidationError(
+            _("Month must be exactly 2 characters in length, got '%(length)s'"),
+            code="invalid",
+            params={"length": len(value)},
+        )
     if value not in months:
         raise ValidationError(
-            _("Month must be 1-12. Got '%(value)s'."),
+            _("Month must be 1-12, got '%(value)s'."),
             code="invalid",
             params={"value": value},
         )
@@ -99,13 +103,19 @@ def validate_credit_card_expiry_year(value: str) -> None:
     this_year = int(f"{timezone.now():%y}")
     if not value.isdigit():
         raise ValidationError(
-            _("Year must be a digit. Got '%(value)s'."),
+            _("Year must be a digit, got '%(value)s'."),
             code="invalid",
             params={"value": value},
         )
+    if not len(value) == 2:
+        raise ValidationError(
+            _("Year must be exactly 2 characters in length, got '%(length)s'"),
+            code="invalid",
+            params={"length": len(value)},
+        )
     if int(value) < this_year:
         raise ValidationError(
-            _("Year is in the past. Got '%(value)s'."),
+            _("Year is in the past, got '%(value)s'."),
             code="invalid",
             params={"value": value},
         )

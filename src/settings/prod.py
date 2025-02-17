@@ -1,3 +1,4 @@
+import logging
 import os
 import pathlib
 from terminusgps.aws.secrets import get_secret
@@ -46,6 +47,7 @@ WIALON_HOST = secret.get("WIALON_HOST")
 WIALON_TOKEN = secret.get("WIALON_TOKEN")
 WIALON_UNACTIVATED_GROUP = secret.get("WIALON_UNACTIVATED_GROUP")
 WIALON_DEFAULT_PLAN = secret.get("WIALON_DEFAULT_PLAN")
+WIALON_SESSION_LOGLEVEL = logging.INFO
 TRACKER_ENCRYPTION_KEY = secret.get("TRACKER_ENCRYPTION_KEY")
 
 TRACKER_APP_CONFIG = {

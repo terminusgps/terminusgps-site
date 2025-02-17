@@ -11,7 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import transaction
 from django.forms import ValidationError
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import FormView, RedirectView
 from terminusgps.wialon import constants
@@ -63,6 +63,10 @@ class TrackerLoginView(LoginView, HtmxTemplateView):
     redirect_authenticated_user = True
     success_url = reverse_lazy("tracker profile")
     template_name = "terminusgps_tracker/login.html"
+
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        print(f"{request.POST = }")
+        return super().post(request, *args, **kwargs)
 
 
 class TrackerLogoutView(LogoutView, TrackerBaseView):
