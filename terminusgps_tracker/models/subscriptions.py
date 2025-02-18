@@ -316,7 +316,7 @@ class TrackerSubscription(models.Model):
             name=f"{self.profile.user.email}'s {tier} Subscription",
             paymentSchedule=paymentSchedule,
             amount=str(tier.amount),
-            trialAmount=trial_amount if trial_amount else str("0.00"),
+            trialAmount=trial_amount if trial_amount else "0.00",
             profile=profile,
         )
 
@@ -350,7 +350,3 @@ class TrackerSubscription(models.Model):
             trialOccurrences=trialOccurrences,
             interval=interval,
         )
-
-    @property
-    def remaining_amount(self) -> Decimal:
-        return Decimal()

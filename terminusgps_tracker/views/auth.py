@@ -64,10 +64,6 @@ class TrackerLoginView(LoginView, HtmxTemplateView):
     success_url = reverse_lazy("tracker profile")
     template_name = "terminusgps_tracker/login.html"
 
-    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        print(f"{request.POST = }")
-        return super().post(request, *args, **kwargs)
-
 
 class TrackerLogoutView(LogoutView, TrackerBaseView):
     content_type = "text/html"

@@ -156,7 +156,7 @@ dependencies = [
     "gunicorn>=23.0.0",
     "sphinx-rtd-theme>=3.0.2",
     "django-docs>=0.3.3",
-    "python-terminusgps==20.1.1",
+    "python-terminusgps==20.4.0",
 ]
 
 [tool.ruff]

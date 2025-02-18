@@ -1,5 +1,4 @@
 <form class="{{ class }}" action="{% url 'asset create' %}" method="post" hx-target="this" hx-include="this" hx-swap="outerHTML">
-    <h2 class="text-xl font-semibold text-gray-800 text-center p-4">Add a new asset</h2>
     {% csrf_token %}
     <div class="p-4 text-center w-full bg-red-100 rounded text-terminus-red-800 hidden has-[ul]:block border border-terminus-red-600">
         {{ form.non_field_errors }}
@@ -16,17 +15,11 @@
             {{ form.imei_number.errors }}
         </div>
     </div>
-    <div class="flex gap-2">
-        <input
-            class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 hover:bg-gray-200 transition-colors duration-300 ease-in-out"
-            type="button"
-            value="Cancel"
-        >
-        <input
-            class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out"
-            type="submit"
-            value="Save"
-            hx-boost="true"
-        >
-    </div>
+    <input
+        class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out"
+        type="submit"
+        value="Save"
+        hx-trigger="click"
+        hx-post="{% url 'asset create' %}"
+    >
 </form>

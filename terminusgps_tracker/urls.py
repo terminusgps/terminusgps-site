@@ -16,7 +16,7 @@ urlpatterns = [
     path("logout/", views.TrackerLogoutView.as_view(), name="tracker logout"),
     path("signup/", views.TrackerSignupView.as_view(), name="tracker signup"),
     path("assets/new/", views.TrackerAssetCreateView.as_view(), name="asset create"),
-    path("assets/list/", views.TrackerAssetCreateView.as_view(), name="asset list"),
+    path("assets/list/", views.TrackerAssetListView.as_view(), name="asset list"),
     path(
         "assets/<int:pk>/", views.TrackerAssetDetailView.as_view(), name="asset detail"
     ),

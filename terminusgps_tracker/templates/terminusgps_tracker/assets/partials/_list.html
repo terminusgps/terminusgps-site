@@ -1,5 +1,8 @@
 <div class="{{ class }}" id="asset-list">
-{% for asset in page_obj %}
-    <div id="{{ asset.pk }}" hx-get="{% url 'asset detail' asset.pk %}" hx-trigger="load" hx-target="this" hx-swap="outerHTML"></div>
+{% for asset in asset_list %}
+    <div id="{{ asset.pk }}" hx-target="this" hx-swap="outerHTML" class="p-4 border bg-gray-200 rounded">
+        <h2 class="text-xl">{{ asset.name }}</h2>
+    </div>
 {% endfor %}
+    <a href="{% url 'asset create' %}" hx-boost="true" class="w-full text-center rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out">Register New Asset</a>
 </div>

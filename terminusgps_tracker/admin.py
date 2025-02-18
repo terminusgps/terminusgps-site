@@ -38,24 +38,25 @@ class TrackerAssetAdmin(admin.ModelAdmin):
     list_display = ["name", "profile__user", "is_active"]
     fieldsets = [
         ("Terminus GPS Tracker", {"fields": ["profile", "is_active"]}),
-        ("Wialon", {"fields": ["wialon_id", "phone_number", "hw_type"]}),
+        ("Wialon", {"fields": ["wialon_id", "imei_number", "phone_number", "hw_type"]}),
     ]
-    readonly_fields = ["is_active", "hw_type"]
+    readonly_fields = ["is_active", "hw_type", "imei_number", "phone_number"]
     actions = ["repopulate_asset"]
 
-    @admin.action(description="Repopulate asset using the Wialon API")
+    @admin.action(description="Repopulate selected assets using the Wialon API")
     def repopulate_asset(self, request, queryset):
+        num_assets = len(queryset)
         with WialonSession() as session:
             for asset in queryset:
                 asset.save(session=session)
         self.message_user(
             request,
             ngettext(
-                "%d asset was successfully repopulated.",
-                "%d assets were successfully repopulated.",
-                len(queryset),
+                "%(count)s asset was successfully repopulated.",
+                "%(count)s assets were successfully repopulated.",
+                num_assets,
             )
-            % len(queryset),
+            % {"count": num_assets},
             messages.SUCCESS,
         )
 
