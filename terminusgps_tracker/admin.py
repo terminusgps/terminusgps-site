@@ -1,6 +1,10 @@
 from django.contrib import admin
 from django.db import models
 from django.forms import widgets
+from django.utils.translation import ngettext
+from django.contrib import messages
+
+from terminusgps.wialon.session import WialonSession
 
 from terminusgps_tracker.models import (
     TrackerAsset,
@@ -33,13 +37,27 @@ class TrackerShippingAddressAdmin(admin.ModelAdmin):
 class TrackerAssetAdmin(admin.ModelAdmin):
     list_display = ["name", "profile__user", "is_active"]
     fieldsets = [
-        ("Terminus GPS Tracker", {"fields": ["profile", "is_active", "commands"]}),
-        (
-            "Wialon",
-            {"fields": ["wialon_id", "imei_number", "phone_number", "hw_type", "icon"]},
-        ),
+        ("Terminus GPS Tracker", {"fields": ["profile", "is_active"]}),
+        ("Wialon", {"fields": ["wialon_id", "phone_number", "hw_type"]}),
     ]
     readonly_fields = ["is_active", "hw_type"]
+    actions = ["repopulate_asset"]
+
+    @admin.action(description="Repopulate asset using the Wialon API")
+    def repopulate_asset(self, request, queryset):
+        with WialonSession() as session:
+            for asset in queryset:
+                asset.save(session=session)
+        self.message_user(
+            request,
+            ngettext(
+                "%d asset was successfully repopulated.",
+                "%d assets were successfully repopulated.",
+                len(queryset),
+            )
+            % len(queryset),
+            messages.SUCCESS,
+        )
 
 
 @admin.register(TrackerProfile)
