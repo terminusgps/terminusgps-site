@@ -62,6 +62,34 @@ class TrackerProfileMultipleObjectMixin(MultipleObjectMixin):
         return super().get_context_data(**kwargs)
 
 
+class TrackerProfileHasPaymentMethodTest(UserPassesTestMixin):
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please add a payment method and try again."
+
+    def get_test_func(self) -> Callable:
+        def user_has_payment_method() -> bool:
+            if self.request.user:
+                profile = TrackerProfile.objects.get(user=self.request.user)
+                return profile.payments.exists()
+            return False
+
+        return user_has_payment_method
+
+
+class TrackerProfileHasShippingAddressTest(UserPassesTestMixin):
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please add a shipping address and try again."
+
+    def get_test_func(self) -> Callable:
+        def user_has_shipping_address() -> bool:
+            if self.request.user:
+                profile = TrackerProfile.objects.get(user=self.request.user)
+                return profile.addresses.exists()
+            return False
+
+        return user_has_shipping_address
+
+
 class StaffRequiredMixin(UserPassesTestMixin):
     login_url = reverse_lazy("tracker login")
     permission_denied_message = "Sorry, you are not allowed to access this."

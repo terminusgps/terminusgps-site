@@ -1,14 +1,16 @@
 <form hx-indicator=".htmx-indicator" id="subscription" hx-target="this" hx-swap="outerHTML" class="{{ class }}" action="{% url 'subscription update' subscription.pk %}" method="post">
     {% csrf_token %}
-    {% if "tier" in form.errors %}
-    <ul class="relative top-0 list-inside list-none rounded border border-red-600 bg-red-200 p-2 text-terminus-red-700">
-        {% for error in form.tier.errors %}<li>{{ error }}</li>{% endfor %}
-    </ul>
-    {% endif %}
-    {{ form.tier }}
+    <div class="mb-4 p-4 text-center w-full bg-red-100 rounded text-terminus-red-800 hidden has-[ul]:block border border-terminus-red-600">
+        {{ form.non_field_errors }}
+    </div>
+    <div class="flex flex-col gap-2">
+        {{ form.tier.label }}
+        {{ form.tier }}
+        {{ form.tier.errors }}
+    </div>
     {{ form.address_id.as_hidden }}
     {{ form.payment_id.as_hidden }}
-    <div class="flex flex-col gap-2">
+    <div class="mt-4 flex flex-col gap-2">
         <input
             class="rounded border border-terminus-black bg-terminus-red-800 p-2 text-white hover:cursor-pointer hover:bg-terminus-red-400"
             type="button"

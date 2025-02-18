@@ -10,7 +10,11 @@ from django.core.exceptions import ValidationError
 from terminusgps_tracker.models import TrackerSubscription, TrackerSubscriptionTier
 from terminusgps_tracker.forms import SubscriptionUpdateForm, SubscriptionCancelForm
 from terminusgps_tracker.views.base import TrackerBaseView
-from terminusgps_tracker.views.mixins import TrackerProfileSingleObjectMixin
+from terminusgps_tracker.views.mixins import (
+    TrackerProfileHasPaymentMethodTest,
+    TrackerProfileHasShippingAddressTest,
+    TrackerProfileSingleObjectMixin,
+)
 
 
 class TrackerSubscriptionCancelView(
@@ -59,25 +63,27 @@ class TrackerSubscriptionDetailView(
 
 
 class TrackerSubscriptionUpdateView(
-    UpdateView, TrackerBaseView, TrackerProfileSingleObjectMixin
+    UpdateView,
+    TrackerBaseView,
+    TrackerProfileSingleObjectMixin,
+    TrackerProfileHasPaymentMethodTest,
+    TrackerProfileHasShippingAddressTest,
 ):
     model = TrackerSubscription
     partial_template_name = "terminusgps_tracker/subscription/partials/_update.html"
     queryset = TrackerSubscription.objects.none()
     template_name = "terminusgps_tracker/subscription/update.html"
-    fields = ["tier", "payment_id", "address_id"]
+    form_class = SubscriptionUpdateForm
     context_object_name = "subscription"
-    extra_context = {"class": "rounded bg-gray-100 p-8 shadow border-gray-600 border"}
+    extra_context = {
+        "class": "rounded bg-gray-100 p-8 shadow border-gray-600 border gap-4"
+    }
 
     def get_initial(self) -> dict[str, Any]:
         initial: dict[str, Any] = super().get_initial()
-        initial["address_id"] = (
-            self.profile.addresses.filter(is_default=True).first().authorizenet_id
-        )
-        initial["payment_id"] = (
-            self.profile.payments.filter(is_default=True).first().authorizenet_id
-        )
         initial["tier"] = TrackerSubscriptionTier.objects.get(pk=2)
+        initial["payment_id"] = self.profile.payments.filter(default=True).first()
+        initial["address_id"] = self.profile.addresses.filter(default=True).first()
         return initial
 
     def get_object(self, queryset: QuerySet | None = None) -> TrackerSubscription:
@@ -93,6 +99,7 @@ class TrackerSubscriptionUpdateView(
         new_tier = form.cleaned_data["tier"]
         payment_id = form.cleaned_data["payment_id"]
         address_id = form.cleaned_data["address_id"]
+
         try:
             upgrading = bool(
                 subscription.tier is None or subscription.tier.amount < new_tier.amount
