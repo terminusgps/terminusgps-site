@@ -50,13 +50,6 @@
                         {% block content %}
                         {% endblock content %}
                     </div>
-                    {% if tracker_config and tracker_config.SOCIALS %}
-                    <div class="flex flex-col gap-2 p-2">
-                        <div class="-m-2 flex justify-evenly bg-red-200 p-2">
-                            {% for social in tracker_config.SOCIALS %}{% include "terminusgps_tracker/social_media_icon.html" with social=social %}{% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </main>
