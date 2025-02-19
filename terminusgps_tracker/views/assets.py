@@ -3,6 +3,7 @@ from django.forms import ValidationError
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView, DetailView, UpdateView, ListView
 from wialon.api import WialonError
 
@@ -41,7 +42,7 @@ class TrackerAssetListView(
 
 
 class TrackerAssetCreateView(
-    CreateView, TrackerBaseView, TrackerProfileSingleObjectMixin
+    CreateView, TrackerBaseView, TrackerProfileSingleObjectMixin, LoginRequiredMixin
 ):
     extra_context = {
         "title": "Register Asset",
@@ -53,6 +54,9 @@ class TrackerAssetCreateView(
     partial_template_name = "terminusgps_tracker/assets/partials/_create.html"
     success_url = reverse_lazy("tracker profile")
     template_name = "terminusgps_tracker/assets/create.html"
+    login_url = reverse_lazy("tracker login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
 
     def form_valid(self, form: TrackerAssetUpdateForm) -> HttpResponse:
         imei_number = form.cleaned_data["imei_number"]
