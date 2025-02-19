@@ -37,7 +37,7 @@ class PaymentMethodCreationForm(forms.Form):
     credit_card = CreditCardField()
     address = AddressField()
     default = forms.BooleanField(
-        label="Set as payment method?",
+        label="Set as default payment method?",
         required=False,
         initial=False,
         widget=forms.widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
