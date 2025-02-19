@@ -4,6 +4,7 @@ output/
 db.*
 build/
 media/
+migrations/
 
 .*
 !.gitignore
