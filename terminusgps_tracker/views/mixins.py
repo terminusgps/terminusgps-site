@@ -84,6 +84,8 @@ class TrackerProfileHasShippingAddressTest(UserPassesTestMixin):
         def user_has_shipping_address() -> bool:
             if self.request.user:
                 profile = TrackerProfile.objects.get(user=self.request.user)
+                print(f"{profile = }")
+                print(f"{profile.addresses.exists() = }")
                 return profile.addresses.exists()
             return False
 

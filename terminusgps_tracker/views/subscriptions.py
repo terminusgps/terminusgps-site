@@ -1,7 +1,8 @@
 from typing import Any
 
 from django.db.models import QuerySet
-from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib import messages
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, UpdateView
@@ -10,11 +11,7 @@ from django.core.exceptions import ValidationError
 from terminusgps_tracker.models import TrackerSubscription, TrackerSubscriptionTier
 from terminusgps_tracker.forms import SubscriptionUpdateForm, SubscriptionCancelForm
 from terminusgps_tracker.views.base import TrackerBaseView
-from terminusgps_tracker.views.mixins import (
-    TrackerProfileHasPaymentMethodTest,
-    TrackerProfileHasShippingAddressTest,
-    TrackerProfileSingleObjectMixin,
-)
+from terminusgps_tracker.views.mixins import TrackerProfileSingleObjectMixin
 
 
 class TrackerSubscriptionCancelView(
@@ -63,11 +60,7 @@ class TrackerSubscriptionDetailView(
 
 
 class TrackerSubscriptionUpdateView(
-    UpdateView,
-    TrackerBaseView,
-    TrackerProfileSingleObjectMixin,
-    TrackerProfileHasPaymentMethodTest,
-    TrackerProfileHasShippingAddressTest,
+    UpdateView, TrackerBaseView, TrackerProfileSingleObjectMixin
 ):
     model = TrackerSubscription
     partial_template_name = "terminusgps_tracker/subscription/partials/_update.html"
@@ -79,11 +72,30 @@ class TrackerSubscriptionUpdateView(
         "class": "rounded bg-gray-100 p-8 shadow border-gray-600 border gap-4"
     }
 
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        if not self.profile.payments.exists():
+            messages.add_message(
+                request,
+                messages.WARNING,
+                _("Please add a payment method before proceeding."),
+                extra_tags="block w-full bg-red-100 p-2 text-terminus-red-800 text-center",
+            )
+        if not self.profile.addresses.exists():
+            messages.add_message(
+                request,
+                messages.WARNING,
+                _("Please add a shipping address before proceeding."),
+                extra_tags="block w-full bg-red-100 p-2 text-terminus-red-800 text-center",
+            )
+
     def get_initial(self) -> dict[str, Any]:
         initial: dict[str, Any] = super().get_initial()
         initial["tier"] = TrackerSubscriptionTier.objects.get(pk=2)
-        initial["payment_id"] = self.profile.payments.filter(default=True).first()
-        initial["address_id"] = self.profile.addresses.filter(default=True).first()
+        if self.profile.payments.exists():
+            initial["payment_id"] = self.profile.payments.filter(default=True).first()
+        if self.profile.addresses.exists():
+            initial["address_id"] = self.profile.addresses.filter(default=True).first()
         return initial
 
     def get_object(self, queryset: QuerySet | None = None) -> TrackerSubscription:
