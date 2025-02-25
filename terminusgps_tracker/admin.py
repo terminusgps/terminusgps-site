@@ -78,7 +78,6 @@ class TrackerProfileAdmin(admin.ModelAdmin):
             },
         ),
     ]
-    readonly_fields = ["authorizenet_id"]
 
 
 @admin.register(TrackerSubscription)
