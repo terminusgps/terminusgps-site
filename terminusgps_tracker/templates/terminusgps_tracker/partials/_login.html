@@ -1,4 +1,4 @@
-<form class="{{ class }}" action="{% url 'tracker login' %}" method="post" hx-boost="true" >
+<form class="{{ class }}" action="{% url 'login' %}" method="post" hx-boost="true" >
     {% if form.non_field_errors %}
     <ul class="m-4 list-inside list-none rounded bg-red-100 p-4">
         {% for error in form.non_field_errors %}<li class="text-red-700">{{ error }}</li>{% endfor %}
@@ -17,7 +17,7 @@
     </div>
     <div class="flex flex-col gap-4 mt-4">
         <input class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out" value="Login" type="submit">
-        <p class="text-center text-sm dark:text-gray-200">Don't have an account? <a class="font-semibold text-terminus-red-800 underline decoration-terminus-black decoration-2 underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted" href="{% url 'tracker signup' %}">Click here</a> to signup.</p>
-        <input class="hidden" type="hidden" name="next" value="{{ next }}"></input>
+        <p class="text-center text-sm dark:text-gray-200">Don't have an account? <a class="font-semibold text-terminus-red-800 underline decoration-terminus-black decoration-2 underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted" href="{% url 'register' %}">Click here</a> to signup.</p>
+        <input class="hidden" type="hidden" name="next" value="{{ next }}">
     </div>
 </form>

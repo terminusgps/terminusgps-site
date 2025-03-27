@@ -12,10 +12,9 @@ from terminusgps_tracker.validators import (
 )
 
 
-class TrackerSignupForm(UserCreationForm):
+class TrackerRegisterForm(UserCreationForm):
     field_order = ["first_name", "last_name", "username", "password1", "password2"]
     default_css_class = "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100 bg-white border border-gray-600"
-    error_css_class = "p-2 bg-red-50 w-full block rounded text-terminus-red-700"
 
     first_name = forms.CharField(
         label="First Name",

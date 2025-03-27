@@ -1,44 +1,21 @@
-from .auth import (
-    TrackerLogoutView,
-    TrackerLoginView,
-    TrackerSignupView,
-    TrackerRegistrationView,
+from .auth import TrackerLoginView, TrackerLogoutView, TrackerRegisterView
+from .customers import (
+    CustomerPaymentMethodCreateView,
+    CustomerPaymentMethodDeleteView,
+    CustomerPaymentMethodDetailView,
+    CustomerPaymentMethodListView,
+    CustomerShippingAddressCreateView,
+    CustomerShippingAddressDeleteView,
+    CustomerShippingAddressDetailView,
+    CustomerShippingAddressListView,
 )
-from .addresses import (
-    ShippingAddressCreateView,
-    ShippingAddressDeleteView,
-    ShippingAddressDetailView,
-)
-from .assets import (
-    TrackerAssetCreateView,
-    TrackerAssetDetailView,
-    TrackerAssetUpdateView,
-    TrackerAssetListView,
-)
-from .profile import TrackerProfileSettingsView, TrackerProfileView
-from .public import (
+from .generic import (
     TrackerAboutView,
     TrackerContactView,
-    TrackerLandingView,
-    TrackerPrivacyView,
-    TrackerSourceView,
-    TrackerMapView,
-    WialonAddressSearchView,
+    TrackerDashboardView,
+    TrackerFrequentlyAskedQuestionsView,
+    TrackerPrivacyPolicyView,
+    TrackerSettingsView,
+    TrackerSourceCodeView,
 )
-from .subscriptions import (
-    TrackerSubscriptionUpdateView,
-    TrackerSubscriptionDetailView,
-    TrackerSubscriptionCancelView,
-)
-from .subscription_tiers import (
-    TrackerSubscriptionTierUpdateView,
-    TrackerSubscriptionTierCreateView,
-    TrackerSubscriptionTierDeleteView,
-    TrackerSubscriptionTierDetailView,
-    TrackerSubscriptionTierListView,
-)
-from .payments import (
-    PaymentMethodDetailView,
-    PaymentMethodCreateView,
-    PaymentMethodDeleteView,
-)
+from .subscriptions import SubscriptionDetailView

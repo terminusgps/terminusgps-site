@@ -11,19 +11,19 @@
     </head>
     <body class="h-fit bg-gradient-to-b from-terminus-red-100 to-terminus-red-900 bg-no-repeat text-gray-800 dark:text-white">
         <nav class="flex justify-between bg-stone-100 py-4 drop-shadow dark:bg-terminus-gray-900 text-gray-800">
-            <a href="{% url 'tracker landing' %}" class="flex items-center space-x-1">
+            <a href="{% url 'dashboard' %}" class="flex items-center space-x-1">
                 {% include "terminusgps_tracker/logo.svg" with class="size-12 dark:fill-terminus-white" %}
                 <h2 class="text-xl font-semibold tracking-wide dark:text-terminus-gray-100">Terminus GPS Tracker</h2>
             </a>
             {% if user and user.is_authenticated %}
             <div class="flex">
-                <a href="{% url 'tracker profile' %}" class="relative group m-4 flex cursor-pointer select-none items-center gap-2 rounded border border-gray-600 bg-gray-300 p-2 drop-shadow-sm hover:border-terminus-red-300 hover:bg-gray-50">
+                <a href="{% url 'dashboard' %}" class="relative group m-4 flex cursor-pointer select-none items-center gap-2 rounded border border-gray-600 bg-gray-300 p-2 drop-shadow-sm hover:border-terminus-red-300 hover:bg-gray-50">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 group-hover:text-terminus-red-300 relative">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                     </svg>
                     <h3 class="relative text-md hidden font-light tracking-wide group-hover:text-terminus-red-500 md:flex">{{ user.username }}</h3>
                 </a>
-                <a hx-swap="outerHTML" hx-target="this" hx-trigger="load" hx-get="{% url 'tracker logout' %}" class="group m-4 flex items-center gap-2 rounded border border-gray-600 bg-gray-300 p-2 drop-shadow-sm hover:border-terminus-red-300 hover:bg-gray-50"></a>
+                <a hx-swap="outerHTML" hx-target="this" hx-trigger="load" hx-get="{% url 'logout' %}" class="group m-4 flex items-center gap-2 rounded border border-gray-600 bg-gray-300 p-2 drop-shadow-sm hover:border-terminus-red-300 hover:bg-gray-50"></a>
             </div>
             {% endif %}
         </nav>
@@ -54,19 +54,22 @@
             </div>
         </main>
         <footer class="w-full border-t border-gray-200 bg-stone-100 p-4 drop-shadow md:flex md:items-center md:justify-between md:p-6 dark:border-gray-600 dark:bg-terminus-gray-900">
-            <span class="text-sm text-gray-800 sm:text-center dark:text-gray-300">© 2024-2025 <a href="{% url 'tracker privacy' %}" class="hover:underline">Terminus GPS, LLC</a>. All Rights Reserved.</span>
+            <span class="text-sm text-gray-800 sm:text-center dark:text-gray-300">© 2024-2025 <a href="https://terminusgps.com/" class="hover:underline">Terminus GPS, LLC</a>. All Rights Reserved.</span>
             <ul hx-boost="true" class="mt-3 flex flex-wrap items-center text-sm font-medium text-gray-600 sm:mt-0 dark:text-gray-400">
                 <li>
-                    <a href="{% url 'tracker about' %}" class="me-4 hover:underline md:me-6">About</a>
+                    <a href="{% url 'about' %}" class="me-4 hover:underline md:me-6">About</a>
                 </li>
                 <li>
-                    <a href="{% url 'tracker contact' %}" class="me-4 hover:underline md:me-6">Contact</a>
+                    <a href="{% url 'contact' %}" class="me-4 hover:underline md:me-6">Contact</a>
                 </li>
                 <li>
-                    <a href="{% url 'tracker privacy' %}" class="me-4 hover:underline md:me-6">Privacy Policy</a>
+                    <a href="{% url 'privacy' %}" class="me-4 hover:underline md:me-6">Privacy Policy</a>
                 </li>
                 <li>
-                    <a hx-boost="false" href="{% url 'tracker source' %}" class="me-4 hover:underline md:me-6">Source Code</a>
+                    <a href="{% url 'faq' %}" class="me-4 hover:underline md:me-6">FAQ</a>
+                </li>
+                <li>
+                    <a hx-boost="false" href="{% url 'source code' %}" class="me-4 hover:underline md:me-6">Source Code</a>
                 </li>
             </ul>
         </footer>

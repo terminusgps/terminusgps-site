@@ -1,8 +1,9 @@
-from typing import Any, Collection
+from collections.abc import Collection
+from typing import Any
 
-from authorizenet.apicontractsv1 import creditCardType
+from authorizenet.apicontractsv1 import creditCardType, customerAddressType
 from django import forms
-from django.core.validators import MinLengthValidator, MaxLengthValidator
+from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.forms import widgets as base_widgets
 from django.utils import timezone
 
@@ -134,13 +135,15 @@ class AddressField(forms.MultiValueField):
         return super().__init__(fields, **kwargs)
 
     def compress(self, data_list):
-        return {
-            "street": data_list[0],
-            "city": data_list[1],
-            "state": data_list[2],
-            "country": data_list[3],
-            "zip": data_list[4],
-        }
+        return customerAddressType(
+            **{
+                "address": data_list[0],
+                "city": data_list[1],
+                "state": data_list[2],
+                "country": data_list[3],
+                "zip": data_list[4],
+            }
+        )
 
 
 class CreditCardField(forms.MultiValueField):

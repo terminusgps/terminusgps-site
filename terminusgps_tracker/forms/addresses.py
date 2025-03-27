@@ -3,7 +3,7 @@ from django import forms
 from terminusgps_tracker.forms.fields import AddressField
 
 
-class ShippingAddressCreationForm(forms.Form):
+class CustomerShippingAddressCreateForm(forms.Form):
     default_field_class = "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100 bg-white border border-gray-600"
     first_name = forms.CharField(
         label="First Name",

@@ -1,17 +1,19 @@
 .. terminusgps-site documentation master file, created by
-   sphinx-quickstart on Fri Dec  6 13:56:21 2024.
+   sphinx-quickstart on Wed Feb 26 11:29:51 2025.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
 terminusgps-site documentation
 ==============================
 
-Welcome to the Terminus GPS site documentation! Please select a link below to get started.
+Add your content using ``reStructuredText`` syntax. See the
+`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
+documentation for details.
 
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents
+    :maxdepth: 2
+    :caption: Contents:
 
-   aws/index.rst
-   apps/index.rst
+    authenticator/index.rst
+    tracker/index.rst

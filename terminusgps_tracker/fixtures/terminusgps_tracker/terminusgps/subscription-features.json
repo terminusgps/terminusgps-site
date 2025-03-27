@@ -1,0 +1,74 @@
+[
+    {
+        "model": "terminusgps_tracker.SubscriptionFeature",
+        "pk": 1,
+        "fields": {
+            "name": "GPS Tracking",
+            "amount": null,
+            "desc": "lorem ipsum"
+        }
+    },
+    {
+        "model": "terminusgps_tracker.SubscriptionFeature",
+        "pk": 2,
+        "fields": {
+            "name": "Driver Behavior Monitoring",
+            "amount": null,
+            "desc": "lorem ipsum"
+        }
+    },
+    {
+        "model": "terminusgps_tracker.SubscriptionFeature",
+        "pk": 3,
+        "fields": {
+            "name": "Geofences",
+            "amount": 5,
+            "desc": "lorem ipsum"
+        }
+    },
+    {
+        "model": "terminusgps_tracker.SubscriptionFeature",
+        "pk": 4,
+        "fields": {
+            "name": "Geofences",
+            "amount": 25,
+            "desc": "lorem ipsum"
+        }
+    },
+    {
+        "model": "terminusgps_tracker.SubscriptionFeature",
+        "pk": 5,
+        "fields": {
+            "name": "Geofences",
+            "amount": 999,
+            "desc": "lorem ipsum"
+        }
+    },
+    {
+        "model": "terminusgps_tracker.SubscriptionFeature",
+        "pk": 6,
+        "fields": {
+            "name": "Notifications",
+            "amount": 5,
+            "desc": "lorem ipsum"
+        }
+    },
+    {
+        "model": "terminusgps_tracker.SubscriptionFeature",
+        "pk": 7,
+        "fields": {
+            "name": "Notifications",
+            "amount": 25,
+            "desc": "lorem ipsum"
+        }
+    },
+    {
+        "model": "terminusgps_tracker.SubscriptionFeature",
+        "pk": 8,
+        "fields": {
+            "name": "Notifications",
+            "amount": 999,
+            "desc": "lorem ipsum"
+        }
+    },
+]

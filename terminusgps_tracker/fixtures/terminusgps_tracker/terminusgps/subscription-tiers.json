@@ -1,0 +1,32 @@
+[
+    {
+        "model": "terminusgps_tracker.SubscriptionTier",
+        "pk": 1,
+        "fields": {
+            "name": "Basic",
+            "amount": 9.99,
+            "desc": "lorem ipsum",
+            "features": [1, 2, 3, 6]
+        }
+    },
+    {
+        "model": "terminusgps_tracker.SubscriptionTier",
+        "pk": 2,
+        "fields": {
+            "name": "Standard",
+            "amount": 9.99,
+            "desc": "lorem ipsum",
+            "features": [1, 2, 4, 7]
+        }
+    },
+    {
+        "model": "terminusgps_tracker.SubscriptionTier",
+        "pk": 3,
+        "fields": {
+            "name": "Premium",
+            "amount": 29.99,
+            "desc": "lorem ipsum",
+            "features": [1, 2, 5, 8]
+        }
+    }
+]

@@ -33,7 +33,7 @@ DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FROM_EMAIL = "no-reply@terminusgps.com"
 DOCS_ACCESS = "staff"
-DOCS_ROOT = BASE_DIR.parent / "docs/build/html"
+DOCS_ROOT = BASE_DIR.parent / "docs" / "build" / "html"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
 EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")
@@ -53,7 +53,10 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "static/"
+TAILWIND_INPUT_FILEPATH = "./src/static/terminusgps/css/input.css"
+TAILWIND_OUTPUT_FILEPATH = "./src/static/terminusgps/css/output.css"
 TIME_ZONE = "America/Chicago"
+TRACKER_ENCRYPTION_KEY = secret.get("TRACKER_ENCRYPTION_KEY")
 TWILIO_FROM_NUMBER = secret.get("TWILIO_FROM_NUMBER")
 TWILIO_MESSAGING_SID = secret.get("TWILIO_MESSAGING_SID")
 TWILIO_SID = secret.get("TWILIO_SID")
@@ -61,12 +64,11 @@ TWILIO_TOKEN = secret.get("TWILIO_TOKEN")
 USE_I18N = True
 USE_TZ = True
 WIALON_ADMIN_ID = secret.get("WIALON_ADMIN_ID")
+WIALON_DEFAULT_PLAN = secret.get("WIALON_DEFAULT_PLAN")
 WIALON_HOST = secret.get("WIALON_HOST")
+WIALON_SESSION_LOGLEVEL = logging.DEBUG
 WIALON_TOKEN = secret.get("WIALON_TOKEN")
 WIALON_UNACTIVATED_GROUP = secret.get("WIALON_UNACTIVATED_GROUP")
-WIALON_DEFAULT_PLAN = secret.get("WIALON_DEFAULT_PLAN")
-WIALON_SESSION_LOGLEVEL = logging.DEBUG
-TRACKER_ENCRYPTION_KEY = secret.get("TRACKER_ENCRYPTION_KEY")
 WSGI_APPLICATION = "src.wsgi.application"
 
 
@@ -174,6 +176,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.forms",
     "docs",
+    "django_browser_reload",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
 ]
 
@@ -185,6 +188,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
 

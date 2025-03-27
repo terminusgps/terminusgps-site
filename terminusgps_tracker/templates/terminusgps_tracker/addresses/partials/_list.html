@@ -1,0 +1,5 @@
+{% for address in address_list %}
+<div id="address-{{ address.pk }}" hx-indicator="#addresses-spinner" hx-get="{% url 'detail address' address.pk %}" hx-target="this" hx-trigger="load" hx-swap="outerHTML"></div>
+{% empty %}
+No shipping addresses
+{% endfor %}

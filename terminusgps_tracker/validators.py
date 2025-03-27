@@ -1,12 +1,13 @@
 import string
 
+from authorizenet import apicontractsv1, apicontrollers
 from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
-from wialon.api import WialonError
-
+from django.utils.translation import gettext_lazy as _
+from terminusgps.authorizenet.auth import get_merchant_auth
 from terminusgps.wialon.session import WialonSession
-from terminusgps.wialon.utils import is_unique, get_wialon_cls
+from terminusgps.wialon.utils import get_wialon_cls, is_unique
+from wialon.api import WialonError
 
 
 class WialonValidatorBase:
@@ -23,7 +24,7 @@ class WialonObjectConstructableValidator(WialonValidatorBase):
         self.items_type = items_type
         return super().__init__(**kwargs)
 
-    def __call__(self, value: str) -> None:
+    def __call__(self, value: str | int) -> None:
         if isinstance(value, str) and not value.isdigit():
             raise ValidationError(
                 _("ID must be a digit, got '%(value)s'"),
@@ -48,11 +49,43 @@ class WialonNameUniqueValidator(WialonValidatorBase):
         self.items_type = items_type
         return super().__init__(**kwargs)
 
-    def __call__(self, value: str) -> None:
-        if not is_unique(value, self.session, items_type=self.items_type):
+    def __call__(self, value: str | int) -> None:
+        if isinstance(value, str) and not value.isdigit():
+            raise ValidationError(
+                _("ID must be a digit, got '%(value)s'"),
+                code="invalid",
+                params={"value": value},
+            )
+
+        if not is_unique(str(value), self.session, items_type=self.items_type):
             raise ValidationError(
                 _("'%(value)s' is taken."), code="invalid", params={"value": value}
             )
+
+
+def validate_customer_profile_id(value: str) -> None:
+    if not value.isdigit():
+        raise ValidationError(
+            _("Customer profile id must be a digit. Got '%(value)s'."),
+            code="invalid",
+            params={"value": value},
+        )
+
+    request = apicontractsv1.getCustomerProfileRequest(
+        merchantAuthenticator=get_merchant_auth(),
+        customerProfileId=value,
+        includeIssuerInfo="false",
+    )
+    controller = apicontrollers.getCustomerProfileController(request)
+    controller.execute()
+    response = controller.getresponse()
+
+    if not response or response.messages.resultCode != "Ok":
+        raise ValidationError(
+            _("Failed to retrieve customer profile #%(id)s"),
+            code="invalid",
+            params={"id": value},
+        )
 
 
 def validate_credit_card_number(value: str) -> None:

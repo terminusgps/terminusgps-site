@@ -22,15 +22,15 @@
     --color-terminus-red-200: oklch(55.71% 0.2026 26.2);
     --color-terminus-red-100: oklch(58.34% 0.2065 25.73);
     --color-terminus-red-50: oklch(60.82% 0.209 25.26);
+
+    --animate-jiggle: jiggle 0.5s linear infinite;
 }
 
-@layer base {
-    input::-webkit-out-spin-button,
-    input::-webkit-inner-spin-button {
-        -webkit-apperance: none;
-        margin: 0;
-    }
-    input[type=number] {
-        -moz-appearance: textfield;
-    }
+@keyframes jiggle {
+    0% {transform: translateX(0%);}
+    20% {transform: translateX(-25%);}
+    40% {transform: translateX(25%);}
+    60% {transform: translateX(-25%);}
+    80% {transform: translateX(25%);}
+    100% {transform: translateX(0%);}
 }

@@ -1,32 +1,43 @@
-<form
-    id="address-form"
-    action="{% url 'create shipping' %}"
-    method="post"
-    hx-include="this"
-    hx-swap="outerHTML"
->
-    <h2 class="mb-4 text-xl text-center text-terminus-red-800">New Shipping Address</h2>
-    <div class="{{ class }}">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
-        {{ form }}
+<form id="address-form" action="{% url 'create address' %}" method="post" class="{{ class }}">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="inset-shadow w-full p-2 text-red-600">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="flex justify-between gap-2">
+        <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
+            {{ form.first_name.label }}
+            {{ form.first_name }}
+            {{ form.first_name.errors }}
+            {% if form.first_name.errors %}
+            <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.first_name.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
+            {{ form.last_name.label }}
+            {{ form.last_name }}
+            {% if form.last_name.errors %}
+            <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.last_name.errors }}</div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
+        {{ form.phone.label }}
+        {{ form.phone }}
+        {% if form.phone.errors %}
+        <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.phone.errors }}</div>
+        {% endif %}
+    </div>
+    <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
+        {{ form.address.label }}
+        {{ form.address }}
+        {% if form.address.errors %}
+        <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.address.errors }}</div>
+        {% endif %}
+    </div>
+    <div class="flex items-center gap-2">
+        {{ form.default.label }}
+        {{ form.default }}
     </div>
     <div class="mt-4 flex flex-col gap-2">
-        <input
-            class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out"
-            type="submit"
-            value="Submit"
-            hx-trigger="click"
-            hx-post="{% url 'create shipping' %}"
-            hx-target="#address-form"
-        >
-        <input 
-            class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 hover:bg-gray-200 transition-colors duration-300 ease-in-out"
-            type="button"
-            value="Cancel"
-            hx-trigger="click"
-            hx-delete="{% url 'create shipping' %}"
-            hx-target="#address-form"
-        >
+        <input class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit" value="Submit">
+        <a href="{% url 'settings' %}" class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-center text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200">Back</a>
     </div>
 </form>

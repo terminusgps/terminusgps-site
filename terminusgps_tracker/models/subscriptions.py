@@ -1,352 +1,117 @@
-from typing import Any
-from decimal import Decimal
-
-from django.db import models, transaction
+from authorizenet import apicontractsv1
+from django.db import models
 from django.utils import timezone
-from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from terminusgps.authorizenet.auth import get_merchant_auth, get_environment
-from terminusgps.wialon import flags
-from terminusgps.wialon.session import WialonSession
-from terminusgps.wialon.items import WialonUnitGroup, WialonUnit
-
-from authorizenet.apicontrollers import (
-    ARBCreateSubscriptionController,
-    ARBCancelSubscriptionController,
-    ARBGetSubscriptionController,
-    ARBGetSubscriptionStatusController,
-    ARBUpdateSubscriptionController,
-)
-from authorizenet.apicontractsv1 import (
-    ARBCancelSubscriptionRequest,
-    ARBCreateSubscriptionRequest,
-    ARBGetSubscriptionRequest,
-    ARBGetSubscriptionStatusRequest,
-    ARBSubscriptionType,
-    ARBSubscriptionUnitEnum,
-    ARBUpdateSubscriptionRequest,
-    customerProfileIdType,
-    paymentScheduleType,
-    paymentScheduleTypeInterval,
-)
 
 
-class TrackerSubscriptionFeature(models.Model):
-    name = models.CharField(max_length=256)
-    desc = models.TextField(max_length=2048, default=None, null=True, blank=True)
-
-    class Meta:
-        verbose_name = "subscription feature"
-        verbose_name_plural = "subscription features"
-
-    def __str__(self) -> str:
-        return self.name
-
-
-class TrackerSubscriptionTier(models.Model):
-    class IntervalPeriod(models.IntegerChoices):
-        MONTHLY = 1
-        QUARTERLY = 3
-        ANNUALLY = 12
-
-    class IntervalLength(models.IntegerChoices):
-        HALF_YEAR = 6
-        FULL_YEAR = 12
-
-    name = models.CharField(max_length=256)
-    wialon_id = models.PositiveBigIntegerField(default=None, null=True, blank=True)
-    wialon_cmd = models.CharField(max_length=256, default=None, null=True, blank=True)
-
-    features = models.ManyToManyField("terminusgps_tracker.TrackerSubscriptionFeature")
-    amount = models.DecimalField(default=0.00, max_digits=14, decimal_places=2)
-    period = models.PositiveSmallIntegerField(
-        choices=IntervalPeriod.choices, default=IntervalPeriod.MONTHLY
-    )
-    length = models.PositiveSmallIntegerField(
-        choices=IntervalLength.choices, default=IntervalLength.FULL_YEAR
-    )
-
-    class Meta:
-        verbose_name = "subscription tier"
-        verbose_name_plural = "subscription tiers"
-
-    def __str__(self) -> str:
-        return self.name
-
-    def save(self, session: WialonSession | None = None, **kwargs) -> None:
-        if not self.wialon_id and session is not None:
-            self.wialon_id = self.wialon_create_group(
-                name=f"{self.name} Subscription Group", session=session
-            )
-        return super().save(**kwargs)
-
-    def wialon_add_to_group(self, unit_id: int, session: WialonSession) -> None:
-        assert self.wialon_id
-        unit = WialonUnit(id=str(unit_id), session=session)
-        group = WialonUnitGroup(id=str(self.wialon_id), session=session)
-        group.add_item(unit)
-
-    def wialon_rm_from_group(self, unit_id: int, session: WialonSession) -> None:
-        assert self.wialon_id
-        unit = WialonUnit(id=str(unit_id), session=session)
-        group = WialonUnitGroup(id=str(self.wialon_id), session=session)
-        group.rm_item(unit)
-
-    def wialon_execute_subscription_command(
-        self, unit_id: int, session: WialonSession, timeout: int = 5
-    ) -> None:
-        session.wialon_api.unit_exec_cmd(
-            **{
-                "itemId": unit_id,
-                "commandName": self.name,
-                "linkType": "",
-                "timeout": timeout,
-                "flags": 0,
-            }
-        )
-
-    @staticmethod
-    def wialon_create_group(name: str, session: WialonSession) -> int:
-        response: dict = session.wialon_api.core_create_unit_group(
-            **{
-                "creatorId": settings.WIALON_ADMIN_ID,
-                "name": name,
-                "dataFlags": flags.DATAFLAG_UNIT_BASE,
-            }
-        )
-        return int(response["item"].get("id"))
-
-
-class TrackerSubscription(models.Model):
+class Subscription(models.Model):
     class SubscriptionStatus(models.TextChoices):
         ACTIVE = "active", _("Active")
+        CANCELED = "canceled", _("Canceled")
         EXPIRED = "expired", _("Expired")
         SUSPENDED = "suspended", _("Suspended")
-        CANCELED = "canceled", _("Canceled")
         TERMINATED = "terminated", _("Terminated")
 
-    authorizenet_id = models.PositiveIntegerField(default=None, null=True, blank=True)
-    payment_id = models.PositiveIntegerField(default=None, null=True, blank=True)
-    address_id = models.PositiveIntegerField(default=None, null=True, blank=True)
-    profile = models.OneToOneField(
-        "terminusgps_tracker.TrackerProfile",
-        on_delete=models.CASCADE,
+    class SubscriptionLength(models.IntegerChoices):
+        HALF_YEAR = 6, _("Half-year")
+        FULL_YEAR = 12, _("Full-year")
+
+    customer = models.OneToOneField(
+        "terminusgps_tracker.Customer",
+        on_delete=models.PROTECT,
         related_name="subscription",
     )
+    """A customer."""
+    authorizenet_id = models.PositiveIntegerField(null=True, blank=True, default=None)
+    """An Authorizenet subscription id."""
+    length = models.IntegerField(
+        choices=SubscriptionLength.choices, default=SubscriptionLength.FULL_YEAR
+    )
+    """Length of the subscription (in months)."""
+    tier = models.ForeignKey(
+        "terminusgps_tracker.SubscriptionTier",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
+        related_name="tier",
+    )
+    """Current subscription tier."""
+    payment = models.ForeignKey(
+        "terminusgps_tracker.CustomerPaymentMethod",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
+        related_name="payment",
+    )
+    """A payment method."""
+    address = models.ForeignKey(
+        "terminusgps_tracker.CustomerShippingAddress",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
+        related_name="address",
+    )
+    """A shipping address."""
     status = models.CharField(
-        max_length=10,
+        max_length=16,
         choices=SubscriptionStatus.choices,
         default=SubscriptionStatus.SUSPENDED,
     )
-    tier = models.ForeignKey(
-        "terminusgps_tracker.TrackerSubscriptionTier",
-        on_delete=models.CASCADE,
-        related_name="tier",
-        default=None,
-        null=True,
-        blank=True,
-    )
-
-    class Meta:
-        verbose_name = "subscription"
-        verbose_name_plural = "subscriptions"
+    """Current Authorizenet subscription status."""
 
     def __str__(self) -> str:
-        return str(self.profile)
+        return f"{self.customer}'s Subscription"
 
-    @transaction.atomic
-    def upgrade(
-        self, new_tier: TrackerSubscriptionTier, payment_id: int, address_id: int
-    ) -> None:
-        try:
-            if self.tier is None or self.authorizenet_id is None:
-                self.authorizenet_id = self.authorizenet_create_subscription(
-                    tier=new_tier, payment_id=payment_id, address_id=address_id
-                )
-            elif self.tier and new_tier.amount > self.tier.amount:
-                self.authorizenet_update_subscription(
-                    tier=new_tier, payment_id=payment_id, address_id=address_id
-                )
-            self.tier = new_tier
-            self.payment_id = payment_id
-            self.address_id = address_id
-            self.refresh_status()
-        except ValueError as e:
-            print(e)
-            raise
-
-    @transaction.atomic
-    def downgrade(
-        self, new_tier: TrackerSubscriptionTier, payment_id: int, address_id: int
-    ) -> None:
-        try:
-            if self.tier is None or self.authorizenet_id is None:
-                self.authorizenet_id = self.authorizenet_create_subscription(
-                    tier=new_tier, payment_id=payment_id, address_id=address_id
-                )
-            elif self.tier and new_tier.amount < self.tier.amount:
-                self.authorizenet_update_subscription(
-                    tier=new_tier, payment_id=payment_id, address_id=address_id
-                )
-            self.tier = new_tier
-            self.payment_id = payment_id
-            self.address_id = address_id
-            self.refresh_status()
-        except ValueError as e:
-            print(e)
-            raise
-
-    @transaction.atomic
-    def refresh_status(self) -> None:
-        assert self.authorizenet_id, "No subscription to refresh status"
-        self.status = self.authorizenet_get_subscription_status(self.authorizenet_id)
-
-    @transaction.atomic
-    def cancel(self) -> None:
-        assert self.authorizenet_id, "No subscription to cancel"
-        self.authorizenet_cancel_subscription(self.authorizenet_id)
-        self.refresh_status()
-
-    def authorizenet_execute_controller(self, controller) -> dict | None:
-        controller.setenvironment(get_environment())
-        controller.execute()
-        return controller.getresponse()
-
-    @classmethod
-    def authorizenet_get_subscription_status(cls, subscription_id: int) -> str:
-        request = ARBGetSubscriptionStatusRequest(
-            merchantAuthentication=get_merchant_auth(),
-            subscriptionId=str(subscription_id),
-        )
-
-        controller = ARBGetSubscriptionStatusController(request)
-        controller.setenvironment(get_environment())
-        controller.execute()
-        response = controller.getresponse()
-        if response.messages.resultCode != "Ok":
-            raise ValueError(response.messages.message[0]["text"].text)
-
-        return str(response.status)
-
-    @classmethod
-    def authorizenet_get_subscription(
-        cls, subscription_id: int, includeTransactions: bool = False
-    ) -> dict[str, Any]:
-        request = ARBGetSubscriptionRequest(
-            merchantAuthentication=get_merchant_auth(),
-            subscriptionId=str(subscription_id),
-            includeTransactions=includeTransactions,
-        )
-
-        controller = ARBGetSubscriptionController(request)
-        controller.setenvironment(get_environment())
-        controller.execute()
-        response = controller.getresponse()
-        if response.messages.resultCode != "Ok":
-            raise ValueError(response.messages.message[0]["text"].text)
-
-        return response.subscription
-
-    @classmethod
-    def authorizenet_cancel_subscription(cls, subscription_id: int) -> None:
-        request = ARBCancelSubscriptionRequest(
-            merchantAuthentication=get_merchant_auth(),
-            subscriptionId=str(subscription_id),
-        )
-
-        controller = ARBCancelSubscriptionController(request)
-        controller.setenvironment(get_environment())
-        controller.execute()
-        response = controller.getresponse()
-        if response.messages.resultCode != "Ok":
-            raise ValueError(response.messages.message[0]["text"].text)
-
-    def authorizenet_update_subscription(
-        self,
-        tier: TrackerSubscriptionTier,
-        payment_id: int,
-        address_id: int,
-        trial_amount: str | None = None,
-    ) -> None:
-        request = ARBUpdateSubscriptionRequest(
-            merchantAuthentication=get_merchant_auth(),
-            subscription=self.generate_customer_subscription(
-                tier, payment_id, address_id, trial_amount
+    def create_payment_schedule(self) -> apicontractsv1.paymentScheduleType:
+        return apicontractsv1.paymentScheduleType(
+            interval=apicontractsv1.paymentScheduleTypeInterval(
+                length=self.length, unit=apicontractsv1.ARBSubscriptionUnitEnum.months
             ),
+            startDate=timezone.now(),
+            totalOccurrences=1,
+            trialOccurrences=0,
         )
 
-        controller = ARBUpdateSubscriptionController(request)
-        controller.setenvironment(get_environment())
-        controller.execute()
-        response = controller.getresponse()
-        if response.messages.resultCode != "Ok":
-            raise ValueError(response.messages.message[0]["text"].text)
 
-    def authorizenet_create_subscription(
-        self, tier: TrackerSubscriptionTier, payment_id: int, address_id: int
-    ) -> int:
-        request = ARBCreateSubscriptionRequest(
-            merchantAuthentication=get_merchant_auth(),
-            subscription=self.generate_customer_subscription(
-                tier, payment_id, address_id
-            ),
-        )
+class SubscriptionTier(models.Model):
+    name = models.CharField(max_length=128)
+    """A subscription tier name."""
+    desc = models.CharField(max_length=1024)
+    """A subscription tier description."""
+    amount = models.DecimalField(max_digits=6, decimal_places=2, default=9.99)
+    """$ amount (monthly) of the subscription tier."""
+    features = models.ManyToManyField(
+        "terminusgps_tracker.SubscriptionFeature", related_name="features"
+    )
+    """Features granted by the subscription."""
 
-        controller = ARBCreateSubscriptionController(request)
-        controller.setenvironment(get_environment())
-        controller.execute()
-        response = controller.getresponse()
-        if response.messages.resultCode != "Ok":
-            raise ValueError(response.messages.message[0]["text"].text)
-        return int(response.subscriptionId)
+    def __str__(self) -> str:
+        return self.name
 
-    def generate_customer_subscription(
-        self,
-        tier: TrackerSubscriptionTier,
-        payment_id: int,
-        address_id: int,
-        trial_amount: str | None = None,
-    ) -> ARBSubscriptionType:
-        paymentSchedule: paymentScheduleType = self.generate_payment_schedule(tier)
-        profile: customerProfileIdType = self.generate_customer_profile(
-            payment_id, address_id
-        )
+    def get_amount_display(self) -> str:
+        return f"${self.amount:.2d}"
 
-        return ARBSubscriptionType(
-            name=f"{self.profile.user.email}'s {tier} Subscription",
-            paymentSchedule=paymentSchedule,
-            amount=str(tier.amount),
-            trialAmount=trial_amount if trial_amount else "0.00",
-            profile=profile,
-        )
 
-    def generate_customer_profile(
-        self, payment_id: int, address_id: int
-    ) -> customerProfileIdType:
-        assert self.profile.authorizenet_id
-        return customerProfileIdType(
-            customerProfileId=str(self.profile.authorizenet_id),
-            customerPaymentProfileId=str(payment_id),
-            customerAddressId=str(address_id),
-        )
+class SubscriptionFeature(models.Model):
+    class SubscriptionFeatureAmount(models.IntegerChoices):
+        MINIMUM = 5, _("5")
+        MID = 25, _("25")
+        MAXIMUM = 150, _("150")
+        INFINITE = 999, _("∞")
 
-    @classmethod
-    def generate_payment_schedule(
-        cls, tier: TrackerSubscriptionTier, trial_occurrences: int = 0
-    ) -> paymentScheduleType:
-        if tier.length < tier.period:
-            raise ValueError("Tier length cannot be less than tier period")
+    name = models.CharField(max_length=128)
+    """Name of the feature."""
+    desc = models.CharField(max_length=2048)
+    """Description of the feature."""
+    amount = models.IntegerField(
+        choices=SubscriptionFeatureAmount.choices, null=True, blank=True, default=None
+    )
+    """An amount for the feature."""
 
-        startDate: str = f"{timezone.now():%Y-%m-%d}"
-        totalOccurrences: str = str(tier.length // int(tier.period))
-        trialOccurrences: str = str(trial_occurrences)
-        interval: paymentScheduleTypeInterval = paymentScheduleTypeInterval(
-            length=str(tier.length), unit=ARBSubscriptionUnitEnum.months
-        )
-
-        return paymentScheduleType(
-            startDate=startDate,
-            totalOccurrences=totalOccurrences,
-            trialOccurrences=trialOccurrences,
-            interval=interval,
-        )
+    def __str__(self) -> str:
+        if self.amount is None:
+            return self.name
+        return f"{self.get_amount_display()} {self.name}"

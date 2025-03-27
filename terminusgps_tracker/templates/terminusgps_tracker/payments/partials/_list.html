@@ -1,0 +1,5 @@
+{% for payment in payment_list %}
+<div id="payment-{{ payment.pk }}" hx-get="{% url 'detail payment' payment.pk %}" hx-target="this" hx-trigger="load" hx-swap="outerHTML"></div>
+{% empty %}
+No payment methods
+{% endfor %}

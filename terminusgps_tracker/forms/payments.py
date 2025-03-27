@@ -3,7 +3,7 @@ from django import forms
 from terminusgps_tracker.forms.fields import AddressField, CreditCardField
 
 
-class PaymentMethodCreationForm(forms.Form):
+class CustomerPaymentMethodCreateForm(forms.Form):
     first_name = forms.CharField(
         max_length=64,
         widget=forms.widgets.TextInput(
@@ -34,8 +34,8 @@ class PaymentMethodCreationForm(forms.Form):
             }
         ),
     )
-    credit_card = CreditCardField()
-    address = AddressField()
+    credit_card = CreditCardField(label="Credit Card")
+    address = AddressField(label="Address")
     default = forms.BooleanField(
         label="Set as default payment method?",
         required=False,

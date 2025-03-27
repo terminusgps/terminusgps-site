@@ -1,0 +1,7 @@
+<div id="dashboard" class="{{ class }}">
+    <div id="assets" hx-trigger="load" hx-swap="outerHTML"></div>
+    <div id="subscription" hx-get="{% url 'detail subscription' subscription.pk %}" hx-trigger="load" hx-swap="outerHTML"></div>
+    <div id="links" class="" hx-boost="true">
+        <a class="font-semibold text-terminus-red-800 underline decoration-terminus-black decoration-2 underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted" href="{% url 'settings' %}">Settings</a>
+    </div>
+</div>

@@ -2,13 +2,15 @@ from typing import Any
 from django.template import Library
 
 from terminusgps.wialon.session import WialonSession
-from terminusgps_tracker.models import TrackerAsset
+from terminusgps_tracker.models import CustomerAsset
 
 register = Library()
 
 
 @register.inclusion_tag("terminusgps_tracker/assets/image.html")
-def get_asset_icon(asset: TrackerAsset, css_class: str | None = None) -> dict[str, Any]:
+def get_asset_icon(
+    asset: CustomerAsset, css_class: str | None = None
+) -> dict[str, Any]:
     base_url = "http://hst-api.wialon.com/avl_item_image/%(asset_id)s/%(max_size)s/%(filename)s.png?b=%(border_size)s&v=%(as_png)s&sid=%(sid)s"
     with WialonSession() as session:
         target_url = base_url % {
