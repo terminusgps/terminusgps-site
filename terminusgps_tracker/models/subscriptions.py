@@ -1,20 +1,18 @@
 from authorizenet import apicontractsv1
-from django.db import models
+from django.db import models, transaction
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from terminusgps.authorizenet.profiles import SubscriptionProfile
 
 
-class Subscription(models.Model):
+class CustomerSubscription(models.Model):
     class SubscriptionStatus(models.TextChoices):
         ACTIVE = "active", _("Active")
         CANCELED = "canceled", _("Canceled")
         EXPIRED = "expired", _("Expired")
         SUSPENDED = "suspended", _("Suspended")
         TERMINATED = "terminated", _("Terminated")
-
-    class SubscriptionLength(models.IntegerChoices):
-        HALF_YEAR = 6, _("Half-year")
-        FULL_YEAR = 12, _("Full-year")
 
     customer = models.OneToOneField(
         "terminusgps_tracker.Customer",
@@ -24,10 +22,14 @@ class Subscription(models.Model):
     """A customer."""
     authorizenet_id = models.PositiveIntegerField(null=True, blank=True, default=None)
     """An Authorizenet subscription id."""
-    length = models.IntegerField(
-        choices=SubscriptionLength.choices, default=SubscriptionLength.FULL_YEAR
+    total_months = models.PositiveIntegerField(
+        choices=[(12, _("12 months")), (24, _("24 months"))], default=12
     )
-    """Length of the subscription (in months)."""
+    """Total number of months for the subscription."""
+    trial_months = models.PositiveIntegerField(
+        choices=[(0, _("0 months")), (1, _("1 month"))], default=0
+    )
+    """Total number of trial months for the subscription."""
     tier = models.ForeignKey(
         "terminusgps_tracker.SubscriptionTier",
         on_delete=models.SET_NULL,
@@ -37,6 +39,15 @@ class Subscription(models.Model):
         related_name="tier",
     )
     """Current subscription tier."""
+    prev_tier = models.ForeignKey(
+        "terminusgps_tracker.SubscriptionTier",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
+        related_name="prev_tier",
+    )
+    """Previous subscription tier."""
     payment = models.ForeignKey(
         "terminusgps_tracker.CustomerPaymentMethod",
         on_delete=models.SET_NULL,
@@ -65,14 +76,86 @@ class Subscription(models.Model):
     def __str__(self) -> str:
         return f"{self.customer}'s Subscription"
 
-    def create_payment_schedule(self) -> apicontractsv1.paymentScheduleType:
+    def save(self, **kwargs) -> None:
+        if self.pk:
+            if self.address and self.address not in self.customer.addresses.filter():
+                raise ValueError("Only this customer's addresses can be assigned.")
+            if self.payment and self.payment not in self.customer.payments.filter():
+                raise ValueError("Only this customer's payments can be assigned.")
+        super().save(**kwargs)
+
+    def get_absolute_url(self) -> str:
+        """Returns a URL pointing to the subscription's detail view."""
+        return reverse("detail subscription", kwargs={"pk": self.pk})
+
+    @transaction.atomic
+    def authorizenet_refresh_status(self) -> None:
+        """Refreshes the subscription status from Authorizenet."""
+        self.status = self.authorizenet_get_subscription_profile().status
+
+    @transaction.atomic
+    def authorizenet_create_subscription(self) -> None:
+        """
+        Creates a subscription in Authorizenet.
+
+        :raises AssertionError: If :py:attr:`payment.authorizenet_id` wasn't set.
+        :raises AssertionError: If :py:attr:`address.authorizenet_id` wasn't set.
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
+        assert self.payment.authorizenet_id, "Payment id was not set."
+        assert self.address.authorizenet_id, "Address id was not set."
+
+        sub_profile = SubscriptionProfile(
+            name=f"{self.customer.user.username}'s {self.tier} Subscription",
+            amount=self.tier.amount,
+            schedule=self.generate_payment_schedule(),
+            profile_id=self.customer.authorizenet_id,
+            payment_id=self.payment.authorizenet_id,
+            address_id=self.address.authorizenet_id,
+        )
+        self.authorizenet_id = sub_profile.id
+
+    def authorizenet_get_subscription_profile(self) -> SubscriptionProfile:
+        """
+        Returns the Authorizenet subscription profile for the subscription.
+
+        :raises AssertionError: If :py:attr`authorizenet_id` wasn't set.
+        :returns: A subscription profile.
+        :rtype: :py:obj:`~terminusgps.authorizenet.profiles.SubscriptionProfile`
+
+        """
+        assert self.authorizenet_id, "Authorizenet id was not set."
+        return SubscriptionProfile(id=self.authorizenet_id)
+
+    def generate_monthly_payment_interval(
+        self,
+    ) -> apicontractsv1.paymentScheduleTypeInterval:
+        """
+        Generates a monthly charge payment interval for the subscription.
+
+        :returns: A payment interval.
+        :rtype: :py:obj:`~authorizenet.apicontractsv1.paymentScheduleTypeInterval`
+
+        """
+        return apicontractsv1.paymentScheduleTypeInterval(
+            length=1, unit=apicontractsv1.ARBSubscriptionUnitEnum.months
+        )
+
+    def generate_payment_schedule(self) -> apicontractsv1.paymentScheduleType:
+        """
+        Generates a payment schedule for the subscription.
+
+        :returns: A payment schedule.
+        :rtype: :py:obj:`~authorizenet.apicontractsv1.paymentScheduleType`
+
+        """
         return apicontractsv1.paymentScheduleType(
-            interval=apicontractsv1.paymentScheduleTypeInterval(
-                length=self.length, unit=apicontractsv1.ARBSubscriptionUnitEnum.months
-            ),
+            interval=self.generate_monthly_payment_interval(),
             startDate=timezone.now(),
-            totalOccurrences=1,
-            trialOccurrences=0,
+            totalOccurrences=self.total_months,
+            trialOccurrences=self.trial_months,
         )
 
 
@@ -112,6 +195,6 @@ class SubscriptionFeature(models.Model):
     """An amount for the feature."""
 
     def __str__(self) -> str:
-        if self.amount is None:
+        if not self.amount:
             return self.name
         return f"{self.get_amount_display()} {self.name}"

@@ -6,13 +6,11 @@ urlpatterns = [
     path("", views.TrackerDashboardView.as_view(), name="dashboard"),
     path("login/", views.TrackerLoginView.as_view(), name="login"),
     path("logout/", views.TrackerLogoutView.as_view(), name="logout"),
-    path("about/", views.TrackerAboutView.as_view(), name="about"),
-    path("contact/", views.TrackerContactView.as_view(), name="contact"),
     path("privacy/", views.TrackerPrivacyPolicyView.as_view(), name="privacy"),
     path("register/", views.TrackerRegisterView.as_view(), name="register"),
     path("source/", views.TrackerSourceCodeView.as_view(), name="source code"),
     path("settings/", views.TrackerSettingsView.as_view(), name="settings"),
-    path("faq/", views.TrackerFrequentlyAskedQuestionsView.as_view(), name="faq"),
+    path("tiers/", views.SubscriptionTierListView.as_view(), name="list tiers"),
     path(
         "payments/", views.CustomerPaymentMethodListView.as_view(), name="list payments"
     ),
@@ -52,8 +50,25 @@ urlpatterns = [
         name="delete address",
     ),
     path(
+        "subscription/<int:pk>/cancel/",
+        views.CustomerSubscriptionDeleteView.as_view(),
+        name="cancel subscription",
+    ),
+    path(
         "subscription/<int:pk>/",
-        views.SubscriptionDetailView.as_view(),
+        views.CustomerSubscriptionDetailView.as_view(),
         name="detail subscription",
+    ),
+    path(
+        "subscription/<int:pk>/update/",
+        views.CustomerSubscriptionUpdateView.as_view(),
+        name="update subscription",
+    ),
+    path("assets/", views.CustomerAssetListView.as_view(), name="list assets"),
+    path(
+        "assets/<int:pk>/", views.CustomerAssetDetailView.as_view(), name="detail asset"
+    ),
+    path(
+        "assets/create/", views.CustomerAssetCreateView.as_view(), name="create asset"
     ),
 ]

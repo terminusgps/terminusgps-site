@@ -1,3 +1,5 @@
-from .auth import TrackerRegisterForm, TrackerAuthenticationForm
 from .addresses import CustomerShippingAddressCreateForm
+from .assets import CustomerAssetCreateForm
+from .auth import TrackerAuthenticationForm, TrackerRegisterForm
 from .payments import CustomerPaymentMethodCreateForm
+from .subscriptions import CustomerSubscriptionUpdateForm

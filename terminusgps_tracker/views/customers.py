@@ -2,9 +2,10 @@ from typing import Any
 
 from authorizenet.apicontractsv1 import customerAddressType, paymentType
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView
 from terminusgps.authorizenet.errors import ControllerExecutionError
@@ -87,10 +88,18 @@ class CustomerShippingAddressListView(
     content_type = "text/html"
     context_object_name = "address_list"
     extra_context = {"title": "Shipping Addresses", "class": "flex flex-col gap-4"}
-    http_method_names = ["get"]
+    http_method_names = ["get", "patch"]
     model = CustomerShippingAddress
     partial_template_name = "terminusgps_tracker/addresses/partials/_list.html"
     template_name = "terminusgps_tracker/addresses/list.html"
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        customer: Customer = Customer.objects.get(user=self.request.user)
+        customer.authorizenet_sync_address_profiles()
+        return super().get(request, *args, **kwargs)
+
+    def patch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        return self.get(request, *args, **kwargs)
 
     def get_queryset(
         self,
@@ -112,8 +121,20 @@ class CustomerShippingAddressDetailView(
     template_name = "terminusgps_tracker/addresses/detail.html"
 
     def patch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        print(f"{request.GET = }")
-        return super().patch(request, *args, **kwargs)
+        if request.GET.get("default"):
+            self.set_default_address(kwargs["pk"])
+        return HttpResponseRedirect(reverse("list addresses"))
+
+    @transaction.atomic
+    def set_default_address(self, address_pk: int) -> None:
+        target_addr = self.get_queryset().get(pk=address_pk)
+        target_addr.default = True
+        target_addr.save()
+
+        other_addrs = self.get_queryset().exclude(pk=address_pk)
+        for addr in other_addrs:
+            addr.default = False
+        CustomerShippingAddress.objects.bulk_update(other_addrs, ["default"])
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
@@ -184,6 +205,20 @@ class CustomerPaymentMethodCreateView(
                 default=form.cleaned_data["default"],
                 authorizenet_id=int(payment_profile.id),
             )
+
+            if form.cleaned_data["create_shipping_address"]:
+                address_profile = AddressProfile(
+                    merchant_id=customer.user.pk,
+                    customer_profile_id=customer.authorizenet_id,
+                    default=form.cleaned_data["default"],
+                    id=None,
+                    address=address_obj,
+                )
+                CustomerShippingAddress.objects.create(
+                    customer=customer,
+                    default=form.cleaned_data["default"],
+                    authorizenet_id=int(address_profile.id),
+                )
         except ControllerExecutionError as e:
             form.add_error(
                 None,
@@ -209,10 +244,18 @@ class CustomerPaymentMethodListView(
     content_type = "text/html"
     context_object_name = "payment_list"
     extra_context = {"title": "Payment Methods", "class": "flex flex-col gap-4"}
-    http_method_names = ["get"]
+    http_method_names = ["get", "patch"]
     model = CustomerPaymentMethod
     partial_template_name = "terminusgps_tracker/payments/partials/_list.html"
     template_name = "terminusgps_tracker/payments/list.html"
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        customer: Customer = Customer.objects.get(user=self.request.user)
+        customer.authorizenet_sync_payment_profiles()
+        return super().get(request, *args, **kwargs)
+
+    def patch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        return self.get(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet[CustomerPaymentMethod, CustomerPaymentMethod]:
         queryset: QuerySet = super().get_queryset()
@@ -226,10 +269,15 @@ class CustomerPaymentMethodDetailView(
     content_type = "text/html"
     context_object_name = "payment"
     extra_context = {"class": "flex flex-col gap-4"}
-    http_method_names = ["get"]
+    http_method_names = ["get", "patch"]
     model = CustomerPaymentMethod
     partial_template_name = "terminusgps_tracker/payments/partials/_detail.html"
     template_name = "terminusgps_tracker/payments/detail.html"
+
+    def patch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if request.GET.get("default"):
+            self.set_default_payment(kwargs["pk"])
+        return HttpResponseRedirect(reverse("list payments"))
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
@@ -246,6 +294,17 @@ class CustomerPaymentMethodDetailView(
         customer: Customer = Customer.objects.get(user=self.request.user)
         return queryset.filter(customer=customer)
 
+    @transaction.atomic
+    def set_default_payment(self, payment_pk: int) -> None:
+        target_payment = self.get_queryset().get(pk=payment_pk)
+        target_payment.default = True
+        target_payment.save()
+
+        other_payments = self.get_queryset().exclude(pk=payment_pk)
+        for payment in other_payments:
+            payment.default = False
+        CustomerPaymentMethod.objects.bulk_update(other_payments, ["default"])
+
 
 class CustomerPaymentMethodDeleteView(
     CustomerRequiredMixin, HtmxTemplateResponseMixin, DeleteView
@@ -260,12 +319,11 @@ class CustomerPaymentMethodDeleteView(
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         prompt: str | None = request.headers.get("HX-Prompt")
-        last_4: int = self.get_object().authorizenet_get_payment_profile().last_4
 
         if not prompt or not prompt.isdigit():
-            return HttpResponse(status=401)
-        if int(prompt) != last_4:
-            return HttpResponse(status=401)
+            return HttpResponse(status=400)
+        if int(prompt) != self.get_object().authorizenet_get_payment_profile().last_4:
+            return HttpResponse(status=400)
         return super().post(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet[CustomerPaymentMethod, CustomerPaymentMethod]:

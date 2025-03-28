@@ -1,25 +1,23 @@
-<form class="{{ class }}" action="{% url 'asset create' %}" method="post" hx-target="this" hx-include="this" hx-swap="outerHTML">
+<form id="create-asset" class="{{ class }}" hx-post="{% url 'create asset' %}" hx-swap="outerHTML" hx-target="this">
     {% csrf_token %}
-    <div class="p-4 text-center w-full bg-red-100 rounded text-terminus-red-800 hidden has-[ul]:block border border-terminus-red-600">
-        {{ form.non_field_errors }}
-    </div>
     <div class="flex flex-col gap-4">
         <div class="flex flex-col gap-2">
             {{ form.name.label }}
             {{ form.name }}
-            {{ form.name.errors }}
+            {% if form.name.errors %}
+            <div class="mt-2 animate-jiggle rounded border border-red-800 bg-red-100 p-2 text-red-600">{{ form.name.errors }}</div>
+            {% endif %}
         </div>
         <div class="flex flex-col gap-2">
             {{ form.imei_number.label }}
             {{ form.imei_number }}
-            {{ form.imei_number.errors }}
+            {% if form.imei_number.errors %}
+            <div class="mt-2 animate-jiggle rounded border border-red-800 bg-red-100 p-2 text-red-600">{{ form.imei_number.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="flex flex-col gap-2">
+            <input class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit">
+            <a class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-center text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200" href="{% url 'dashboard' %}">Back</a>
         </div>
     </div>
-    <input
-        class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out"
-        type="submit"
-        value="Save"
-        hx-trigger="click"
-        hx-post="{% url 'asset create' %}"
-    >
 </form>

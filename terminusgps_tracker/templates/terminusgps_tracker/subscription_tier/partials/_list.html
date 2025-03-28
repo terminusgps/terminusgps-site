@@ -1,9 +1,0 @@
-{% for tier in tiers %}
-<div
-    id="tier-{{ tier.pk }}"
-    hx-target="this"
-    hx-swap="outerHTML"
-    hx-trigger="load"
-    hx-get="{% url 'detail tier' tier.pk %}">
-</div>
-{% endfor %}

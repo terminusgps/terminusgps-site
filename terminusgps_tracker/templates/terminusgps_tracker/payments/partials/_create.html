@@ -42,6 +42,10 @@
         {{ form.default.label }}
         {{ form.default }}
     </div>
+    <div class="flex items-center gap-2">
+        {{ form.create_shipping_address.label }}
+        {{ form.create_shipping_address }}
+    </div>
     <div class="mt-4 flex flex-col gap-2">
         <input class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit" value="Submit">
         <a href="{% url 'settings' %}" class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-center text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200">Back</a>

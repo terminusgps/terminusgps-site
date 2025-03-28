@@ -4,4 +4,4 @@ from .customers import (
     CustomerPaymentMethod,
     CustomerShippingAddress,
 )
-from .subscriptions import Subscription, SubscriptionFeature, SubscriptionTier
+from .subscriptions import CustomerSubscription, SubscriptionFeature, SubscriptionTier

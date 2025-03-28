@@ -1,27 +1,20 @@
-<form hx-indicator=".htmx-indicator" id="subscription" hx-target="this" hx-swap="outerHTML" class="{{ class }}" action="{% url 'subscription update' subscription.pk %}" method="post">
+<form id="update-subscription" class="{{ class }}" hx-target="#subscription" hx-post="{% url 'update subscription' subscription.pk %}" hx-swap="outerHTML">
     {% csrf_token %}
-    <div class="mb-4 p-4 text-center w-full bg-red-100 rounded text-terminus-red-800 hidden has-[ul]:block border border-terminus-red-600">
-        {{ form.non_field_errors }}
-    </div>
+    {{ form.tier.label }}
+    {{ form.tier }}
+    {% if form.tier.errors %}
+    <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.tier.errors }}</div>
+    {% endif %}
     <div class="flex flex-col gap-2">
-        {{ form.tier.label }}
-        {{ form.tier }}
-        {{ form.tier.errors }}
-    </div>
-    {{ form.address_id.as_hidden }}
-    {{ form.payment_id.as_hidden }}
-    <div class="mt-4 flex flex-col gap-2">
         <input
-            class="rounded border border-terminus-black bg-terminus-red-800 p-2 text-white hover:cursor-pointer hover:bg-terminus-red-400"
-            type="button"
-            value="Confirm"
-            hx-post="{% url 'subscription update' subscription.pk %}"
+            class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400"
+            type="submit"
         >
         <input
-            class="cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 hover:bg-gray-200"
-            value=Cancel
+            class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200"
             type="button"
-            hx-get="{% url 'subscription detail' subscription.pk %}"
-            >
+            value="Back"
+            hx-get="{% url 'detail subscription' subscription.pk %}"
+        >
     </div>
 </form>

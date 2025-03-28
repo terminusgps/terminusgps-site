@@ -49,15 +49,8 @@ class WialonNameUniqueValidator(WialonValidatorBase):
         self.items_type = items_type
         return super().__init__(**kwargs)
 
-    def __call__(self, value: str | int) -> None:
-        if isinstance(value, str) and not value.isdigit():
-            raise ValidationError(
-                _("ID must be a digit, got '%(value)s'"),
-                code="invalid",
-                params={"value": value},
-            )
-
-        if not is_unique(str(value), self.session, items_type=self.items_type):
+    def __call__(self, value: str) -> None:
+        if not is_unique(value, self.session, items_type=self.items_type):
             raise ValidationError(
                 _("'%(value)s' is taken."), code="invalid", params={"value": value}
             )

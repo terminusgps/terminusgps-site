@@ -1,0 +1,27 @@
+<div id="tier-list" class="{{ class }}">
+{% for tier in tier_list %}
+    <div id="{{ tier.name|lower }}-tier" class="p-4 border rounded flex flex-col gap-4">
+        <div class="flex items-center justify-between text-xl">
+            <h2 class="font-bold">{{ tier.name }}</h2>
+            <p class="font-serif">${{ tier.amount }}</p>
+        </div>
+        <div id="{{ tier.name|lower }}-features" class="flex flex-col gap-2">
+            <h2 class="text-xl font-bold">Features</h2>
+            {% for feature in tier.features.all %}
+            <div class="group" hx-on:click="" aria-expanded="true">
+                <div class="flex flex-inline gap-2 items-center">
+                    <h3 class="text-lg font-semibold">{% if feature.amount != None %}{{ feature.get_amount_display }}{% endif %} {{ feature.name }}</h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                    </svg>
+                </div>
+                <p class="hidden group-[aria-expanded]:flex">{{ feature.desc }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% if subscription != None %}
+        <a class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" href="{% url 'update subscription' subscription.pk %}?tier={{ tier.pk }}">Select</a>
+        {% endif %}
+    </div>
+{% endfor %}
+</div>

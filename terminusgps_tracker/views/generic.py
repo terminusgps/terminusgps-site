@@ -6,7 +6,7 @@ from django.http import HttpRequest
 from django.urls import reverse_lazy
 from django.views.generic import RedirectView, TemplateView
 
-from terminusgps_tracker.models import Customer, Subscription
+from terminusgps_tracker.models import Customer, CustomerSubscription
 from terminusgps_tracker.views.mixins import (
     CustomerRequiredMixin,
     HtmxTemplateResponseMixin,
@@ -86,7 +86,7 @@ class TrackerDashboardView(LoginRequiredMixin, HtmxTemplateResponseMixin, Templa
         context: dict[str, Any] = super().get_context_data(**kwargs)
         context["customer"] = self.customer
         context["assets"] = self.customer.assets.all()
-        context["subscription"], _ = Subscription.objects.get_or_create(
+        context["subscription"], _ = CustomerSubscription.objects.get_or_create(
             customer=self.customer
         )
         return context

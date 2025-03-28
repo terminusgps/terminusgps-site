@@ -1,3 +1,8 @@
+from .assets import (
+    CustomerAssetCreateView,
+    CustomerAssetDetailView,
+    CustomerAssetListView,
+)
 from .auth import TrackerLoginView, TrackerLogoutView, TrackerRegisterView
 from .customers import (
     CustomerPaymentMethodCreateView,
@@ -18,4 +23,9 @@ from .generic import (
     TrackerSettingsView,
     TrackerSourceCodeView,
 )
-from .subscriptions import SubscriptionDetailView
+from .subscriptions import (
+    CustomerSubscriptionDeleteView,
+    CustomerSubscriptionDetailView,
+    CustomerSubscriptionUpdateView,
+    SubscriptionTierListView,
+)

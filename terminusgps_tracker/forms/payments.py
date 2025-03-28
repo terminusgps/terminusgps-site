@@ -42,3 +42,9 @@ class CustomerPaymentMethodCreateForm(forms.Form):
         initial=False,
         widget=forms.widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
     )
+    create_shipping_address = forms.BooleanField(
+        label="Create shipping address from billing address?",
+        required=False,
+        initial=False,
+        widget=forms.widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
+    )

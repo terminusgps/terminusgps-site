@@ -1,11 +1,12 @@
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.utils.translation import ngettext
 
 from terminusgps_tracker.models import (
     Customer,
     CustomerAsset,
     CustomerPaymentMethod,
     CustomerShippingAddress,
-    Subscription,
+    CustomerSubscription,
     SubscriptionFeature,
     SubscriptionTier,
 )
@@ -14,6 +15,10 @@ from terminusgps_tracker.models import (
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ["authorizenet_id", "user"]
+    actions = [
+        "refresh_customer_payment_methods",
+        "refresh_customer_shipping_addresses",
+    ]
     fieldsets = [
         (None, {"fields": ["user"]}),
         ("Authorizenet", {"fields": ["authorizenet_id"]}),
@@ -30,6 +35,34 @@ class CustomerAdmin(admin.ModelAdmin):
         ),
     ]
 
+    @admin.action(description="Refresh selected customers payment methods")
+    def refresh_customer_payment_methods(self, request, queryset):
+        [customer.authorizenet_sync_payment_profiles() for customer in queryset]
+        self.message_user(
+            request,
+            ngettext(
+                "Refreshed %(count)s customer payment methods.",
+                "Refreshed %(count)s customers payment methods.",
+                len(queryset),
+            )
+            % {"count": len(queryset)},
+            messages.SUCCESS,
+        )
+
+    @admin.action(description="Refresh selected customers shipping addresses")
+    def refresh_customer_shipping_addresses(self, request, queryset):
+        [customer.authorizenet_sync_address_profiles() for customer in queryset]
+        self.message_user(
+            request,
+            ngettext(
+                "Refreshed %(count)s customer shipping addresses.",
+                "Refreshed %(count)s customers shipping addresses.",
+                len(queryset),
+            )
+            % {"count": len(queryset)},
+            messages.SUCCESS,
+        )
+
 
 @admin.register(CustomerAsset)
 class CustomerAssetAdmin(admin.ModelAdmin):
@@ -39,17 +72,19 @@ class CustomerAssetAdmin(admin.ModelAdmin):
 @admin.register(CustomerPaymentMethod)
 class CustomerPaymentMethodAdmin(admin.ModelAdmin):
     list_display = ["authorizenet_id", "customer"]
+    view_on_site = False
 
 
 @admin.register(CustomerShippingAddress)
 class CustomerShippingAddressAdmin(admin.ModelAdmin):
     list_display = ["authorizenet_id", "customer"]
+    view_on_site = False
 
 
-@admin.register(Subscription)
-class SubscriptionAdmin(admin.ModelAdmin):
+@admin.register(CustomerSubscription)
+class CustomerSubscriptionAdmin(admin.ModelAdmin):
     list_display = ["authorizenet_id", "customer", "status"]
-    readonly_fields = ["status"]
+    readonly_fields = ["status", "payment", "address"]
 
 
 @admin.register(SubscriptionTier)
