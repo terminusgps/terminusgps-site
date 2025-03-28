@@ -39,15 +39,6 @@ class CustomerSubscription(models.Model):
         related_name="tier",
     )
     """Current subscription tier."""
-    prev_tier = models.ForeignKey(
-        "terminusgps_tracker.SubscriptionTier",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        default=None,
-        related_name="prev_tier",
-    )
-    """Previous subscription tier."""
     payment = models.ForeignKey(
         "terminusgps_tracker.CustomerPaymentMethod",
         on_delete=models.SET_NULL,
@@ -79,9 +70,13 @@ class CustomerSubscription(models.Model):
     def save(self, **kwargs) -> None:
         if self.pk:
             if self.address and self.address not in self.customer.addresses.filter():
-                raise ValueError("Only this customer's addresses can be assigned.")
+                raise ValueError(
+                    f"Only {self.customer}'s shipping addresses can be assigned."
+                )
             if self.payment and self.payment not in self.customer.payments.filter():
-                raise ValueError("Only this customer's payments can be assigned.")
+                raise ValueError(
+                    f"Only {self.customer}'s payment methods can be assigned."
+                )
         super().save(**kwargs)
 
     def get_absolute_url(self) -> str:
@@ -92,6 +87,7 @@ class CustomerSubscription(models.Model):
     def authorizenet_refresh_status(self) -> None:
         """Refreshes the subscription status from Authorizenet."""
         self.status = self.authorizenet_get_subscription_profile().status
+        self.save()
 
     @transaction.atomic
     def authorizenet_create_subscription(self) -> None:

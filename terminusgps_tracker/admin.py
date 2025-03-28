@@ -84,7 +84,22 @@ class CustomerShippingAddressAdmin(admin.ModelAdmin):
 @admin.register(CustomerSubscription)
 class CustomerSubscriptionAdmin(admin.ModelAdmin):
     list_display = ["authorizenet_id", "customer", "status"]
-    readonly_fields = ["status", "payment", "address"]
+    readonly_fields = ["status"]
+    actions = ["refresh_subscriptions_status"]
+
+    @admin.action(description="Refresh selected subscriptions status")
+    def refresh_subscriptions_status(self, request, queryset):
+        [sub.authorizenet_refresh_status() for sub in queryset]
+        self.message_user(
+            request,
+            ngettext(
+                "Refreshed %(count)s subscription's status.",
+                "Refreshed %(count)s subscriptions' statuses.",
+                len(queryset),
+            )
+            % {"count": len(queryset)},
+            messages.SUCCESS,
+        )
 
 
 @admin.register(SubscriptionTier)
