@@ -1,13 +1,14 @@
 import string
 
 from authorizenet import apicontractsv1, apicontrollers
-from django.core.exceptions import ValidationError
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from terminusgps.authorizenet.auth import get_merchant_auth
+from terminusgps.wialon.items import WialonUnitGroup
 from terminusgps.wialon.session import WialonSession
-from terminusgps.wialon.utils import get_wialon_cls, is_unique
-from wialon.api import WialonError
+from terminusgps.wialon.utils import get_id_from_imei, is_unique
 
 
 class WialonValidatorBase:
@@ -19,31 +20,6 @@ class WialonValidatorBase:
         raise NotImplementedError("Subclasses must implement this method.")
 
 
-class WialonObjectConstructableValidator(WialonValidatorBase):
-    def __init__(self, items_type: str, **kwargs) -> None:
-        self.items_type = items_type
-        return super().__init__(**kwargs)
-
-    def __call__(self, value: str | int) -> None:
-        if isinstance(value, str) and not value.isdigit():
-            raise ValidationError(
-                _("ID must be a digit, got '%(value)s'"),
-                code="invalid",
-                params={"value": value},
-            )
-
-        try:
-            # Construct an object with the id and populate it
-            wialon_cls = get_wialon_cls(self.items_type)
-            wialon_cls(id=value, session=self.session).populate()
-        except (WialonError, ValueError) as e:
-            raise ValidationError(
-                _("Object was not constructed with '%(value)s': '%(error)s'."),
-                code="invalid",
-                params={"value": value, "error": e},
-            )
-
-
 class WialonNameUniqueValidator(WialonValidatorBase):
     def __init__(self, items_type: str, **kwargs) -> None:
         self.items_type = items_type
@@ -53,6 +29,40 @@ class WialonNameUniqueValidator(WialonValidatorBase):
         if not is_unique(value, self.session, items_type=self.items_type):
             raise ValidationError(
                 _("'%(value)s' is taken."), code="invalid", params={"value": value}
+            )
+
+
+class WialonUnitAvailableValidator(WialonValidatorBase):
+    def __init__(self, *args, **kwargs) -> None:
+        if not hasattr(settings, "WIALON_UNACTIVATED_GROUP"):
+            raise ImproperlyConfigured(
+                "'WIALON_UNACTIVATED_GROUP' setting is required."
+            )
+
+        super().__init__(*args, **kwargs)
+
+    def __call__(self, value: str) -> None:
+        if not value.isdigit():
+            raise ValidationError(
+                _("'%(value)s' cannot contain non-digits."),
+                code="invalid",
+                params={"value": value},
+            )
+        unit_id: str | None = get_id_from_imei(value, session=self.session)
+        if not unit_id:
+            raise ValidationError(
+                _("'%(value)s' wasn't found in Wialon."),
+                code="invalid",
+                params={"value": value},
+            )
+        available: WialonUnitGroup = WialonUnitGroup(
+            id=settings.WIALON_UNACTIVATED_GROUP, session=self.session
+        )
+        if unit_id not in available.items:
+            raise ValidationError(
+                _("Whoops! '%(value)s' has already been registered."),
+                code="invalid",
+                params={"value": value},
             )
 
 
@@ -147,24 +157,8 @@ def validate_credit_card_expiry_year(value: str) -> None:
         )
 
 
-def validate_wialon_user_id(value: str) -> None:
-    """Raises :py:exec:`ValidationError` if a :py:obj:`WialonUser` cannot be constructed from the value."""
-    return WialonObjectConstructableValidator(items_type="user")(value)
-
-
-def validate_wialon_unit_id(value: str) -> None:
-    """Raises :py:exec:`ValidationError` if a :py:obj:`WialonUnit` cannot be constructed from the value."""
-    return WialonObjectConstructableValidator(items_type="avl_unit")(value)
-
-
-def validate_wialon_unit_group_id(value: str) -> None:
-    """Raises :py:exec:`ValidationError` if a :py:obj:`WialonUnitGroup` cannot be constructed from the value."""
-    return WialonObjectConstructableValidator(items_type="avl_unit_group")(value)
-
-
-def validate_wialon_resource_id(value: str) -> None:
-    """Raises :py:exec:`ValidationError` if a :py:obj:`WialonResource` cannot be constructed from the value."""
-    return WialonObjectConstructableValidator(items_type="avl_resource")(value)
+def validate_wialon_imei_number_available(value: str) -> None:
+    return WialonUnitAvailableValidator()(value)
 
 
 def validate_wialon_unit_name_unique(value: str) -> None:
@@ -182,7 +176,7 @@ def validate_wialon_resource_name_unique(value: str) -> None:
     return WialonNameUniqueValidator(items_type="avl_resource")(value)
 
 
-def validate_unit_group_name_unique(value: str) -> None:
+def validate_wialon_unit_group_name_unique(value: str) -> None:
     """Raises :py:exec:`ValidationError` if the value is a non-unique Wialon unit group name."""
     return WialonNameUniqueValidator(items_type="avl_unit_group")(value)
 

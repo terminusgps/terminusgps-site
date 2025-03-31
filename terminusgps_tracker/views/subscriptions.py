@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from terminusgps_tracker.forms import CustomerSubscriptionUpdateForm
-from terminusgps_tracker.models import CustomerSubscription
+from terminusgps_tracker.models import Customer, CustomerSubscription
 from terminusgps_tracker.models.subscriptions import SubscriptionTier
 from terminusgps_tracker.views.mixins import (
     CustomerRequiredMixin,
@@ -20,7 +20,11 @@ class SubscriptionTierListView(HtmxTemplateResponseMixin, ListView):
     model = SubscriptionTier
     partial_template_name = "terminusgps_tracker/subscriptions/partials/_tier_list.html"
     template_name = "terminusgps_tracker/subscriptions/tier_list.html"
-    extra_context = {"class": "flex flex-col gap-4", "title": "Subscription Tiers"}
+    extra_context = {
+        "title": "Subscription Tiers",
+        "subtitle": "You get what you pay for",
+        "class": "flex flex-col gap-4",
+    }
     context_object_name = "tier_list"
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
@@ -57,7 +61,10 @@ class CustomerSubscriptionUpdateView(
     CustomerRequiredMixin, HtmxTemplateResponseMixin, UpdateView
 ):
     content_type = "text/html"
-    extra_context = {"title": "Update Subscription", "class": "flex flex-col gap-4"}
+    extra_context = {
+        "title": "Update Subscription",
+        "class": "flex flex-col gap-4 border p-4 rounded bg-white",
+    }
     form_class = CustomerSubscriptionUpdateForm
     http_method_names = ["get", "post"]
     model = CustomerSubscription
@@ -67,15 +74,26 @@ class CustomerSubscriptionUpdateView(
 
     def get_initial(self) -> dict[str, Any]:
         initial: dict[str, Any] = super().get_initial()
-        if self.request.GET.get("tier"):
-            initial["tier"] = SubscriptionTier.objects.get(
-                pk=self.request.GET.get("tier")
-            )
+        initial["tier"] = SubscriptionTier.objects.get(
+            pk=self.request.GET.get("tier") or 1
+        )
+        customer = Customer.objects.get(user=self.request.user)
+        if customer.addresses.filter().exists():
+            initial["address"] = customer.addresses.filter().first()
+        if customer.payments.filter().exists():
+            initial["payment"] = customer.payments.filter().first()
         return initial
 
     def form_valid(self, form: CustomerSubscriptionUpdateForm) -> HttpResponse:
-        print(f"{form.cleaned_data["tier"] = }")
-        # TODO: upgrade/downgrade subscription
+        new_tier = form.cleaned_data["tier"]
+        address = form.cleaned_data["address"]
+        payment = form.cleaned_data["payment"]
+
+        subscription = self.get_object()
+        subscription.payment = payment
+        subscription.address = address
+        subscription.tier = new_tier
+        subscription.save()
         return super().form_valid(form=form)
 
     def get_success_url(self) -> str:

@@ -24,6 +24,9 @@
     --color-terminus-red-50: oklch(60.82% 0.209 25.26);
 
     --animate-jiggle: jiggle 0.5s ease 1;
+    --animate-coin: coin 3s linear infinite;
+    --animate-slide-up: slideup 1s ease 1;
+    --animate-slide-down: slidedown 1s ease 1;
 }
 
 @keyframes jiggle {
@@ -33,4 +36,19 @@
     60% {transform: translateX(-5%);}
     80% {transform: translateX(5%);}
     100% {transform: translateX(0%);}
+}
+
+@keyframes coin {
+    from {transform: rotateY(0deg);}
+    to {transform: rotateY(180deg);}
+}
+
+@keyframes slideup {
+    from {transform: translateY(20%); opacity: 0}
+    to {transform: translateY(0); opacity: 1}
+}
+
+@keyframes slidedown {
+    from {transform: translateY(-20%); opacity: 0}
+    to {transform: translateY(0); opacity: 1}
 }

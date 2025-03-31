@@ -64,24 +64,20 @@ class CustomerSubscription(models.Model):
     )
     """Current Authorizenet subscription status."""
 
+    class Meta:
+        constraints = []
+
     def __str__(self) -> str:
         return f"{self.customer}'s Subscription"
-
-    def save(self, **kwargs) -> None:
-        if self.pk:
-            if self.address and self.address not in self.customer.addresses.filter():
-                raise ValueError(
-                    f"Only {self.customer}'s shipping addresses can be assigned."
-                )
-            if self.payment and self.payment not in self.customer.payments.filter():
-                raise ValueError(
-                    f"Only {self.customer}'s payment methods can be assigned."
-                )
-        super().save(**kwargs)
 
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the subscription's detail view."""
         return reverse("detail subscription", kwargs={"pk": self.pk})
+
+    @transaction.atomic
+    def authorizenet_delete_subscription(self) -> None:
+        sub_profile = self.authorizenet_get_subscription_profile()
+        sub_profile.delete()
 
     @transaction.atomic
     def authorizenet_refresh_status(self) -> None:
@@ -96,6 +92,7 @@ class CustomerSubscription(models.Model):
 
         :raises AssertionError: If :py:attr:`payment.authorizenet_id` wasn't set.
         :raises AssertionError: If :py:attr:`address.authorizenet_id` wasn't set.
+        :raises ControllerExecutionError: If something goes wrong with an Authorizenet API call.
         :returns: Nothing.
         :rtype: :py:obj:`None`
 
@@ -118,6 +115,7 @@ class CustomerSubscription(models.Model):
         Returns the Authorizenet subscription profile for the subscription.
 
         :raises AssertionError: If :py:attr`authorizenet_id` wasn't set.
+        :raises ControllerExecutionError: If something goes wrong with an Authorizenet API call.
         :returns: A subscription profile.
         :rtype: :py:obj:`~terminusgps.authorizenet.profiles.SubscriptionProfile`
 

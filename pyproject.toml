@@ -23,7 +23,7 @@ dependencies = [
     "numpy==2.0.1",
     "pandas==2.2.2",
     "pillow==10.4.0",
-    "python-terminusgps==28.2.0",
+    "python-terminusgps==28.2.1",
     "python-wialon==1.2.4",
 ]
 

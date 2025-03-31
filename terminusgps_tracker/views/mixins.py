@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic.base import ContextMixin, TemplateResponseMixin
 
-from terminusgps_tracker.models import Customer
+from terminusgps_tracker.models import Customer, CustomerSubscription
 
 if not hasattr(settings, "TRACKER_APP_CONFIG"):
     raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
@@ -55,7 +55,7 @@ class TrackerAppConfigContextMixin(ContextMixin):
 class CustomerRequiredMixin(UserPassesTestMixin):
     login_url = reverse_lazy("login")
     permission_denied_message = "You do not have permission to view this."
-    raise_exception = True
+    raise_exception = False
 
     def test_func(self) -> bool:
         if not hasattr(self, "request"):
@@ -68,5 +68,23 @@ class CustomerRequiredMixin(UserPassesTestMixin):
         try:
             Customer.objects.get(user=self.request.user)
             return True
+        except Customer.DoesNotExist:
+            return False
+
+
+class CustomerSubscriptionRequiredMixin(UserPassesTestMixin):
+    login_url = reverse_lazy("login")
+    permission_denied_message = (
+        "An active subscription is required to perform this action."
+    )
+    raise_exception = False
+
+    def test_func(self) -> bool:
+        try:
+            customer = Customer.objects.get(user=self.request.user)
+            return (
+                customer.subscription.status
+                == CustomerSubscription.SubscriptionStatus.ACTIVE
+            )
         except Customer.DoesNotExist:
             return False

@@ -1,32 +1,21 @@
+import datetime
 from typing import Any
 
 from django.conf import settings
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpRequest
-from django.urls import reverse_lazy
+from django.core.exceptions import ImproperlyConfigured
+from django.utils import timezone
 from django.views.generic import RedirectView, TemplateView
 
-from terminusgps_tracker.models import Customer, CustomerSubscription
-from terminusgps_tracker.views.mixins import (
-    CustomerRequiredMixin,
-    HtmxTemplateResponseMixin,
-)
+from terminusgps_tracker.views.mixins import HtmxTemplateResponseMixin
+
+if not hasattr(settings, "TRACKER_APP_CONFIG"):
+    raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
 
 
-class TrackerAboutView(HtmxTemplateResponseMixin, TemplateView):
-    content_type = "text/html"
+class TrackerSourceCodeView(RedirectView):
     http_method_names = ["get"]
-    partial_template_name = "terminusgps_tracker/partials/_about.html"
-    template_name = "terminusgps_tracker/about.html"
-    extra_context = {"title": "About", "class": "flex flex-col gap-4"}
-
-
-class TrackerContactView(HtmxTemplateResponseMixin, TemplateView):
-    content_type = "text/html"
-    http_method_names = ["get"]
-    partial_template_name = "terminusgps_tracker/partials/_contact.html"
-    template_name = "terminusgps_tracker/contact.html"
-    extra_context = {"title": "Contact", "class": "flex flex-col gap-4"}
+    permanent = True
+    url = settings.TRACKER_APP_CONFIG.get("REPOSITORY_URL")
 
 
 class TrackerPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
@@ -37,56 +26,28 @@ class TrackerPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
     extra_context = {"title": "Privacy Policy", "class": "flex flex-col gap-4"}
 
 
-class TrackerFrequentlyAskedQuestionsView(HtmxTemplateResponseMixin, TemplateView):
+class TrackerGreetingView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
+    extra_context = {"title": "Greeting", "class": "flex flex-col gap-4"}
     http_method_names = ["get"]
-    partial_template_name = "terminusgps_tracker/partials/_faq.html"
-    template_name = "terminusgps_tracker/faq.html"
-    extra_context = {
-        "title": "Frequently Asked Questions",
-        "class": "flex flex-col gap-4",
-    }
-
-
-class TrackerSourceCodeView(RedirectView):
-    http_method_names = ["get"]
-    permanent = True
-    url = settings.TRACKER_APP_CONFIG["REPOSITORY_URL"]
-
-
-class TrackerSettingsView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, TemplateView
-):
-    content_type = "text/html"
-    extra_context = {"title": "Settings", "class": "flex flex-col gap-4"}
-    http_method_names = ["get"]
-    partial_template_name = "terminusgps_tracker/partials/_settings.html"
-    template_name = "terminusgps_tracker/settings.html"
-
-
-class TrackerDashboardView(LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView):
-    content_type = "text/html"
-    extra_context = {
-        "title": "Dashboard",
-        "subtitle": "Check out the Terminus GPS mobile app!",
-        "class": "flex flex-col gap-4",
-    }
-    http_method_names = ["get"]
-    login_url = reverse_lazy("login")
-    partial_template_name = "terminusgps_tracker/partials/_dashboard.html"
-    permission_denied_message = "Please login and try again."
-    raise_exception = False
-    template_name = "terminusgps_tracker/dashboard.html"
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        super().setup(request, *args, **kwargs)
-        self.customer, _ = Customer.objects.get_or_create(user=request.user)
+    partial_template_name = "terminusgps_tracker/partials/_greeting.html"
+    template_name = "terminusgps_tracker/greeting.html"
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["customer"] = self.customer
-        context["assets"] = self.customer.assets.all()
-        context["subscription"], _ = CustomerSubscription.objects.get_or_create(
-            customer=self.customer
-        )
+        if self.request.user:
+            context["now"] = timezone.now()
+            context["name"] = self.request.user.first_name
+            context["message"] = self.get_user_greeting(context["now"])
         return context
+
+    def get_user_greeting(self, time: datetime.datetime) -> str | None:
+        greetings_map = {
+            frozenset({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}): "Good morning",
+            frozenset({12, 13, 14, 15, 16}): "Good afternoon",
+            frozenset({17, 18, 19, 20, 21, 22, 23, 24}): "Good afternoon",
+        }
+        for key, value in greetings_map.items():
+            if time.astimezone().hour in key:
+                return value
+        return

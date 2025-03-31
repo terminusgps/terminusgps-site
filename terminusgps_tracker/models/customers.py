@@ -33,12 +33,12 @@ class Customer(models.Model):
         return self.user.username
 
     def save(self, **kwargs) -> None:
-        if not self.authorizenet_customer_profile_exists:
+        if not self.authorizenet_id and not self.authorizenet_customer_profile_exists:
             customer_profile = CustomerProfile(
                 merchant_id=self.user.pk,
                 id=None,
                 email=self.user.username,
-                desc=f"{timezone.now():%Y-%m-%d %H:%M:%S}: Created by the Terminus GPS Tracker application.",
+                desc=f"{timezone.now():%Y-%m-%d %H:%M:%S}: Created by the Terminus GPS Tracker application",
             )
             self.authorizenet_id = customer_profile.id
         super().save(**kwargs)
@@ -152,7 +152,7 @@ class CustomerPaymentMethod(models.Model):
     def get_absolute_url(self) -> str:
         return reverse("detail payment", kwargs={"pk": self.pk})
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
         """Deletes the payment profile in Authorizenet before deleting the object."""
         payment_profile = self.authorizenet_get_payment_profile()
         payment_profile.delete()
@@ -197,7 +197,7 @@ class CustomerShippingAddress(models.Model):
     def get_absolute_url(self) -> str:
         return reverse("detail address", kwargs={"pk": self.pk})
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
         """Deletes the address profile in Authorizenet before deleting the object."""
         address_profile = self.authorizenet_get_address_profile()
         address_profile.delete()

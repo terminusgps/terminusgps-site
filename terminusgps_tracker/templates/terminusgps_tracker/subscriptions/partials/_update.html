@@ -1,9 +1,11 @@
-<form id="update-subscription" class="{{ class }}" hx-target="#subscription" hx-post="{% url 'update subscription' subscription.pk %}" hx-swap="outerHTML">
+<form id="subscription" class="{{ class }}" hx-post="{% url 'update subscription' subscription.pk %}" hx-target="this" hx-swap="outerHTML">
     {% csrf_token %}
     {{ form.tier.label }}
     {{ form.tier }}
+    {{ form.payment }}
+    {{ form.address }}
     {% if form.tier.errors %}
-    <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.tier.errors }}</div>
+    <div class="mt-2 animate-jiggle rounded border border-red-800 bg-red-100 p-2 text-red-600">{{ form.tier.errors }}</div>
     {% endif %}
     <div class="flex flex-col gap-2">
         <input
@@ -15,6 +17,7 @@
             type="button"
             value="Back"
             hx-get="{% url 'detail subscription' subscription.pk %}"
+            hx-swap="outerHTML"
         >
     </div>
 </form>

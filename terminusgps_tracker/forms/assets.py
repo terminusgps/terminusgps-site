@@ -1,7 +1,10 @@
 from django import forms
-from django.core.validators import validate_integer
 
-from terminusgps_tracker.validators import validate_wialon_unit_name_unique
+from terminusgps_tracker.models import Customer
+from terminusgps_tracker.validators import (
+    validate_wialon_imei_number_available,
+    validate_wialon_unit_name_unique,
+)
 
 
 class CustomerAssetCreateForm(forms.Form):
@@ -15,8 +18,11 @@ class CustomerAssetCreateForm(forms.Form):
     )
     imei_number = forms.CharField(
         label="IMEI #",
-        validators=[validate_integer],
+        validators=[validate_wialon_imei_number_available],
         widget=forms.widgets.TextInput(
             attrs={"class": default_field_class, "placeholder": "867730050855555"}
         ),
+    )
+    customer = forms.ModelChoiceField(
+        queryset=Customer.objects.all(), widget=forms.widgets.HiddenInput()
     )

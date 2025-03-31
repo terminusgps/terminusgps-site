@@ -1,13 +1,20 @@
 from typing import Any
 
 from authorizenet.apicontractsv1 import customerAddressType, paymentType
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import DeleteView, DetailView, FormView, ListView
+from django.views.generic import (
+    DeleteView,
+    DetailView,
+    FormView,
+    ListView,
+    TemplateView,
+)
 from terminusgps.authorizenet.errors import ControllerExecutionError
 from terminusgps.authorizenet.profiles import AddressProfile, PaymentProfile
 from terminusgps.authorizenet.utils import (
@@ -30,6 +37,61 @@ from terminusgps_tracker.views.mixins import (
 )
 
 
+class CustomerDashboardView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Dashboard",
+        "subtitle": "Check out the Terminus GPS mobile app!",
+        "class": "flex flex-col gap-8",
+    }
+    http_method_names = ["get"]
+    login_url = reverse_lazy("login")
+    partial_template_name = "terminusgps_tracker/partials/_dashboard.html"
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    template_name = "terminusgps_tracker/dashboard.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        try:
+            context["customer"] = Customer.objects.get(user=self.request.user)
+            context["subscription"] = context["customer"].subscription
+        except Customer.DoesNotExist:
+            context["customer"] = None
+            context["subscription"] = None
+        return context
+
+
+class CustomerSettingsView(
+    CustomerRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Settings",
+        "subtitle": "Update your information",
+        "class": "flex flex-col gap-8",
+    }
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps_tracker/partials/_settings.html"
+    template_name = "terminusgps_tracker/settings.html"
+
+
+class CustomerSupportView(
+    CustomerRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Support",
+        "subtitle": "Drop us a line",
+        "class": "flex flex-col gap-4",
+    }
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps_tracker/partials/_support.html"
+    template_name = "terminusgps_tracker/support.html"
+
+
 class CustomerShippingAddressCreateView(
     CustomerRequiredMixin, HtmxTemplateResponseMixin, FormView
 ):
@@ -43,6 +105,13 @@ class CustomerShippingAddressCreateView(
     queryset = Customer.objects.none()
     success_url = reverse_lazy("settings")
     template_name = "terminusgps_tracker/addresses/create.html"
+
+    def get_initial(self) -> dict[str, Any]:
+        initial: dict[str, Any] = super().get_initial()
+        if self.request.user:
+            initial["first_name"] = self.request.user.first_name
+            initial["last_name"] = self.request.user.last_name
+        return initial
 
     def form_valid(
         self, form: CustomerShippingAddressCreateForm
@@ -183,6 +252,13 @@ class CustomerPaymentMethodCreateView(
     success_url = reverse_lazy("settings")
     template_name = "terminusgps_tracker/payments/create.html"
     queryset = CustomerPaymentMethod.objects.none()
+
+    def get_initial(self) -> dict[str, Any]:
+        initial: dict[str, Any] = super().get_initial()
+        if self.request.user:
+            initial["first_name"] = self.request.user.first_name
+            initial["last_name"] = self.request.user.last_name
+        return initial
 
     def form_valid(
         self, form: CustomerPaymentMethodCreateForm

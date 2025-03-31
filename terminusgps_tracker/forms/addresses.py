@@ -27,6 +27,6 @@ class CustomerShippingAddressCreateForm(forms.Form):
     default = forms.BooleanField(
         label="Set as default shipping address?",
         required=False,
-        initial=False,
+        initial=True,
         widget=forms.widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
     )

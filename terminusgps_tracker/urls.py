@@ -3,14 +3,16 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("", views.TrackerDashboardView.as_view(), name="dashboard"),
+    path("", views.CustomerDashboardView.as_view(), name="dashboard"),
     path("login/", views.TrackerLoginView.as_view(), name="login"),
     path("logout/", views.TrackerLogoutView.as_view(), name="logout"),
     path("privacy/", views.TrackerPrivacyPolicyView.as_view(), name="privacy"),
     path("register/", views.TrackerRegisterView.as_view(), name="register"),
     path("source/", views.TrackerSourceCodeView.as_view(), name="source code"),
-    path("settings/", views.TrackerSettingsView.as_view(), name="settings"),
+    path("settings/", views.CustomerSettingsView.as_view(), name="settings"),
     path("tiers/", views.SubscriptionTierListView.as_view(), name="list tiers"),
+    path("greeting/", views.TrackerGreetingView.as_view(), name="greeting"),
+    path("support/", views.CustomerSupportView.as_view(), name="support"),
     path(
         "payments/", views.CustomerPaymentMethodListView.as_view(), name="list payments"
     ),
@@ -67,6 +69,11 @@ urlpatterns = [
     path("assets/", views.CustomerAssetListView.as_view(), name="list assets"),
     path(
         "assets/<int:pk>/", views.CustomerAssetDetailView.as_view(), name="detail asset"
+    ),
+    path(
+        "assets/<int:pk>/delete/",
+        views.CustomerAssetDeleteView.as_view(),
+        name="delete asset",
     ),
     path(
         "assets/create/", views.CustomerAssetCreateView.as_view(), name="create asset"
