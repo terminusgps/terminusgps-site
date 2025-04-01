@@ -1,8 +1,9 @@
 from typing import Any
-from django.template import Library
 
+from django.template import Library
 from terminusgps.wialon.session import WialonSession
-from terminusgps_tracker.models import CustomerAsset
+
+from terminusgps_tracker.models.customers import CustomerAsset
 
 register = Library()
 

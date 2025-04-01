@@ -1,11 +1,13 @@
 from django.contrib import admin, messages
 from django.utils.translation import ngettext
 
-from terminusgps_tracker.models import (
+from terminusgps_tracker.models.customers import (
     Customer,
     CustomerAsset,
     CustomerPaymentMethod,
     CustomerShippingAddress,
+)
+from terminusgps_tracker.models.subscriptions import (
     CustomerSubscription,
     SubscriptionFeature,
     SubscriptionTier,

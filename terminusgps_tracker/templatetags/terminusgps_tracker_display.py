@@ -1,8 +1,7 @@
+from django.conf import settings
 from django.template import Library
 from django.utils import timezone
-from django.conf import settings
 from django.utils.safestring import SafeString, mark_safe
-
 
 register = Library()
 
