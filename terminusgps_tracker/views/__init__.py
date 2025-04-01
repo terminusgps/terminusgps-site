@@ -19,13 +19,14 @@ from .customers import (
     CustomerSupportView,
 )
 from .generic import (
-    TrackerGreetingView,
+    TrackerMobileAppView,
     TrackerPrivacyPolicyView,
     TrackerSourceCodeView,
 )
 from .subscriptions import (
     CustomerSubscriptionDeleteView,
     CustomerSubscriptionDetailView,
+    CustomerSubscriptionTransactionsView,
     CustomerSubscriptionUpdateView,
     SubscriptionTierListView,
 )

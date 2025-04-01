@@ -1,12 +1,14 @@
 from typing import Any
 
 from authorizenet.apicontractsv1 import customerAddressType, paymentType
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import (
     DeleteView,
@@ -30,22 +32,22 @@ from terminusgps_tracker.models import (
     Customer,
     CustomerPaymentMethod,
     CustomerShippingAddress,
+    CustomerSubscription,
 )
 from terminusgps_tracker.views.mixins import (
     CustomerRequiredMixin,
     HtmxTemplateResponseMixin,
 )
 
+if not hasattr(settings, "TRACKER_APP_CONFIG"):
+    raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
+
 
 class CustomerDashboardView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
 ):
     content_type = "text/html"
-    extra_context = {
-        "title": "Dashboard",
-        "subtitle": "Check out the Terminus GPS mobile app!",
-        "class": "flex flex-col gap-8",
-    }
+    extra_context = {"title": "Dashboard", "class": "flex flex-col gap-8"}
     http_method_names = ["get"]
     login_url = reverse_lazy("login")
     partial_template_name = "terminusgps_tracker/partials/_dashboard.html"
@@ -54,13 +56,21 @@ class CustomerDashboardView(
     template_name = "terminusgps_tracker/dashboard.html"
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
         try:
-            context["customer"] = Customer.objects.get(user=self.request.user)
-            context["subscription"] = context["customer"].subscription
+            customer = Customer.objects.get(user=self.request.user)
+            subscription, _ = CustomerSubscription.objects.get_or_create(
+                customer=customer
+            )
         except Customer.DoesNotExist:
-            context["customer"] = None
-            context["subscription"] = None
+            customer = None
+            subscription = None
+
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["customer"] = customer
+        context["subscription"] = subscription
+        context["subtitle"] = mark_safe(
+            f"Check out the Terminus GPS <a class='text-terminus-red-800 underline decoration-terminus-black decoration underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted' href='{reverse('mobile apps')}'>mobile app</a> today!"
+        )
         return context
 
 

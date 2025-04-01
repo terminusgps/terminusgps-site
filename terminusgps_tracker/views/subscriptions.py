@@ -1,8 +1,10 @@
 from typing import Any
 
 from django import forms
-from django.http import HttpResponse, HttpResponseRedirect
+from django.core.exceptions import ValidationError
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from terminusgps_tracker.forms import CustomerSubscriptionUpdateForm
@@ -12,6 +14,32 @@ from terminusgps_tracker.views.mixins import (
     CustomerRequiredMixin,
     HtmxTemplateResponseMixin,
 )
+
+
+class CustomerSubscriptionTransactionsView(
+    CustomerRequiredMixin, HtmxTemplateResponseMixin, DetailView
+):
+    content_type = "text/html"
+    http_method_names = ["get"]
+    model = CustomerSubscription
+    template_name = "terminusgps_tracker/subscriptions/transactions.html"
+    partial_template_name = (
+        "terminusgps_tracker/subscriptions/partials/_transactions.html"
+    )
+    extra_context = {
+        "title": "Subscription Transactions",
+        "class": "flex flex-col gap-4",
+    }
+
+    def get_object(self, queryset=None) -> CustomerSubscription:
+        customer: Customer = Customer.objects.get(user=self.request.user)
+        subscription, _ = CustomerSubscription.objects.get_or_create(customer=customer)
+        return subscription
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        total_transactions = int(request.GET.get("total_transactions", 5))
+        subscription_profile = self.get_object().authorizenet_get_subscription_profile()
+        return super().get(request, *args, **kwargs)
 
 
 class SubscriptionTierListView(HtmxTemplateResponseMixin, ListView):
@@ -89,6 +117,23 @@ class CustomerSubscriptionUpdateView(
         address = form.cleaned_data["address"]
         payment = form.cleaned_data["payment"]
 
+        if not payment:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Please add at least one payment method before proceeding.")
+                ),
+            )
+            return self.form_invalid(form=form)
+        if not address:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Please add at least one shipping address before proceeding.")
+                ),
+            )
+            return self.form_invalid(form=form)
+
         subscription = self.get_object()
         subscription.payment = payment
         subscription.address = address
@@ -116,8 +161,11 @@ class CustomerSubscriptionDeleteView(
         if self.get_object() is None:
             return self.form_invalid(form=form)
 
-        subscription_profile = self.get_object().authorizenet_get_subscription_profile()
-        subscription_profile.cancel()
+        if self.get_object().authorizenet_id is not None:
+            subscription_profile = (
+                self.get_object().authorizenet_get_subscription_profile()
+            )
+            subscription_profile.cancel()
         return super().form_valid(form=form)
 
     def get_object(self, queryset=None) -> CustomerSubscription | None:

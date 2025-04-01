@@ -11,8 +11,8 @@ urlpatterns = [
     path("source/", views.TrackerSourceCodeView.as_view(), name="source code"),
     path("settings/", views.CustomerSettingsView.as_view(), name="settings"),
     path("tiers/", views.SubscriptionTierListView.as_view(), name="list tiers"),
-    path("greeting/", views.TrackerGreetingView.as_view(), name="greeting"),
     path("support/", views.CustomerSupportView.as_view(), name="support"),
+    path("apps/", views.TrackerMobileAppView.as_view(), name="mobile apps"),
     path(
         "payments/", views.CustomerPaymentMethodListView.as_view(), name="list payments"
     ),
@@ -65,6 +65,11 @@ urlpatterns = [
         "subscription/<int:pk>/update/",
         views.CustomerSubscriptionUpdateView.as_view(),
         name="update subscription",
+    ),
+    path(
+        "subscription/<int:pk>/transactions/",
+        views.CustomerSubscriptionTransactionsView.as_view(),
+        name="subscription transactions",
     ),
     path("assets/", views.CustomerAssetListView.as_view(), name="list assets"),
     path(

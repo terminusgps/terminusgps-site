@@ -10,20 +10,20 @@
         <script src="{% static 'terminusgps/js/htmx.min.js' %}" defer></script>
     </head>
     <body class="h-fit bg-gradient-to-b from-terminus-red-100 to-terminus-red-900 bg-no-repeat text-gray-800 dark:text-white">
-        <nav class="flex justify-between bg-stone-100 py-4 drop-shadow dark:bg-terminus-gray-900 text-gray-800">
-            <a href="{% url 'dashboard' %}" class="flex items-center space-x-1">
-                {% include "terminusgps_tracker/logo.svg" with class="size-16 dark:fill-terminus-white" %}
+        <nav class="flex justify-between bg-stone-100 py-4 text-gray-800 drop-shadow dark:bg-terminus-gray-900">
+            <a href="{% url 'dashboard' %}" class="group flex items-center space-x-1">
+                {% include "terminusgps_tracker/logo.svg" with class="size-16 dark:fill-terminus-white animate-coin-slow group-hover:animate-none" %}
                 <div class="flex flex-col gap-2">
                     <h2 class="text-xl font-semibold tracking-wide dark:text-terminus-gray-100">Terminus GPS Tracker</h2>
                 </div>
             </a>
             {% if user and user.is_authenticated %}
             <div class="flex">
-                <a href="{% url 'dashboard' %}" class="relative group m-4 flex cursor-pointer select-none items-center gap-2 rounded border border-gray-600 bg-gray-300 p-2 drop-shadow-sm hover:border-terminus-red-300 hover:bg-gray-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 group-hover:text-terminus-red-300 relative">
+                <a href="{% url 'dashboard' %}" class="group relative m-4 flex cursor-pointer items-center gap-2 rounded border border-gray-600 bg-gray-300 p-2 drop-shadow-sm select-none hover:border-terminus-red-300 hover:bg-gray-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="relative size-6 group-hover:text-terminus-red-300">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                     </svg>
-                    <h3 class="relative text-md hidden font-light tracking-wide group-hover:text-terminus-red-500 md:flex">{{ user.username }}</h3>
+                    <h3 class="text-md relative hidden font-light tracking-wide group-hover:text-terminus-red-500 md:flex">{{ user.username }}</h3>
                 </a>
                 <a hx-swap="outerHTML" hx-target="this" hx-trigger="load" hx-get="{% url 'logout' %}" class="group m-4 flex items-center gap-2 rounded border border-gray-600 bg-gray-300 p-2 drop-shadow-sm hover:border-terminus-red-300 hover:bg-gray-50"></a>
             </div>
@@ -31,22 +31,12 @@
         </nav>
         <main>
             <div class="container mx-auto -mt-2">
-                <div class="mx-8 bg-stone-100 border-lr border-gray-600 dark:bg-terminus-gray-800">
-                    <div class="m-2 flex flex-row items-center p-4">
-                        {% include "terminusgps_tracker/logo.svg" with class="size-32 dark:fill-terminus-white" %}
-                        <div class="flex flex-col">
-                            <h1 class="text-2xl text-terminus-gray-800 dark:text-terminus-gray-100">{{ title }}</h1>
-                            {% if subtitle %}<h2 class="text-md font-light text-terminus-gray-700 md:text-xl md:tracking-wide dark:text-terminus-gray-200">{{ subtitle|safe }}</h2>{% endif %}
-                        </div>
+                <div class="border-lr mx-8 border-gray-600 bg-stone-100 dark:bg-terminus-gray-800">
+                    <div class="flex flex-col gap-2 bg-gray-200 p-8 shadow-inner">
+                        <h2 class="text-xl font-bold md:text-2xl">{{ title }}</h2>
+                        {% if subtitle %}<h3 class="font-light md:text-lg">{{ subtitle }}</h3>{% endif %}
                     </div>
                     <div class="flex flex-col gap-8 p-8">
-                        {% if messages %}
-                        <ul id="messages">
-                        {% for message in messages %}
-                            <li>{{ message }}</li>
-                        {% endfor %}
-                        </ul>
-                        {% endif %}
                         {% block content %}
                         {% endblock content %}
                     </div>

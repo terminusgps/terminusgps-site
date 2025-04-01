@@ -20,7 +20,12 @@ class CustomerShippingAddressCreateForm(forms.Form):
     phone = forms.CharField(
         label="Phone #",
         widget=forms.widgets.TextInput(
-            attrs={"class": default_field_class, "placeholder": "+15555555555"}
+            attrs={
+                "class": default_field_class,
+                "placeholder": "+15555555555",
+                "maxlength": 20,
+                "pattern": "\\+[0-9]+",
+            }
         ),
     )
     address = AddressField(label="Address")

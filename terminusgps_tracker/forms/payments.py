@@ -25,12 +25,14 @@ class CustomerPaymentMethodCreateForm(forms.Form):
         ),
     )
     phone = forms.CharField(
+        label="Phone #",
         max_length=20,
         widget=forms.widgets.TextInput(
             attrs={
                 "class": "p-2 w-full border border-gray-600 rounded bg-gray-50 aria-[invalid]:bg-red-50 aria-[invalid]:text-red-700 aria-[invalid]:border-red-600",
-                "placeholder": "Phone #",
+                "placeholder": "+15555555555",
                 "maxlength": 20,
+                "pattern": "\\+[0-9]+",
             }
         ),
     )

@@ -154,8 +154,9 @@ class CustomerPaymentMethod(models.Model):
 
     def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
         """Deletes the payment profile in Authorizenet before deleting the object."""
-        payment_profile = self.authorizenet_get_payment_profile()
-        payment_profile.delete()
+        if self.authorizenet_id:
+            payment_profile = self.authorizenet_get_payment_profile()
+            payment_profile.delete()
         return super().delete(*args, **kwargs)
 
     def authorizenet_get_payment_profile(self) -> PaymentProfile:
@@ -194,13 +195,17 @@ class CustomerShippingAddress(models.Model):
     def __str__(self) -> str:
         return f"Shipping Address #{self.authorizenet_id}"
 
+    def save(self, **kwargs) -> None:
+        super().save(**kwargs)
+
     def get_absolute_url(self) -> str:
         return reverse("detail address", kwargs={"pk": self.pk})
 
     def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
         """Deletes the address profile in Authorizenet before deleting the object."""
-        address_profile = self.authorizenet_get_address_profile()
-        address_profile.delete()
+        if self.authorizenet_id:
+            address_profile = self.authorizenet_get_address_profile()
+            address_profile.delete()
         return super().delete(*args, **kwargs)
 
     def authorizenet_get_address_profile(self) -> AddressProfile:
