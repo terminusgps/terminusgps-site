@@ -13,8 +13,6 @@ CSRF_COOKIE_SECURE = True
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FROM_EMAIL = "support@terminusgps.com"
-DOCS_ACCESS = "staff"
-DOCS_ROOT = BASE_DIR.parent / "docs/build/html"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
 EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")
@@ -182,7 +180,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
-    "docs",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
 ]
 
