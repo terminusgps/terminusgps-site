@@ -4,7 +4,7 @@
         "pk": 1,
         "fields": {
             "name": "GPS Tracking",
-            "amount": null,
+            "amount": 5,
             "desc": "lorem ipsum"
         }
     },
@@ -13,7 +13,7 @@
         "pk": 2,
         "fields": {
             "name": "Driver Behavior Monitoring",
-            "amount": null,
+            "amount": 5,
             "desc": "lorem ipsum"
         }
     },
