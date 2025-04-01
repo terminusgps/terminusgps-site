@@ -1,6 +1,9 @@
 from django import forms
 
-from terminusgps_tracker.models import CustomerSubscription, SubscriptionTier
+from terminusgps_tracker.models.subscriptions import (
+    CustomerSubscription,
+    SubscriptionTier,
+)
 
 
 class CustomerSubscriptionUpdateForm(forms.ModelForm):

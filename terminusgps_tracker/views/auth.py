@@ -12,7 +12,7 @@ from terminusgps.wialon.session import WialonSession
 from wialon.api import WialonError
 
 from terminusgps_tracker.forms import TrackerAuthenticationForm, TrackerRegisterForm
-from terminusgps_tracker.models import Customer
+from terminusgps_tracker.models.customers import Customer
 from terminusgps_tracker.views.mixins import HtmxTemplateResponseMixin
 
 

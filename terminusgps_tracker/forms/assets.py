@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 
-from terminusgps_tracker.models import Customer
+from terminusgps_tracker.models.customers import Customer
 from terminusgps_tracker.validators import (
     validate_vin_number,
     validate_wialon_imei_number_available,

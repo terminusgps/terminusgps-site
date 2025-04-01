@@ -28,12 +28,12 @@ from terminusgps_tracker.forms import (
     CustomerPaymentMethodCreateForm,
     CustomerShippingAddressCreateForm,
 )
-from terminusgps_tracker.models import (
+from terminusgps_tracker.models.customers import (
     Customer,
     CustomerPaymentMethod,
     CustomerShippingAddress,
-    CustomerSubscription,
 )
+from terminusgps_tracker.models.subscriptions import CustomerSubscription
 from terminusgps_tracker.views.mixins import (
     CustomerRequiredMixin,
     HtmxTemplateResponseMixin,

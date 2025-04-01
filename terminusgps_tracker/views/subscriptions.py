@@ -8,8 +8,11 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from terminusgps_tracker.forms import CustomerSubscriptionUpdateForm
-from terminusgps_tracker.models import Customer, CustomerSubscription
-from terminusgps_tracker.models.subscriptions import SubscriptionTier
+from terminusgps_tracker.models.customers import Customer
+from terminusgps_tracker.models.subscriptions import (
+    CustomerSubscription,
+    SubscriptionTier,
+)
 from terminusgps_tracker.views.mixins import (
     CustomerRequiredMixin,
     HtmxTemplateResponseMixin,

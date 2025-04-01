@@ -7,7 +7,8 @@ from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic.base import ContextMixin, TemplateResponseMixin
 
-from terminusgps_tracker.models import Customer, CustomerSubscription
+from terminusgps_tracker.models.customers import Customer
+from terminusgps_tracker.models.subscriptions import CustomerSubscription
 
 if not hasattr(settings, "TRACKER_APP_CONFIG"):
     raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
