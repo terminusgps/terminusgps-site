@@ -6,6 +6,47 @@ from django.utils.translation import gettext_lazy as _
 from terminusgps.authorizenet.profiles import SubscriptionProfile
 
 
+class SubscriptionTier(models.Model):
+    name = models.CharField(max_length=128)
+    """A subscription tier name."""
+    desc = models.CharField(max_length=1024)
+    """A subscription tier description."""
+    amount = models.DecimalField(max_digits=6, decimal_places=2, default=9.99)
+    """$ amount (monthly) of the subscription tier."""
+    features = models.ManyToManyField(
+        "terminusgps_tracker.SubscriptionFeature", related_name="features"
+    )
+    """Features granted by the subscription."""
+
+    def __str__(self) -> str:
+        return self.name
+
+    def get_amount_display(self) -> str:
+        return f"${self.amount:.2d}"
+
+
+class SubscriptionFeature(models.Model):
+    class SubscriptionFeatureAmount(models.IntegerChoices):
+        MINIMUM = 5, _("5")
+        MID = 25, _("25")
+        MAXIMUM = 150, _("150")
+        INFINITE = 999, _("∞")
+
+    name = models.CharField(max_length=128)
+    """Name of the feature."""
+    desc = models.CharField(max_length=2048)
+    """Description of the feature."""
+    amount = models.IntegerField(
+        choices=SubscriptionFeatureAmount.choices, null=True, blank=True, default=None
+    )
+    """An amount for the feature."""
+
+    def __str__(self) -> str:
+        if not self.amount:
+            return self.name
+        return f"{self.get_amount_display()} {self.name}"
+
+
 class CustomerSubscription(models.Model):
     class SubscriptionStatus(models.TextChoices):
         ACTIVE = "active", _("Active")
@@ -36,7 +77,6 @@ class CustomerSubscription(models.Model):
         null=True,
         blank=True,
         default=None,
-        related_name="tier",
     )
     """Current subscription tier."""
     payment = models.ForeignKey(
@@ -45,7 +85,6 @@ class CustomerSubscription(models.Model):
         null=True,
         blank=True,
         default=None,
-        related_name="payment",
     )
     """A payment method."""
     address = models.ForeignKey(
@@ -54,7 +93,6 @@ class CustomerSubscription(models.Model):
         null=True,
         blank=True,
         default=None,
-        related_name="address",
     )
     """A shipping address."""
     status = models.CharField(
@@ -151,44 +189,3 @@ class CustomerSubscription(models.Model):
             totalOccurrences=self.total_months,
             trialOccurrences=self.trial_months,
         )
-
-
-class SubscriptionTier(models.Model):
-    name = models.CharField(max_length=128)
-    """A subscription tier name."""
-    desc = models.CharField(max_length=1024)
-    """A subscription tier description."""
-    amount = models.DecimalField(max_digits=6, decimal_places=2, default=9.99)
-    """$ amount (monthly) of the subscription tier."""
-    features = models.ManyToManyField(
-        "terminusgps_tracker.SubscriptionFeature", related_name="features"
-    )
-    """Features granted by the subscription."""
-
-    def __str__(self) -> str:
-        return self.name
-
-    def get_amount_display(self) -> str:
-        return f"${self.amount:.2d}"
-
-
-class SubscriptionFeature(models.Model):
-    class SubscriptionFeatureAmount(models.IntegerChoices):
-        MINIMUM = 5, _("5")
-        MID = 25, _("25")
-        MAXIMUM = 150, _("150")
-        INFINITE = 999, _("∞")
-
-    name = models.CharField(max_length=128)
-    """Name of the feature."""
-    desc = models.CharField(max_length=2048)
-    """Description of the feature."""
-    amount = models.IntegerField(
-        choices=SubscriptionFeatureAmount.choices, null=True, blank=True, default=None
-    )
-    """An amount for the feature."""
-
-    def __str__(self) -> str:
-        if not self.amount:
-            return self.name
-        return f"{self.get_amount_display()} {self.name}"
