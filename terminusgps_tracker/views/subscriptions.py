@@ -53,7 +53,7 @@ class SubscriptionTierListView(HtmxTemplateResponseMixin, ListView):
     template_name = "terminusgps_tracker/subscriptions/tier_list.html"
     extra_context = {
         "title": "Subscription Tiers",
-        "subtitle": "You get what you pay for",
+        "subtitle": "We have a plan for your plan...",
         "class": "flex flex-col gap-4",
     }
     context_object_name = "tier_list"

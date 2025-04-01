@@ -6,7 +6,7 @@
         {{ form.username }}
         {{ form.username.errors }}
     </div>
-    <div class="flex">
+    <div class="flex flex-col md:flex-row">
         <div class="flex flex-col gap-1 w-full p-2">
             {{ form.first_name.label }}
             {{ form.first_name }}
@@ -18,7 +18,7 @@
             {{ form.last_name.errors }}
         </div>
     </div>
-    <div class="flex">
+    <div class="flex flex-col md:flex-row">
         <div class="flex flex-col gap-1 w-full p-2">
             {{ form.password1.label }}
             {{ form.password1 }}
