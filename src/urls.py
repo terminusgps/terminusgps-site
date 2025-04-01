@@ -6,7 +6,6 @@ from django.conf.urls.static import static
 urlpatterns = [
     path("admin/docs/", include("django.contrib.admindocs.urls")),
     path("admin/", admin.site.urls),
-    path("docs/", include("docs.urls")),
     path("", include("terminusgps_tracker.urls")),
 ]
 
