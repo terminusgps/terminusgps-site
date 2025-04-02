@@ -8,7 +8,7 @@ class CustomerPaymentMethodCreateForm(forms.Form):
         max_length=64,
         widget=forms.widgets.TextInput(
             attrs={
-                "class": "p-2 w-full border border-gray-600 rounded bg-gray-50 aria-[invalid]:bg-red-50 aria-[invalid]:text-red-700 aria-[invalid]:border-red-600",
+                "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
                 "placeholder": "First Name",
                 "maxlength": 64,
             }
@@ -18,7 +18,7 @@ class CustomerPaymentMethodCreateForm(forms.Form):
         max_length=64,
         widget=forms.widgets.TextInput(
             attrs={
-                "class": "p-2 w-full border border-gray-600 rounded bg-gray-50 aria-[invalid]:bg-red-50 aria-[invalid]:text-red-700 aria-[invalid]:border-red-600",
+                "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
                 "placeholder": "Last Name",
                 "maxlength": 64,
             }
@@ -29,7 +29,7 @@ class CustomerPaymentMethodCreateForm(forms.Form):
         max_length=20,
         widget=forms.widgets.TextInput(
             attrs={
-                "class": "p-2 w-full border border-gray-600 rounded bg-gray-50 aria-[invalid]:bg-red-50 aria-[invalid]:text-red-700 aria-[invalid]:border-red-600",
+                "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
                 "placeholder": "+15555555555",
                 "maxlength": 20,
                 "pattern": "\\+[0-9]+",

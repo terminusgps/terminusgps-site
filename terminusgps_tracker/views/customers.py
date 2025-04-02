@@ -69,7 +69,7 @@ class CustomerDashboardView(
         context["customer"] = customer
         context["subscription"] = subscription
         context["subtitle"] = mark_safe(
-            f"Check out the Terminus GPS <a class='text-terminus-red-800 underline decoration-terminus-black decoration underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted' href='{reverse('mobile apps')}'>mobile app</a> today!"
+            f"Check out the Terminus GPS <a class='text-terminus-red-800 underline decoration-terminus-black decoration underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:hover:text-terminus-red-200 dark:decoration-white' href='{reverse('mobile apps')}'>mobile app</a> today!"
         )
         return context
 

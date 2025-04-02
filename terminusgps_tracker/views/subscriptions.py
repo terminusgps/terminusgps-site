@@ -76,7 +76,9 @@ class CustomerSubscriptionDetailView(
     model = CustomerSubscription
     partial_template_name = "terminusgps_tracker/subscriptions/partials/_detail.html"
     template_name = "terminusgps_tracker/subscriptions/detail.html"
-    extra_context = {"class": "flex flex-col gap-4 border p-4 rounded bg-white"}
+    extra_context = {
+        "class": "flex flex-col gap-4 border p-4 rounded bg-white dark:bg-terminus-gray-700 dark:border-terminus-gray-500"
+    }
     queryset = CustomerSubscription.objects.none()
     context_object_name = "subscription"
 
@@ -94,7 +96,7 @@ class CustomerSubscriptionUpdateView(
     content_type = "text/html"
     extra_context = {
         "title": "Update Subscription",
-        "class": "flex flex-col gap-4 border p-4 rounded bg-white",
+        "class": "flex flex-col gap-4 border p-4 rounded bg-white dark:bg-terminus-gray-700 dark:border-terminus-gray-500",
     }
     form_class = CustomerSubscriptionUpdateForm
     http_method_names = ["get", "post"]
