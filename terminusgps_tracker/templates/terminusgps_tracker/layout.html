@@ -40,11 +40,11 @@
                         {% block content %}
                         {% endblock content %}
                     </div>
-                    <div class="flex justify-evenly bg-red-100 py-4">
-                        {% for social in config.SOCIALS %}
-                        {% social_media_icon social %}
-                        {% endfor %}
+                    {% if config %}
+                    <div class="flex justify-evenly bg-red-100 py-4 dark:bg-red-200">
+                        {% for social in config.SOCIALS %}{% social_media_icon social %}{% endfor %}
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </main>

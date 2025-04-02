@@ -12,6 +12,7 @@ urlpatterns = [
     path("settings/", views.CustomerSettingsView.as_view(), name="settings"),
     path("tiers/", views.SubscriptionTierListView.as_view(), name="list tiers"),
     path("support/", views.CustomerSupportView.as_view(), name="support"),
+    path("support/token/", views.ConnectTokenView.as_view(), name="connect token"),
     path("apps/", views.TrackerMobileAppView.as_view(), name="mobile apps"),
     path(
         "payments/", views.CustomerPaymentMethodListView.as_view(), name="list payments"

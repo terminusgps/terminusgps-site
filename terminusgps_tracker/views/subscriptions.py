@@ -16,6 +16,7 @@ from terminusgps_tracker.models.subscriptions import (
 from terminusgps_tracker.views.mixins import (
     CustomerRequiredMixin,
     HtmxTemplateResponseMixin,
+    TrackerAppConfigContextMixin,
 )
 
 
@@ -45,7 +46,9 @@ class CustomerSubscriptionTransactionsView(
         return super().get(request, *args, **kwargs)
 
 
-class SubscriptionTierListView(HtmxTemplateResponseMixin, ListView):
+class SubscriptionTierListView(
+    HtmxTemplateResponseMixin, TrackerAppConfigContextMixin, ListView
+):
     content_type = "text/html"
     http_method_names = ["get"]
     model = SubscriptionTier
@@ -53,7 +56,7 @@ class SubscriptionTierListView(HtmxTemplateResponseMixin, ListView):
     template_name = "terminusgps_tracker/subscriptions/tier_list.html"
     extra_context = {
         "title": "Subscription Tiers",
-        "subtitle": "We have a plan for your plan...",
+        "subtitle": "We have a plan for your plan",
         "class": "flex flex-col gap-4",
     }
     context_object_name = "tier_list"

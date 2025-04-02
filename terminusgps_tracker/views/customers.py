@@ -73,7 +73,7 @@ class CustomerDashboardView(
         context["customer"] = customer
         context["subscription"] = subscription
         context["subtitle"] = mark_safe(
-            f"Check out the Terminus GPS <a class='text-terminus-red-800 underline decoration-terminus-black decoration underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:hover:text-terminus-red-200 dark:decoration-white' href='{reverse('mobile apps')}'>mobile app</a> today!"
+            f"Check out the Terminus GPS <a class='text-terminus-red-800 underline decoration-terminus-black decoration underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:hover:text-terminus-red-200 dark:decoration-white' href='{reverse('mobile apps')}'>mobile app</a>!"
         )
         return context
 
@@ -103,10 +103,18 @@ class CustomerSupportView(
         "title": "Support",
         "subtitle": "Drop us a line",
         "class": "flex flex-col gap-4",
+        "support_email": settings.TRACKER_APP_CONFIG["EMAILS"],
     }
     http_method_names = ["get"]
     partial_template_name = "terminusgps_tracker/partials/_support.html"
     template_name = "terminusgps_tracker/support.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        for email in settings.TRACKER_APP_CONFIG["EMAILS"]:
+            if email["NAME"] == "SUPPORT":
+                context["support_link"] = email["OPTIONS"]["link"]
+        return context
 
 
 class CustomerShippingAddressCreateView(

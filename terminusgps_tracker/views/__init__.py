@@ -4,7 +4,12 @@ from .assets import (
     CustomerAssetDetailView,
     CustomerAssetListView,
 )
-from .auth import TrackerLoginView, TrackerLogoutView, TrackerRegisterView
+from .auth import (
+    ConnectTokenView,
+    TrackerLoginView,
+    TrackerLogoutView,
+    TrackerRegisterView,
+)
 from .customers import (
     CustomerDashboardView,
     CustomerPaymentMethodCreateView,
