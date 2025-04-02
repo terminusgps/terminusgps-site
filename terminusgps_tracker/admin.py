@@ -85,7 +85,7 @@ class CustomerShippingAddressAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerSubscription)
 class CustomerSubscriptionAdmin(admin.ModelAdmin):
-    list_display = ["authorizenet_id", "customer", "status"]
+    list_display = ["customer", "status"]
     readonly_fields = ["status"]
     actions = ["refresh_subscriptions_status"]
 
