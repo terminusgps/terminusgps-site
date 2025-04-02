@@ -1,3 +1,5 @@
+import datetime
+
 from authorizenet import apicontractsv1
 from django.db import models, transaction
 from django.urls import reverse
@@ -64,7 +66,7 @@ class CustomerSubscription(models.Model):
     authorizenet_id = models.PositiveIntegerField(null=True, blank=True, default=None)
     """An Authorizenet subscription id."""
     total_months = models.PositiveIntegerField(
-        choices=[(12, _("12 months")), (24, _("24 months"))], default=12
+        choices=[(12, _("1 year")), (24, _("2 years"))], default=12
     )
     """Total number of months for the subscription."""
     trial_months = models.PositiveIntegerField(
@@ -77,14 +79,25 @@ class CustomerSubscription(models.Model):
         null=True,
         blank=True,
         default=None,
+        related_name="tier",
     )
     """Current subscription tier."""
+    prev_tier = models.ForeignKey(
+        "terminusgps_tracker.SubscriptionTier",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
+        related_name="prev_tier",
+    )
+    """Previous subscription tier."""
     payment = models.ForeignKey(
         "terminusgps_tracker.CustomerPaymentMethod",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         default=None,
+        related_name="payment",
     )
     """A payment method."""
     address = models.ForeignKey(
@@ -93,6 +106,7 @@ class CustomerSubscription(models.Model):
         null=True,
         blank=True,
         default=None,
+        related_name="address",
     )
     """A shipping address."""
     status = models.CharField(
@@ -108,20 +122,71 @@ class CustomerSubscription(models.Model):
     def __str__(self) -> str:
         return f"{self.customer}'s Subscription"
 
+    def save(self, **kwargs) -> None:
+        if self.authorizenet_id:
+            self.authorizenet_refresh_status()
+        super().save(**kwargs)
+
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the subscription's detail view."""
         return reverse("detail subscription", kwargs={"pk": self.pk})
 
-    @transaction.atomic
-    def authorizenet_delete_subscription(self) -> None:
-        sub_profile = self.authorizenet_get_subscription_profile()
-        sub_profile.delete()
+    def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
+        if self.authorizenet_id:
+            self.authorizenet_cancel_subscription()
+        return super().delete(*args, **kwargs)
+
+    def authorizenet_cancel_subscription(self) -> None:
+        """
+        Cancels a subscription in Authorizenet.
+
+        :raises AssertionError: If :py:attr:`authorizenet_id` wasn't set.
+        :raises ControllerExecutionError: If something goes wrong with an Authorizenet API call.
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
+        assert self.authorizenet_id, "Authorizenet id was not set"
+        self.authorizenet_get_subscription_profile().cancel()
 
     @transaction.atomic
     def authorizenet_refresh_status(self) -> None:
-        """Refreshes the subscription status from Authorizenet."""
+        """
+        Refreshes the subscription status from Authorizenet.
+
+        :raises AssertionError: If :py:attr:`authorizenet_id` wasn't set.
+        :raises ControllerExecutionError: If something goes wrong with an Authorizenet API call.
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
+        assert self.authorizenet_id, "Authorizenet id was not set"
         self.status = self.authorizenet_get_subscription_profile().status
-        self.save()
+
+    @transaction.atomic
+    def authorizenet_update_subscription(self) -> None:
+        """
+        Updates a subscription in Authorizenet.
+
+        :raises AssertionError: If :py:attr:`payment.authorizenet_id` wasn't set.
+        :raises AssertionError: If :py:attr:`address.authorizenet_id` wasn't set.
+        :raises ControllerExecutionError: If something goes wrong with an Authorizenet API call.
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
+        assert self.payment.authorizenet_id, "Payment id was not set."
+        assert self.address.authorizenet_id, "Address id was not set."
+        subscription_profile: SubscriptionProfile = (
+            self.authorizenet_get_subscription_profile()
+        )
+        subscription_profile.update(
+            name=f"{self.customer}'s {self.tier.name} Subscription",
+            amount=self.tier.amount,
+            profile_id=self.customer.authorizenet_id,
+            payment_id=self.payment.authorizenet_id,
+            address_id=self.address.authorizenet_id,
+        )
 
     @transaction.atomic
     def authorizenet_create_subscription(self) -> None:
@@ -138,15 +203,15 @@ class CustomerSubscription(models.Model):
         assert self.payment.authorizenet_id, "Payment id was not set."
         assert self.address.authorizenet_id, "Address id was not set."
 
-        sub_profile = SubscriptionProfile(
-            name=f"{self.customer.user.username}'s {self.tier} Subscription",
+        subscription_profile: SubscriptionProfile = SubscriptionProfile(
+            name=f"{self.customer}'s {self.tier.name} Subscription",
             amount=self.tier.amount,
-            schedule=self.generate_payment_schedule(),
+            schedule=self.generate_payment_schedule(timezone.now()),
             profile_id=self.customer.authorizenet_id,
             payment_id=self.payment.authorizenet_id,
             address_id=self.address.authorizenet_id,
         )
-        self.authorizenet_id = sub_profile.id
+        self.authorizenet_id = subscription_profile.id
 
     def authorizenet_get_subscription_profile(self) -> SubscriptionProfile:
         """
@@ -175,7 +240,9 @@ class CustomerSubscription(models.Model):
             length=1, unit=apicontractsv1.ARBSubscriptionUnitEnum.months
         )
 
-    def generate_payment_schedule(self) -> apicontractsv1.paymentScheduleType:
+    def generate_payment_schedule(
+        self, start_date: datetime.datetime
+    ) -> apicontractsv1.paymentScheduleType:
         """
         Generates a payment schedule for the subscription.
 
@@ -185,7 +252,7 @@ class CustomerSubscription(models.Model):
         """
         return apicontractsv1.paymentScheduleType(
             interval=self.generate_monthly_payment_interval(),
-            startDate=timezone.now(),
+            startDate=start_date,
             totalOccurrences=self.total_months,
             trialOccurrences=self.trial_months,
         )

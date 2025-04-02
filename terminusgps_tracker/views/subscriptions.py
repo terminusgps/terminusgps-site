@@ -2,8 +2,8 @@ from typing import Any
 
 from django import forms
 from django.core.exceptions import ValidationError
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.urls import reverse_lazy
+from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
@@ -40,10 +40,12 @@ class CustomerSubscriptionTransactionsView(
         subscription, _ = CustomerSubscription.objects.get_or_create(customer=customer)
         return subscription
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        total_transactions = int(request.GET.get("total_transactions", 5))
-        subscription_profile = self.get_object().authorizenet_get_subscription_profile()
-        return super().get(request, *args, **kwargs)
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["transaction_list"] = (
+            self.get_object().authorizenet_get_subscription_profile().transactions
+        )
+        return context
 
 
 class SubscriptionTierListView(
@@ -108,6 +110,13 @@ class CustomerSubscriptionUpdateView(
     template_name = "terminusgps_tracker/subscriptions/update.html"
     context_object_name = "subscription"
 
+    def get_object(self, queryset=None) -> CustomerSubscription | None:
+        return (
+            CustomerSubscription.objects.get(customer__user=self.request.user)
+            if self.request.user and self.request.user.is_authenticated
+            else None
+        )
+
     def get_initial(self) -> dict[str, Any]:
         initial: dict[str, Any] = super().get_initial()
         initial["tier"] = SubscriptionTier.objects.get(
@@ -143,14 +152,23 @@ class CustomerSubscriptionUpdateView(
             return self.form_invalid(form=form)
 
         subscription = self.get_object()
-        subscription.payment = payment
-        subscription.address = address
-        subscription.tier = new_tier
-        subscription.save()
-        return super().form_valid(form=form)
+        if subscription:
+            subscription.payment = payment
+            subscription.address = address
+            subscription.tier = new_tier
+            subscription.save()
+            return super().form_valid(form=form)
+
+        form.add_error(
+            None,
+            ValidationError(_("Whoops! Something went wrong, please try again later.")),
+        )
+        return self.form_invalid(form=form)
 
     def get_success_url(self) -> str:
-        return self.get_object().get_absolute_url()
+        if self.get_object():
+            return self.get_object().get_absolute_url()
+        return reverse("dashboard")
 
 
 class CustomerSubscriptionDeleteView(
@@ -169,10 +187,9 @@ class CustomerSubscriptionDeleteView(
         if self.get_object() is None:
             return self.form_invalid(form=form)
 
-        if self.get_object().authorizenet_id is not None:
-            subscription_profile = (
-                self.get_object().authorizenet_get_subscription_profile()
-            )
+        obj = self.get_object()
+        if obj.authorizenet_id is not None:
+            subscription_profile = obj.authorizenet_get_subscription_profile()
             subscription_profile.cancel()
         return super().form_valid(form=form)
 
