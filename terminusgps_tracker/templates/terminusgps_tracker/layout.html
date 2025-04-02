@@ -1,4 +1,4 @@
-{% load static %}
+{% load static terminusgps_tracker_display %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -39,6 +39,11 @@
                     <div class="flex flex-col gap-8 p-8">
                         {% block content %}
                         {% endblock content %}
+                    </div>
+                    <div class="flex justify-evenly bg-red-100 py-4">
+                        {% for social in config.SOCIALS %}
+                        {% social_media_icon social %}
+                        {% endfor %}
                     </div>
                 </div>
             </div>

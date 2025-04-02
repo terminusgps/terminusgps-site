@@ -37,6 +37,7 @@ from terminusgps_tracker.models.subscriptions import CustomerSubscription
 from terminusgps_tracker.views.mixins import (
     CustomerRequiredMixin,
     HtmxTemplateResponseMixin,
+    TrackerAppConfigContextMixin,
 )
 
 if not hasattr(settings, "TRACKER_APP_CONFIG"):
@@ -44,7 +45,10 @@ if not hasattr(settings, "TRACKER_APP_CONFIG"):
 
 
 class CustomerDashboardView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+    LoginRequiredMixin,
+    TrackerAppConfigContextMixin,
+    HtmxTemplateResponseMixin,
+    TemplateView,
 ):
     content_type = "text/html"
     extra_context = {"title": "Dashboard", "class": "flex flex-col gap-8"}
@@ -89,7 +93,10 @@ class CustomerSettingsView(
 
 
 class CustomerSupportView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+    CustomerRequiredMixin,
+    TrackerAppConfigContextMixin,
+    HtmxTemplateResponseMixin,
+    TemplateView,
 ):
     content_type = "text/html"
     extra_context = {
