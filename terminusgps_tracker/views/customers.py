@@ -2,6 +2,7 @@ from typing import Any
 
 from authorizenet.apicontractsv1 import customerAddressType, paymentType
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import transaction
@@ -44,6 +45,26 @@ if not hasattr(settings, "TRACKER_APP_CONFIG"):
     raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
 
 
+class CustomerEmailVerificationView(
+    LoginRequiredMixin,
+    TrackerAppConfigContextMixin,
+    HtmxTemplateResponseMixin,
+    DetailView,
+):
+    content_type = "text/html"
+    extra_context = {"title": "Verify Email", "class": "flex flex-col gap-8"}
+    http_method_names = ["post"]
+    login_url = reverse_lazy("login")
+    model = Customer
+    partial_template_name = "terminusgps_tracker/partials/_email_verification.html"
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+    template_name = "terminusgps_tracker/email_verification.html"
+
+    def send_verification_email(self) -> None:
+        return
+
+
 class CustomerDashboardView(
     LoginRequiredMixin,
     TrackerAppConfigContextMixin,
@@ -70,6 +91,10 @@ class CustomerDashboardView(
             subscription = None
 
         context: dict[str, Any] = super().get_context_data(**kwargs)
+        if customer and not customer.verified:
+            messages.warning(
+                self.request, "Please verify your email.", extra_tags="text-gray-800"
+            )
         context["customer"] = customer
         context["subscription"] = subscription
         context["subtitle"] = mark_safe(
