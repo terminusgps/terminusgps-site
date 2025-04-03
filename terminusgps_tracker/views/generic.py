@@ -2,7 +2,10 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.views.generic import RedirectView, TemplateView
 
-from terminusgps_tracker.views.mixins import HtmxTemplateResponseMixin
+from terminusgps_tracker.views.mixins import (
+    HtmxTemplateResponseMixin,
+    TrackerAppConfigContextMixin,
+)
 
 if not hasattr(settings, "TRACKER_APP_CONFIG"):
     raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
@@ -14,7 +17,9 @@ class TrackerSourceCodeView(RedirectView):
     url = settings.TRACKER_APP_CONFIG.get("REPOSITORY_URL")
 
 
-class TrackerPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
+class TrackerPrivacyPolicyView(
+    TrackerAppConfigContextMixin, HtmxTemplateResponseMixin, TemplateView
+):
     content_type = "text/html"
     http_method_names = ["get"]
     partial_template_name = "terminusgps_tracker/partials/_privacy.html"
@@ -26,7 +31,9 @@ class TrackerPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
     }
 
 
-class TrackerMobileAppView(HtmxTemplateResponseMixin, TemplateView):
+class TrackerMobileAppView(
+    TrackerAppConfigContextMixin, HtmxTemplateResponseMixin, TemplateView
+):
     content_type = "text/html"
     extra_context = {
         "title": "Mobile Apps",
