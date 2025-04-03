@@ -91,10 +91,10 @@ class CustomerDashboardView(
             subscription = None
 
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        if customer and not customer.verified:
-            messages.warning(
-                self.request, "Please verify your email.", extra_tags="text-gray-800"
-            )
+        # if customer and not customer.verified:
+        #     messages.warning(
+        #         self.request, "Please verify your email.", extra_tags="text-gray-800"
+        #     )
         context["customer"] = customer
         context["subscription"] = subscription
         context["subtitle"] = mark_safe(
