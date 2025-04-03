@@ -7,7 +7,7 @@ from terminusgps.authorizenet.profiles import (
     CustomerProfile,
     PaymentProfile,
 )
-from terminusgps.wialon.items import WialonUnit, WialonUser
+from terminusgps.wialon.items import WialonResource, WialonUnit, WialonUser
 from terminusgps.wialon.session import WialonSession
 
 
@@ -33,7 +33,7 @@ class Customer(models.Model):
         return self.user.username
 
     def save(self, **kwargs) -> None:
-        if not self.authorizenet_id and not self.authorizenet_customer_profile_exists:
+        if not self.authorizenet_customer_profile_exists:
             customer_profile = CustomerProfile(
                 merchant_id=self.user.pk,
                 id=None,
@@ -83,6 +83,42 @@ class Customer(models.Model):
         if self.wialon_user_id:
             user = WialonUser(id=self.wialon_user_id, session=session)
             return user.name
+
+    def wialon_disable_account(self, session: WialonSession) -> None:
+        """
+        Disables the customer's Wialon account.
+
+        :param session: A valid Wialon API session.
+        :type session: :py:obj:`~terminusgps.wialon.session.WialonSession`
+        :raises WialonError: If something goes wrong calling the Wialon API.
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
+        if self.wialon_resource_id:
+            resource: WialonResource = WialonResource(
+                id=self.wialon_resource_id, session=session
+            )
+            if resource.is_account:
+                resource.disable_account()
+
+    def wialon_enable_account(self, session: WialonSession) -> None:
+        """
+        Enables the customer's Wialon account.
+
+        :param session: A valid Wialon API session.
+        :type session: :py:obj:`~terminusgps.wialon.session.WialonSession`
+        :raises WialonError: If something goes wrong calling the Wialon API.
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
+        if self.wialon_resource_id:
+            resource: WialonResource = WialonResource(
+                id=self.wialon_resource_id, session=session
+            )
+            if resource.is_account:
+                resource.enable_account()
 
     @property
     def authorizenet_customer_profile_exists(self) -> bool:

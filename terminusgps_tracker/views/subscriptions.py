@@ -57,7 +57,7 @@ class SubscriptionTierListView(
     partial_template_name = "terminusgps_tracker/subscriptions/partials/_tier_list.html"
     template_name = "terminusgps_tracker/subscriptions/tier_list.html"
     extra_context = {
-        "title": "Subscription Tiers",
+        "title": "Subscription Plans",
         "subtitle": "We have a plan for your plan",
         "class": "flex flex-col gap-4",
     }
@@ -130,11 +130,7 @@ class CustomerSubscriptionUpdateView(
         return initial
 
     def form_valid(self, form: CustomerSubscriptionUpdateForm) -> HttpResponse:
-        new_tier = form.cleaned_data["tier"]
-        address = form.cleaned_data["address"]
-        payment = form.cleaned_data["payment"]
-
-        if not payment:
+        if not form.cleaned_data["payment"]:
             form.add_error(
                 None,
                 ValidationError(
@@ -142,7 +138,7 @@ class CustomerSubscriptionUpdateView(
                 ),
             )
             return self.form_invalid(form=form)
-        if not address:
+        if not form.cleaned_data["address"]:
             form.add_error(
                 None,
                 ValidationError(
@@ -153,10 +149,9 @@ class CustomerSubscriptionUpdateView(
 
         subscription = self.get_object()
         if subscription:
-            subscription.payment = payment
-            subscription.address = address
-            subscription.tier = new_tier
-            subscription.save()
+            subscription.payment = form.cleaned_data["payment"]
+            subscription.address = form.cleaned_data["address"]
+            subscription.tier = form.cleaned_data["tier"]
             return super().form_valid(form=form)
 
         form.add_error(
@@ -166,8 +161,9 @@ class CustomerSubscriptionUpdateView(
         return self.form_invalid(form=form)
 
     def get_success_url(self) -> str:
-        if self.get_object():
-            return self.get_object().get_absolute_url()
+        subscription: CustomerSubscription | None = self.get_object()
+        if subscription is not None:
+            return subscription.get_absolute_url()
         return reverse("dashboard")
 
 

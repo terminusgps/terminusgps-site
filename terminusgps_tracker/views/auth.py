@@ -75,7 +75,7 @@ class TrackerRegisterView(HtmxTemplateResponseMixin, FormView):
                     username=form.cleaned_data["username"],
                     password=form.cleaned_data["password1"],
                 ),
-                wialon_end_user_id=ids.get("end_user_id"),
+                wialon_user_id=ids.get("end_user_id"),
                 wialon_super_user_id=ids.get("super_user_id"),
                 wialon_group_id=ids.get("group_id"),
                 wialon_resource_id=ids.get("resource_id"),

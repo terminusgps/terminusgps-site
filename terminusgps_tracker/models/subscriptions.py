@@ -82,15 +82,6 @@ class CustomerSubscription(models.Model):
         related_name="tier",
     )
     """Current subscription tier."""
-    prev_tier = models.ForeignKey(
-        "terminusgps_tracker.SubscriptionTier",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        default=None,
-        related_name="prev_tier",
-    )
-    """Previous subscription tier."""
     payment = models.ForeignKey(
         "terminusgps_tracker.CustomerPaymentMethod",
         on_delete=models.SET_NULL,
@@ -162,31 +153,6 @@ class CustomerSubscription(models.Model):
         """
         assert self.authorizenet_id, "Authorizenet id was not set"
         self.status = self.authorizenet_get_subscription_profile().status
-
-    @transaction.atomic
-    def authorizenet_update_subscription(self) -> None:
-        """
-        Updates a subscription in Authorizenet.
-
-        :raises AssertionError: If :py:attr:`payment.authorizenet_id` wasn't set.
-        :raises AssertionError: If :py:attr:`address.authorizenet_id` wasn't set.
-        :raises ControllerExecutionError: If something goes wrong with an Authorizenet API call.
-        :returns: Nothing.
-        :rtype: :py:obj:`None`
-
-        """
-        assert self.payment.authorizenet_id, "Payment id was not set."
-        assert self.address.authorizenet_id, "Address id was not set."
-        subscription_profile: SubscriptionProfile = (
-            self.authorizenet_get_subscription_profile()
-        )
-        subscription_profile.update(
-            name=f"{self.customer}'s {self.tier.name} Subscription",
-            amount=self.tier.amount,
-            profile_id=self.customer.authorizenet_id,
-            payment_id=self.payment.authorizenet_id,
-            address_id=self.address.authorizenet_id,
-        )
 
     @transaction.atomic
     def authorizenet_create_subscription(self) -> None:
