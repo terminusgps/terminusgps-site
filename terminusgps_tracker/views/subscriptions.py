@@ -152,7 +152,6 @@ class CustomerSubscriptionUpdateView(
             subscription.payment = form.cleaned_data["payment"]
             subscription.address = form.cleaned_data["address"]
             subscription.tier = form.cleaned_data["tier"]
-            subscription.save()
             return super().form_valid(form=form)
 
         form.add_error(
