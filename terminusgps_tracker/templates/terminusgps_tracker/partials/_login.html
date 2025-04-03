@@ -8,12 +8,16 @@
     <div class="flex flex-col gap-1 w-full p-2">
         {{ form.username.label }}
         {{ form.username }}
-        {{ form.username.errors }}
+        {% if form.username.errors %}
+        <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.username.errors }}</div>
+        {% endif %}
     </div>
     <div class="flex flex-col gap-1 w-full p-2">
         {{ form.password.label }}
         {{ form.password }}
-        {{ form.password.errors }}
+        {% if form.password.errors %}
+        <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.password.errors }}</div>
+        {% endif %}
     </div>
     <div class="flex flex-col gap-4 mt-4">
         <input class="w-full rounded border border-terminus-black bg-terminus-red-800 p-2 text-white cursor-pointer hover:bg-terminus-red-400 transition-colors duration-300 ease-in-out" value="Login" type="submit">
