@@ -1,18 +1,17 @@
 <div id="tier-list" class="{{ class }}">
 {% for tier in tier_list %}
-    <div id="{{ tier.name|lower }}-tier" class="flex flex-col gap-4 rounded border p-4">
-        <div class="-m-4 mb-2 rounded-t border-b bg-red-100 p-4">
+    <div id="{{ tier.name|lower }}-tier" class="flex flex-col gap-4 rounded border bg-gray-100 p-4">
+        <div class="-m-4 mb-2 rounded-t border-b bg-red-300 p-4">
             <div class="flex items-center justify-between">
-                <h2 class="font-serif text-3xl font-bold tracking-wider text-terminus-red-800">{{ tier.name|upper }}</h2>
-                <p class="font-serif text-xl text-terminus-red-900">${{ tier.amount }}</p>
+                <h2 class="font-serif text-2xl font-bold tracking-wider text-terminus-red-800 md:text-3xl">{{ tier.name|upper }}</h2>
+                <p class="font-serif text-lg text-terminus-red-900 md:text-xl">${{ tier.amount }}/mo</p>
             </div>
         </div>
-        <div id="{{ tier.name|lower }}-features" class="flex flex-col gap-2">
-            <ul id="features-list" class="flex flex-col py-4">
-            {% for feature in tier.features.all %}
-            <li class="group -mx-4 border-b bg-red-200 p-4 first:border-t" hx-on:click="s=this.getAttribute('aria-expanded')==='true'?'false':'true';this.setAttribute('aria-expanded',s);" aria-expanded="false">
-                <div class="flex-inline flex items-center justify-between gap-4">
-                    <h3 class="text-lg font-semibold">{% if feature.amount != None %}{{ feature.get_amount_display }}{% endif %} {{ feature.name }}</h3>
+        <ul id="{{ tier.name|lower }}-features" class="flex flex-col py-4">
+        {% for feature in tier.features.all %}
+            <li class="-mx-4 border-b bg-gray-300 p-4 first:border-t">
+                <div hx-on:click="s=this.getAttribute('aria-expanded')==='true'?'false':'true';this.setAttribute('aria-expanded',s);" class="peer flex-inline group flex items-center justify-between gap-4" aria-expanded="false">
+                    <label for="feature-desc" class="text-lg font-semibold select-none">{% if feature.amount != None %}{{ feature.get_amount_display }}{% endif %} {{ feature.name }}</label>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex size-6 group-aria-expanded:hidden">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                     </svg>
@@ -20,13 +19,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                     </svg>
                 </div>
-                <p class="mt-2 hidden rounded bg-red-300 p-2 indent-4 group-aria-expanded:flex">{{ feature.desc }}</p>
+                <p id="feature-desc" class="mt-2 hidden p-2 indent-4 peer-aria-expanded:flex">{{ feature.desc }}</p>
             </li>
-            {% endfor %}
-            </ul>
-        </div>
+        {% endfor %}
+        </ul>
         {% if subscription != None %}
-        <a class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" href="{% url 'update subscription' subscription.pk %}?tier={{ tier.pk }}">Select</a>
+        <a class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out select-none hover:bg-terminus-red-400" href="{% url 'update subscription' subscription.pk %}?tier={{ tier.pk }}">Select</a>
         {% endif %}
     </div>
 {% endfor %}
