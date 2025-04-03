@@ -3,7 +3,6 @@ import datetime
 from authorizenet import apicontractsv1
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.db.models import F, Q
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -111,16 +110,7 @@ class CustomerSubscription(models.Model):
     """Current Authorizenet subscription status."""
 
     class Meta:
-        constraints = [
-            models.CheckConstraint(
-                condition=Q(Q(address__isnull=True) | Q(address__customer__pk=F("pk"))),
-                name="address_exclusive_to_customer",
-            ),
-            models.CheckConstraint(
-                condition=Q(Q(payment__isnull=True) | Q(payment__customer__pk=F("pk"))),
-                name="payment_exclusive_to_customer",
-            ),
-        ]
+        constraints = []
 
     def __str__(self) -> str:
         return f"{self.customer}'s Subscription"
