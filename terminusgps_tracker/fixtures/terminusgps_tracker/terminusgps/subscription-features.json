@@ -14,7 +14,7 @@
         "fields": {
             "name": "Driver Behavior Monitoring",
             "amount": null,
-            "desc": "Using experimental AI image processing, be informed of how your drivers are behaving behind the wheel."
+            "desc": "Using experimental AI image processing (camera install required), be informed on how your drivers are behaving behind the wheel."
         }
     },
     {
