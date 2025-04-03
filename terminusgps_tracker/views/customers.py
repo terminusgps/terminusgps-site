@@ -2,7 +2,6 @@ from typing import Any
 
 from authorizenet.apicontractsv1 import customerAddressType, paymentType
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import transaction

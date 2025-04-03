@@ -1,0 +1,7 @@
+Hello {{ first_name }},
+
+Thanks for choosing Terminus GPS!
+
+Click the link below to verify your account.
+
+{{ link }}
