@@ -1,7 +1,9 @@
 import datetime
 
 from authorizenet import apicontractsv1
+from django.core.exceptions import ValidationError
 from django.db import models, transaction
+from django.db.models import F, Q
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -11,7 +13,7 @@ from terminusgps.authorizenet.profiles import SubscriptionProfile
 class SubscriptionTier(models.Model):
     name = models.CharField(max_length=128)
     """A subscription tier name."""
-    desc = models.CharField(max_length=1024)
+    desc = models.TextField(max_length=1024)
     """A subscription tier description."""
     amount = models.DecimalField(max_digits=6, decimal_places=2, default=9.99)
     """$ amount (monthly) of the subscription tier."""
@@ -36,7 +38,7 @@ class SubscriptionFeature(models.Model):
 
     name = models.CharField(max_length=128)
     """Name of the feature."""
-    desc = models.CharField(max_length=2048)
+    desc = models.TextField(max_length=2048)
     """Description of the feature."""
     amount = models.IntegerField(
         choices=SubscriptionFeatureAmount.choices, null=True, blank=True, default=None
@@ -53,6 +55,7 @@ class CustomerSubscription(models.Model):
     class SubscriptionStatus(models.TextChoices):
         ACTIVE = "active", _("Active")
         CANCELED = "canceled", _("Canceled")
+        CREATED = "created", _("Created")
         EXPIRED = "expired", _("Expired")
         SUSPENDED = "suspended", _("Suspended")
         TERMINATED = "terminated", _("Terminated")
@@ -103,12 +106,21 @@ class CustomerSubscription(models.Model):
     status = models.CharField(
         max_length=16,
         choices=SubscriptionStatus.choices,
-        default=SubscriptionStatus.SUSPENDED,
+        default=SubscriptionStatus.CREATED,
     )
     """Current Authorizenet subscription status."""
 
     class Meta:
-        constraints = []
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(Q(address__isnull=True) | Q(address__customer__pk=F("pk"))),
+                name="address_exclusive_to_customer",
+            ),
+            models.CheckConstraint(
+                condition=Q(Q(payment__isnull=True) | Q(payment__customer__pk=F("pk"))),
+                name="payment_exclusive_to_customer",
+            ),
+        ]
 
     def __str__(self) -> str:
         return f"{self.customer}'s Subscription"
@@ -116,11 +128,30 @@ class CustomerSubscription(models.Model):
     def save(self, **kwargs) -> None:
         if self.authorizenet_id:
             self.authorizenet_refresh_status()
+        if (
+            self.authorizenet_id
+            and self.status == CustomerSubscription.SubscriptionStatus.CANCELED
+        ):
+            self.authorizenet_id = None
         super().save(**kwargs)
 
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the subscription's detail view."""
         return reverse("detail subscription", kwargs={"pk": self.pk})
+
+    def clean(self) -> None:
+        if self.address and self.address.customer.pk != self.customer.pk:
+            raise ValidationError(
+                {
+                    "address": f"Only {self.customer}'s addresses can be assigned to this subscription."
+                }
+            )
+        if self.payment and self.payment.customer.pk != self.customer.pk:
+            raise ValidationError(
+                {
+                    "payment": f"Only {self.customer}'s payments can be assigned to this subscription."
+                }
+            )
 
     def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
         if self.authorizenet_id:
