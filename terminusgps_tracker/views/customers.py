@@ -108,7 +108,7 @@ class CustomerSettingsView(
     content_type = "text/html"
     extra_context = {
         "title": "Settings",
-        "subtitle": "Update your information",
+        "subtitle": "Update your payment information",
         "class": "flex flex-col gap-8",
     }
     http_method_names = ["get"]

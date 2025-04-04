@@ -22,9 +22,9 @@ class CustomerShippingAddressCreateForm(forms.Form):
         widget=forms.widgets.TextInput(
             attrs={
                 "class": default_field_class,
-                "placeholder": "+15555555555",
-                "maxlength": 20,
-                "pattern": "\\+[0-9]+",
+                "placeholder": "555-555-5555",
+                "maxlength": 32,
+                "pattern": "\\d\\d\\d-\\d\\d\\d-\\d\\d\\d\\d",
             }
         ),
     )

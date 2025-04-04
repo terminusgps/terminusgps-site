@@ -1,15 +1,16 @@
 from typing import Any
 
-from django import forms
 from django.core.exceptions import ValidationError
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse, reverse_lazy
+from django.http import HttpResponse
+from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from terminusgps_tracker.forms import CustomerSubscriptionUpdateForm
-from terminusgps_tracker.models.customers import Customer
-from terminusgps_tracker.models.subscriptions import (
+from terminusgps_tracker.models import (
+    Customer,
+    CustomerPaymentMethod,
+    CustomerShippingAddress,
     CustomerSubscription,
     SubscriptionTier,
 )
@@ -110,26 +111,32 @@ class CustomerSubscriptionUpdateView(
     template_name = "terminusgps_tracker/subscriptions/update.html"
     context_object_name = "subscription"
 
-    def get_object(self, queryset=None) -> CustomerSubscription | None:
-        return (
-            CustomerSubscription.objects.get(customer__user=self.request.user)
-            if self.request.user and self.request.user.is_authenticated
-            else None
-        )
+    def get_object(self, queryset=None) -> CustomerSubscription:
+        return CustomerSubscription.objects.get(customer__user=self.request.user)
 
     def get_initial(self) -> dict[str, Any]:
         initial: dict[str, Any] = super().get_initial()
-        initial["tier"] = SubscriptionTier.objects.get(
-            pk=self.request.GET.get("tier") or 1
-        )
-        customer = Customer.objects.get(user=self.request.user)
-        if customer.addresses.filter().exists():
-            initial["address"] = customer.addresses.filter().first()
-        if customer.payments.filter().exists():
-            initial["payment"] = customer.payments.filter().first()
+        customer: Customer = self.get_object().customer
+        addresses = customer.addresses.filter()
+        payments = customer.payments.filter()
+
+        if self.request.GET.get("tier"):
+            initial["tier"] = self.request.GET.get("tier", 1)
+        if addresses.exists():
+            initial["address"] = addresses.filter(default=True).first()
+        if payments.exists():
+            initial["payment"] = payments.filter(default=True).first()
         return initial
 
     def form_valid(self, form: CustomerSubscriptionUpdateForm) -> HttpResponse:
+        if not form.cleaned_data["tier"]:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Please select a subscription tier before proceeding.")
+                ),
+            )
+            return self.form_invalid(form=form)
         if not form.cleaned_data["payment"]:
             form.add_error(
                 None,
@@ -147,24 +154,14 @@ class CustomerSubscriptionUpdateView(
             )
             return self.form_invalid(form=form)
 
-        subscription = self.get_object()
-        if subscription:
-            subscription.payment = form.cleaned_data["payment"]
-            subscription.address = form.cleaned_data["address"]
-            subscription.tier = form.cleaned_data["tier"]
-            return super().form_valid(form=form)
-
-        form.add_error(
-            None,
-            ValidationError(_("Whoops! Something went wrong, please try again later.")),
-        )
-        return self.form_invalid(form=form)
+        subscription: CustomerSubscription = self.get_object()
+        new_tier: SubscriptionTier = form.cleaned_data["tier"]
+        new_address: CustomerShippingAddress = form.cleaned_data["address"]
+        new_payment: CustomerPaymentMethod = form.cleaned_data["payment"]
+        return super().form_valid(form=form)
 
     def get_success_url(self) -> str:
-        subscription: CustomerSubscription | None = self.get_object()
-        if subscription is not None:
-            return subscription.get_absolute_url()
-        return reverse("dashboard")
+        return self.get_object().get_absolute_url()
 
 
 class CustomerSubscriptionDeleteView(
@@ -179,19 +176,5 @@ class CustomerSubscriptionDeleteView(
     context_object_name = "subscription"
     success_url = reverse_lazy("dashboard")
 
-    def form_valid(self, form: forms.Form) -> HttpResponse | HttpResponseRedirect:
-        if self.get_object() is None:
-            return self.form_invalid(form=form)
-
-        obj = self.get_object()
-        if obj.authorizenet_id is not None:
-            subscription_profile = obj.authorizenet_get_subscription_profile()
-            subscription_profile.cancel()
-        return super().form_valid(form=form)
-
-    def get_object(self, queryset=None) -> CustomerSubscription | None:
-        return (
-            CustomerSubscription.objects.get(customer__user=self.request.user)
-            if self.request.user and self.request.user.is_authenticated
-            else None
-        )
+    def get_object(self, queryset=None) -> CustomerSubscription:
+        return CustomerSubscription.objects.get(customer__user=self.request.user)
