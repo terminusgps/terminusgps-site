@@ -121,9 +121,9 @@ class CustomerSubscriptionUpdateView(
         )
         customer: Customer = self.get_object().customer
         if customer.addresses.filter().exists():
-            initial["address"] = customer.addresses.filter().first()
+            initial["address"] = customer.addresses.filter(default=True).first()
         if customer.payments.filter().exists():
-            initial["payment"] = customer.payments.filter().last()
+            initial["payment"] = customer.payments.filter(default=True).first()
         return initial
 
     def form_valid(self, form: CustomerSubscriptionUpdateForm) -> HttpResponse:
@@ -147,17 +147,18 @@ class CustomerSubscriptionUpdateView(
         try:
             subscription: CustomerSubscription = self.get_object()
             new_tier: SubscriptionTier = form.cleaned_data["tier"]
+            subscription.tier = new_tier
+            subscription.payment = form.cleaned_data["payment"]
+            subscription.address = form.cleaned_data["address"]
+            subscription.save()
 
             if subscription.authorizenet_id is None:
+                # Create the subscription
                 subscription.authorizenet_create_subscription()
             elif subscription.authorizenet_id:
-                params = self.generate_update_params(
-                    new_tier=new_tier,
-                    address_id=form.cleaned_data["address"].authorizenet_id,
-                    payment_id=form.cleaned_data["payment"].authorizenet_id,
-                )
-                profile = subscription.authorizenet_get_subscription_profile()
-                profile.update(params)
+                # Update the subscription
+                ...
+            return super().form_valid(form=form)
         except ControllerExecutionError as e:
             form.add_error(
                 None,
@@ -166,12 +167,6 @@ class CustomerSubscriptionUpdateView(
                 ),
             )
             return self.form_invalid(form=form)
-        else:
-            subscription.tier = form.cleaned_data["tier"]
-            subscription.payment = form.cleaned_data["payment"]
-            subscription.address = form.cleaned_data["address"]
-            subscription.save()
-            return super().form_valid(form=form)
 
     def get_success_url(self) -> str:
         return self.get_object().get_absolute_url()

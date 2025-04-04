@@ -1,6 +1,6 @@
 {% load terminusgps_tracker_display %}
 {% if payment.default %} 
-<div id="payment-{{ payment.pk }}" class="border-xl container relative mx-auto rounded-md border border-green-600 bg-green-100 p-4 drop-shadow dark:border-green-300 dark:bg-green-900" hx-indicator="#payments-spinner" hx-target="this">
+<div id="payment-{{ payment.pk }}" class="border-xl container relative mx-auto rounded-md border border-green-600 bg-green-100 p-4 drop-shadow dark:border-green-300 dark:bg-green-900 order-first" hx-indicator="#payments-spinner" hx-target="this">
 {% else %}
 <div id="payment-{{ payment.pk }}" class="border-xl container relative mx-auto rounded-md border border-gray-600 bg-white p-4 drop-shadow dark:border-gray-300 dark:bg-gray-500" hx-indicator="#payments-spinner" hx-target="this">
 {% endif %}
