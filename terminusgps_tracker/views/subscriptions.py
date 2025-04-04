@@ -1,11 +1,12 @@
 from typing import Any
 
-from django import forms
+from authorizenet import apicontractsv1
 from django.core.exceptions import ValidationError
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse, reverse_lazy
+from django.http import HttpResponse
+from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
+from terminusgps.authorizenet.utils import ControllerExecutionError
 
 from terminusgps_tracker.forms import CustomerSubscriptionUpdateForm
 from terminusgps_tracker.models.customers import Customer
@@ -110,27 +111,23 @@ class CustomerSubscriptionUpdateView(
     template_name = "terminusgps_tracker/subscriptions/update.html"
     context_object_name = "subscription"
 
-    def get_object(self, queryset=None) -> CustomerSubscription | None:
-        return (
-            CustomerSubscription.objects.get(customer__user=self.request.user)
-            if self.request.user and self.request.user.is_authenticated
-            else None
-        )
+    def get_object(self, queryset=None) -> CustomerSubscription:
+        return CustomerSubscription.objects.get(customer__user=self.request.user)
 
     def get_initial(self) -> dict[str, Any]:
         initial: dict[str, Any] = super().get_initial()
         initial["tier"] = SubscriptionTier.objects.get(
             pk=self.request.GET.get("tier") or 1
         )
-        customer = Customer.objects.get(user=self.request.user)
+        customer: Customer = self.get_object().customer
         if customer.addresses.filter().exists():
             initial["address"] = customer.addresses.filter().first()
         if customer.payments.filter().exists():
-            initial["payment"] = customer.payments.filter().first()
+            initial["payment"] = customer.payments.filter().last()
         return initial
 
     def form_valid(self, form: CustomerSubscriptionUpdateForm) -> HttpResponse:
-        if not form.cleaned_data["payment"]:
+        if form.cleaned_data["payment"] is None:
             form.add_error(
                 None,
                 ValidationError(
@@ -138,7 +135,7 @@ class CustomerSubscriptionUpdateView(
                 ),
             )
             return self.form_invalid(form=form)
-        if not form.cleaned_data["address"]:
+        if form.cleaned_data["address"] is None:
             form.add_error(
                 None,
                 ValidationError(
@@ -147,24 +144,67 @@ class CustomerSubscriptionUpdateView(
             )
             return self.form_invalid(form=form)
 
-        subscription = self.get_object()
-        if subscription:
+        try:
+            subscription: CustomerSubscription = self.get_object()
+            new_tier: SubscriptionTier = form.cleaned_data["tier"]
+
+            if subscription.authorizenet_id is None:
+                subscription.authorizenet_create_subscription()
+            elif subscription.authorizenet_id:
+                params = self.generate_update_params(
+                    new_tier=new_tier,
+                    address_id=form.cleaned_data["address"].authorizenet_id,
+                    payment_id=form.cleaned_data["payment"].authorizenet_id,
+                )
+                profile = subscription.authorizenet_get_subscription_profile()
+                profile.update(params)
+        except ControllerExecutionError as e:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! %(error)s"), code="invalid", params={"error": e}
+                ),
+            )
+            return self.form_invalid(form=form)
+        else:
+            subscription.tier = form.cleaned_data["tier"]
             subscription.payment = form.cleaned_data["payment"]
             subscription.address = form.cleaned_data["address"]
-            subscription.tier = form.cleaned_data["tier"]
+            subscription.save()
             return super().form_valid(form=form)
 
-        form.add_error(
-            None,
-            ValidationError(_("Whoops! Something went wrong, please try again later.")),
-        )
-        return self.form_invalid(form=form)
-
     def get_success_url(self) -> str:
-        subscription: CustomerSubscription | None = self.get_object()
-        if subscription is not None:
-            return subscription.get_absolute_url()
-        return reverse("dashboard")
+        return self.get_object().get_absolute_url()
+
+    def generate_update_params(
+        self,
+        new_tier: SubscriptionTier,
+        address_id: int | None = None,
+        payment_id: int | None = None,
+    ) -> apicontractsv1.ARBSubscriptionType:
+        subscription = self.get_object()
+        new_subscription = apicontractsv1.ARBSubscriptionType()
+        new_profile = apicontractsv1.customerProfileIdType(
+            customerProfileId=str(subscription.customer.authorizenet_id)
+        )
+
+        if subscription.tier != new_tier:
+            # Update new name and amount
+            name = f"{subscription.customer}'s {new_tier.name} Subscription"
+            new_subscription.name = name
+            new_subscription.amount = new_tier.amount
+
+        if address_id and subscription.address.authorizenet_id != address_id:
+            # Update new shipping address
+            new_profile.customerAddressId = str(address_id)
+            new_subscription.profile = new_profile
+
+        if payment_id and subscription.payment.authorizenet_id != payment_id:
+            # Update new payment method
+            new_profile.customerPaymentProfileId = str(payment_id)
+            new_subscription.profile = new_profile
+
+        return new_subscription
 
 
 class CustomerSubscriptionDeleteView(
@@ -179,19 +219,5 @@ class CustomerSubscriptionDeleteView(
     context_object_name = "subscription"
     success_url = reverse_lazy("dashboard")
 
-    def form_valid(self, form: forms.Form) -> HttpResponse | HttpResponseRedirect:
-        if self.get_object() is None:
-            return self.form_invalid(form=form)
-
-        obj = self.get_object()
-        if obj.authorizenet_id is not None:
-            subscription_profile = obj.authorizenet_get_subscription_profile()
-            subscription_profile.cancel()
-        return super().form_valid(form=form)
-
-    def get_object(self, queryset=None) -> CustomerSubscription | None:
-        return (
-            CustomerSubscription.objects.get(customer__user=self.request.user)
-            if self.request.user and self.request.user.is_authenticated
-            else None
-        )
+    def get_object(self, queryset=None) -> CustomerSubscription:
+        return CustomerSubscription.objects.get(customer__user=self.request.user)

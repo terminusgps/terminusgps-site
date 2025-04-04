@@ -109,20 +109,12 @@ class CustomerSubscription(models.Model):
     )
     """Current Authorizenet subscription status."""
 
-    class Meta:
-        constraints = []
-
     def __str__(self) -> str:
         return f"{self.customer}'s Subscription"
 
     def save(self, **kwargs) -> None:
         if self.authorizenet_id:
             self.authorizenet_refresh_status()
-        if (
-            self.authorizenet_id
-            and self.status == CustomerSubscription.SubscriptionStatus.CANCELED
-        ):
-            self.authorizenet_id = None
         super().save(**kwargs)
 
     def get_absolute_url(self) -> str:
@@ -173,7 +165,9 @@ class CustomerSubscription(models.Model):
 
         """
         assert self.authorizenet_id, "Authorizenet id was not set"
-        self.status = self.authorizenet_get_subscription_profile().status
+        new_status: str | None = self.authorizenet_get_subscription_profile().status
+        if new_status is not None:
+            self.status = new_status
 
     @transaction.atomic
     def authorizenet_create_subscription(self) -> None:
@@ -198,7 +192,7 @@ class CustomerSubscription(models.Model):
             payment_id=self.payment.authorizenet_id,
             address_id=self.address.authorizenet_id,
         )
-        self.authorizenet_id = subscription_profile.id
+        self.authorizenet_id = int(subscription_profile.id)
 
     def authorizenet_get_subscription_profile(self) -> SubscriptionProfile:
         """

@@ -2,11 +2,10 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LoginView, LogoutView
 from django.forms import ValidationError
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView, View
-from terminusgps.aws.connect import get_aws_connect_jwt
+from django.views.generic import FormView
 from terminusgps.wialon import constants
 from terminusgps.wialon.items import WialonResource, WialonUnitGroup, WialonUser
 from terminusgps.wialon.session import WialonSession
@@ -15,15 +14,6 @@ from wialon.api import WialonError
 from terminusgps_tracker.forms import TrackerAuthenticationForm, TrackerRegisterForm
 from terminusgps_tracker.models.customers import Customer
 from terminusgps_tracker.views.mixins import HtmxTemplateResponseMixin
-
-
-class ConnectTokenView(View):
-    http_method_names = ["get"]
-    content_type = "application/json"
-
-    def get(self, request: HttpRequest) -> HttpResponse:
-        connect_jwt = get_aws_connect_jwt("7511b537-c6e4-48ab-b317-a908cbfc1b88")
-        return JsonResponse({"jwt": connect_jwt})
 
 
 class TrackerLoginView(HtmxTemplateResponseMixin, LoginView):
