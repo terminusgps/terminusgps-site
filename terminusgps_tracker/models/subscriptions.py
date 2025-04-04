@@ -139,7 +139,9 @@ class CustomerSubscription(models.Model):
     def save(self, **kwargs) -> None:
         if self.authorizenet_id:
             self.authorizenet_refresh_status()
-            # Check differences and update accordingly
+            self.authorizenet_update_subscription()
+        if all([not self.authorizenet_id, self.tier, self.address, self.payment]):
+            self.authorizenet_id = self.authorizenet_create_subscription()
         self._prev_tier = self.tier
         self._prev_address = self.address
         self._prev_payment = self.payment
@@ -182,8 +184,23 @@ class CustomerSubscription(models.Model):
         subscription_profile: SubscriptionProfile = (
             self.authorizenet_get_subscription_profile()
         )
-        subscription_params = apicontractsv1.ARBSubscriptionType()
-        subscription_profile.update(subscription_params)
+        params = apicontractsv1.ARBSubscriptionType()
+        cprofile = apicontractsv1.customerProfileIdType()
+        updated = []
+        if self._prev_tier != self.tier:
+            params.name = f"{self.customer}'s {self.tier.name} Subscription"
+            params.amount = self.tier.amount
+            updated.append(self.tier)
+        if self._prev_address != self.address:
+            cprofile.customerAddressId = self.address.authorizenet_id
+            params.profile = cprofile
+            updated.append(self.address)
+        if self._prev_payment != self.payment:
+            cprofile.customerPaymentProfileId = self.payment.authorizenet_id
+            params.profile = cprofile
+            updated.append(self.payment)
+        if len(updated):
+            subscription_profile.update(params)
 
     def authorizenet_cancel_subscription(self) -> None:
         """
