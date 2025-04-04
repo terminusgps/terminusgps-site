@@ -54,7 +54,7 @@ class CustomerSubscription(models.Model):
     class SubscriptionStatus(models.TextChoices):
         ACTIVE = "active", _("Active")
         CANCELED = "canceled", _("Canceled")
-        CREATED = "created", _("Created")
+        UNBOUND = "unbound", _("Unbound")
         EXPIRED = "expired", _("Expired")
         SUSPENDED = "suspended", _("Suspended")
         TERMINATED = "terminated", _("Terminated")
@@ -105,9 +105,33 @@ class CustomerSubscription(models.Model):
     status = models.CharField(
         max_length=16,
         choices=SubscriptionStatus.choices,
-        default=SubscriptionStatus.CREATED,
+        default=SubscriptionStatus.UNBOUND,
     )
     """Current Authorizenet subscription status."""
+    _prev_address = models.ForeignKey(
+        "terminusgps_tracker.CustomerShippingAddress",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
+        related_name="prev_address",
+    )
+    _prev_payment = models.ForeignKey(
+        "terminusgps_tracker.CustomerPaymentMethod",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
+        related_name="prev_payment",
+    )
+    _prev_tier = models.ForeignKey(
+        "terminusgps_tracker.SubscriptionTier",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
+        related_name="prev_tier",
+    )
 
     def __str__(self) -> str:
         return f"{self.customer}'s Subscription"
@@ -115,11 +139,20 @@ class CustomerSubscription(models.Model):
     def save(self, **kwargs) -> None:
         if self.authorizenet_id:
             self.authorizenet_refresh_status()
+            # Check differences and update accordingly
+        self._prev_tier = self.tier
+        self._prev_address = self.address
+        self._prev_payment = self.payment
         super().save(**kwargs)
 
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the subscription's detail view."""
         return reverse("detail subscription", kwargs={"pk": self.pk})
+
+    def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
+        if self.authorizenet_id and self.status != self.SubscriptionStatus.CANCELED:
+            self.authorizenet_cancel_subscription()
+        return super().delete(*args, **kwargs)
 
     def clean(self) -> None:
         if self.address and self.address.customer.pk != self.customer.pk:
@@ -135,10 +168,22 @@ class CustomerSubscription(models.Model):
                 }
             )
 
-    def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
-        if self.authorizenet_id:
-            self.authorizenet_cancel_subscription()
-        return super().delete(*args, **kwargs)
+    def authorizenet_update_subscription(self) -> None:
+        """
+        Updates the subscription in Authorizenet.
+
+        :raises AssertionError: If :py:attr:`authorizenet_id` wasn't set.
+        :raises ControllerExecutionError: If something goes wrong with an Authorizenet API call.
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
+        assert self.authorizenet_id, "Authorizenet id was not set"
+        subscription_profile: SubscriptionProfile = (
+            self.authorizenet_get_subscription_profile()
+        )
+        subscription_params = apicontractsv1.ARBSubscriptionType()
+        subscription_profile.update(subscription_params)
 
     def authorizenet_cancel_subscription(self) -> None:
         """
@@ -169,16 +214,15 @@ class CustomerSubscription(models.Model):
         if new_status is not None:
             self.status = new_status
 
-    @transaction.atomic
-    def authorizenet_create_subscription(self) -> None:
+    def authorizenet_create_subscription(self) -> int:
         """
         Creates a subscription in Authorizenet.
 
         :raises AssertionError: If :py:attr:`payment.authorizenet_id` wasn't set.
         :raises AssertionError: If :py:attr:`address.authorizenet_id` wasn't set.
         :raises ControllerExecutionError: If something goes wrong with an Authorizenet API call.
-        :returns: Nothing.
-        :rtype: :py:obj:`None`
+        :returns: An Authorizenet subscription id.
+        :rtype: :py:obj:`int`
 
         """
         assert self.payment.authorizenet_id, "Payment id was not set."
@@ -192,13 +236,13 @@ class CustomerSubscription(models.Model):
             payment_id=self.payment.authorizenet_id,
             address_id=self.address.authorizenet_id,
         )
-        self.authorizenet_id = int(subscription_profile.id)
+        return int(subscription_profile.id)
 
     def authorizenet_get_subscription_profile(self) -> SubscriptionProfile:
         """
         Returns the Authorizenet subscription profile for the subscription.
 
-        :raises AssertionError: If :py:attr`authorizenet_id` wasn't set.
+        :raises AssertionError: If :py:attr:`authorizenet_id` wasn't set.
         :raises ControllerExecutionError: If something goes wrong with an Authorizenet API call.
         :returns: A subscription profile.
         :rtype: :py:obj:`~terminusgps.authorizenet.profiles.SubscriptionProfile`
