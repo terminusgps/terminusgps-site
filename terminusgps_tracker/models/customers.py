@@ -14,8 +14,6 @@ from terminusgps.wialon.session import WialonSession
 class Customer(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
     """A Django user."""
-    verified = models.BooleanField(default=False)
-    """Whether or not the user has completed email verification."""
     authorizenet_id = models.PositiveIntegerField(null=True, blank=True, default=None)
     """An Authorizenet customer profile id."""
     wialon_user_id = models.PositiveIntegerField(null=True, blank=True, default=None)
