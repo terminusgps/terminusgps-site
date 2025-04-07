@@ -175,7 +175,7 @@ class CustomerShippingAddressAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerSubscription)
 class CustomerSubscriptionAdmin(admin.ModelAdmin):
-    list_display = ["customer", "status"]
+    list_display = ["authorizenet_id", "customer", "status"]
     readonly_fields = ["status", "_prev_tier", "_prev_payment", "_prev_address"]
     actions = ["refresh_subscriptions_status"]
 
