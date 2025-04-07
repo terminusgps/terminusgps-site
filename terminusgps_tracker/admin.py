@@ -26,18 +26,11 @@ class CustomerAdmin(admin.ModelAdmin):
         "unblock_customer_accounts",
     ]
     fieldsets = [
-        (None, {"fields": ["user"]}),
+        (None, {"fields": ["user", "email_verified"]}),
         ("Authorizenet", {"fields": ["authorizenet_id"]}),
-        (
-            "Wialon",
-            {
-                "fields": [
-                    "wialon_user_id",
-                    "wialon_resource_id",
-                ]
-            },
-        ),
+        ("Wialon", {"fields": ["wialon_user_id", "wialon_resource_id"]}),
     ]
+    readonly_fields = ["email_verified"]
 
     @admin.action(description="Refresh selected customers payment methods")
     def refresh_customer_payment_methods(self, request, queryset):
