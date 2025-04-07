@@ -1,6 +1,8 @@
+import decimal
 import logging
 import os
 import pathlib
+
 from terminusgps.aws.secrets import get_secret
 
 os.umask(0)
@@ -13,6 +15,10 @@ CSRF_COOKIE_SECURE = True
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FROM_EMAIL = "support@terminusgps.com"
+DEFAULT_TAX_RATE = decimal.Decimal(
+    secret.get("DEFAULT_TAX_RATE", "0.0625"),
+    context=decimal.Context(prec=4, rounding=decimal.ROUND_HALF_UP),
+)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
 EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")

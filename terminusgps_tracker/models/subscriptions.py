@@ -1,6 +1,8 @@
 import datetime
+import decimal
 
 from authorizenet import apicontractsv1
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.urls import reverse
@@ -151,6 +153,12 @@ class CustomerSubscription(models.Model):
         """Returns a URL pointing to the subscription's detail view."""
         return reverse("detail subscription", kwargs={"pk": self.pk})
 
+    def get_amount_plus_tax(self) -> decimal.Decimal:
+        """Returns the amount + tax for the subscription."""
+        return round(
+            self.tier.amount + (self.tier.amount * settings.DEFAULT_TAX_RATE), ndigits=2
+        )
+
     def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
         if self.authorizenet_id and self.status != self.SubscriptionStatus.CANCELED:
             self.authorizenet_cancel_subscription()
@@ -189,7 +197,7 @@ class CustomerSubscription(models.Model):
         updated = []
         if self._prev_tier != self.tier:
             params.name = f"{self.customer}'s {self.tier.name} Subscription"
-            params.amount = self.tier.amount
+            params.amount = self.get_amount_plus_tax()
             updated.append(self.tier)
         if self._prev_address != self.address:
             cprofile.customerAddressId = self.address.authorizenet_id
@@ -199,7 +207,7 @@ class CustomerSubscription(models.Model):
             cprofile.customerPaymentProfileId = self.payment.authorizenet_id
             params.profile = cprofile
             updated.append(self.payment)
-        if len(updated):
+        if updated:
             subscription_profile.update(params)
 
     def authorizenet_cancel_subscription(self) -> None:
@@ -247,7 +255,7 @@ class CustomerSubscription(models.Model):
 
         subscription_profile: SubscriptionProfile = SubscriptionProfile(
             name=f"{self.customer}'s {self.tier.name} Subscription",
-            amount=self.tier.amount,
+            amount=self.get_amount_plus_tax(),
             schedule=self.generate_payment_schedule(timezone.now()),
             profile_id=self.customer.authorizenet_id,
             payment_id=self.payment.authorizenet_id,

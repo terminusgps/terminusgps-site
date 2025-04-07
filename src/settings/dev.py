@@ -1,3 +1,4 @@
+import decimal
 import logging
 import os
 from pathlib import Path
@@ -9,6 +10,7 @@ secret: dict[str, str | None] = {
     "CONNECT_SECRET": os.getenv("CONNECT_SECRET"),
     "MERCHANT_AUTH_LOGIN_ID": os.getenv("MERCHANT_AUTH_LOGIN_ID"),
     "MERCHANT_AUTH_TRANSACTION_KEY": os.getenv("MERCHANT_AUTH_TRANSACTION_KEY"),
+    "DEFAULT_TAX_RATE": os.getenv("DEFAULT_TAX_RATE"),
     "TWILIO_TOKEN": os.getenv("TWILIO_TOKEN"),
     "TWILIO_SID": os.getenv("TWILIO_SID"),
     "TWILIO_MESSAGING_SID": os.getenv("TWILIO_MESSAGING_SID"),
@@ -32,6 +34,10 @@ CORS_ORIGIN_ALLOW_ALL = True
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FROM_EMAIL = "no-reply@terminusgps.com"
+DEFAULT_TAX_RATE = decimal.Decimal(
+    secret.get("DEFAULT_TAX_RATE", "0.0625"),
+    context=decimal.Context(prec=4, rounding=decimal.ROUND_HALF_UP),
+)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
 EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")
