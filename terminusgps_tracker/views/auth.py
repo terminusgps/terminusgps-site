@@ -1,19 +1,124 @@
+from typing import Any
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LoginView, LogoutView
+from django.core.mail import EmailMultiAlternatives
 from django.forms import ValidationError
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse_lazy
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.template.loader import render_to_string
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView
+from django.views.generic import FormView, View
 from terminusgps.wialon import constants
 from terminusgps.wialon.items import WialonResource, WialonUnitGroup, WialonUser
 from terminusgps.wialon.session import WialonSession
 from wialon.api import WialonError
 
-from terminusgps_tracker.forms import TrackerAuthenticationForm, TrackerRegisterForm
+from terminusgps_tracker.forms import (
+    TrackerAuthenticationForm,
+    TrackerEmailVerificationForm,
+    TrackerRegisterForm,
+)
 from terminusgps_tracker.models.customers import Customer
 from terminusgps_tracker.views.mixins import HtmxTemplateResponseMixin
+
+
+class TrackerSendVerificationEmailView(View):
+    content_type = "text/html"
+    http_method_names = ["get"]
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        try:
+            customer = Customer.objects.get(pk=kwargs["pk"])
+            customer.email_otp = customer.generate_email_otp(duration=500)
+            customer.save()
+            text_content = render_to_string(
+                "terminusgps_tracker/emails/verify.txt",
+                context=self.generate_email_context(request, customer),
+            )
+            html_content = render_to_string(
+                "terminusgps_tracker/emails/verify.html",
+                context=self.generate_email_context(request, customer),
+            )
+            msg = EmailMultiAlternatives(
+                "Terminus GPS - Verify Email",
+                text_content,
+                "support@terminusgps.com",
+                [customer.user.username],
+            )
+            msg.attach_alternative(html_content, "text/html")
+            msg.send(fail_silently=False)
+            return HttpResponse(status=200)
+        except Customer.DoesNotExist:
+            return HttpResponse(status=400)
+
+    def generate_email_context(
+        self, request: HttpRequest, customer: Customer
+    ) -> dict[str, str]:
+        return {
+            "first_name": customer.user.first_name
+            or customer.user.username.split("@")[0],
+            "link": request.build_absolute_uri(
+                f"%s?otp={customer.email_otp}"
+                % reverse("verify email", kwargs={"pk": customer.pk})
+            ),
+        }
+
+
+class TrackerVerifyEmailView(HtmxTemplateResponseMixin, FormView):
+    content_type = "text/html"
+    extra_context = {"title": "Verify Email", "class": "p-4 flex flex-col gap-2"}
+    http_method_names = ["get", "post"]
+    form_class = TrackerEmailVerificationForm
+    success_url = reverse_lazy("dashboard")
+    template_name = "terminusgps_tracker/email_verification.html"
+    partial_template_name = "terminusgps_tracker/partials/_email_verification.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        try:
+            customer = Customer.objects.get(pk=self.kwargs["pk"])
+            context["customer"] = customer
+        except Customer.DoesNotExist:
+            context["customer"] = None
+        return context
+
+    def get_initial(self) -> dict[str, Any]:
+        initial: dict[str, Any] = super().get_initial()
+        if self.request.GET.get("otp"):
+            initial["otp"] = self.request.GET["otp"]
+        return initial
+
+    def form_valid(
+        self, form: TrackerEmailVerificationForm
+    ) -> HttpResponse | HttpResponseRedirect:
+        try:
+            customer = Customer.objects.get(pk=self.kwargs["pk"])
+            input_otp = form.cleaned_data["otp"]
+            customer_otp = customer.email_otp
+
+            if input_otp == customer_otp:
+                customer.email_verified = True
+                customer.save()
+                return super().form_valid(form=form)
+            else:
+                form.add_error(
+                    "otp",
+                    ValidationError(
+                        _("Whoops! OTP was invalid, please try again later.")
+                    ),
+                )
+                return self.form_invalid(form=form)
+
+        except Customer.DoesNotExist:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! Couldn't find a customer for your account.")
+                ),
+            )
+            return self.form_invalid(form=form)
 
 
 class TrackerLoginView(HtmxTemplateResponseMixin, LoginView):

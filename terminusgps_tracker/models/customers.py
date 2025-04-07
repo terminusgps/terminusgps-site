@@ -1,3 +1,4 @@
+import pyotp
 from django.contrib.auth import get_user_model
 from django.db import models, transaction
 from django.urls import reverse
@@ -14,22 +15,18 @@ from terminusgps.wialon.session import WialonSession
 class Customer(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
     """A Django user."""
-    verified = models.BooleanField(default=False)
+    email_verified = models.BooleanField(default=False)
     """Whether or not the user has completed email verification."""
+    email_otp = models.CharField(max_length=6, null=True, blank=True)
+    """Email one-time password."""
     authorizenet_id = models.PositiveIntegerField(null=True, blank=True, default=None)
     """An Authorizenet customer profile id."""
     wialon_user_id = models.PositiveIntegerField(null=True, blank=True, default=None)
     """A Wialon user id."""
-    wialon_group_id = models.PositiveIntegerField(null=True, blank=True, default=None)
-    """A Wialon unit group id."""
     wialon_resource_id = models.PositiveIntegerField(
         null=True, blank=True, default=None
     )
     """A Wialon resource id."""
-    wialon_super_user_id = models.PositiveIntegerField(
-        null=True, blank=True, default=None
-    )
-    """A Wialon super user id."""
 
     def __str__(self) -> str:
         return self.user.username
@@ -49,6 +46,18 @@ class Customer(models.Model):
         """Returns a :py:obj:`~terminusgps.authorizenet.profiles.CustomerProfile` for the customer."""
         assert self.authorizenet_id is not None, "'authorizenet_id' wasn't set."
         return CustomerProfile(merchant_id=self.user.pk, id=self.authorizenet_id)
+
+    def generate_email_otp(self, duration: int = 500) -> str:
+        """
+        Generates an OTP to be verified via email.
+
+        :param duration: How long (in seconds) the OTP will be valid for.
+        :type duration: :py:obj:`int`
+        :returns: A OTP.
+        :rtype: :py:obj:`str`
+
+        """
+        return pyotp.TOTP(pyotp.random_base32(), interval=duration).now()
 
     @transaction.atomic
     def authorizenet_sync_payment_profiles(self) -> None:

@@ -14,6 +14,16 @@ urlpatterns = [
     path("support/", views.CustomerSupportView.as_view(), name="support"),
     path("apps/", views.TrackerMobileAppView.as_view(), name="mobile apps"),
     path(
+        "verify/<int:pk>/email/new/",
+        views.TrackerSendVerificationEmailView.as_view(),
+        name="send verification email",
+    ),
+    path(
+        "verify/<int:pk>/email/",
+        views.TrackerVerifyEmailView.as_view(),
+        name="verify email",
+    ),
+    path(
         "payments/", views.CustomerPaymentMethodListView.as_view(), name="list payments"
     ),
     path(

@@ -33,9 +33,7 @@ class CustomerAdmin(admin.ModelAdmin):
             {
                 "fields": [
                     "wialon_user_id",
-                    "wialon_group_id",
                     "wialon_resource_id",
-                    "wialon_super_user_id",
                 ]
             },
         ),
