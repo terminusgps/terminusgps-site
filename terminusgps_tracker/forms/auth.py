@@ -12,6 +12,18 @@ from terminusgps_tracker.validators import (
 )
 
 
+class TrackerEmailVerificationForm(forms.Form):
+    otp = forms.CharField(
+        label="One-time Password (OTP)",
+        max_length=6,
+        widget=widgets.TextInput(
+            attrs={
+                "class": "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100 bg-white border border-gray-600"
+            }
+        ),
+    )
+
+
 class TrackerRegisterForm(UserCreationForm):
     field_order = ["first_name", "last_name", "username", "password1", "password2"]
     default_css_class = "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100 bg-white border border-gray-600"
