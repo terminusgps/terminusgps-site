@@ -2,6 +2,8 @@ Hello {{ first_name }},
 
 Thanks for choosing Terminus GPS!
 
+Your One-time Password is: {{ otp }}
+
 Please click the link below to verify your account.
 
 {{ link }}

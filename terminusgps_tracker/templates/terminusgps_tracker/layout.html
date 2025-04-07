@@ -4,6 +4,12 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta property="og:title" content="{{ title|default:'GPS Tracking' }}">
+        <meta property="og:site_name" content="Terminus GPS Tracker">
+        <meta property="og:image" content="{% static 'terminusgps/logo.svg' %}">
+        <meta property="og:image:type" content="image/svg">
+        <meta property="og:image:alt" content="Terminus GPS Company Logo">
+        <meta property="og:locale" content="en_US">
         <title>{{ title|default:'GPS Tracking' }} | Terminus GPS</title>
         <link href="{% static 'terminusgps/favicon.ico' %}" rel="shortcut icon" type="image/x-icon">
         <link href="{% static 'terminusgps/css/output.css' %}" rel="stylesheet" type="text/css">

@@ -33,13 +33,13 @@ class TrackerSendVerificationEmailView(View):
             customer = Customer.objects.get(pk=kwargs["pk"])
             customer.email_otp = customer.generate_email_otp(duration=500)
             customer.save()
+
+            context = self.generate_email_context(request, customer)
             text_content = render_to_string(
-                "terminusgps_tracker/emails/verify.txt",
-                context=self.generate_email_context(request, customer),
+                "terminusgps_tracker/emails/verify.txt", context=context
             )
             html_content = render_to_string(
-                "terminusgps_tracker/emails/verify.html",
-                context=self.generate_email_context(request, customer),
+                "terminusgps_tracker/emails/verify.html", context=context
             )
             msg = EmailMultiAlternatives(
                 "Terminus GPS - Verify Email",
@@ -57,11 +57,11 @@ class TrackerSendVerificationEmailView(View):
         self, request: HttpRequest, customer: Customer
     ) -> dict[str, str]:
         return {
+            "otp": customer.email_otp,
             "first_name": customer.user.first_name
             or customer.user.username.split("@")[0],
             "link": request.build_absolute_uri(
-                f"%s?otp={customer.email_otp}"
-                % reverse("verify email", kwargs={"pk": customer.pk})
+                reverse("verify email", kwargs={"pk": customer.pk})
             ),
         }
 
