@@ -1,0 +1,7 @@
+Hello {{ first_name }},
+
+Your {{ plan_name }} subscription expires on {{ date|date:'l, F jS' }}, (that's in {{ date|timeuntil:now }})!
+
+Please click the link below to renew your {{ plan_name }} subscription.
+
+{{ link }}

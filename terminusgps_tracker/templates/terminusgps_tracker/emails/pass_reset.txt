@@ -1,0 +1,9 @@
+Hello {{ first_name }},
+
+On {{ date|date:'l, F jS' }} at {{ date|time:'P' }}, you requested to reset your password.
+
+To reset your password, please click the link below.
+
+{{ link }}
+
+NOTE: If you didn't request a password reset, this email can be safely ignored.
