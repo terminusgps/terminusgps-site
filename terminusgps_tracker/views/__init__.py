@@ -7,11 +7,14 @@ from .assets import (
 from .auth import (
     TrackerLoginView,
     TrackerLogoutView,
+    TrackerPasswordChangeDoneView,
+    TrackerPasswordChangeView,
     TrackerRegisterView,
     TrackerSendVerificationEmailView,
     TrackerVerifyEmailView,
 )
 from .customers import (
+    CustomerAccountView,
     CustomerDashboardView,
     CustomerPaymentMethodCreateView,
     CustomerPaymentMethodDeleteView,

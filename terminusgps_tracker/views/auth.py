@@ -1,8 +1,15 @@
 from typing import Any
 
+from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import (
+    LoginView,
+    LogoutView,
+    PasswordChangeDoneView,
+    PasswordChangeView,
+)
 from django.core.mail import EmailMultiAlternatives
 from django.forms import ValidationError
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -24,37 +31,77 @@ from terminusgps_tracker.models.customers import Customer
 from terminusgps_tracker.views.mixins import HtmxTemplateResponseMixin
 
 
+class TrackerPasswordChangeView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, PasswordChangeView
+):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Change Password",
+        "subtitle": "Update your account password",
+        "class": "flex flex-col gap-4",
+    }
+    http_method_names = ["get", "post"]
+    success_url = reverse_lazy("password change done")
+    template_name = "terminusgps_tracker/account/change_password.html"
+    partial_template_name = "terminusgps_tracker/account/partials/_change_password.html"
+    login_url = reverse_lazy("login")
+    permission_denied_message = "Please login and try again."
+    raise_exception = False
+
+    def get_form(self, form_class: forms.Form | None = None) -> forms.Form:
+        form = super().get_form(form_class)
+        for name in form.fields:
+            form.fields[name].widget.attrs.update(
+                {
+                    "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300"
+                }
+            )
+        return form
+
+
+class TrackerPasswordChangeDoneView(HtmxTemplateResponseMixin, PasswordChangeDoneView):
+    content_type = "text/html"
+    extra_context = {"title": "Password Changed", "class": "flex flex-col gap-4"}
+    http_method_names = ["get"]
+    template_name = "terminusgps_tracker/account/change_password_done.html"
+    partial_template_name = (
+        "terminusgps_tracker/account/partials/_change_password_done.html"
+    )
+
+
 class TrackerSendVerificationEmailView(View):
     content_type = "text/html"
     http_method_names = ["get"]
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         try:
-            customer = Customer.objects.get(pk=kwargs["pk"])
-            customer.email_otp = customer.generate_email_otp(duration=500)
-            customer.save()
-
-            context = self.generate_email_context(request, customer)
-            text_content = render_to_string(
-                "terminusgps_tracker/emails/verify.txt", context=context
-            )
-            html_content = render_to_string(
-                "terminusgps_tracker/emails/verify.html", context=context
-            )
-            msg = EmailMultiAlternatives(
-                "Terminus GPS - Verify Email",
-                text_content,
-                "support@terminusgps.com",
-                [customer.user.username],
-            )
-            msg.attach_alternative(html_content, "text/html")
-            msg.send(fail_silently=False)
-            return HttpResponse(status=200)
+            customer: Customer = Customer.objects.get(pk=kwargs["pk"])
         except Customer.DoesNotExist:
             return HttpResponse(status=400)
 
-    def generate_email_context(
-        self, request: HttpRequest, customer: Customer
+        customer.email_otp = customer.generate_email_otp(duration=500)
+        customer.save()
+
+        context: dict[str, str] = self.generate_otp_email_context(request, customer)
+        text_content: str = render_to_string(
+            "terminusgps_tracker/emails/verify.txt", context=context
+        )
+        html_content: str = render_to_string(
+            "terminusgps_tracker/emails/verify.html", context=context
+        )
+        msg: EmailMultiAlternatives = EmailMultiAlternatives(
+            "Terminus GPS - Verify Email",
+            text_content,
+            "support@terminusgps.com",
+            [customer.user.username],
+        )
+        msg.attach_alternative(html_content, "text/html")
+        msg.send(fail_silently=True)
+        return HttpResponse(status=200)
+
+    @staticmethod
+    def generate_otp_email_context(
+        request: HttpRequest, customer: Customer
     ) -> dict[str, str]:
         return {
             "otp": customer.email_otp,

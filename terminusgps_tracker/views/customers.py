@@ -116,6 +116,25 @@ class CustomerSettingsView(
     template_name = "terminusgps_tracker/settings.html"
 
 
+class CustomerAccountView(
+    CustomerRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Your Account",
+        "subtitle": "Update your account",
+        "class": "flex flex-col gap-8",
+    }
+    http_method_names = ["get"]
+    template_name = "terminusgps_tracker/account.html"
+    partial_template_name = "terminusgps_tracker/partials/_account.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["customer"], _ = Customer.objects.get_or_create(user=self.request.user)
+        return context
+
+
 class CustomerSupportView(
     CustomerRequiredMixin,
     TrackerAppConfigContextMixin,

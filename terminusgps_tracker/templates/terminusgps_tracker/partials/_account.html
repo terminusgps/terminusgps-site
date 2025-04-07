@@ -1,0 +1,10 @@
+<div id="account-info">
+    <h2>{{ customer.user.username }}</h2>
+    {% with customer.payments.all|length as num_payments %}
+    <h3>{{ num_payments }} payment method{{ num_payments|pluralize }}</h3>
+    {% endwith %}
+    {% with customer.addresses.all|length as num_addresses %}
+    <h3>{{ num_addresses }} shipping address{{ num_addresses|pluralize:'es' }}</h3>
+    {% endwith %}
+    <div class="border p-2 rounded bg-gray-200 mt-4" hx-get="{% url 'change password' %}" hx-target="this" hx-trigger="load"></div>
+</div>
