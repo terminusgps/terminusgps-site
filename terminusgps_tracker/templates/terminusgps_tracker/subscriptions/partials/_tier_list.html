@@ -11,7 +11,7 @@
         <ul id="{{ tier.name|lower }}-features" class="flex flex-col py-4">
         {% for feature in tier.features.all %}
             <li class="-mx-4 border-b bg-gray-300 p-4 first:border-t dark:bg-gray-600">
-                <div hx-on:click="s=this.getAttribute('aria-expanded')==='true'?'false':'true';this.setAttribute('aria-expanded',s);" class="peer group flex cursor-pointer items-center justify-between gap-4" aria-expanded="false">
+                <div hx-on:click="s=this.getAttribute('aria-expanded')==='true'?'false':'true';this.setAttribute('aria-expanded',s);" class="peer group flex cursor-pointer items-center justify-between gap-4 rounded-full p-2 transition-colors duration-300 ease-in-out hover:bg-gray-100" aria-expanded="false">
                     <label for="feature-desc" class="cursor-pointer text-lg font-semibold select-none">{% if feature.amount != None %}{{ feature.get_amount_display }}{% endif %} {{ feature.name }}</label>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex size-6 group-aria-expanded:hidden">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
