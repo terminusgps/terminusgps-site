@@ -150,27 +150,31 @@ class CustomerAdmin(admin.ModelAdmin):
 @admin.register(CustomerAsset)
 class CustomerAssetAdmin(admin.ModelAdmin):
     list_display = ["customer"]
+    list_filter = ["customer"]
 
 
 @admin.register(CustomerPaymentMethod)
 class CustomerPaymentMethodAdmin(admin.ModelAdmin):
     list_display = ["authorizenet_id", "customer"]
+    list_filter = ["customer"]
     view_on_site = False
 
 
 @admin.register(CustomerShippingAddress)
 class CustomerShippingAddressAdmin(admin.ModelAdmin):
     list_display = ["authorizenet_id", "customer"]
+    list_filter = ["customer"]
     view_on_site = False
 
 
 @admin.register(CustomerSubscription)
 class CustomerSubscriptionAdmin(admin.ModelAdmin):
     list_display = ["authorizenet_id", "customer", "status"]
+    list_filter = ["status"]
     readonly_fields = ["status", "_prev_tier", "_prev_payment", "_prev_address"]
     actions = ["refresh_subscriptions_status"]
 
-    @admin.action(description="Refresh selected subscriptions status")
+    @admin.action(description="Refresh selected subscription statuses")
     def refresh_subscriptions_status(self, request, queryset):
         [sub.authorizenet_refresh_status() for sub in queryset if sub.authorizenet_id]
         self.message_user(
