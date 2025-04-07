@@ -930,7 +930,7 @@ requires-dist = [
     { name = "pandas", specifier = "==2.2.2" },
     { name = "pillow", specifier = "==10.4.0" },
     { name = "pyotp", specifier = ">=2.9.0" },
-    { name = "python-terminusgps", specifier = "==28.7.1" },
+    { name = "python-terminusgps", specifier = "==28.8.0" },
     { name = "python-wialon", specifier = "==1.2.4" },
 ]
 
