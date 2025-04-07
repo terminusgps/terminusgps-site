@@ -32,7 +32,7 @@ class Customer(models.Model):
         return self.user.username
 
     def save(self, **kwargs) -> None:
-        if not self.authorizenet_customer_profile_exists:
+        if not self.authorizenet_id:
             customer_profile = CustomerProfile(
                 merchant_id=self.user.pk,
                 id=None,
