@@ -153,7 +153,7 @@ class CustomerSubscription(models.Model):
         """Returns a URL pointing to the subscription's detail view."""
         return reverse("detail subscription", kwargs={"pk": self.pk})
 
-    def get_amount_plus_tax(self) -> decimal.Decimal:
+    def calculate_amount_plus_tax(self) -> decimal.Decimal:
         """Returns the amount + tax for the subscription."""
         return round(
             self.tier.amount + (self.tier.amount * settings.DEFAULT_TAX_RATE), ndigits=2
@@ -197,7 +197,7 @@ class CustomerSubscription(models.Model):
         updated = []
         if self._prev_tier != self.tier:
             params.name = f"{self.customer}'s {self.tier.name} Subscription"
-            params.amount = self.get_amount_plus_tax()
+            params.amount = self.calculate_amount_plus_tax()
             updated.append(self.tier)
         if self._prev_address != self.address:
             cprofile.customerAddressId = self.address.authorizenet_id
@@ -255,7 +255,7 @@ class CustomerSubscription(models.Model):
 
         subscription_profile: SubscriptionProfile = SubscriptionProfile(
             name=f"{self.customer}'s {self.tier.name} Subscription",
-            amount=self.get_amount_plus_tax(),
+            amount=self.calculate_amount_plus_tax(),
             schedule=self.generate_payment_schedule(timezone.now()),
             profile_id=self.customer.authorizenet_id,
             payment_id=self.payment.authorizenet_id,
