@@ -16,7 +16,7 @@ DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FROM_EMAIL = "support@terminusgps.com"
 DEFAULT_TAX_RATE = decimal.Decimal(
-    secret.get("DEFAULT_TAX_RATE", "0.0625"),
+    secret.get("DEFAULT_TAX_RATE", "0.0825"),
     context=decimal.Context(prec=4, rounding=decimal.ROUND_HALF_UP),
 )
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
