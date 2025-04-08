@@ -137,11 +137,22 @@ class CustomerAsset(models.Model):
         "terminusgps_tracker.Customer", on_delete=models.CASCADE, related_name="assets"
     )
     """A customer."""
+    name = models.CharField(max_length=128, null=True, blank=True, default=None)
+    """An identifiable name."""
     wialon_id = models.PositiveIntegerField()
     """A Wialon unit id."""
 
     def __str__(self) -> str:
         return f"Asset #{self.pk}"
+
+    @transaction.atomic
+    def wialon_sync_name(self, session: WialonSession) -> None:
+        unit: WialonUnit = self.wialon_get_unit(session)
+        if self.name is None or self.name != unit.name:
+            self.name = unit.name
+            self.save()
+        else:
+            unit.rename(self.name)
 
     def wialon_get_unit(self, session: WialonSession) -> WialonUnit:
         """
