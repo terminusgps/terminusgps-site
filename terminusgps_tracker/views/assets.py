@@ -84,7 +84,6 @@ class CustomerAssetCreateView(
         self, form: CustomerAssetCreateForm
     ) -> HttpResponse | HttpResponseRedirect:
         imei_number: str = form.cleaned_data["imei_number"]
-        asset_name: str = form.cleaned_data["name"]
         customer: Customer = Customer.objects.get(user=self.request.user)
 
         if not customer.wialon_user_id:
@@ -129,13 +128,13 @@ class CustomerAssetCreateView(
                 resource = WialonResource(
                     id=customer.wialon_resource_id, session=session
                 )
-                if unit.name != asset_name:
-                    unit.rename(asset_name)
+                if unit.name != form.cleaned_data["name"]:
+                    unit.rename(form.cleaned_data["name"])
                 resource.migrate_unit(unit)
                 user.grant_access(unit, access_mask=constants.ACCESSMASK_UNIT_BASIC)
 
                 asset = CustomerAsset.objects.create(
-                    wialon_id=unit.id, customer=customer, name=asset_name
+                    wialon_id=unit.id, customer=customer, name=form.cleaned_data["name"]
                 )
                 return HttpResponseRedirect(self.get_success_url(asset))
         except WialonError as e:
