@@ -96,11 +96,7 @@ class CustomerAccountView(
     CustomerRequiredMixin, HtmxTemplateResponseMixin, TemplateView
 ):
     content_type = "text/html"
-    extra_context = {
-        "title": "Your Account",
-        "subtitle": "Update your account",
-        "class": "flex flex-col gap-8",
-    }
+    extra_context = {"title": "Your Account", "class": "flex flex-col gap-8"}
     http_method_names = ["get"]
     template_name = "terminusgps_tracker/account.html"
     partial_template_name = "terminusgps_tracker/partials/_account.html"
