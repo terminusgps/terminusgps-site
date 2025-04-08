@@ -1,9 +1,4 @@
-from .assets import (
-    CustomerAssetCreateView,
-    CustomerAssetDeleteView,
-    CustomerAssetDetailView,
-    CustomerAssetListView,
-)
+from .assets import CustomerAssetListView
 from .auth import (
     TrackerLoginView,
     TrackerLogoutView,

@@ -6,5 +6,5 @@
     {% with customer.addresses.all|length as num_addresses %}
     <h3>{{ num_addresses }} shipping address{{ num_addresses|pluralize:'es' }}</h3>
     {% endwith %}
-    <div class="border p-2 rounded bg-gray-200 mt-4" hx-get="{% url 'change password' %}" hx-target="this" hx-trigger="load"></div>
+    <div class="relative overflow-x-auto" id="asset-list" hx-get="{% url 'list assets' %}" hx-target="this" hx-trigger="load"></div>
 </div>

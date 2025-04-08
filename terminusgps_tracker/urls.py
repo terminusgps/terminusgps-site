@@ -93,15 +93,4 @@ urlpatterns = [
         name="subscription transactions",
     ),
     path("assets/", views.CustomerAssetListView.as_view(), name="list assets"),
-    path(
-        "assets/<int:pk>/", views.CustomerAssetDetailView.as_view(), name="detail asset"
-    ),
-    path(
-        "assets/<int:pk>/delete/",
-        views.CustomerAssetDeleteView.as_view(),
-        name="delete asset",
-    ),
-    path(
-        "assets/create/", views.CustomerAssetCreateView.as_view(), name="create asset"
-    ),
 ]
