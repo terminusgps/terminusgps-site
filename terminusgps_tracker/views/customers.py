@@ -78,18 +78,18 @@ class CustomerDashboardView(
         return context
 
 
-class CustomerSettingsView(
+class CustomerPaymentsView(
     CustomerRequiredMixin, HtmxTemplateResponseMixin, TemplateView
 ):
     content_type = "text/html"
     extra_context = {
-        "title": "Settings",
+        "title": "Payments",
         "subtitle": "Update your payment information",
         "class": "flex flex-col gap-8",
     }
     http_method_names = ["get"]
-    partial_template_name = "terminusgps_tracker/partials/_settings.html"
-    template_name = "terminusgps_tracker/settings.html"
+    partial_template_name = "terminusgps_tracker/partials/_payments.html"
+    template_name = "terminusgps_tracker/payments.html"
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)

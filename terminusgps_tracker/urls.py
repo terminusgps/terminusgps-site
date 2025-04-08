@@ -9,7 +9,7 @@ urlpatterns = [
     path("privacy/", views.TrackerPrivacyPolicyView.as_view(), name="privacy"),
     path("register/", views.TrackerRegisterView.as_view(), name="register"),
     path("source/", views.TrackerSourceCodeView.as_view(), name="source code"),
-    path("settings/", views.CustomerSettingsView.as_view(), name="settings"),
+    path("payments/", views.CustomerPaymentsView.as_view(), name="payments"),
     path("tiers/", views.SubscriptionTierListView.as_view(), name="list tiers"),
     path("support/", views.CustomerSupportView.as_view(), name="support"),
     path("apps/", views.TrackerMobileAppView.as_view(), name="mobile apps"),
@@ -35,7 +35,9 @@ urlpatterns = [
         name="password reset complete",
     ),
     path(
-        "payments/", views.CustomerPaymentMethodListView.as_view(), name="list payments"
+        "payments/list/",
+        views.CustomerPaymentMethodListView.as_view(),
+        name="list payments",
     ),
     path(
         "payments/create/",

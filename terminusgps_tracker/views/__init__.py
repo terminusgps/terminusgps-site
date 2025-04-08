@@ -19,7 +19,7 @@ from .customers import (
     CustomerPaymentMethodDeleteView,
     CustomerPaymentMethodDetailView,
     CustomerPaymentMethodListView,
-    CustomerSettingsView,
+    CustomerPaymentsView,
     CustomerShippingAddressCreateView,
     CustomerShippingAddressDeleteView,
     CustomerShippingAddressDetailView,
