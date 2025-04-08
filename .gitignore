@@ -13,6 +13,7 @@ media/
 *.webm
 *.csv
 *.xlsx
+*.png
 
 
 package-lock.json
