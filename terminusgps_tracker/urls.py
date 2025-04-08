@@ -13,6 +13,27 @@ urlpatterns = [
     path("tiers/", views.SubscriptionTierListView.as_view(), name="list tiers"),
     path("support/", views.CustomerSupportView.as_view(), name="support"),
     path("apps/", views.TrackerMobileAppView.as_view(), name="mobile apps"),
+    path("account/", views.CustomerAccountView.as_view(), name="account"),
+    path(
+        "reset-password/",
+        views.TrackerPasswordResetView.as_view(),
+        name="password reset",
+    ),
+    path(
+        "reset-password/done/",
+        views.TrackerPasswordResetDoneView.as_view(),
+        name="password reset done",
+    ),
+    path(
+        "reset-password/<str:uidb64>/<str:token>/confirm/",
+        views.TrackerPasswordResetConfirmView.as_view(),
+        name="password reset confirm",
+    ),
+    path(
+        "reset-password/complete/",
+        views.TrackerPasswordResetCompleteView.as_view(),
+        name="password reset complete",
+    ),
     path(
         "payments/", views.CustomerPaymentMethodListView.as_view(), name="list payments"
     ),
