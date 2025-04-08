@@ -18,9 +18,10 @@
                 {{ asset.wialon_id }}
             </th>
             <td class="px-6 py-4">
-                {{ asset.customer.user.username }}
+                {{ asset.name }}
             </td>
             <td class="px-6 py-4">
+                <a class="font-semibold text-terminus-red-800 underline decoration-terminus-black decoration-2 underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted" href="{{ asset.get_absolute_url }}">View Asset</a>
             </td>
         </tr>
         {% endfor %}

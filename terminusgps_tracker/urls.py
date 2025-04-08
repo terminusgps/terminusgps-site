@@ -93,4 +93,10 @@ urlpatterns = [
         name="subscription transactions",
     ),
     path("assets/", views.CustomerAssetListView.as_view(), name="list assets"),
+    path(
+        "assets/<int:pk>/", views.CustomerAssetDetailView.as_view(), name="detail asset"
+    ),
+    path(
+        "assets/create/", views.CustomerAssetCreateView.as_view(), name="create asset"
+    ),
 ]

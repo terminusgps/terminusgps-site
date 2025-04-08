@@ -145,6 +145,9 @@ class CustomerAsset(models.Model):
     def __str__(self) -> str:
         return f"Asset #{self.pk}"
 
+    def get_absolute_url(self) -> str:
+        return reverse("detail asset", kwargs={"pk": self.pk})
+
     @transaction.atomic
     def wialon_sync_name(self, session: WialonSession) -> None:
         unit: WialonUnit = self.wialon_get_unit(session)
