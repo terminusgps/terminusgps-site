@@ -15,7 +15,7 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from terminusgps.wialon import constants
-from terminusgps.wialon.items import WialonResource, WialonUnitGroup, WialonUser
+from terminusgps.wialon.items import WialonResource, WialonUser
 from terminusgps.wialon.session import WialonSession
 from wialon.api import WialonError
 
@@ -147,8 +147,6 @@ class TrackerRegisterView(HtmxTemplateResponseMixin, FormView):
                     password=form.cleaned_data["password1"],
                 ),
                 wialon_user_id=ids.get("end_user_id"),
-                wialon_super_user_id=ids.get("super_user_id"),
-                wialon_group_id=ids.get("group_id"),
                 wialon_resource_id=ids.get("resource_id"),
             )
         except WialonError as e:
@@ -189,16 +187,7 @@ class TrackerRegisterView(HtmxTemplateResponseMixin, FormView):
                 name=username,  # email@domain.com
                 password=password,
             )
-            unit_group = WialonUnitGroup(
-                id=None,
-                session=session,
-                creator_id=super_user.id,
-                name=f"group_{username}",  # group_email@domain.com
-            )
 
-            end_user.grant_access(
-                unit_group, access_mask=constants.ACCESSMASK_UNIT_BASIC
-            )
             end_user.grant_access(
                 resource, access_mask=constants.ACCESSMASK_RESOURCE_BASIC
             )
@@ -207,9 +196,4 @@ class TrackerRegisterView(HtmxTemplateResponseMixin, FormView):
             resource.set_settings_flags()
             resource.add_days(7)
 
-        return {
-            "end_user_id": end_user.id,
-            "group_id": unit_group.id,
-            "resource_id": resource.id,
-            "super_user_id": super_user.id,
-        }
+        return {"end_user_id": end_user.id, "resource_id": resource.id}

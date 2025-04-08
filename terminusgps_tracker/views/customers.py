@@ -91,6 +91,11 @@ class CustomerSettingsView(
     partial_template_name = "terminusgps_tracker/partials/_settings.html"
     template_name = "terminusgps_tracker/settings.html"
 
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context: dict[str, Any] = super().get_context_data(**kwargs)
+        context["customer"] = Customer.objects.get(user=self.request.user)
+        return context
+
 
 class CustomerAccountView(
     CustomerRequiredMixin, HtmxTemplateResponseMixin, TemplateView
