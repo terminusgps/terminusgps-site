@@ -1,17 +1,16 @@
 from .assets import (
     CustomerAssetCreateView,
-    CustomerAssetDeleteView,
     CustomerAssetDetailView,
     CustomerAssetListView,
 )
 from .auth import (
     TrackerLoginView,
     TrackerLogoutView,
-    TrackerPasswordChangeDoneView,
-    TrackerPasswordChangeView,
+    TrackerPasswordResetCompleteView,
+    TrackerPasswordResetConfirmView,
+    TrackerPasswordResetDoneView,
+    TrackerPasswordResetView,
     TrackerRegisterView,
-    TrackerSendVerificationEmailView,
-    TrackerVerifyEmailView,
 )
 from .customers import (
     CustomerAccountView,

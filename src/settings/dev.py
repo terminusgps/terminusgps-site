@@ -33,7 +33,7 @@ CONNECT_SECRET = secret.get("CONNECT_SECRET")
 CORS_ORIGIN_ALLOW_ALL = True
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-DEFAULT_FROM_EMAIL = "no-reply@terminusgps.com"
+DEFAULT_FROM_EMAIL = "support@terminusgps.com"
 DEFAULT_TAX_RATE = decimal.Decimal(
     secret.get("DEFAULT_TAX_RATE"),
     context=decimal.Context(prec=4, rounding=decimal.ROUND_HALF_UP),

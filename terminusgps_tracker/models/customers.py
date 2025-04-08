@@ -131,26 +131,31 @@ class Customer(models.Model):
             if resource.is_account:
                 resource.enable_account()
 
-    @property
-    def authorizenet_customer_profile_exists(self) -> bool:
-        """Whether or not the customer profile exists in Authorizenet."""
-        return (
-            self.authorizenet_get_customer_profile().exists
-            if self.authorizenet_id
-            else False
-        )
-
 
 class CustomerAsset(models.Model):
     customer = models.ForeignKey(
         "terminusgps_tracker.Customer", on_delete=models.CASCADE, related_name="assets"
     )
     """A customer."""
+    name = models.CharField(max_length=128, null=True, blank=True, default=None)
+    """An identifiable name."""
     wialon_id = models.PositiveIntegerField()
     """A Wialon unit id."""
 
     def __str__(self) -> str:
         return f"Asset #{self.pk}"
+
+    def get_absolute_url(self) -> str:
+        return reverse("detail asset", kwargs={"pk": self.pk})
+
+    @transaction.atomic
+    def wialon_sync_name(self, session: WialonSession) -> None:
+        unit: WialonUnit = self.wialon_get_unit(session)
+        if self.name is None or self.name != unit.name:
+            self.name = unit.name
+            self.save()
+        else:
+            unit.rename(self.name)
 
     def wialon_get_unit(self, session: WialonSession) -> WialonUnit:
         """

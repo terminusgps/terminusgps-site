@@ -5,7 +5,6 @@
         <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
             {{ form.first_name.label }}
             {{ form.first_name }}
-            {{ form.first_name.errors }}
             {% if form.first_name.errors %}
             <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.first_name.errors }}</div>
             {% endif %}

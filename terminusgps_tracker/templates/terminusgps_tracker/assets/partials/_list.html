@@ -1,5 +1,5 @@
-<table class="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
-    <thead class="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
+<table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
         <tr>
             <th scope="col" class="px-6 py-3">
                 #
@@ -13,15 +13,15 @@
     </thead>
     <tbody>
         {% for asset in asset_list %}
-        <tr id="asset-{{ asset.pk }}" class="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800" hx-target="this">
-            <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 dark:text-white">
-                {{ asset.pk }}
+        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                {{ asset.wialon_id }}
             </th>
             <td class="px-6 py-4">
                 {{ asset.name }}
             </td>
             <td class="px-6 py-4">
-                <input type="button" class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" value="Edit" hx-get="#">
+                <a class="font-semibold text-terminus-red-800 underline decoration-terminus-black decoration-2 underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted" href="{{ asset.get_absolute_url }}">View Asset</a>
             </td>
         </tr>
         {% endfor %}
