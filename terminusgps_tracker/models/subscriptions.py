@@ -70,7 +70,7 @@ class CustomerSubscription(models.Model):
     authorizenet_id = models.PositiveIntegerField(null=True, blank=True, default=None)
     """An Authorizenet subscription id."""
     total_months = models.PositiveIntegerField(
-        choices=[(12, _("1 year")), (24, _("2 years"))], default=12
+        choices=[(12, _("1 year")), (24, _("2 years")), (9999, _("∞"))], default=9999
     )
     """Total number of months for the subscription."""
     trial_months = models.PositiveIntegerField(
