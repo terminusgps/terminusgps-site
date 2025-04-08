@@ -92,7 +92,7 @@ class CustomerAssetCreateView(
                 None,
                 ValidationError(
                     _(
-                        "Whoops! Your account doesn't have a Wialon user assigned to it. Please try again later."
+                        "Whoops! Your account doesn't have an assigned Wialon user. Please try again later."
                     ),
                     code="invalid",
                 ),
@@ -103,7 +103,7 @@ class CustomerAssetCreateView(
                 None,
                 ValidationError(
                     _(
-                        "Whoops! Your account doesn't have a Wialon account assigned to it. Please try again later."
+                        "Whoops! Your account doesn't have an assigned Wialon resource. Please try again later."
                     ),
                     code="invalid",
                 ),
