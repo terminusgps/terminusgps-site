@@ -131,15 +131,6 @@ class Customer(models.Model):
             if resource.is_account:
                 resource.enable_account()
 
-    @property
-    def authorizenet_customer_profile_exists(self) -> bool:
-        """Whether or not the customer profile exists in Authorizenet."""
-        return (
-            self.authorizenet_get_customer_profile().exists
-            if self.authorizenet_id
-            else False
-        )
-
 
 class CustomerAsset(models.Model):
     customer = models.ForeignKey(
