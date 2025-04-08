@@ -158,6 +158,17 @@ class CustomerSubscriptionUpdateView(
         new_tier: SubscriptionTier = form.cleaned_data["tier"]
         new_address: CustomerShippingAddress = form.cleaned_data["address"]
         new_payment: CustomerPaymentMethod = form.cleaned_data["payment"]
+        updated_fields: list = []
+        if subscription.tier != new_tier:
+            subscription.tier = new_tier
+            updated_fields.append("tier")
+        if subscription.address != new_address:
+            subscription.address = new_address
+            updated_fields.append("address")
+        if subscription.payment != new_payment:
+            subscription.payment = new_payment
+            updated_fields.append("payment")
+        subscription.save(update_fields=updated_fields)
         return super().form_valid(form=form)
 
     def get_success_url(self) -> str:
