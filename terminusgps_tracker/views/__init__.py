@@ -27,6 +27,7 @@ from .customers import (
     CustomerSupportView,
 )
 from .generic import (
+    TrackerHostingView,
     TrackerMobileAppView,
     TrackerPrivacyPolicyView,
     TrackerSourceCodeView,

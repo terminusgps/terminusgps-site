@@ -17,6 +17,12 @@ class TrackerSourceCodeView(RedirectView):
     url = settings.TRACKER_APP_CONFIG.get("REPOSITORY_URL")
 
 
+class TrackerHostingView(RedirectView):
+    http_method_names = ["get"]
+    permanent = True
+    url = "https://hosting.terminusgps.com/"
+
+
 class TrackerPrivacyPolicyView(
     TrackerAppConfigContextMixin, HtmxTemplateResponseMixin, TemplateView
 ):
