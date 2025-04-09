@@ -119,6 +119,8 @@ class CustomerAccountView(
         context["subscription"], _ = CustomerSubscription.objects.get_or_create(
             customer=context["customer"]
         )
+        if self.request.user.first_name:
+            context["title"] = f"{self.request.user.first_name}'s Account"
         return context
 
 

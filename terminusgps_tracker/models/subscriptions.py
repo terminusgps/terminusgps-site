@@ -3,6 +3,7 @@ import decimal
 
 from authorizenet import apicontractsv1
 from django.conf import settings
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.urls import reverse
@@ -144,6 +145,12 @@ class CustomerSubscription(models.Model):
             self.authorizenet_update_subscription()
         if all([not self.authorizenet_id, self.tier, self.address, self.payment]):
             self.authorizenet_id = self.authorizenet_create_subscription()
+            self.authorizenet_refresh_status()
+        subscribed_group, _ = Group.objects.get_or_create(name="Subscribed")
+        if self.status and self.status == self.SubscriptionStatus.ACTIVE:
+            subscribed_group.user_set.add(self.customer.user)
+        elif self.status and self.status != self.SubscriptionStatus.ACTIVE:
+            subscribed_group.user_set.remove(self.customer.user)
         self._prev_tier = self.tier
         self._prev_address = self.address
         self._prev_payment = self.payment
