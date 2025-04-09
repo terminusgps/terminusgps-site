@@ -192,23 +192,16 @@ class CustomerSubscription(models.Model):
         subscription_profile: SubscriptionProfile = (
             self.authorizenet_get_subscription_profile()
         )
-        params = apicontractsv1.ARBSubscriptionType()
-        cprofile = apicontractsv1.customerProfileIdType()
-        updated = []
-        if self._prev_tier != self.tier:
-            params.name = f"{self.customer}'s {self.tier.name} Subscription"
-            params.amount = self.calculate_amount_plus_tax()
-            updated.append(self.tier)
-        if self._prev_address != self.address:
-            cprofile.customerAddressId = self.address.authorizenet_id
-            params.profile = cprofile
-            updated.append(self.address)
-        if self._prev_payment != self.payment:
-            cprofile.customerPaymentProfileId = self.payment.authorizenet_id
-            params.profile = cprofile
-            updated.append(self.payment)
-        if updated:
-            subscription_profile.update(params)
+        params = apicontractsv1.ARBSubscriptionType(
+            name=f"{self.customer}'s {self.tier.name} Subscription",
+            amount=self.calculate_amount_plus_tax(),
+            profile=apicontractsv1.customerProfileIdType(
+                customerProfileId=str(self.customer.authorizenet_id),
+                customerPaymentProfileId=str(self.payment.authorizenet_id),
+                customerAddressId=str(self.address.authorizenet_id),
+            ),
+        )
+        subscription_profile.update(params)
 
     def authorizenet_cancel_subscription(self) -> None:
         """
