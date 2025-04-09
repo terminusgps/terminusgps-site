@@ -111,30 +111,6 @@ class CustomerSubscription(models.Model):
         default=SubscriptionStatus.UNBOUND,
     )
     """Current Authorizenet subscription status."""
-    _prev_address = models.ForeignKey(
-        "terminusgps_tracker.CustomerShippingAddress",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        default=None,
-        related_name="prev_address",
-    )
-    _prev_payment = models.ForeignKey(
-        "terminusgps_tracker.CustomerPaymentMethod",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        default=None,
-        related_name="prev_payment",
-    )
-    _prev_tier = models.ForeignKey(
-        "terminusgps_tracker.SubscriptionTier",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        default=None,
-        related_name="prev_tier",
-    )
 
     def __str__(self) -> str:
         return f"{self.customer}'s Subscription"
@@ -143,17 +119,21 @@ class CustomerSubscription(models.Model):
         if self.authorizenet_id:
             self.authorizenet_refresh_status()
             self.authorizenet_update_subscription()
-        if all([not self.authorizenet_id, self.tier, self.address, self.payment]):
+        if not self.authorizenet_id and all([self.tier, self.address, self.payment]):
             self.authorizenet_id = self.authorizenet_create_subscription()
             self.authorizenet_refresh_status()
-        subscribed_group, _ = Group.objects.get_or_create(name="Subscribed")
-        if self.status and self.status == self.SubscriptionStatus.ACTIVE:
+
+        subscribed_group = Group.objects.get(name="Subscribed")
+        if (
+            self.status == self.SubscriptionStatus.ACTIVE
+            and self.customer.user not in subscribed_group.user_set.all()
+        ):
             subscribed_group.user_set.add(self.customer.user)
-        elif self.status and self.status != self.SubscriptionStatus.ACTIVE:
+        elif (
+            self.status != self.SubscriptionStatus.ACTIVE
+            and self.customer.user in subscribed_group.user_set.all()
+        ):
             subscribed_group.user_set.remove(self.customer.user)
-        self._prev_tier = self.tier
-        self._prev_address = self.address
-        self._prev_payment = self.payment
         super().save(**kwargs)
 
     def get_absolute_url(self) -> str:

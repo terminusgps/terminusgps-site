@@ -153,10 +153,6 @@ class CustomerSubscriptionUpdateView(
         subscription.address = form.cleaned_data["address"]
         subscription.payment = form.cleaned_data["payment"]
         subscription.save()
-
-        if subscription.status == subscription.SubscriptionStatus.ACTIVE:
-            subscribed_group = Group.objects.get(name="Subscribed")
-            subscribed_group.user_set.add(subscription.customer.user)
         return super().form_valid(form=form)
 
     def get_success_url(self) -> str:
