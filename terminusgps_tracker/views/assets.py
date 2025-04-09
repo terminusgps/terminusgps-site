@@ -2,7 +2,7 @@ from typing import Any
 
 from django.db.models import QuerySet
 from django.forms import ValidationError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView
@@ -45,6 +45,17 @@ class CustomerAssetDetailView(
     http_method_names = ["get", "patch"]
     template_name = "terminusgps_tracker/assets/detail.html"
     partial_template_name = "terminusgps_tracker/assets/partials/_detail.html"
+
+    def patch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        new_name: str | None = request.GET.get("name")
+        if new_name is not None:
+            try:
+                with WialonSession() as session:
+                    unit = WialonUnit(id=self.get_object().wialon_id, session=session)
+                    unit.rename(new_name)
+            except WialonError:
+                return HttpResponse(status=400)
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
