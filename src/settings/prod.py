@@ -59,6 +59,7 @@ TRACKER_APP_CONFIG = {
     "LEGAL_NAME": "Terminus GPS, LLC",
     "MOTD": "Check out the Terminus GPS mobile app!",
     "REPOSITORY_URL": "https://github.com/terminusgps/terminusgps-site/",
+    "HOSTING_URL": "https://hosting.terminusgps.com/",
     "ADDRESSES": [
         {
             "NAME": "OFFICE1",

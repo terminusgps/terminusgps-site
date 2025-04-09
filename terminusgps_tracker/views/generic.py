@@ -20,7 +20,7 @@ class TrackerSourceCodeView(RedirectView):
 class TrackerHostingView(RedirectView):
     http_method_names = ["get"]
     permanent = True
-    url = "https://hosting.terminusgps.com/"
+    url = settings.TRACKER_APP_CONFIG.get("HOSTING_URL")
 
 
 class TrackerPrivacyPolicyView(
