@@ -94,6 +94,7 @@ class CustomerPaymentsView(
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
         context["customer"] = Customer.objects.get(user=self.request.user)
+        context["subscription"] = context["customer"].subscription
         return context
 
 
