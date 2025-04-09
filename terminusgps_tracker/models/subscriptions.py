@@ -193,7 +193,7 @@ class CustomerSubscription(models.Model):
             self.authorizenet_get_subscription_profile()
         )
         params = apicontractsv1.ARBSubscriptionType(
-            name=f"{self.customer}'s {self.tier.name} Subscription",
+            name=f"{self.tier.name} Subscription",
             amount=self.calculate_amount_plus_tax(),
             profile=apicontractsv1.customerProfileIdType(
                 customerProfileId=str(self.customer.authorizenet_id),
@@ -247,7 +247,7 @@ class CustomerSubscription(models.Model):
         assert self.address.authorizenet_id, "Address id was not set."
 
         subscription_profile: SubscriptionProfile = SubscriptionProfile(
-            name=f"{self.customer}'s {self.tier.name} Subscription",
+            name=f"{self.tier.name} Subscription",
             amount=self.calculate_amount_plus_tax(),
             schedule=self.generate_payment_schedule(timezone.now()),
             profile_id=self.customer.authorizenet_id,

@@ -1,14 +1,9 @@
 import typing
 
 from django.conf import settings
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse
-from django.urls import reverse_lazy
 from django.views.generic.base import ContextMixin, TemplateResponseMixin
-
-from terminusgps_tracker.models.customers import Customer
-from terminusgps_tracker.models.subscriptions import CustomerSubscription
 
 if not hasattr(settings, "TRACKER_APP_CONFIG"):
     raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
@@ -51,41 +46,3 @@ class TrackerAppConfigContextMixin(ContextMixin):
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         context["config"] = settings.TRACKER_APP_CONFIG
         return context
-
-
-class CustomerRequiredMixin(UserPassesTestMixin):
-    login_url = reverse_lazy("login")
-    permission_denied_message = "You do not have permission to view this."
-    raise_exception = False
-
-    def test_func(self) -> bool:
-        if not hasattr(self, "request"):
-            return False
-        if not hasattr(self.request, "user"):
-            return False
-        if not self.request.user.is_authenticated:
-            return False
-
-        try:
-            Customer.objects.get(user=self.request.user)
-            return True
-        except Customer.DoesNotExist:
-            return False
-
-
-class CustomerSubscriptionRequiredMixin(UserPassesTestMixin):
-    login_url = reverse_lazy("login")
-    permission_denied_message = (
-        "An active subscription is required to perform this action."
-    )
-    raise_exception = False
-
-    def test_func(self) -> bool:
-        try:
-            customer = Customer.objects.get(user=self.request.user)
-            return (
-                customer.subscription.status
-                == CustomerSubscription.SubscriptionStatus.ACTIVE
-            )
-        except Customer.DoesNotExist:
-            return False

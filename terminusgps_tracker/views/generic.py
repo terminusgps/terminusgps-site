@@ -27,14 +27,14 @@ class TrackerPrivacyPolicyView(
     TrackerAppConfigContextMixin, HtmxTemplateResponseMixin, TemplateView
 ):
     content_type = "text/html"
-    http_method_names = ["get"]
-    partial_template_name = "terminusgps_tracker/partials/_privacy.html"
-    template_name = "terminusgps_tracker/privacy.html"
     extra_context = {
         "title": "Privacy Policy",
         "subtitle": "How we use your data",
         "class": "flex flex-col gap-4",
     }
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps_tracker/partials/_privacy.html"
+    template_name = "terminusgps_tracker/privacy.html"
 
 
 class TrackerMobileAppView(

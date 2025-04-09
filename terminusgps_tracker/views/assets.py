@@ -1,9 +1,10 @@
 from typing import Any
 
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import QuerySet
 from django.forms import ValidationError
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.urls import reverse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView
 from terminusgps.wialon import constants
@@ -14,22 +15,22 @@ from wialon.api import WialonError
 
 from terminusgps_tracker.forms import CustomerAssetCreateForm
 from terminusgps_tracker.models import Customer, CustomerAsset
-from terminusgps_tracker.views.mixins import (
-    CustomerRequiredMixin,
-    HtmxTemplateResponseMixin,
-)
+from terminusgps_tracker.views.mixins import HtmxTemplateResponseMixin
 
 
-class CustomerAssetListView(CustomerRequiredMixin, HtmxTemplateResponseMixin, ListView):
+class CustomerAssetListView(LoginRequiredMixin, HtmxTemplateResponseMixin, ListView):
     content_type = "text/html"
-    extra_context = {"title": "Asset List", "subtitle": "Your vehicles at a glance"}
     context_object_name = "asset_list"
-    model = CustomerAsset
-    paginate_by = 25
-    ordering = "wialon_id"
+    extra_context = {"title": "Asset List", "subtitle": "Your vehicles at a glance"}
     http_method_names = ["get"]
-    template_name = "terminusgps_tracker/assets/list.html"
+    login_url = reverse_lazy("login")
+    model = CustomerAsset
+    ordering = "wialon_id"
+    paginate_by = 25
     partial_template_name = "terminusgps_tracker/assets/partials/_list.html"
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
+    template_name = "terminusgps_tracker/assets/list.html"
 
     def get_queryset(self) -> QuerySet[CustomerAsset, CustomerAsset]:
         customer = Customer.objects.get(user=self.request.user)
@@ -37,25 +38,17 @@ class CustomerAssetListView(CustomerRequiredMixin, HtmxTemplateResponseMixin, Li
 
 
 class CustomerAssetDetailView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, DetailView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
 ):
     content_type = "text/html"
     context_object_name = "asset"
+    http_method_names = ["get"]
+    login_url = reverse_lazy("login")
     model = CustomerAsset
-    http_method_names = ["get", "patch"]
-    template_name = "terminusgps_tracker/assets/detail.html"
     partial_template_name = "terminusgps_tracker/assets/partials/_detail.html"
-
-    def patch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        new_name: str | None = request.GET.get("name")
-        if new_name is not None:
-            try:
-                with WialonSession() as session:
-                    unit = WialonUnit(id=self.get_object().wialon_id, session=session)
-                    unit.rename(new_name)
-            except WialonError:
-                return HttpResponse(status=400)
-        return super().get(request, *args, **kwargs)
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
+    template_name = "terminusgps_tracker/assets/detail.html"
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
@@ -68,7 +61,7 @@ class CustomerAssetDetailView(
 
 
 class CustomerAssetCreateView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, FormView
+    PermissionRequiredMixin, HtmxTemplateResponseMixin, FormView
 ):
     content_type = "text/html"
     extra_context = {
@@ -76,10 +69,16 @@ class CustomerAssetCreateView(
         "subtitle": "Add an asset to your account",
     }
     context_object_name = "asset"
-    http_method_names = ["get", "post"]
-    template_name = "terminusgps_tracker/assets/create.html"
-    partial_template_name = "terminusgps_tracker/assets/partials/_create.html"
     form_class = CustomerAssetCreateForm
+    http_method_names = ["get", "post"]
+    login_url = reverse_lazy("login")
+    partial_template_name = "terminusgps_tracker/assets/partials/_create.html"
+    permission_denied_message = (
+        "An active subscription is required to perform this action."
+    )
+    permission_required = "terminusgps_tracker.add_customerasset"
+    raise_exception = False
+    template_name = "terminusgps_tracker/assets/create.html"
 
     def get_success_url(self, asset: CustomerAsset | None) -> str:
         if asset is not None:

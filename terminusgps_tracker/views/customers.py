@@ -28,14 +28,13 @@ from terminusgps_tracker.forms import (
     CustomerPaymentMethodCreateForm,
     CustomerShippingAddressCreateForm,
 )
-from terminusgps_tracker.models.customers import (
+from terminusgps_tracker.models import (
     Customer,
     CustomerPaymentMethod,
     CustomerShippingAddress,
+    CustomerSubscription,
 )
-from terminusgps_tracker.models.subscriptions import CustomerSubscription
 from terminusgps_tracker.views.mixins import (
-    CustomerRequiredMixin,
     HtmxTemplateResponseMixin,
     TrackerAppConfigContextMixin,
 )
@@ -60,18 +59,11 @@ class CustomerDashboardView(
     template_name = "terminusgps_tracker/dashboard.html"
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
-        try:
-            customer = Customer.objects.get(user=self.request.user)
-            subscription, _ = CustomerSubscription.objects.get_or_create(
-                customer=customer
-            )
-        except Customer.DoesNotExist:
-            customer = None
-            subscription = None
-
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["customer"] = customer
-        context["subscription"] = subscription
+        context["customer"], _ = Customer.objects.get_or_create(user=self.request.user)
+        context["subscription"], _ = CustomerSubscription.objects.get_or_create(
+            customer=context["customer"]
+        )
         context["subtitle"] = mark_safe(
             f"Check out the Terminus GPS <a class='text-terminus-red-800 underline decoration-terminus-black decoration underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:hover:text-terminus-red-200 dark:decoration-white' href='{reverse('mobile apps')}'>mobile app</a>!"
         )
@@ -79,7 +71,10 @@ class CustomerDashboardView(
 
 
 class CustomerPaymentsView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+    LoginRequiredMixin,
+    TrackerAppConfigContextMixin,
+    HtmxTemplateResponseMixin,
+    TemplateView,
 ):
     content_type = "text/html"
     extra_context = {
@@ -88,33 +83,47 @@ class CustomerPaymentsView(
         "class": "flex flex-col gap-8",
     }
     http_method_names = ["get"]
+    login_url = reverse_lazy("login")
     partial_template_name = "terminusgps_tracker/partials/_payments.html"
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
     template_name = "terminusgps_tracker/payments.html"
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["customer"] = Customer.objects.get(user=self.request.user)
-        context["subscription"] = context["customer"].subscription
+        context["customer"], _ = Customer.objects.get_or_create(user=self.request.user)
+        context["subscription"], _ = CustomerSubscription.objects.get_or_create(
+            customer=context["customer"]
+        )
         return context
 
 
 class CustomerAccountView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+    LoginRequiredMixin,
+    TrackerAppConfigContextMixin,
+    HtmxTemplateResponseMixin,
+    TemplateView,
 ):
     content_type = "text/html"
     extra_context = {"title": "Your Account", "class": "flex flex-col gap-8"}
     http_method_names = ["get"]
-    template_name = "terminusgps_tracker/account.html"
+    login_url = reverse_lazy("login")
     partial_template_name = "terminusgps_tracker/partials/_account.html"
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
+    template_name = "terminusgps_tracker/account.html"
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["customer"] = Customer.objects.get(user=self.request.user)
+        context["customer"], _ = Customer.objects.get_or_create(user=self.request.user)
+        context["subscription"], _ = CustomerSubscription.objects.get_or_create(
+            customer=context["customer"]
+        )
         return context
 
 
 class CustomerSupportView(
-    CustomerRequiredMixin,
+    LoginRequiredMixin,
     TrackerAppConfigContextMixin,
     HtmxTemplateResponseMixin,
     TemplateView,
@@ -124,10 +133,12 @@ class CustomerSupportView(
         "title": "Support",
         "subtitle": "Drop us a line",
         "class": "flex flex-col gap-4",
-        "support_email": settings.TRACKER_APP_CONFIG["EMAILS"],
     }
     http_method_names = ["get"]
+    login_url = reverse_lazy("login")
     partial_template_name = "terminusgps_tracker/partials/_support.html"
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
     template_name = "terminusgps_tracker/support.html"
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
@@ -139,17 +150,19 @@ class CustomerSupportView(
 
 
 class CustomerShippingAddressCreateView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, FormView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, FormView
 ):
     content_type = "text/html"
     context_object_name = "address"
     extra_context = {"class": "flex flex-col gap-4", "title": "Add Shipping Address"}
     form_class = CustomerShippingAddressCreateForm
     http_method_names = ["get", "post", "delete"]
+    login_url = reverse_lazy("login")
     model = CustomerShippingAddress
     partial_template_name = "terminusgps_tracker/addresses/partials/_create.html"
-    queryset = Customer.objects.none()
-    success_url = reverse_lazy("settings")
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
+    success_url = reverse_lazy("payments")
     template_name = "terminusgps_tracker/addresses/create.html"
 
     def get_initial(self) -> dict[str, Any]:
@@ -178,6 +191,7 @@ class CustomerShippingAddressCreateView(
                 default=form.cleaned_data["default"],
                 authorizenet_id=int(address_profile.id),
             )
+            return super().form_valid(form=form)
         except ControllerExecutionError as e:
             form.add_error(
                 None,
@@ -194,18 +208,20 @@ class CustomerShippingAddressCreateView(
                 ),
             )
             return self.form_invalid(form=form)
-        return super().form_valid(form=form)
 
 
 class CustomerShippingAddressListView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, ListView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, ListView
 ):
     content_type = "text/html"
     context_object_name = "address_list"
     extra_context = {"title": "Shipping Addresses", "class": "flex flex-col gap-4"}
     http_method_names = ["get", "patch"]
+    login_url = reverse_lazy("login")
     model = CustomerShippingAddress
     partial_template_name = "terminusgps_tracker/addresses/partials/_list.html"
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
     template_name = "terminusgps_tracker/addresses/list.html"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
@@ -225,14 +241,17 @@ class CustomerShippingAddressListView(
 
 
 class CustomerShippingAddressDetailView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, DetailView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
 ):
     content_type = "text/html"
     context_object_name = "address"
     extra_context = {"class": "flex flex-col gap-4"}
     http_method_names = ["get", "patch"]
+    login_url = reverse_lazy("login")
     model = CustomerShippingAddress
     partial_template_name = "terminusgps_tracker/addresses/partials/_detail.html"
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
     template_name = "terminusgps_tracker/addresses/detail.html"
 
     def patch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
@@ -267,13 +286,16 @@ class CustomerShippingAddressDetailView(
 
 
 class CustomerShippingAddressDeleteView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, DeleteView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DeleteView
 ):
     content_type = "text/html"
     context_object_name = "address"
     http_method_names = ["post"]
+    login_url = reverse_lazy("login")
     model = CustomerShippingAddress
     partial_template_name = "terminusgps_tracker/addresses/partials/_delete.html"
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
     success_url = reverse_lazy("list addresses")
     template_name = "terminusgps_tracker/addresses/delete.html"
 
@@ -286,18 +308,21 @@ class CustomerShippingAddressDeleteView(
 
 
 class CustomerPaymentMethodCreateView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, FormView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, FormView
 ):
     content_type = "text/html"
     context_object_name = "address"
     extra_context = {"class": "flex flex-col gap-4", "title": "Add Payment Method"}
     form_class = CustomerPaymentMethodCreateForm
     http_method_names = ["get", "post"]
+    login_url = reverse_lazy("login")
     model = CustomerPaymentMethod
     partial_template_name = "terminusgps_tracker/payments/partials/_create.html"
-    success_url = reverse_lazy("settings")
-    template_name = "terminusgps_tracker/payments/create.html"
+    permission_denied_message = "Please login in order to view this content."
     queryset = CustomerPaymentMethod.objects.none()
+    raise_exception = False
+    success_url = reverse_lazy("payments")
+    template_name = "terminusgps_tracker/payments/create.html"
 
     def get_initial(self) -> dict[str, Any]:
         initial: dict[str, Any] = super().get_initial()
@@ -361,14 +386,17 @@ class CustomerPaymentMethodCreateView(
 
 
 class CustomerPaymentMethodListView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, ListView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, ListView
 ):
     content_type = "text/html"
     context_object_name = "payment_list"
     extra_context = {"title": "Payment Methods", "class": "flex flex-col gap-4"}
     http_method_names = ["get", "patch"]
+    login_url = reverse_lazy("login")
     model = CustomerPaymentMethod
     partial_template_name = "terminusgps_tracker/payments/partials/_list.html"
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
     template_name = "terminusgps_tracker/payments/list.html"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
@@ -386,14 +414,17 @@ class CustomerPaymentMethodListView(
 
 
 class CustomerPaymentMethodDetailView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, DetailView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
 ):
     content_type = "text/html"
     context_object_name = "payment"
     extra_context = {"class": "flex flex-col gap-4"}
     http_method_names = ["get", "patch"]
+    login_url = reverse_lazy("login")
     model = CustomerPaymentMethod
     partial_template_name = "terminusgps_tracker/payments/partials/_detail.html"
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
     template_name = "terminusgps_tracker/payments/detail.html"
 
     def patch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
@@ -429,13 +460,16 @@ class CustomerPaymentMethodDetailView(
 
 
 class CustomerPaymentMethodDeleteView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, DeleteView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DeleteView
 ):
     content_type = "text/html"
     context_object_name = "payment"
     http_method_names = ["post"]
+    login_url = reverse_lazy("login")
     model = CustomerPaymentMethod
     partial_template_name = "terminusgps_tracker/payments/partials/_delete.html"
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
     success_url = reverse_lazy("list payments")
     template_name = "terminusgps_tracker/payments/delete.html"
 

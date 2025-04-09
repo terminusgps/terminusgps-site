@@ -1,5 +1,7 @@
 from typing import Any
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.urls import reverse_lazy
@@ -7,37 +9,49 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from terminusgps_tracker.forms import CustomerSubscriptionUpdateForm
-from terminusgps_tracker.models import (
-    Customer,
-    CustomerPaymentMethod,
-    CustomerShippingAddress,
-    CustomerSubscription,
-    SubscriptionTier,
-)
+from terminusgps_tracker.models import Customer, CustomerSubscription, SubscriptionTier
 from terminusgps_tracker.views.mixins import (
-    CustomerRequiredMixin,
     HtmxTemplateResponseMixin,
     TrackerAppConfigContextMixin,
 )
 
 
-class CustomerSubscriptionTransactionsView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, DetailView
+class SubscriptionTierListView(
+    HtmxTemplateResponseMixin, TrackerAppConfigContextMixin, ListView
 ):
     content_type = "text/html"
+    extra_context = {
+        "title": "Subscription Plans",
+        "subtitle": "We have a plan for your plan",
+        "class": "flex flex-col gap-4",
+    }
+    context_object_name = "tier_list"
     http_method_names = ["get"]
-    model = CustomerSubscription
-    template_name = "terminusgps_tracker/subscriptions/transactions.html"
-    partial_template_name = (
-        "terminusgps_tracker/subscriptions/partials/_transactions.html"
-    )
+    model = SubscriptionTier
+    partial_template_name = "terminusgps_tracker/subscriptions/partials/_tier_list.html"
+    template_name = "terminusgps_tracker/subscriptions/tier_list.html"
+
+
+class CustomerSubscriptionTransactionsView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
+):
+    content_type = "text/html"
     extra_context = {
         "title": "Subscription Transactions",
         "class": "flex flex-col gap-4",
     }
+    http_method_names = ["get"]
+    login_url = reverse_lazy("login")
+    model = CustomerSubscription
+    partial_template_name = (
+        "terminusgps_tracker/subscriptions/partials/_transactions.html"
+    )
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
+    template_name = "terminusgps_tracker/subscriptions/transactions.html"
 
     def get_object(self, queryset=None) -> CustomerSubscription:
-        customer: Customer = Customer.objects.get(user=self.request.user)
+        customer, _ = Customer.objects.get_or_create(user=self.request.user)
         subscription, _ = CustomerSubscription.objects.get_or_create(customer=customer)
         return subscription
 
@@ -49,44 +63,21 @@ class CustomerSubscriptionTransactionsView(
         return context
 
 
-class SubscriptionTierListView(
-    HtmxTemplateResponseMixin, TrackerAppConfigContextMixin, ListView
-):
-    content_type = "text/html"
-    http_method_names = ["get"]
-    model = SubscriptionTier
-    partial_template_name = "terminusgps_tracker/subscriptions/partials/_tier_list.html"
-    template_name = "terminusgps_tracker/subscriptions/tier_list.html"
-    extra_context = {
-        "title": "Subscription Plans",
-        "subtitle": "We have a plan for your plan",
-        "class": "flex flex-col gap-4",
-    }
-    context_object_name = "tier_list"
-
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["subscription"] = (
-            CustomerSubscription.objects.get(customer__user=self.request.user)
-            if self.request.user and self.request.user.is_authenticated
-            else None
-        )
-        return context
-
-
 class CustomerSubscriptionDetailView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, DetailView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
 ):
     content_type = "text/html"
-    http_method_names = ["get", "patch"]
-    model = CustomerSubscription
-    partial_template_name = "terminusgps_tracker/subscriptions/partials/_detail.html"
-    template_name = "terminusgps_tracker/subscriptions/detail.html"
     extra_context = {
         "class": "flex flex-col gap-4 border p-4 rounded bg-white dark:bg-terminus-gray-700 dark:border-terminus-gray-500"
     }
-    queryset = CustomerSubscription.objects.none()
     context_object_name = "subscription"
+    http_method_names = ["get", "patch"]
+    login_url = reverse_lazy("login")
+    model = CustomerSubscription
+    partial_template_name = "terminusgps_tracker/subscriptions/partials/_detail.html"
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
+    template_name = "terminusgps_tracker/subscriptions/detail.html"
 
     def get_object(self, queryset=None) -> CustomerSubscription | None:
         return (
@@ -97,19 +88,22 @@ class CustomerSubscriptionDetailView(
 
 
 class CustomerSubscriptionUpdateView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, UpdateView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, UpdateView
 ):
     content_type = "text/html"
+    context_object_name = "subscription"
     extra_context = {
         "title": "Update Subscription",
         "class": "flex flex-col gap-4 border p-4 rounded bg-white dark:bg-terminus-gray-700 dark:border-terminus-gray-500",
     }
     form_class = CustomerSubscriptionUpdateForm
     http_method_names = ["get", "post"]
+    login_url = reverse_lazy("login")
     model = CustomerSubscription
     partial_template_name = "terminusgps_tracker/subscriptions/partials/_update.html"
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
     template_name = "terminusgps_tracker/subscriptions/update.html"
-    context_object_name = "subscription"
 
     def get_object(self, queryset=None) -> CustomerSubscription:
         return CustomerSubscription.objects.get(customer__user=self.request.user)
@@ -155,20 +149,14 @@ class CustomerSubscriptionUpdateView(
             return self.form_invalid(form=form)
 
         subscription: CustomerSubscription = self.get_object()
-        new_tier: SubscriptionTier = form.cleaned_data["tier"]
-        new_address: CustomerShippingAddress = form.cleaned_data["address"]
-        new_payment: CustomerPaymentMethod = form.cleaned_data["payment"]
-        updated_fields: list = []
-        if subscription.tier != new_tier:
-            subscription.tier = new_tier
-            updated_fields.append("tier")
-        if subscription.address != new_address:
-            subscription.address = new_address
-            updated_fields.append("address")
-        if subscription.payment != new_payment:
-            subscription.payment = new_payment
-            updated_fields.append("payment")
-        subscription.save(update_fields=updated_fields)
+        subscription.tier = form.cleaned_data["tier"]
+        subscription.address = form.cleaned_data["address"]
+        subscription.payment = form.cleaned_data["payment"]
+        subscription.save()
+
+        if subscription.status == subscription.SubscriptionStatus.ACTIVE:
+            subscribed_group = Group.objects.get(name="Subscribed")
+            subscribed_group.user_set.add(subscription.customer.user)
         return super().form_valid(form=form)
 
     def get_success_url(self) -> str:
@@ -176,16 +164,19 @@ class CustomerSubscriptionUpdateView(
 
 
 class CustomerSubscriptionDeleteView(
-    CustomerRequiredMixin, HtmxTemplateResponseMixin, DeleteView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DeleteView
 ):
     content_type = "text/html"
+    context_object_name = "subscription"
     extra_context = {"class": "flex flex-col gap-4"}
     http_method_names = ["get", "post"]
+    login_url = reverse_lazy("login")
     model = CustomerSubscription
     partial_template_name = "terminusgps_tracker/subscriptions/partials/_delete.html"
-    template_name = "terminusgps_tracker/subscriptions/delete.html"
-    context_object_name = "subscription"
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
     success_url = reverse_lazy("dashboard")
+    template_name = "terminusgps_tracker/subscriptions/delete.html"
 
     def get_object(self, queryset=None) -> CustomerSubscription:
         return CustomerSubscription.objects.get(customer__user=self.request.user)
