@@ -27,6 +27,7 @@ secret: dict[str, str | None] = {
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+LOGIN_URL = "/login/"
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 BASE_DIR = Path(__file__).resolve().parent.parent
 CONNECT_SECRET = secret.get("CONNECT_SECRET")
@@ -180,6 +181,7 @@ INSTALLED_APPS = [
     "django.forms",
     "django_browser_reload",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
+    "terminusgps_install.apps.TerminusgpsInstallConfig",
 ]
 
 MIDDLEWARE = [

@@ -4,10 +4,7 @@ from . import views
 
 urlpatterns = [
     path("", views.CustomerDashboardView.as_view(), name="dashboard"),
-    path("login/", views.TrackerLoginView.as_view(), name="login"),
-    path("logout/", views.TrackerLogoutView.as_view(), name="logout"),
     path("privacy/", views.TrackerPrivacyPolicyView.as_view(), name="privacy"),
-    path("register/", views.TrackerRegisterView.as_view(), name="register"),
     path("source/", views.TrackerSourceCodeView.as_view(), name="source code"),
     path("hosting/", views.TrackerHostingView.as_view(), name="hosting"),
     path("payments/", views.CustomerPaymentsView.as_view(), name="payments"),
@@ -15,26 +12,6 @@ urlpatterns = [
     path("support/", views.CustomerSupportView.as_view(), name="support"),
     path("apps/", views.TrackerMobileAppView.as_view(), name="mobile apps"),
     path("account/", views.CustomerAccountView.as_view(), name="account"),
-    path(
-        "reset-password/",
-        views.TrackerPasswordResetView.as_view(),
-        name="password reset",
-    ),
-    path(
-        "reset-password/done/",
-        views.TrackerPasswordResetDoneView.as_view(),
-        name="password reset done",
-    ),
-    path(
-        "reset-password/<str:uidb64>/<str:token>/confirm/",
-        views.TrackerPasswordResetConfirmView.as_view(),
-        name="password reset confirm",
-    ),
-    path(
-        "reset-password/complete/",
-        views.TrackerPasswordResetCompleteView.as_view(),
-        name="password reset complete",
-    ),
     path(
         "payments/list/",
         views.CustomerPaymentMethodListView.as_view(),

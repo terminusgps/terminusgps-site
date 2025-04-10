@@ -9,6 +9,7 @@ os.umask(0)
 secret: dict[str, str] = get_secret("terminusgps-site-live-env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+LOGIN_URL = "/login/"
 ALLOWED_HOSTS = [".terminusgps.com"]
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 CSRF_COOKIE_SECURE = True
@@ -186,6 +187,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.forms",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
+    "terminusgps_install.apps.TerminusgpsInstallConfig",
 ]
 
 MIDDLEWARE = [

@@ -3,15 +3,6 @@ from .assets import (
     CustomerAssetDetailView,
     CustomerAssetListView,
 )
-from .auth import (
-    TrackerLoginView,
-    TrackerLogoutView,
-    TrackerPasswordResetCompleteView,
-    TrackerPasswordResetConfirmView,
-    TrackerPasswordResetDoneView,
-    TrackerPasswordResetView,
-    TrackerRegisterView,
-)
 from .customers import (
     CustomerAccountView,
     CustomerDashboardView,
