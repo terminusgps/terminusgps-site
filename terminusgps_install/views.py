@@ -34,7 +34,7 @@ class InstallDashboardView(
 
 class InstallAssetCreateView(UserIsStaffTestMixin, HtmxTemplateResponseMixin, FormView):
     content_type = "text/html"
-    extra_context = {"title": "Add Asset"}
+    extra_context = {"title": "Add Asset", "class": "flex flex-col gap-4"}
     form_class = WialonAssetCreateForm
     http_method_names = ["get", "post"]
     model = WialonAsset
