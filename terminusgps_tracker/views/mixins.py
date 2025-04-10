@@ -20,9 +20,12 @@ class SubscribedUsersOnlyMixin(UserPassesTestMixin):
     def test_func(self) -> bool:
         try:
             subscribed: Group = Group.objects.get(name="Subscribed")
-            return self.request.user in subscribed.user_set.all()
+            return (
+                self.request.user in subscribed.user_set.all()
+                or self.request.user.is_staff
+            )
         except Group.DoesNotExist:
-            return False
+            return self.request.user.is_staff
 
 
 class HtmxTemplateResponseMixin(TemplateResponseMixin):
