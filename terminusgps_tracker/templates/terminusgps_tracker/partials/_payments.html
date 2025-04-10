@@ -38,7 +38,9 @@
     {% if subscription.authorizenet_id != None %}
     <div class="flex flex-col gap-4">
         <h2 class="text-lg font-semibold text-terminus-red-800 md:text-2xl">Recent Transactions</h2>
-        <div id="subscription-transactions" hx-get="{% url 'subscription transactions' subscription.pk %}" hx-trigger="load" hx-swap="outerHTML"></div>
+        <div class="relative overflow-x-auto">
+            <div id="subscription-transactions" hx-get="{% url 'subscription transactions' subscription.pk %}" hx-trigger="load" hx-swap="outerHTML"></div>
+        </div>
     </div>
     {% endif %}
 </div>

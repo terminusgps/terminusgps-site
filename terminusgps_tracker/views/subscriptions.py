@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.urls import reverse_lazy
+from django.utils.dateparse import parse_datetime
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
@@ -56,9 +57,19 @@ class CustomerSubscriptionTransactionsView(
 
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
-        context["transaction_list"] = (
+        transactions = (
             self.get_object().authorizenet_get_subscription_profile().transactions
         )
+        context["transaction_list"] = [
+            {
+                "response": str(t.response),
+                "submitTimeUTC": parse_datetime(str(t.submitTimeUTC)),
+                "payNum": int(t.payNum),
+                "attemptNum": int(t.attemptNum),
+            }
+            for t in transactions
+            if transactions
+        ]
         return context
 
 
