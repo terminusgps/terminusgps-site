@@ -17,7 +17,9 @@
             </div>
         </div>
     {% endif %}
+        {% if perms.terminusgps_tracker.update_customersubscription or subscription.tier != None %}
         <div class="flex w-full flex-col gap-2">
+            {% if perms.terminusgps_tracker.update_customersubscription %}
             <input
                 class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400 dark:border-terminus-gray-400"
                 type="button"
@@ -25,6 +27,7 @@
                 hx-trigger="click"
                 hx-get="{% url 'update subscription' subscription.pk %}"
             >
+            {% endif %}
             {% if subscription.tier != None %}
             <input
                 class="w-full cursor-pointer rounded border border-red-800 bg-gray-100 p-2 text-red-900 transition-colors duration-300 ease-in-out hover:bg-red-50"
@@ -36,6 +39,7 @@
             >
             {% endif %}
         </div>
+        {% endif %}
         {% if subscription.tier != None %}<p class="text-center text-sm text-gray-500 italic dark:text-gray-300">NOTE: Above subscription price does not include tax.</p>{% endif %}
     </div>
 </div>

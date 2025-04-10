@@ -1,7 +1,7 @@
 from typing import Any
 
 from django import forms
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.urls import reverse_lazy
@@ -99,7 +99,7 @@ class CustomerSubscriptionDetailView(
 
 
 class CustomerSubscriptionUpdateView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, UpdateView
+    PermissionRequiredMixin, HtmxTemplateResponseMixin, UpdateView
 ):
     content_type = "text/html"
     context_object_name = "subscription"
@@ -112,9 +112,10 @@ class CustomerSubscriptionUpdateView(
     login_url = reverse_lazy("login")
     model = CustomerSubscription
     partial_template_name = "terminusgps_tracker/subscriptions/partials/_update.html"
-    permission_denied_message = "Please login in order to view this content."
+    permission_denied_message = "You do not have permission to view this."
     raise_exception = False
     template_name = "terminusgps_tracker/subscriptions/update.html"
+    permission_required = "terminusgps_tracker.update_customersubscription"
 
     def get_form(self, form_class=None) -> forms.ModelForm:
         form = super().get_form(form_class=form_class)
