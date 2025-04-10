@@ -1,5 +1,6 @@
 from typing import Any
 
+from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
@@ -114,6 +115,13 @@ class CustomerSubscriptionUpdateView(
     permission_denied_message = "Please login in order to view this content."
     raise_exception = False
     template_name = "terminusgps_tracker/subscriptions/update.html"
+
+    def get_form(self, form_class=None) -> forms.ModelForm:
+        form = super().get_form(form_class=form_class)
+        form.fields["tier"].widget.choices = [
+            (tier.pk, _(tier.name)) for tier in SubscriptionTier.objects.all()
+        ]
+        return form
 
     def get_object(self, queryset=None) -> CustomerSubscription:
         return CustomerSubscription.objects.get(customer__user=self.request.user)
