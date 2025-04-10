@@ -118,7 +118,6 @@ class CustomerSubscription(models.Model):
     def save(self, **kwargs) -> None:
         if self.authorizenet_id:
             self.authorizenet_refresh_status()
-            self.authorizenet_update_subscription()
         if not self.authorizenet_id and all([self.tier, self.address, self.payment]):
             self.authorizenet_id = self.authorizenet_create_subscription()
             self.authorizenet_refresh_status()

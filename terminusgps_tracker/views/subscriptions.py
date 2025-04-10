@@ -1,7 +1,6 @@
 from typing import Any
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.urls import reverse_lazy
@@ -149,10 +148,23 @@ class CustomerSubscriptionUpdateView(
             return self.form_invalid(form=form)
 
         subscription: CustomerSubscription = self.get_object()
-        subscription.tier = form.cleaned_data["tier"]
-        subscription.address = form.cleaned_data["address"]
-        subscription.payment = form.cleaned_data["payment"]
-        subscription.save()
+        if any(
+            [
+                subscription.tier != form.cleaned_data["tier"],
+                subscription.address != form.cleaned_data["address"],
+                subscription.payment != form.cleaned_data["payment"],
+            ]
+        ):
+            subscription.tier = form.cleaned_data["tier"]
+            subscription.address = form.cleaned_data["address"]
+            subscription.payment = form.cleaned_data["payment"]
+            subscription.save()
+            subscription.authorizenet_update_subscription()
+        else:
+            subscription.tier = form.cleaned_data["tier"]
+            subscription.address = form.cleaned_data["address"]
+            subscription.payment = form.cleaned_data["payment"]
+            subscription.save()
         return super().form_valid(form=form)
 
     def get_success_url(self) -> str:
