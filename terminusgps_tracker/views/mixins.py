@@ -1,12 +1,28 @@
 import typing
 
 from django.conf import settings
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.models import Group
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse
+from django.urls import reverse_lazy
 from django.views.generic.base import ContextMixin, TemplateResponseMixin
 
 if not hasattr(settings, "TRACKER_APP_CONFIG"):
     raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
+
+
+class SubscribedUsersOnlyMixin(UserPassesTestMixin):
+    login_url = reverse_lazy("login")
+    permission_denied_message = "An active subscription is required to access this."
+    raise_exception = False
+
+    def test_func(self) -> bool:
+        try:
+            subscribed: Group = Group.objects.get(name="Subscribed")
+            return self.request.user in subscribed.user_set.all()
+        except Group.DoesNotExist:
+            return False
 
 
 class HtmxTemplateResponseMixin(TemplateResponseMixin):

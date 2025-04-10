@@ -1,6 +1,6 @@
 from typing import Any
 
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import QuerySet
 from django.forms import ValidationError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -15,7 +15,10 @@ from wialon.api import WialonError
 
 from terminusgps_tracker.forms import CustomerAssetCreateForm
 from terminusgps_tracker.models import Customer, CustomerAsset
-from terminusgps_tracker.views.mixins import HtmxTemplateResponseMixin
+from terminusgps_tracker.views.mixins import (
+    HtmxTemplateResponseMixin,
+    SubscribedUsersOnlyMixin,
+)
 
 
 class CustomerAssetListView(LoginRequiredMixin, HtmxTemplateResponseMixin, ListView):
@@ -61,7 +64,7 @@ class CustomerAssetDetailView(
 
 
 class CustomerAssetCreateView(
-    PermissionRequiredMixin, HtmxTemplateResponseMixin, FormView
+    SubscribedUsersOnlyMixin, HtmxTemplateResponseMixin, FormView
 ):
     content_type = "text/html"
     extra_context = {
@@ -71,13 +74,8 @@ class CustomerAssetCreateView(
     context_object_name = "asset"
     form_class = CustomerAssetCreateForm
     http_method_names = ["get", "post"]
-    login_url = reverse_lazy("login")
     partial_template_name = "terminusgps_tracker/assets/partials/_create.html"
-    permission_denied_message = (
-        "An active subscription is required to perform this action."
-    )
     permission_required = "terminusgps_tracker.add_customerasset"
-    raise_exception = False
     template_name = "terminusgps_tracker/assets/create.html"
 
     def get_success_url(self, asset: CustomerAsset | None) -> str:
@@ -120,7 +118,7 @@ class CustomerAssetCreateView(
 
         try:
             with WialonSession() as session:
-                unit_id = get_id_from_imei(imei_number, session)  # Try to get unit id
+                unit_id = get_id_from_imei(imei_number, session)
                 if unit_id is None:
                     form.add_error(
                         "imei_number",
