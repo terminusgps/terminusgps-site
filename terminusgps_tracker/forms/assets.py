@@ -1,11 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
-
-from terminusgps_tracker.validators import (
-    validate_vin_number,
-    validate_wialon_imei_number_available,
-    validate_wialon_unit_name_unique,
-)
+from terminusgps.wialon.validators import validate_vin_number
 
 default_field_class = "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100 bg-white border border-gray-600"
 
@@ -13,14 +8,12 @@ default_field_class = "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-
 class CustomerAssetCreateForm(forms.Form):
     name = forms.CharField(
         label="Asset Name",
-        validators=[validate_wialon_unit_name_unique],
         widget=forms.widgets.TextInput(
             attrs={"class": default_field_class, "placeholder": "My Vehicle"}
         ),
     )
     imei_number = forms.CharField(
         label="IMEI #",
-        validators=[validate_wialon_imei_number_available],
         widget=forms.widgets.TextInput(
             attrs={"class": default_field_class, "placeholder": "867730050855555"}
         ),
@@ -38,6 +31,5 @@ class InstallerAssetCreateForm(forms.Form):
     )
     imei_number = forms.CharField(
         label="IMEI #",
-        validators=[validate_wialon_imei_number_available],
         widget=forms.widgets.TextInput(attrs={"class": default_field_class}),
     )

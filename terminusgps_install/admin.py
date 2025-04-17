@@ -1,6 +1,11 @@
 from django.contrib import admin
 
-from terminusgps_install.models import WialonAccount, WialonAsset
+from terminusgps_install.models import Installer, WialonAccount, WialonAsset
+
+
+@admin.register(Installer)
+class InstallerAdmin(admin.ModelAdmin):
+    list_display = ["wialon_id", "user"]
 
 
 @admin.register(WialonAccount)

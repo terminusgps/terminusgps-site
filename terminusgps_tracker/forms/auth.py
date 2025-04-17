@@ -5,11 +5,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.validators import validate_email
 from django.forms import ValidationError, widgets
 from django.utils.translation import gettext_lazy as _
-
-from terminusgps_tracker.validators import (
-    validate_wialon_password,
-    validate_wialon_user_name_unique,
-)
+from terminusgps.wialon.validators import validate_wialon_password
 
 
 class TrackerEmailVerificationForm(forms.Form):
@@ -46,7 +42,7 @@ class TrackerRegisterForm(UserCreationForm):
         label="Email Address",
         min_length=4,
         max_length=150,
-        validators=[validate_email, validate_wialon_user_name_unique],
+        validators=[validate_email],
         widget=widgets.EmailInput(
             attrs={
                 "class": default_css_class,

@@ -10,7 +10,7 @@ from django.views.generic import DetailView, FormView, ListView
 from terminusgps.wialon import constants
 from terminusgps.wialon.items import WialonResource, WialonUnit, WialonUser
 from terminusgps.wialon.session import WialonSession
-from terminusgps.wialon.utils import get_id_from_imei
+from terminusgps.wialon.utils import get_unit_by_imei
 from wialon.api import WialonError
 
 from terminusgps_tracker.forms import CustomerAssetCreateForm
@@ -118,7 +118,7 @@ class CustomerAssetCreateView(
 
         try:
             with WialonSession() as session:
-                unit_id = get_id_from_imei(imei_number, session)
+                unit_id = get_unit_by_imei(imei_number, session)
                 if unit_id is None:
                     form.add_error(
                         "imei_number",

@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from terminusgps.authorizenet.auth import get_merchant_auth
 from terminusgps.wialon.items import WialonUnitGroup
 from terminusgps.wialon.session import WialonSession
-from terminusgps.wialon.utils import get_id_from_imei, is_unique
+from terminusgps.wialon.utils import get_unit_by_imei, is_unique
 
 
 class WialonValidatorBase:
@@ -48,7 +48,7 @@ class WialonUnitAvailableValidator(WialonValidatorBase):
                 code="invalid",
                 params={"value": value},
             )
-        unit_id: str | None = get_id_from_imei(value, session=self.session)
+        unit_id: str | None = get_unit_by_imei(value, session=self.session)
         if not unit_id:
             raise ValidationError(
                 _("'%(value)s' wasn't found in Wialon."),

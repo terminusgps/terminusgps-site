@@ -26,8 +26,8 @@ class Command(BaseCommand):
             wialon_resources = {
                 item.get("id"): item.get("nm") for item in response.get("items")
             }
-            accounts = [
+            accounts = (
                 WialonAccount.objects.create(wialon_id=id, name=name)
                 for id, name in wialon_resources.items()
-            ]
+            )
             WialonAccount.objects.bulk_create(accounts)

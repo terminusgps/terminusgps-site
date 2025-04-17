@@ -5,7 +5,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.validators import validate_email
 from django.forms import ValidationError, widgets
 from django.utils.translation import gettext_lazy as _
-from terminusgps.validators import validate_wialon_password
+from terminusgps.wialon.validators import validate_wialon_password
 
 
 class TerminusgpsEmailVerificationForm(forms.Form):
