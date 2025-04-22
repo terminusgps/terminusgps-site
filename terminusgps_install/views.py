@@ -14,8 +14,8 @@ from django.views.generic import (
     UpdateView,
 )
 from PIL import Image
-from terminusgps.mixins import HtmxTemplateResponseMixin
-from terminusgps.utils import scan_barcode
+from terminusgps.django.mixins import HtmxTemplateResponseMixin
+from terminusgps.django.utils import scan_barcode
 
 from .forms import VinNumberScanningForm, WialonAssetCreateForm, WialonAssetUpdateForm
 from .models import Installer, WialonAsset

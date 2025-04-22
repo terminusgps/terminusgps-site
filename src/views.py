@@ -1,7 +1,6 @@
 from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Permission
 from django.contrib.auth.views import (
     LoginView,
     LogoutView,
@@ -15,7 +14,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
-from terminusgps.mixins import HtmxTemplateResponseMixin
+from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon import constants
 from terminusgps.wialon.items import WialonResource, WialonUser
 from terminusgps.wialon.session import WialonSession
@@ -139,18 +138,13 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     ) -> HttpResponse | HttpResponseRedirect:
         try:
             ids = self.wialon_registration_flow(form)
-            customer = Customer.objects.create(
+            Customer.objects.create(
                 user=get_user_model().objects.create_user(
                     username=form.cleaned_data["username"],
                     password=form.cleaned_data["password1"],
                 ),
                 wialon_user_id=ids.get("end_user_id"),
                 wialon_resource_id=ids.get("resource_id"),
-            )
-            customer.user.user_permissions.add(
-                Permission.objects.get(
-                    codename="terminusgps_tracker.update_customersubscription"
-                )
             )
         except WialonError as e:
             form.add_error(

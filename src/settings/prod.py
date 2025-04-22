@@ -7,6 +7,7 @@ from terminusgps.aws.secrets import get_secret
 
 os.umask(0)
 secret: dict[str, str] = get_secret("terminusgps-site-live-env")
+db_secret: dict[str, str] = get_secret("rds!db-90c204bb-fdaf-483f-9305-66a13050cf3e")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 LOGIN_URL = "/login/"
@@ -220,7 +221,15 @@ TEMPLATES = [
 WSGI_APPLICATION = "src.wsgi.application"
 
 DATABASES = {
-    "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": db_secret.get("username"),
+        "HOST": "terminusgps-db-1.cl0u0gis0s3x.us-east-1.rds.amazonaws.com",
+        "USER": db_secret.get("username"),
+        "PASSWORD": db_secret.get("password"),
+        "PORT": 5432,
+        "OPTIONS": {"client_encoding": "UTF8"},
+    }
 }
 
 AUTH_PASSWORD_VALIDATORS = [
