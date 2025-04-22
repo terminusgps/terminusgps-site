@@ -22,7 +22,7 @@ dependencies = [
     "numpy==2.0.1",
     "pandas==2.2.3",
     "pillow==10.4.0",
-    "python-terminusgps==31.7.2",
+    "python-terminusgps==32.0.0",
     "python-wialon==1.2.4",
     "django-otp>=1.6.0",
     "pyotp>=2.9.0",

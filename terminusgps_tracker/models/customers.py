@@ -16,9 +16,9 @@ class Customer(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
     """A Django user."""
     email_verified = models.BooleanField(default=False)
-    """Whether or not the user has completed email verification."""
+    """Whether or not the customer has completed email verification."""
     email_otp = models.CharField(max_length=6, null=True, blank=True)
-    """Email one-time password."""
+    """An email one-time password."""
     authorizenet_id = models.PositiveIntegerField(null=True, blank=True, default=None)
     """An Authorizenet customer profile id."""
     wialon_user_id = models.PositiveIntegerField(null=True, blank=True, default=None)
@@ -32,6 +32,7 @@ class Customer(models.Model):
         return self.user.username
 
     def save(self, **kwargs) -> None:
+        """Retrieves and/or creates an Authorizenet customer profile for the customer."""
         if not self.authorizenet_id:
             customer_profile = CustomerProfile(
                 merchant_id=self.user.pk,
