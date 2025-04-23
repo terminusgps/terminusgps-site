@@ -10,30 +10,23 @@ secret: dict[str, str] = get_secret("terminusgps-site-live-env")
 db_secret: dict[str, str] = get_secret("rds!db-90c204bb-fdaf-483f-9305-66a13050cf3e")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-LOGIN_URL = "/login/"
-ALLOWED_HOSTS = [".terminusgps.com"]
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+
+ALLOWED_HOSTS = [".terminusgps.com"]
 CSRF_COOKIE_SECURE = True
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FROM_EMAIL = "support@terminusgps.com"
-DEFAULT_TAX_RATE = decimal.Decimal(
-    secret.get("DEFAULT_TAX_RATE", "0.0825"),
-    context=decimal.Context(prec=4, rounding=decimal.ROUND_HALF_UP),
-)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
-EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")
-EMAIL_HOST_USER = secret.get("EMAIL_HOST_USER")
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 INTERNAL_IPS = ["127.0.0.1", "0.0.0.0"]
 LANGUAGE_CODE = "en-us"
+LOGIN_URL = "/login/"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
-MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
-MERCHANT_AUTH_TRANSACTION_KEY = secret.get("MERCHANT_AUTH_TRANSACTION_KEY")
-SECRET_KEY = secret.get("SECRET_KEY")
+ROOT_URLCONF = "src.urls"
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = True
@@ -42,19 +35,31 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = "/var/www/terminusgps-site/static/"
 STATIC_URL = "/static/"
 TIME_ZONE = "America/Chicago"
+USE_I18N = True
+USE_TZ = True
+WSGI_APPLICATION = "src.wsgi.application"
+
+# Secret values
+DEFAULT_TAX_RATE = decimal.Decimal(
+    secret.get("DEFAULT_TAX_RATE", "0.0825"),
+    context=decimal.Context(prec=4, rounding=decimal.ROUND_HALF_UP),
+)
+EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_USER = secret.get("EMAIL_HOST_USER")
+MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
+MERCHANT_AUTH_TRANSACTION_KEY = secret.get("MERCHANT_AUTH_TRANSACTION_KEY")
+SECRET_KEY = secret.get("SECRET_KEY")
+TRACKER_ENCRYPTION_KEY = secret.get("TRACKER_ENCRYPTION_KEY")
 TWILIO_FROM_NUMBER = secret.get("TWILIO_FROM_NUMBER")
 TWILIO_MESSAGING_SID = secret.get("TWILIO_MESSAGING_SID")
 TWILIO_SID = secret.get("TWILIO_SID")
 TWILIO_TOKEN = secret.get("TWILIO_TOKEN")
-USE_I18N = True
-USE_TZ = True
 WIALON_ADMIN_ID = secret.get("WIALON_ADMIN_ID")
+WIALON_DEFAULT_PLAN = secret.get("WIALON_DEFAULT_PLAN")
 WIALON_HOST = secret.get("WIALON_HOST")
+WIALON_SESSION_LOGLEVEL = logging.WARNING
 WIALON_TOKEN = secret.get("WIALON_TOKEN")
 WIALON_UNACTIVATED_GROUP = secret.get("WIALON_UNACTIVATED_GROUP")
-WIALON_DEFAULT_PLAN = secret.get("WIALON_DEFAULT_PLAN")
-WIALON_SESSION_LOGLEVEL = logging.WARNING
-TRACKER_ENCRYPTION_KEY = secret.get("TRACKER_ENCRYPTION_KEY")
 
 TRACKER_APP_CONFIG = {
     "DISPLAY_NAME": "Terminus GPS",
@@ -143,11 +148,6 @@ TRACKER_APP_CONFIG = {
             },
         },
     ],
-    "SUBSCRIPTIONS": [
-        {"NAME": "Basic", "OPTIONS": {"cmd": "Basic", "amount": "19.99"}},
-        {"NAME": "Standard", "OPTIONS": {"cmd": "Standard", "amount": "29.99"}},
-        {"NAME": "Premium", "OPTIONS": {"cmd": "Premium", "amount": "39.99"}},
-    ],
 }
 
 LOGGING = {
@@ -201,7 +201,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "src.urls"
 
 TEMPLATES = [
     {
@@ -218,7 +217,6 @@ TEMPLATES = [
     }
 ]
 
-WSGI_APPLICATION = "src.wsgi.application"
 
 DATABASES = {
     "default": {

@@ -76,5 +76,6 @@ skip-magic-trailing-comma = true
 
 [dependency-groups]
 dev = [
+    "certifi>=2025.1.31",
     "django-browser-reload>=1.18.0",
 ]
