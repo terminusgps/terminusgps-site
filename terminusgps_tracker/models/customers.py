@@ -44,9 +44,16 @@ class Customer(models.Model):
         super().save(**kwargs)
 
     def authorizenet_get_customer_profile(self) -> CustomerProfile:
-        """Returns a :py:obj:`~terminusgps.authorizenet.profiles.CustomerProfile` for the customer."""
+        """
+        Returns a customer profile for the customer.
+
+        :raises AssertionError: If :py:attr:`authorizenet_id` wasn't set.
+        :returns: A customer profile object.
+        :rtype: :py:obj:`~terminusgps.authorizenet.profiles.customers.CustomerProfile`
+
+        """
         assert self.authorizenet_id is not None, "'authorizenet_id' wasn't set."
-        return CustomerProfile(merchant_id=self.user.pk, id=self.authorizenet_id)
+        return CustomerProfile(self.authorizenet_id)
 
     def generate_email_otp(self, duration: int = 500) -> str:
         """

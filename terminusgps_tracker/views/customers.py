@@ -17,7 +17,7 @@ from django.views.generic import (
     ListView,
     TemplateView,
 )
-from terminusgps.authorizenet.errors import ControllerExecutionError
+from terminusgps.authorizenet.controllers import AuthorizenetControllerExecutionError
 from terminusgps.authorizenet.profiles import AddressProfile, PaymentProfile
 from terminusgps.authorizenet.utils import (
     generate_customer_address,
@@ -194,7 +194,7 @@ class CustomerShippingAddressCreateView(
                 authorizenet_id=int(address_profile.id),
             )
             return super().form_valid(form=form)
-        except ControllerExecutionError as e:
+        except AuthorizenetControllerExecutionError as e:
             form.add_error(
                 None,
                 ValidationError(
@@ -357,18 +357,16 @@ class CustomerPaymentMethodCreateView(
 
             if form.cleaned_data["create_shipping_address"]:
                 address_profile = AddressProfile(
-                    merchant_id=customer.user.pk,
                     customer_profile_id=customer.authorizenet_id,
                     default=form.cleaned_data["default"],
-                    id=None,
-                    address=address_obj,
                 )
+                address_profile.id = address_profile.create(address_obj)
                 CustomerShippingAddress.objects.create(
                     customer=customer,
                     default=form.cleaned_data["default"],
                     authorizenet_id=int(address_profile.id),
                 )
-        except ControllerExecutionError as e:
+        except AuthorizenetControllerExecutionError as e:
             form.add_error(
                 None,
                 ValidationError(
