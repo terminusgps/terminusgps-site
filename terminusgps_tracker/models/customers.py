@@ -44,9 +44,16 @@ class Customer(models.Model):
         super().save(**kwargs)
 
     def authorizenet_get_customer_profile(self) -> CustomerProfile:
-        """Returns a :py:obj:`~terminusgps.authorizenet.profiles.CustomerProfile` for the customer."""
+        """
+        Returns a customer profile for the customer.
+
+        :raises AssertionError: If :py:attr:`authorizenet_id` wasn't set.
+        :returns: A customer profile object.
+        :rtype: :py:obj:`~terminusgps.authorizenet.profiles.customers.CustomerProfile`
+
+        """
         assert self.authorizenet_id is not None, "'authorizenet_id' wasn't set."
-        return CustomerProfile(merchant_id=self.user.pk, id=self.authorizenet_id)
+        return CustomerProfile(self.authorizenet_id)
 
     def generate_email_otp(self, duration: int = 500) -> str:
         """
@@ -63,7 +70,7 @@ class Customer(models.Model):
     @transaction.atomic
     def authorizenet_sync_payment_profiles(self) -> None:
         customer_profile: CustomerProfile = self.authorizenet_get_customer_profile()
-        payment_ids: set[int] = set(customer_profile.payment_profile_ids)
+        payment_ids: set[int] = set(customer_profile.get_payment_profile_ids())
         for profile_id in payment_ids.difference(
             list(self.payments.all().values_list("authorizenet_id", flat=True))
         ):
@@ -74,7 +81,7 @@ class Customer(models.Model):
     @transaction.atomic
     def authorizenet_sync_address_profiles(self) -> None:
         customer_profile: CustomerProfile = self.authorizenet_get_customer_profile()
-        address_ids: set[int] = set(customer_profile.address_profile_ids)
+        address_ids: set[int] = set(customer_profile.get_address_profile_ids())
         for profile_id in address_ids.difference(
             list(self.addresses.all().values_list("authorizenet_id", flat=True))
         ):
@@ -223,7 +230,6 @@ class CustomerPaymentMethod(models.Model):
         """
         assert self.customer.authorizenet_id, "Customer profile id wasn't set."
         return PaymentProfile(
-            merchant_id=self.customer.user.pk,
             customer_profile_id=self.customer.authorizenet_id,
             id=self.authorizenet_id,
             default=self.default,
@@ -272,7 +278,6 @@ class CustomerShippingAddress(models.Model):
         """
         assert self.customer.authorizenet_id, "Customer profile id wasn't set."
         return AddressProfile(
-            merchant_id=self.customer.user.pk,
             customer_profile_id=self.customer.authorizenet_id,
             id=self.authorizenet_id,
             default=self.default,
