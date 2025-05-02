@@ -14,6 +14,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
+from terminusgps.authorizenet.profiles import CustomerProfile
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon import constants
 from terminusgps.wialon.items import WialonResource, WialonUser
@@ -138,7 +139,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     ) -> HttpResponse | HttpResponseRedirect:
         try:
             ids = self.wialon_registration_flow(form)
-            Customer.objects.create(
+            customer = Customer.objects.create(
                 user=get_user_model().objects.create_user(
                     username=form.cleaned_data["username"],
                     password=form.cleaned_data["password1"],
@@ -146,6 +147,9 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
                 wialon_user_id=ids.get("end_user_id"),
                 wialon_resource_id=ids.get("resource_id"),
             )
+            customer.authorizenet_id = CustomerProfile(
+                email=form.cleaned_data["username"], merchant_id=customer.pk
+            ).id
         except WialonError as e:
             form.add_error(
                 None,

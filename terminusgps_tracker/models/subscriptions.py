@@ -48,9 +48,9 @@ class SubscriptionFeature(models.Model):
     """An amount for the feature."""
 
     def __str__(self) -> str:
-        if not self.amount:
-            return self.name
-        return f"{self.get_amount_display()} {self.name}"
+        if self.amount is not None:
+            return f"{self.get_amount_display()} {self.name}"
+        return self.name
 
 
 class CustomerSubscription(models.Model):

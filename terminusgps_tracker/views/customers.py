@@ -181,17 +181,15 @@ class CustomerShippingAddressCreateView(
             customer: Customer = Customer.objects.get(user=self.request.user)
             address_obj: customerAddressType = generate_customer_address(form)
             address_profile: AddressProfile = AddressProfile(
-                merchant_id=customer.user.pk,
                 customer_profile_id=customer.authorizenet_id,
                 default=form.cleaned_data["default"],
                 id=None,
-                address=address_obj,
             )
 
             CustomerShippingAddress.objects.create(
                 customer=customer,
                 default=form.cleaned_data["default"],
-                authorizenet_id=int(address_profile.id),
+                authorizenet_id=address_profile.create(address_obj),
             )
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
@@ -344,18 +342,17 @@ class CustomerPaymentMethodCreateView(
             address_obj: customerAddressType = generate_customer_address(form)
             payment_obj: paymentType = generate_customer_payment(form)
             payment_profile = PaymentProfile(
-                merchant_id=customer.user.pk,
                 customer_profile_id=customer.authorizenet_id,
                 default=form.cleaned_data["default"],
                 id=None,
-                address=address_obj,
-                payment=payment_obj,
             )
 
             CustomerPaymentMethod.objects.create(
                 customer=customer,
                 default=form.cleaned_data["default"],
-                authorizenet_id=int(payment_profile.id),
+                authorizenet_id=payment_profile.create(
+                    address=address_obj, payment=payment_obj
+                ),
             )
 
             if form.cleaned_data["create_shipping_address"]:
