@@ -7,7 +7,6 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from terminusgps.authorizenet.profiles import SubscriptionProfile
 
@@ -140,17 +139,19 @@ class CustomerSubscription(models.Model):
         return reverse("detail subscription", kwargs={"pk": self.pk})
 
     def calculate_amount_plus_tax(self) -> decimal.Decimal:
-        """Returns the amount + tax for the subscription."""
+        """Returns the amount + tax for the subscription as a :py:obj:`~decimal.Decimal`."""
         return round(
             self.tier.amount + (self.tier.amount * settings.DEFAULT_TAX_RATE), ndigits=2
         )
 
     def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
+        """Cancels the subscription in Authorizenet if necessary before deleting the object."""
         if self.authorizenet_id and self.status != self.SubscriptionStatus.CANCELED:
             self.authorizenet_cancel_subscription()
         return super().delete(*args, **kwargs)
 
     def clean(self) -> None:
+        """Ensures :py:attr:`address` and :py:attr:`payments` are exclusive to the customer."""
         if self.address and self.address.customer.pk != self.customer.pk:
             raise ValidationError(
                 {
@@ -164,21 +165,22 @@ class CustomerSubscription(models.Model):
                 }
             )
 
-    def authorizenet_update_subscription(self) -> None:
+    def _generate_subscription_obj(self) -> apicontractsv1.ARBSubscriptionType:
         """
-        Updates the subscription in Authorizenet.
+        Generates a :py:obj:`~authorizenet.apicontractsv1.ARBSubscriptionType` object based on the subscription for Authorizenet API calls.
 
-        :raises AssertionError: If :py:attr:`authorizenet_id` wasn't set.
-        :raises ControllerExecutionError: If something goes wrong with an Authorizenet API call.
-        :returns: Nothing.
-        :rtype: :py:obj:`None`
+        :raises AssertionError: If :py:attr:`address.authorizenet_id` wasn't set.
+        :raises AssertionError: If :py:attr:`payment.authorizenet_id` wasn't set.
+        :raises AssertionError: If :py:attr:`tier` wasn't set.
+        :returns: An Authorizenet subscription object.
+        :rtype: :py:obj:`~authorizenet.apicontractsv1.ARBSubscriptionType`
 
         """
-        assert self.authorizenet_id, "Authorizenet id was not set"
-        subscription_profile: SubscriptionProfile = (
-            self.authorizenet_get_subscription_profile()
-        )
-        params = apicontractsv1.ARBSubscriptionType(
+        assert self.address.authorizenet_id, "Address id wasn't set."
+        assert self.payment.authorizenet_id, "Payment id wasn't set."
+        assert self.tier, "Subscription tier wasn't set."
+
+        return apicontractsv1.ARBSubscriptionType(
             name=f"{self.tier.name} Subscription",
             amount=self.calculate_amount_plus_tax(),
             profile=apicontractsv1.customerProfileIdType(
@@ -187,20 +189,39 @@ class CustomerSubscription(models.Model):
                 customerAddressId=str(self.address.authorizenet_id),
             ),
         )
-        subscription_profile.update(params)
+
+    def authorizenet_update_subscription(self) -> None:
+        """
+        Updates the subscription in Authorizenet.
+
+        :raises AssertionError: If :py:attr:`address.authorizenet_id` wasn't set.
+        :raises AssertionError: If :py:attr:`payment.authorizenet_id` wasn't set.
+        :raises AssertionError: If :py:attr:`tier` wasn't set.
+        :raises AuthorizenetControllerExecutionError: If something goes wrong with an Authorizenet API call.
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
+        assert self.address.authorizenet_id, "Address id was not set."
+        assert self.payment.authorizenet_id, "Payment id was not set."
+        assert self.tier, "Subscription tier wasn't set."
+
+        if self.authorizenet_id:
+            subscription_profile = self.authorizenet_get_subscription_profile()
+            subscription_profile.update(self._generate_subscription_obj())
 
     def authorizenet_cancel_subscription(self) -> None:
         """
         Cancels a subscription in Authorizenet.
 
-        :raises AssertionError: If :py:attr:`authorizenet_id` wasn't set.
-        :raises ControllerExecutionError: If something goes wrong with an Authorizenet API call.
+        :raises AuthorizenetControllerExecutionError: If something goes wrong with an Authorizenet API call.
         :returns: Nothing.
         :rtype: :py:obj:`None`
 
         """
-        assert self.authorizenet_id, "Authorizenet id was not set"
-        self.authorizenet_get_subscription_profile().cancel()
+        if self.authorizenet_id:
+            subscription_profile = self.authorizenet_get_subscription_profile()
+            subscription_profile.cancel()
 
     @transaction.atomic
     def authorizenet_refresh_status(self) -> None:
@@ -208,59 +229,53 @@ class CustomerSubscription(models.Model):
         Refreshes the subscription status from Authorizenet.
 
         :raises AssertionError: If :py:attr:`authorizenet_id` wasn't set.
-        :raises ControllerExecutionError: If something goes wrong with an Authorizenet API call.
+        :raises AuthorizenetControllerExecutionError: If something goes wrong with an Authorizenet API call.
         :returns: Nothing.
         :rtype: :py:obj:`None`
 
         """
-        assert self.authorizenet_id, "Authorizenet id was not set"
-        new_status: str | None = self.authorizenet_get_subscription_profile().status
-        if new_status is not None:
-            self.status = new_status
+        if self.authorizenet_id:
+            self.status = self.authorizenet_get_subscription_profile().status
 
     def authorizenet_create_subscription(self) -> int:
         """
         Creates a subscription in Authorizenet.
 
-        :raises AssertionError: If :py:attr:`payment.authorizenet_id` wasn't set.
         :raises AssertionError: If :py:attr:`address.authorizenet_id` wasn't set.
-        :raises ControllerExecutionError: If something goes wrong with an Authorizenet API call.
+        :raises AssertionError: If :py:attr:`payment.authorizenet_id` wasn't set.
+        :raises AssertionError: If :py:attr:`tier` wasn't set.
+        :raises AuthorizenetControllerExecutionError: If something goes wrong with an Authorizenet API call.
         :returns: An Authorizenet subscription id.
         :rtype: :py:obj:`int`
 
         """
-        assert self.payment.authorizenet_id, "Payment id was not set."
         assert self.address.authorizenet_id, "Address id was not set."
+        assert self.payment.authorizenet_id, "Payment id was not set."
+        assert self.tier, "Subscription tier wasn't set."
 
-        sub_obj = apicontractsv1.ARBSubscriptionType(
-            name=f"{self.tier.name} Subscription",
-            amount=self.calculate_amount_plus_tax(),
-            schedule=self.generate_payment_schedule(timezone.now()),
-            profile=apicontractsv1.customerProfileIdType(
-                customerProfileId=str(self.customer.authorizenet_id),
-                customerPaymentProfileId=str(self.payment.authorizenet_id),
-                customerAddressId=str(self.address.authorizenet_id),
-            ),
-        )
         subscription_profile = SubscriptionProfile(
             customer_profile_id=self.customer.authorizenet_id
         )
-        return subscription_profile.create(sub_obj)
+        return subscription_profile.create(self._generate_subscription_obj())
 
     def authorizenet_get_subscription_profile(self) -> SubscriptionProfile:
         """
         Returns the Authorizenet subscription profile for the subscription.
 
         :raises AssertionError: If :py:attr:`authorizenet_id` wasn't set.
-        :raises ControllerExecutionError: If something goes wrong with an Authorizenet API call.
+        :raises AssertionError: If :py:attr:`customer.authorizenet_id` wasn't set.
+        :raises AuthorizenetControllerExecutionError: If something goes wrong with an Authorizenet API call.
         :returns: A subscription profile.
         :rtype: :py:obj:`~terminusgps.authorizenet.profiles.SubscriptionProfile`
 
         """
         assert self.authorizenet_id, "Authorizenet id was not set."
-        return SubscriptionProfile(
-            customer_profile_id=self.customer.authorizenet_id, id=self.authorizenet_id
+        assert self.customer.authorizenet_id, (
+            "Customer profile authorizenet id was not set."
         )
+
+        profile_id, sub_id = self.customer.authorizenet_id, self.authorizenet_id
+        return SubscriptionProfile(customer_profile_id=profile_id, id=sub_id)
 
     def generate_monthly_payment_interval(
         self,
