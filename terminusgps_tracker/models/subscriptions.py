@@ -232,15 +232,20 @@ class CustomerSubscription(models.Model):
         assert self.payment.authorizenet_id, "Payment id was not set."
         assert self.address.authorizenet_id, "Address id was not set."
 
-        subscription_profile: SubscriptionProfile = SubscriptionProfile(
+        sub_obj = apicontractsv1.ARBSubscriptionType(
             name=f"{self.tier.name} Subscription",
             amount=self.calculate_amount_plus_tax(),
             schedule=self.generate_payment_schedule(timezone.now()),
-            profile_id=self.customer.authorizenet_id,
-            payment_id=self.payment.authorizenet_id,
-            address_id=self.address.authorizenet_id,
+            profile=apicontractsv1.customerProfileIdType(
+                customerProfileId=str(self.customer.authorizenet_id),
+                customerPaymentProfileId=str(self.payment.authorizenet_id),
+                customerAddressId=str(self.address.authorizenet_id),
+            ),
         )
-        return int(subscription_profile.id)
+        subscription_profile = SubscriptionProfile(
+            customer_profile_id=self.customer.authorizenet_id
+        )
+        return subscription_profile.create(sub_obj)
 
     def authorizenet_get_subscription_profile(self) -> SubscriptionProfile:
         """
