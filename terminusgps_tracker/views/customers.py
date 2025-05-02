@@ -275,7 +275,10 @@ class CustomerShippingAddressDetailView(
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context: dict[str, Any] = super().get_context_data(**kwargs)
         context["profile"] = (
-            self.get_object().authorizenet_get_address_profile().get_details().address
+            self.get_object()
+            .authorizenet_get_address_profile()
+            ._authorizenet_get_shipping_address()
+            .address
         )
         return context
 
@@ -437,7 +440,7 @@ class CustomerPaymentMethodDetailView(
         context["profile"] = (
             self.get_object()
             .authorizenet_get_payment_profile()
-            .get_details()
+            ._authorizenet_get_payment_profile()
             .paymentProfile
         )
         return context

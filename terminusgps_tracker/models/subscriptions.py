@@ -253,7 +253,9 @@ class CustomerSubscription(models.Model):
 
         """
         assert self.authorizenet_id, "Authorizenet id was not set."
-        return SubscriptionProfile(id=self.authorizenet_id)
+        return SubscriptionProfile(
+            customer_profile_id=self.customer.authorizenet_id, id=self.authorizenet_id
+        )
 
     def generate_monthly_payment_interval(
         self,
