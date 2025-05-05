@@ -1,21 +1,9 @@
 from typing import Any
 
-from django.conf import settings
 from django.template import Library
-from django.utils import timezone
 from django.utils.safestring import SafeString, mark_safe
 
 register = Library()
-
-
-@register.inclusion_tag("terminusgps_tracker/map.html")
-def render_map(
-    x: int, y: int, zoom: int = 2, density: int = 256 * 256
-) -> dict[str, str]:
-    filename = f"{timezone.now():%m%d%y%H%M}"
-    uid = settings.WIALON_ADMIN_ID
-    url = f"https://hst-api.wialon.com/gis_render/{x}_{y}_{zoom}/{uid}/{filename}.png?density={density}"
-    return {}
 
 
 @register.filter(name="credit_card_icon")

@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-8">
         <div class="flex justify-between gap-2">
             {% with customer.payments.all|length as num_payments %}
-            <a class="relative flex w-full flex-row items-center rounded border bg-gray-300 p-4 transition-colors duration-300 ease-in-out hover:bg-gray-100 md:flex-col gap-2" href="{% url 'tracker:payments' %}#payments">
+            <a class="relative flex w-full flex-row items-center rounded border bg-gray-300 p-4 transition-colors duration-300 ease-in-out hover:bg-gray-100 md:flex-col gap-2 dark:bg-gray-500 dark:hover:bg-gray-600" href="{% url 'tracker:payments' %}#payments">
                 {% if num_payments == 0 %}<div class="absolute -top-2 -right-2 z-0 flex h-8 w-8 animate-ping items-center justify-center rounded-full border border-red-400 bg-red-600 text-white select-none"></div>{% endif %}
                 <div class="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full border border-red-400 bg-red-600 text-white select-none">{{ customer.payments.all|length }}</div>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -12,7 +12,7 @@
             </a>
             {% endwith %}
             {% with customer.addresses.all|length as num_addresses %}
-            <a class="relative flex w-full flex-row items-center rounded border bg-gray-300 p-4 transition-colors duration-300 ease-in-out hover:bg-gray-100 md:flex-col gap-2" href="{% url 'tracker:payments' %}#addresses">
+            <a class="relative flex w-full flex-row items-center rounded border bg-gray-300 p-4 transition-colors duration-300 ease-in-out hover:bg-gray-100 md:flex-col gap-2 dark:bg-gray-500 dark:hover:bg-gray-600" href="{% url 'tracker:payments' %}#addresses">
                 {% if num_addresses == 0 %}<div class="absolute -top-2 -right-2 z-0 flex h-8 w-8 animate-ping items-center justify-center rounded-full border border-red-400 bg-red-600 text-white select-none"></div>{% endif %}
                 <div class="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full border border-red-400 bg-red-600 text-white select-none">{{ customer.addresses.all|length }}</div>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
