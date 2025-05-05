@@ -25,7 +25,7 @@
                 type="button"
                 value="Update"
                 hx-trigger="click"
-                hx-get="{% url 'update subscription' subscription.pk %}"
+                hx-get="{% url 'tracker:update subscription' subscription.pk %}"
             >
             {% endif %}
             {% if subscription.tier != None %}
@@ -34,7 +34,7 @@
                 type="button"
                 value="Cancel"
                 hx-trigger="click"
-                hx-get="{% url 'cancel subscription' subscription.pk %}"
+                hx-get="{% url 'tracker:cancel subscription' subscription.pk %}"
                 hx-swap="innerHTML"
             >
             {% endif %}

@@ -1,5 +1,5 @@
 {% for address in address_list %}
-<div id="address-{{ address.pk }}" hx-indicator="#addresses-spinner" hx-get="{% url 'detail address' address.pk %}" hx-target="this" hx-trigger="load" hx-swap="outerHTML"></div>
+<div id="address-{{ address.pk }}" hx-indicator="#addresses-spinner" hx-get="{% url 'tracker:detail address' address.pk %}" hx-target="this" hx-trigger="load" hx-swap="outerHTML"></div>
 {% empty %}
 <div class="rounded border border-orange-300 bg-orange-50 p-4 text-orange-800 drop-shadow">
     <div class="flex-inline flex items-center gap-2">

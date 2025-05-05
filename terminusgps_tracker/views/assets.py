@@ -7,6 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView
+from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon import constants
 from terminusgps.wialon.items import WialonResource, WialonUnit, WialonUser
 from terminusgps.wialon.session import WialonSession
@@ -15,10 +16,6 @@ from wialon.api import WialonError
 
 from terminusgps_tracker.forms import CustomerAssetCreateForm
 from terminusgps_tracker.models import Customer, CustomerAsset
-from terminusgps_tracker.views.mixins import (
-    HtmxTemplateResponseMixin,
-    SubscribedUsersOnlyMixin,
-)
 
 
 class CustomerAssetListView(LoginRequiredMixin, HtmxTemplateResponseMixin, ListView):
@@ -63,9 +60,7 @@ class CustomerAssetDetailView(
         return super().get_queryset().filter(customer=customer)
 
 
-class CustomerAssetCreateView(
-    SubscribedUsersOnlyMixin, HtmxTemplateResponseMixin, FormView
-):
+class CustomerAssetCreateView(HtmxTemplateResponseMixin, FormView):
     content_type = "text/html"
     extra_context = {
         "title": "Register Asset",

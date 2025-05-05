@@ -2,17 +2,18 @@ import pyotp
 from django.contrib.auth import get_user_model
 from django.db import models, transaction
 from django.urls import reverse
-from django.utils import timezone
 from terminusgps.authorizenet.profiles import (
     AddressProfile,
     CustomerProfile,
     PaymentProfile,
 )
-from terminusgps.wialon.items import WialonResource, WialonUnit, WialonUser
+from terminusgps.wialon.items import WialonResource
 from terminusgps.wialon.session import WialonSession
 
 
 class Customer(models.Model):
+    """A customer."""
+
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
     """A Django user."""
     email_verified = models.BooleanField(default=False)
@@ -29,31 +30,15 @@ class Customer(models.Model):
     """A Wialon resource id."""
 
     def __str__(self) -> str:
+        """Returns the customer's username (an email address)."""
         return self.user.username
 
     def save(self, **kwargs) -> None:
         """Retrieves and/or creates an Authorizenet customer profile for the customer."""
         if not self.authorizenet_id:
-            customer_profile = CustomerProfile(
-                merchant_id=self.user.pk,
-                id=None,
-                email=self.user.username,
-                desc=f"{timezone.now():%Y-%m-%d %H:%M:%S}: Created by the Terminus GPS Tracker application",
-            )
-            self.authorizenet_id = customer_profile.id
+            customer_profile: CustomerProfile = self.authorizenet_get_customer_profile()
+            self.authorizenet_id = int(customer_profile.id)
         super().save(**kwargs)
-
-    def authorizenet_get_customer_profile(self) -> CustomerProfile:
-        """
-        Returns a customer profile for the customer.
-
-        :raises AssertionError: If :py:attr:`authorizenet_id` wasn't set.
-        :returns: A customer profile object.
-        :rtype: :py:obj:`~terminusgps.authorizenet.profiles.customers.CustomerProfile`
-
-        """
-        assert self.authorizenet_id is not None, "'authorizenet_id' wasn't set."
-        return CustomerProfile(self.authorizenet_id)
 
     def generate_email_otp(self, duration: int = 500) -> str:
         """
@@ -67,12 +52,25 @@ class Customer(models.Model):
         """
         return pyotp.TOTP(pyotp.random_base32(), interval=duration).now()
 
+    def authorizenet_get_customer_profile(self) -> CustomerProfile:
+        """
+        Returns a customer profile for the customer.
+
+        :returns: A customer profile object.
+        :rtype: :py:obj:`~terminusgps.authorizenet.profiles.customers.CustomerProfile`
+
+        """
+        if self.authorizenet_id:
+            return CustomerProfile(id=self.authorizenet_id)
+        return CustomerProfile(merchant_id=self.user.pk, email=self.user.username)
+
     @transaction.atomic
     def authorizenet_sync_payment_profiles(self) -> None:
+        """Creates :model:`terminusgps_tracker.CustomerPaymentMethod` objects for each payment profile present in Authorizenet but missing locally."""
         customer_profile: CustomerProfile = self.authorizenet_get_customer_profile()
         payment_ids: set[int] = set(customer_profile.get_payment_profile_ids())
         for profile_id in payment_ids.difference(
-            list(self.payments.all().values_list("authorizenet_id", flat=True))
+            self.payments.all().values_list("authorizenet_id", flat=True)
         ):
             CustomerPaymentMethod.objects.create(
                 customer=self, authorizenet_id=profile_id
@@ -80,28 +78,15 @@ class Customer(models.Model):
 
     @transaction.atomic
     def authorizenet_sync_address_profiles(self) -> None:
+        """Creates :model:`terminusgps_tracker.CustomerShippingAddress` objects for each address profile present in Authorizenet but missing locally."""
         customer_profile: CustomerProfile = self.authorizenet_get_customer_profile()
         address_ids: set[int] = set(customer_profile.get_address_profile_ids())
         for profile_id in address_ids.difference(
-            list(self.addresses.all().values_list("authorizenet_id", flat=True))
+            self.addresses.all().values_list("authorizenet_id", flat=True)
         ):
             CustomerShippingAddress.objects.create(
                 customer=self, authorizenet_id=profile_id
             )
-
-    def wialon_get_username(self, session: WialonSession) -> str | None:
-        """
-        Returns the customer's Wialon user username.
-
-        :param session: A valid Wialon API session.
-        :type session: :py:obj:`~terminusgps.wialon.session.WialonSession`
-        :returns: The customer's Wialon user username, if it exists.
-        :rtype: :py:obj:`str` | :py:obj:`None`
-
-        """
-        if self.wialon_user_id:
-            user = WialonUser(id=self.wialon_user_id, session=session)
-            return user.name
 
     def wialon_disable_account(self, session: WialonSession) -> None:
         """
@@ -114,10 +99,8 @@ class Customer(models.Model):
         :rtype: :py:obj:`None`
 
         """
-        if self.wialon_resource_id:
-            resource: WialonResource = WialonResource(
-                id=self.wialon_resource_id, session=session
-            )
+        if self.wialon_resource_id is not None:
+            resource = WialonResource(self.wialon_resource_id, session=session)
             if resource.is_account:
                 resource.disable_account()
 
@@ -132,15 +115,15 @@ class Customer(models.Model):
         :rtype: :py:obj:`None`
 
         """
-        if self.wialon_resource_id:
-            resource: WialonResource = WialonResource(
-                id=self.wialon_resource_id, session=session
-            )
+        if self.wialon_resource_id is not None:
+            resource = WialonResource(self.wialon_resource_id, session=session)
             if resource.is_account:
                 resource.enable_account()
 
 
 class CustomerAsset(models.Model):
+    """A customer Wialon unit."""
+
     customer = models.ForeignKey(
         "terminusgps_tracker.Customer", on_delete=models.CASCADE, related_name="assets"
     )
@@ -151,50 +134,17 @@ class CustomerAsset(models.Model):
     """A Wialon unit id."""
 
     def __str__(self) -> str:
+        """Returns the asset's id in format: ``'Asset #<pk>'``"""
         return f"Asset #{self.pk}"
 
     def get_absolute_url(self) -> str:
-        return reverse("detail asset", kwargs={"pk": self.pk})
-
-    @transaction.atomic
-    def wialon_sync_name(self, session: WialonSession) -> None:
-        unit: WialonUnit = self.wialon_get_unit(session)
-        if self.name is None or self.name != unit.name:
-            self.name = unit.name
-            self.save()
-        else:
-            unit.rename(self.name)
-
-    def wialon_get_unit(self, session: WialonSession) -> WialonUnit:
-        """
-        Returns a :py:obj:`~terminusgps.wialon.items.WialonUnit` for the asset.
-
-        :param session: A valid Wialon API session.
-        :type session: :py:obj:`~terminusgps.wialon.session.WialonSession`
-        :raises AssertionError: If :py:attr:`wialon_id` wasn't set.
-        :returns: A Wialon unit.
-        :rtype: :py:obj:`~terminusgps.wialon.items.WialonUnit`
-
-        """
-        assert self.wialon_id is not None, "'wialon_id' wasn't set."
-        return WialonUnit(id=self.wialon_id, session=session)
-
-    def wialon_unit_exists(self, session: WialonSession) -> bool:
-        """
-        Determines whether or not the unit exists in Wialon.
-
-        :param session: A valid Wialon API session.
-        :type session: :py:obj:`~terminusgps.wialon.session.WialonSession`
-        :returns: Whether or not the unit exists.
-        :rtype: :py:obj:`bool`
-
-        """
-        if not self.wialon_id:
-            return False
-        return self.wialon_get_unit(session).exists
+        """Returns a URL pointing to the asset's detail view."""
+        return reverse("tracker:detail asset", kwargs={"pk": self.pk})
 
 
 class CustomerPaymentMethod(models.Model):
+    """A customer payment method."""
+
     customer = models.ForeignKey(
         "terminusgps_tracker.Customer",
         on_delete=models.CASCADE,
@@ -207,14 +157,16 @@ class CustomerPaymentMethod(models.Model):
     """Whether or not the payment method is set as default."""
 
     def __str__(self) -> str:
+        """Returns the payment method id in format: ``'Payment Method #<authorizenet_id>'``."""
         return f"Payment Method #{self.authorizenet_id}"
 
     def get_absolute_url(self) -> str:
-        return reverse("detail payment", kwargs={"pk": self.pk})
+        """Returns a URL to the payment method's detail view."""
+        return reverse("tracker:detail payment", kwargs={"pk": self.pk})
 
     def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
         """Deletes the payment profile in Authorizenet before deleting the object."""
-        if self.authorizenet_id:
+        if self.customer.authorizenet_id and self.authorizenet_id:
             payment_profile = self.authorizenet_get_payment_profile()
             payment_profile.delete()
         return super().delete(*args, **kwargs)
@@ -223,12 +175,15 @@ class CustomerPaymentMethod(models.Model):
         """
         Returns the Authorizenet payment profile for the payment method.
 
-        :raises AssertionError: If the customer's Authorizenet profile id wasn't set.
+        :raises AssertionError: If :py:attr:`customer.authorizenet_id` wasn't set.
+        :raises AssertionError: If :py:attr:`authorizenet_id` wasn't set.
         :returns: An Authorizenet payment profile.
         :rtype: :py:obj:`~terminusgps.authorizenet.profiles.PaymentProfile`
 
         """
         assert self.customer.authorizenet_id, "Customer profile id wasn't set."
+        assert self.authorizenet_id, "Payment method id wasn't set."
+
         return PaymentProfile(
             customer_profile_id=self.customer.authorizenet_id,
             id=self.authorizenet_id,
@@ -237,6 +192,8 @@ class CustomerPaymentMethod(models.Model):
 
 
 class CustomerShippingAddress(models.Model):
+    """A customer shipping address."""
+
     customer = models.ForeignKey(
         "terminusgps_tracker.Customer",
         on_delete=models.CASCADE,
@@ -249,34 +206,37 @@ class CustomerShippingAddress(models.Model):
     """Whether or not the shipping address is set as default."""
 
     class Meta:
+        verbose_name = "customer shipping address"
         verbose_name_plural = "customer shipping addresses"
 
     def __str__(self) -> str:
+        """Returns the shipping address id in format: ``'Shipping Address #<authorizenet_id>'``."""
         return f"Shipping Address #{self.authorizenet_id}"
 
-    def save(self, **kwargs) -> None:
-        super().save(**kwargs)
-
     def get_absolute_url(self) -> str:
-        return reverse("detail address", kwargs={"pk": self.pk})
+        """Returns a URL for the shipping address' detail view."""
+        return reverse("tracker:detail address", kwargs={"pk": self.pk})
 
     def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
         """Deletes the address profile in Authorizenet before deleting the object."""
-        if self.authorizenet_id:
+        if self.customer.authorizenet_id and self.authorizenet_id:
             address_profile = self.authorizenet_get_address_profile()
             address_profile.delete()
         return super().delete(*args, **kwargs)
 
     def authorizenet_get_address_profile(self) -> AddressProfile:
         """
-        Returns the Authorizenet address profile for the shipping address.
+        Returns an Authorizenet address profile for the shipping address.
 
-        :raises AssertionError: If the customer's Authorizenet profile id wasn't set.
+        :raises AssertionError: If :py:attr:`customer.authorizenet_id` wasn't set.
+        :raises AssertionError: If :py:attr:`authorizenet_id` wasn't set.
         :returns: An Authorizenet address profile.
         :rtype: :py:obj:`~terminusgps.authorizenet.profiles.AddressProfile`
 
         """
         assert self.customer.authorizenet_id, "Customer profile id wasn't set."
+        assert self.authorizenet_id, "Shipping address id wasn't set."
+
         return AddressProfile(
             customer_profile_id=self.customer.authorizenet_id,
             id=self.authorizenet_id,

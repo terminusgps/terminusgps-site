@@ -1,25 +1,25 @@
-<form class="{{ class }}" hx-post="{% url 'install:create asset' %}">
+<form class="{{ class }}" hx-post="{% url 'install:create asset' %}" hx-target="this">
     {% csrf_token %}
-    {% if form.non_field_errors %}<div class="inset-shadow w-full p-2 text-red-600">{{ form.non_field_errors }}</div>{% endif %}
+    {% if form.non_field_errors %}<div class="animate-jiggle inset-shadow w-full p-2 text-red-600">{{ form.non_field_errors }}</div>{% endif %}
     <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
         {{ form.vin_number.label }}
         {{ form.vin_number }}
         {% if form.vin_number.errors %}
-        <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.vin_number.errors }}</div>
+        <div class="animate-jiggle border border-red-800 bg-red-100 p-2 text-red-600">{{ form.vin_number.errors }}</div>
         {% endif %}
     </div>
     <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
         {{ form.imei_number.label }}
         {{ form.imei_number }}
         {% if form.imei_number.errors %}
-        <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.imei_number.errors }}</div>
+        <div class="animate-jiggle border border-red-800 bg-red-100 p-2 text-red-600">{{ form.imei_number.errors }}</div>
         {% endif %}
     </div>
     <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
         {{ form.account.label }}
         {{ form.account }}
         {% if form.account.errors %}
-        <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.account.errors }}</div>
+        <div class="animate-jiggle border border-red-800 bg-red-100 p-2 text-red-600">{{ form.account.errors }}</div>
         {% endif %}
     </div>
     <div class="mt-4 flex flex-col gap-2">

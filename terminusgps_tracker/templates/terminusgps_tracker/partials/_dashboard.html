@@ -1,10 +1,10 @@
 <div id="dashboard" class="{{ class }}">
     <div class="flex flex-col gap-4">
         <h2 class="text-lg font-semibold text-terminus-red-800 md:text-2xl dark:text-terminus-red-300">Your Subscription</h2>
-        <div id="subscription" hx-get="{% url 'detail subscription' subscription.pk %}" hx-trigger="load" hx-swap="outerHTML"></div>
+        <div id="subscription" hx-get="{% url 'tracker:detail subscription' subscription.pk %}" hx-trigger="load" hx-swap="outerHTML"></div>
     </div>
     <div id="links" class="flex flex-col gap-4" hx-boost="true">
-        <a class="group" href="{% url 'account' %}">
+        <a class="group" href="{% url 'tracker:account' %}">
             <div class="flex-inline flex items-center justify-between rounded border-2 border-terminus-red-800 bg-red-300 p-4 text-terminus-red-900 transition-colors duration-300 ease-in-out hover:bg-red-100">
                 <div class="flex-inline flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -20,7 +20,7 @@
                 </svg>
             </div>
         </a>
-        <a class="group" href="{% url 'mobile apps' %}">
+        <a class="group" href="{% url 'tracker:mobile apps' %}">
             <div class="flex-inline flex items-center justify-between rounded border-2 border-terminus-red-800 bg-red-300 p-4 text-terminus-red-900 transition-colors duration-300 ease-in-out hover:bg-red-100">
                 <div class="flex-inline flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -36,7 +36,7 @@
                 </svg>
             </div>
         </a>
-        <a class="group" href="{% url 'payments' %}">
+        <a class="group" href="{% url 'tracker:payments' %}">
             <div class="flex-inline flex items-center justify-between rounded border-2 border-terminus-red-800 bg-red-300 p-4 text-terminus-red-900 transition-colors duration-300 ease-in-out hover:bg-red-100">
                 <div class="flex-inline flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -52,7 +52,7 @@
                 </svg>
             </div>
         </a>
-        <a class="group" href="{% url 'support' %}">
+        <a class="group" href="{% url 'tracker:support' %}">
             <div class="flex-inline flex items-center justify-between rounded border-2 border-terminus-red-800 bg-red-300 p-4 text-terminus-red-900 transition-colors duration-300 ease-in-out hover:bg-red-100">
                 <div class="flex-inline flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">

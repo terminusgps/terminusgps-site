@@ -1,6 +1,5 @@
 from django.contrib import admin, messages
 from django.utils.translation import ngettext
-from terminusgps.wialon.items import WialonResource
 from terminusgps.wialon.session import WialonSession
 
 from terminusgps_tracker.models.customers import (
@@ -68,23 +67,15 @@ class CustomerAdmin(admin.ModelAdmin):
                 if not customer.wialon_resource_id:
                     results_map["skipped"].append(customer)
                     continue
-
-                resource: WialonResource = WialonResource(
-                    id=customer.wialon_resource_id, session=session
-                )
-                if not resource.is_account:
-                    results_map["skipped"].append(customer)
-                    continue
-                else:
-                    resource.disable_account()
-                    results_map["success"].append(customer)
+                customer.wialon_disable_account(session)
+                results_map["success"].append(customer)
 
         if results_map["skipped"]:
             self.message_user(
                 request,
                 ngettext(
-                    "%(count)s customer account was not blocked.",
-                    "%(count)s customer accounts were not blocked.",
+                    "%(count)s customer account was skipped.",
+                    "%(count)s customer accounts were skipped.",
                     len(results_map["skipped"]),
                 )
                 % {"count": len(results_map["skipped"])},
@@ -95,8 +86,8 @@ class CustomerAdmin(admin.ModelAdmin):
             self.message_user(
                 request,
                 ngettext(
-                    "%(count)s customer account was blocked.",
-                    "%(count)s customer accounts were blocked.",
+                    "%(count)s customer account was disabled.",
+                    "%(count)s customer accounts were disabled.",
                     len(results_map["success"]),
                 )
                 % {"count": len(results_map["success"])},
@@ -106,28 +97,21 @@ class CustomerAdmin(admin.ModelAdmin):
     @admin.action(description="Unblock selected customer accounts")
     def unblock_customer_accounts(self, request, queryset):
         results_map = {"success": [], "skipped": []}
+
         with WialonSession() as session:
             for customer in queryset:
                 if not customer.wialon_resource_id:
                     results_map["skipped"].append(customer)
                     continue
-
-                resource: WialonResource = WialonResource(
-                    id=customer.wialon_resource_id, session=session
-                )
-                if not resource.is_account:
-                    results_map["skipped"].append(customer)
-                    continue
-                else:
-                    resource.enable_account()
-                    results_map["success"].append(customer)
+                customer.wialon_enable_account(session)
+                results_map["success"].append(customer)
 
         if results_map["skipped"]:
             self.message_user(
                 request,
                 ngettext(
-                    "%(count)s customer account was not unblocked.",
-                    "%(count)s customer accounts were not unblocked.",
+                    "%(count)s customer account was skipped.",
+                    "%(count)s customer accounts were skipped.",
                     len(results_map["skipped"]),
                 )
                 % {"count": len(results_map["skipped"])},
@@ -138,8 +122,8 @@ class CustomerAdmin(admin.ModelAdmin):
             self.message_user(
                 request,
                 ngettext(
-                    "%(count)s customer account was unblocked.",
-                    "%(count)s customer accounts were unblocked.",
+                    "%(count)s customer account was enabled.",
+                    "%(count)s customer accounts were enabled.",
                     len(results_map["success"]),
                 )
                 % {"count": len(results_map["success"])},

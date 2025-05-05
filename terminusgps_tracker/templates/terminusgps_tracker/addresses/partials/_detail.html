@@ -19,7 +19,7 @@
                     type="button"
                     class="w-full cursor-pointer rounded border border-red-800 bg-gray-100 p-2 text-red-900 transition-colors duration-300 ease-in-out hover:bg-red-50"
                     value="Delete"
-                    hx-post="{% url 'delete address' address.pk %}"
+                    hx-post="{% url 'tracker:delete address' address.pk %}"
                     hx-confirm="Are you sure you want to delete '{{ profile.address }}'?"
                     hx-target="#address-list"
                     hx-swap="innerHTML"
@@ -27,8 +27,8 @@
                 {% if not address.default %}
                 <input
                     type="button"
-                    class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400"
-                    hx-patch="{% url 'detail address' address.pk %}?default=true"
+                    class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400 dark:border-terminus-gray-400"
+                    hx-patch="{% url 'tracker:detail address' address.pk %}?default=true"
                     hx-confirm="Set '{{ profile.address }}' as default?"
                     hx-target="#address-list"
                     hx-swap="innerHTML"

@@ -1,5 +1,5 @@
 {% for payment in payment_list %}
-<div id="payment-{{ payment.pk }}" hx-get="{% url 'detail payment' payment.pk %}" hx-target="this" hx-trigger="load" hx-swap="outerHTML"></div>
+<div id="payment-{{ payment.pk }}" hx-get="{% url 'tracker:detail payment' payment.pk %}" hx-target="this" hx-trigger="load" hx-swap="outerHTML"></div>
 {% empty %}
 <div class="rounded border border-orange-300 bg-orange-50 p-4 text-orange-800 drop-shadow">
     <div class="flex-inline flex items-center gap-2">

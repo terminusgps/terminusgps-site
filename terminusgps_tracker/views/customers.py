@@ -1,9 +1,9 @@
-from typing import Any
+import typing
 
 from authorizenet.apicontractsv1 import customerAddressType, paymentType
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -23,6 +23,7 @@ from terminusgps.authorizenet.utils import (
     generate_customer_address,
     generate_customer_payment,
 )
+from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
 from terminusgps_tracker.forms import (
     CustomerPaymentMethodCreateForm,
@@ -34,13 +35,7 @@ from terminusgps_tracker.models import (
     CustomerShippingAddress,
     CustomerSubscription,
 )
-from terminusgps_tracker.views.mixins import (
-    HtmxTemplateResponseMixin,
-    TrackerAppConfigContextMixin,
-)
-
-if not hasattr(settings, "TRACKER_APP_CONFIG"):
-    raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
+from terminusgps_tracker.views.mixins import TrackerAppConfigContextMixin
 
 
 class CustomerDashboardView(
@@ -49,6 +44,48 @@ class CustomerDashboardView(
     HtmxTemplateResponseMixin,
     TemplateView,
 ):
+    """
+    Renders a dashboard for a customer.
+
+    **Context**
+
+    ``title``
+        The title for the view/webpage.
+
+        Value: ``"Dashboard"``
+
+    ``class``
+        The `tailwindcss`_ class used for the view.
+
+        Value: ``"flex flex-col gap-8"``
+
+    ``config``
+        A tracker application configuration object.
+
+    ``customer``
+        The :model:`terminusgps_tracker.Customer` retrieved from the request user.
+
+    ``subscription``
+        The :model:`terminusgps_tracker.CustomerSubscription` for the customer.
+
+    ``subtitle``
+        The subtitle for the view/webpage.
+
+        Value: ``"Take your tracking to-go with our mobile apps."``
+
+    **HTTP Methods:**
+        - GET
+
+    **Template:**
+        :template:`terminusgps_tracker/dashboard.html`
+
+    **Partial Template:**
+        :template:`terminusgps_tracker/partials/_dashboard.html`
+
+    .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
+
+    """
+
     content_type = "text/html"
     extra_context = {"title": "Dashboard", "class": "flex flex-col gap-8"}
     http_method_names = ["get"]
@@ -58,14 +95,15 @@ class CustomerDashboardView(
     raise_exception = False
     template_name = "terminusgps_tracker/dashboard.html"
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        """Adds ``"customer"``, ``"subscription"`` and ``"subtitle"`` to the view context."""
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         context["customer"], _ = Customer.objects.get_or_create(user=self.request.user)
         context["subscription"], _ = CustomerSubscription.objects.get_or_create(
             customer=context["customer"]
         )
         context["subtitle"] = mark_safe(
-            f"Check out the Terminus GPS <a class='text-terminus-red-800 underline decoration-terminus-black decoration underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:hover:text-terminus-red-200 dark:decoration-white' href='{reverse('mobile apps')}'>mobile app</a>!"
+            f"Check out the Terminus GPS <a class='text-terminus-red-800 underline decoration-terminus-black decoration underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:hover:text-terminus-red-200 dark:decoration-white' href='{reverse('tracker:mobile apps')}'>mobile app</a>!"
         )
         return context
 
@@ -76,6 +114,48 @@ class CustomerPaymentsView(
     HtmxTemplateResponseMixin,
     TemplateView,
 ):
+    """
+    Renders payment methods and shipping addresses for the customer.
+
+    **Context**
+
+    ``title``
+        The title for the view/webpage.
+
+        Value: ``"Payments"``
+
+    ``class``
+        The `tailwindcss`_ class used for the view.
+
+        Value: ``"flex flex-col gap-8"``
+
+    ``config``
+        A tracker application configuration object.
+
+    ``customer``
+        The :model:`terminusgps_tracker.Customer` retrieved from the request user.
+
+    ``subscription``
+        The :model:`terminusgps_tracker.CustomerSubscription` for the customer.
+
+    ``subtitle``
+        The subtitle for the view/webpage.
+
+        Value: ``"Update your payment information"``
+
+    **HTTP Methods:**
+        - GET
+
+    **Template:**
+        :template:`terminusgps_tracker/payments.html`
+
+    **Partial Template:**
+        :template:`terminusgps_tracker/partials/_payments.html`
+
+    .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
+
+    """
+
     content_type = "text/html"
     extra_context = {
         "title": "Payments",
@@ -89,8 +169,9 @@ class CustomerPaymentsView(
     raise_exception = False
     template_name = "terminusgps_tracker/payments.html"
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        """Adds ``"customer"`` and ``"subscription"`` to the view context."""
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         context["customer"], _ = Customer.objects.get_or_create(user=self.request.user)
         context["subscription"], _ = CustomerSubscription.objects.get_or_create(
             customer=context["customer"]
@@ -104,6 +185,43 @@ class CustomerAccountView(
     HtmxTemplateResponseMixin,
     TemplateView,
 ):
+    """
+    Renders account information for the customer.
+
+    **Context**
+
+    ``title``
+        The title for the view/webpage.
+
+        Value: ``"Your Account"``
+
+    ``class``
+        The `tailwindcss`_ class used for the view.
+
+        Value: ``"flex flex-col gap-8"``
+
+    ``config``
+        A tracker application configuration object.
+
+    ``customer``
+        The :model:`terminusgps_tracker.Customer` retrieved from the request user.
+
+    ``subscription``
+        The :model:`terminusgps_tracker.CustomerSubscription` for the customer.
+
+    **HTTP Methods:**
+        - GET
+
+    **Template:**
+        :template:`terminusgps_tracker/account.html`
+
+    **Partial Template:**
+        :template:`terminusgps_tracker/partials/_account.html`
+
+    .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
+
+    """
+
     content_type = "text/html"
     extra_context = {"title": "Your Account", "class": "flex flex-col gap-8"}
     http_method_names = ["get"]
@@ -113,8 +231,9 @@ class CustomerAccountView(
     raise_exception = False
     template_name = "terminusgps_tracker/account.html"
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        """Adds ``"customer"``, ``"subscription"`` and updates ``"title"`` in the view context."""
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         context["customer"], _ = Customer.objects.get_or_create(user=self.request.user)
         context["subscription"], _ = CustomerSubscription.objects.get_or_create(
             customer=context["customer"]
@@ -130,6 +249,48 @@ class CustomerSupportView(
     HtmxTemplateResponseMixin,
     TemplateView,
 ):
+    """
+    Renders the support view for a customer.
+
+    **Context**
+
+    ``title``
+        The title for the view/webpage.
+
+        Value: ``"Support"``
+
+    ``class``
+        The `tailwindcss`_ class used for the view.
+
+        Value: ``"flex flex-col gap-4"``
+
+    ``config``
+        A tracker application configuration object.
+
+    ``customer``
+        The :model:`terminusgps_tracker.Customer` retrieved from the request user.
+
+    ``subscription``
+        The :model:`terminusgps_tracker.CustomerSubscription` for the customer.
+
+    ``subtitle``
+        The subtitle for the view/webpage.
+
+        Value: ``"Drop us a line"``
+
+    **HTTP Methods:**
+        - GET
+
+    **Template:**
+        :template:`terminusgps_tracker/support.html`
+
+    **Partial Template:**
+        :template:`terminusgps_tracker/partials/_support.html`
+
+    .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
+
+    """
+
     content_type = "text/html"
     extra_context = {
         "title": "Support",
@@ -143,8 +304,9 @@ class CustomerSupportView(
     raise_exception = False
     template_name = "terminusgps_tracker/support.html"
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        """Adds the support email address to the view context."""
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         for email in settings.TRACKER_APP_CONFIG["EMAILS"]:
             if email["NAME"] == "SUPPORT":
                 context["support_link"] = email["OPTIONS"]["link"]
@@ -154,6 +316,42 @@ class CustomerSupportView(
 class CustomerShippingAddressCreateView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, FormView
 ):
+    """
+    Creates a customer shipping address locally and in Authorizenet.
+
+    **Context**
+
+    ``address``
+        The :model:`terminusgps_tracker.CustomerShippingAddress` for the view, if it already exists.
+
+    ``class``
+        The `tailwindcss`_ class used for the view.
+
+        Value: ``"flex flex-col gap-4"``
+
+    ``customer``
+        The :model:`terminusgps_tracker.Customer` retrieved from the request user.
+
+    ``title``
+        The title for the view/webpage.
+
+        Value: ``"Add Shipping Address"``
+
+    **HTTP Methods:**
+        - GET
+        - POST
+        - DELETE
+
+    **Template:**
+        :template:`terminusgps_tracker/support.html`
+
+    **Partial Template:**
+        :template:`terminusgps_tracker/partials/_support.html`
+
+    .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
+
+    """
+
     content_type = "text/html"
     context_object_name = "address"
     extra_context = {"class": "flex flex-col gap-4", "title": "Add Shipping Address"}
@@ -167,8 +365,10 @@ class CustomerShippingAddressCreateView(
     success_url = reverse_lazy("payments")
     template_name = "terminusgps_tracker/addresses/create.html"
 
-    def get_initial(self) -> dict[str, Any]:
-        initial: dict[str, Any] = super().get_initial()
+    def get_initial(self) -> dict[str, typing.Any]:
+        """Sets initial values for ``first_name`` and ``last_name`` based on the request user."""
+        initial: dict[str, typing.Any] = super().get_initial()
+
         if self.request.user:
             initial["first_name"] = self.request.user.first_name
             initial["last_name"] = self.request.user.last_name
@@ -257,7 +457,7 @@ class CustomerShippingAddressDetailView(
     def patch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if request.GET.get("default"):
             self.set_default_address(kwargs["pk"])
-        return HttpResponseRedirect(reverse("list addresses"))
+        return HttpResponseRedirect(reverse("tracker:list addresses"))
 
     @transaction.atomic
     def set_default_address(self, address_pk: int) -> None:
@@ -270,8 +470,8 @@ class CustomerShippingAddressDetailView(
             addr.default = False
         CustomerShippingAddress.objects.bulk_update(other_addrs, ["default"])
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         context["profile"] = (
             self.get_object()
             .authorizenet_get_address_profile()
@@ -327,8 +527,8 @@ class CustomerPaymentMethodCreateView(
     success_url = reverse_lazy("payments")
     template_name = "terminusgps_tracker/payments/create.html"
 
-    def get_initial(self) -> dict[str, Any]:
-        initial: dict[str, Any] = super().get_initial()
+    def get_initial(self) -> dict[str, typing.Any]:
+        initial: dict[str, typing.Any] = super().get_initial()
         if self.request.user:
             initial["first_name"] = self.request.user.first_name
             initial["last_name"] = self.request.user.last_name
@@ -430,10 +630,10 @@ class CustomerPaymentMethodDetailView(
     def patch(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if request.GET.get("default"):
             self.set_default_payment(kwargs["pk"])
-        return HttpResponseRedirect(reverse("list payments"))
+        return HttpResponseRedirect(reverse("tracker:list payments"))
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         context["profile"] = (
             self.get_object()
             .authorizenet_get_payment_profile()
@@ -476,10 +676,11 @@ class CustomerPaymentMethodDeleteView(
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         prompt: str | None = request.headers.get("HX-Prompt")
 
-        if not prompt or not prompt.isdigit():
+        if prompt is None or not prompt.isdigit():
             return HttpResponse(status=400)
         if int(prompt) != self.get_object().authorizenet_get_payment_profile().last_4:
             return HttpResponse(status=400)
+
         return super().post(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet[CustomerPaymentMethod, CustomerPaymentMethod]:

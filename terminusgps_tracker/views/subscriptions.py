@@ -1,4 +1,4 @@
-from typing import Any
+import typing
 
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
@@ -8,13 +8,11 @@ from django.urls import reverse_lazy
 from django.utils.dateparse import parse_datetime
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
+from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
 from terminusgps_tracker.forms import CustomerSubscriptionUpdateForm
 from terminusgps_tracker.models import Customer, CustomerSubscription, SubscriptionTier
-from terminusgps_tracker.views.mixins import (
-    HtmxTemplateResponseMixin,
-    TrackerAppConfigContextMixin,
-)
+from terminusgps_tracker.views.mixins import TrackerAppConfigContextMixin
 
 
 class SubscriptionTierListView(
@@ -56,8 +54,8 @@ class CustomerSubscriptionTransactionsView(
         subscription, _ = CustomerSubscription.objects.get_or_create(customer=customer)
         return subscription
 
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context: dict[str, Any] = super().get_context_data(**kwargs)
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         transactions = (
             self.get_object().authorizenet_get_subscription_profile().transactions
         )
@@ -127,8 +125,8 @@ class CustomerSubscriptionUpdateView(
     def get_object(self, queryset=None) -> CustomerSubscription:
         return CustomerSubscription.objects.get(customer__user=self.request.user)
 
-    def get_initial(self) -> dict[str, Any]:
-        initial: dict[str, Any] = super().get_initial()
+    def get_initial(self) -> dict[str, typing.Any]:
+        initial: dict[str, typing.Any] = super().get_initial()
         customer: Customer = self.get_object().customer
         addresses = customer.addresses.filter()
         payments = customer.payments.filter()

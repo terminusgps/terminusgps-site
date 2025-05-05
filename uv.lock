@@ -365,6 +365,15 @@ wheels = [
 ]
 
 [[package]]
+name = "docutils"
+version = "0.21.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ae/ed/aefcc8cd0ba62a0560c3c18c33925362d46c6075480bfa4df87b28e169a9/docutils-0.21.2.tar.gz", hash = "sha256:3a6b18732edf182daa3cd12775bbb338cf5691468f91eeeb109deff6ebfa986f", size = 2204444 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8f/d7/9322c609343d929e75e7e5e6255e614fcc67572cfd083959cdef3b7aad79/docutils-0.21.2-py3-none-any.whl", hash = "sha256:dafca5b9e384f0e419294eb4d2ff9fa826435bf15f15b7bd45723e8ad76811b2", size = 587408 },
+]
+
+[[package]]
 name = "fonttools"
 version = "4.57.0"
 source = { registry = "https://pypi.org/simple" }
@@ -883,7 +892,7 @@ wheels = [
 
 [[package]]
 name = "python-terminusgps"
-version = "36.3.1"
+version = "36.4.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiobotocore" },
@@ -898,9 +907,9 @@ dependencies = [
     { name = "pyzbar" },
     { name = "twilio" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/68/df/a38d7a4f988a2d4d86bab5be3cb0133bf7f945fff0e44bdec5dd4e1e5707/python_terminusgps-36.3.1.tar.gz", hash = "sha256:ff13e85b25c5b5c827b77f6239a7177da1f288916ec8ee4db843bca99c59499b", size = 10442010 }
+sdist = { url = "https://files.pythonhosted.org/packages/70/c2/c800401ced9836914abd0af0cad40257cd9b9b0b8cb1946902626d5f97fd/python_terminusgps-36.4.2.tar.gz", hash = "sha256:d42525a186f895df27a202dcc03c68cb33b8e80d613578172021ad22ed98f548", size = 10458266 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f2/e9/a0d7572b12af343499301e1383286c430268f52a20d10aa740099b32b7fe/python_terminusgps-36.3.1-py3-none-any.whl", hash = "sha256:b51e3dbc46fd77c216a973ca7f995a45c6416829b88d8d035a62a59ee61da5e0", size = 64533 },
+    { url = "https://files.pythonhosted.org/packages/9f/9c/3e45e7b754ae414e95000dfc429cbeb448c30289bea582aa797810f70d3b/python_terminusgps-36.4.2-py3-none-any.whl", hash = "sha256:da23a31d363d1b64a155e658541647dad226b2406718252d965717f6f15d4a0e", size = 65166 },
 ]
 
 [[package]]
@@ -1052,6 +1061,7 @@ dependencies = [
     { name = "django-storages" },
     { name = "django-stubs" },
     { name = "django-stubs-ext" },
+    { name = "docutils" },
     { name = "gunicorn" },
     { name = "lxml" },
     { name = "numpy" },
@@ -1079,6 +1089,7 @@ requires-dist = [
     { name = "django-storages", specifier = ">=1.14.4" },
     { name = "django-stubs", specifier = "==5.0.2" },
     { name = "django-stubs-ext", specifier = "==5.0.2" },
+    { name = "docutils", specifier = ">=0.21.2" },
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "lxml", specifier = "==4.9.4" },
     { name = "numpy", specifier = "==2.0.1" },
@@ -1087,7 +1098,7 @@ requires-dist = [
     { name = "pillow", specifier = "==10.4.0" },
     { name = "psycopg", specifier = ">=3.2.6" },
     { name = "pyotp", specifier = ">=2.9.0" },
-    { name = "python-terminusgps", specifier = "==36.3.1" },
+    { name = "python-terminusgps", specifier = "==36.4.2" },
     { name = "python-wialon", specifier = "==1.2.4" },
     { name = "qrcode", extras = ["pil"], specifier = ">=8.1" },
 ]
@@ -1100,7 +1111,7 @@ dev = [
 
 [[package]]
 name = "twilio"
-version = "9.5.2"
+version = "9.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -1108,9 +1119,9 @@ dependencies = [
     { name = "pyjwt" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a1/c9/c9d38f464856d32f5359c1c130392e1ad8717fe4d438a221a5e7fd9b37be/twilio-9.5.2.tar.gz", hash = "sha256:55d57d9c58e4ce5fa8e11943e42d76705ac2aaa7eaeab49946521df6f245e936", size = 981755 }
+sdist = { url = "https://files.pythonhosted.org/packages/91/e9/ffc6e52465ffc16fad31fa64aea4e10e06cb4803447310c539c6fd66e859/twilio-9.6.0.tar.gz", hash = "sha256:bcb6cbc7f1dad09717d48d3e610573b6a55fa4a1f6fd1006f5b59cf6878b5562", size = 986499 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7b/76/33a9198dfea214779af895b80deff0cbd07e7e51f899d308530674f189a0/twilio-9.5.2-py2.py3-none-any.whl", hash = "sha256:072fc85145ab26a922be0a0ef544cbdae2771e11143bc78e919a1dfbfd84a63a", size = 1852752 },
+    { url = "https://files.pythonhosted.org/packages/b5/04/1d9f452b1089c634bd6d64b40b9002c935b8214e9b08a7cbbfef204c8186/twilio-9.6.0-py2.py3-none-any.whl", hash = "sha256:19e8554c56324186973dcb3121de34626755db15331767e3021a2e23f80c6a3b", size = 1859151 },
 ]
 
 [[package]]
