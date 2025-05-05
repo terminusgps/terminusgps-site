@@ -3,7 +3,6 @@ import decimal
 
 from authorizenet import apicontractsv1
 from django.conf import settings
-from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.urls import reverse
@@ -117,26 +116,14 @@ class CustomerSubscription(models.Model):
     def save(self, **kwargs) -> None:
         if self.authorizenet_id:
             self.authorizenet_refresh_status()
-        if not self.authorizenet_id and all([self.tier, self.address, self.payment]):
+        elif not self.authorizenet_id and all([self.tier, self.address, self.payment]):
             self.authorizenet_id = self.authorizenet_create_subscription()
             self.authorizenet_refresh_status()
-
-        subscribed_group = Group.objects.get(name="Subscribed")
-        if (
-            self.status == self.SubscriptionStatus.ACTIVE
-            and self.customer.user not in subscribed_group.user_set.all()
-        ):
-            subscribed_group.user_set.add(self.customer.user)
-        elif (
-            self.status != self.SubscriptionStatus.ACTIVE
-            and self.customer.user in subscribed_group.user_set.all()
-        ):
-            subscribed_group.user_set.remove(self.customer.user)
         super().save(**kwargs)
 
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the subscription's detail view."""
-        return reverse("detail subscription", kwargs={"pk": self.pk})
+        return reverse("tracker:detail subscription", kwargs={"pk": self.pk})
 
     def calculate_amount_plus_tax(self) -> decimal.Decimal:
         """Returns the amount + tax for the subscription as a :py:obj:`~decimal.Decimal`."""

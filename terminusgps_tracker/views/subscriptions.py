@@ -118,7 +118,8 @@ class CustomerSubscriptionUpdateView(
     def get_form(self, form_class=None) -> forms.ModelForm:
         form = super().get_form(form_class=form_class)
         form.fields["tier"].widget.choices = [
-            (tier.pk, _(tier.name)) for tier in SubscriptionTier.objects.all()
+            (tier.pk, _(f"{tier.name} - ${tier.amount}/mo"))
+            for tier in SubscriptionTier.objects.all()
         ]
         return form
 

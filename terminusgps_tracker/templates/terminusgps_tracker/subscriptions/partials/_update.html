@@ -1,4 +1,4 @@
-<form id="subscription" class="{{ class }}" hx-post="{% url 'update subscription' subscription.pk %}" hx-target="this" hx-swap="outerHTML">
+<form id="subscription" class="{{ class }}" hx-post="{% url 'tracker:update subscription' subscription.pk %}" hx-target="this" hx-swap="outerHTML">
     {% if form.non_field_errors %}
     <div class="animate-jiggle rounded border border-red-800 bg-red-100 p-2 text-red-600">{{ form.non_field_errors }}</div>
     {% endif %}
@@ -19,7 +19,7 @@
             class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200 dark:border-gray-400"
             type="button"
             value="Back"
-            hx-get="{% url 'detail subscription' subscription.pk %}"
+            hx-get="{% url 'tracker:detail subscription' subscription.pk %}"
         >
     </div>
 </form>
