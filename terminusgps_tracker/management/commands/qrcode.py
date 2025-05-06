@@ -10,10 +10,24 @@ class Command(BaseCommand):
 
     @property
     def domain(self) -> str:
+        """
+        The domain for the QR code URL data.
+
+        :type: :py:obj:`str`
+        :value: :py:obj:`"app.terminusgps.com"`
+
+        """
         return "app.terminusgps.com"
 
     @property
     def protocol(self) -> str:
+        """
+        The protocol for the QR code URL data.
+
+        :type: :py:obj:`str`
+        :value: :py:obj:`"https"`
+
+        """
         return "https"
 
     def add_arguments(self, parser: argparse.ArgumentParser) -> None:
