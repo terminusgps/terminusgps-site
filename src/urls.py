@@ -32,7 +32,7 @@ urlpatterns = [
         name="password reset complete",
     ),
     path("install/", include("terminusgps_install.urls", namespace="install")),
-    path("", include("terminusgps_tracker.urls")),
+    path("", include("terminusgps_tracker.urls", namespace="tracker")),
 ]
 
 if settings.DEBUG:
