@@ -37,13 +37,13 @@ STATIC_URL = "/static/"
 TIME_ZONE = "America/Chicago"
 USE_I18N = True
 USE_TZ = True
+WIALON_SESSION_LOGLEVEL = logging.WARNING
 WSGI_APPLICATION = "src.wsgi.application"
 
 # Secret values
-DEFAULT_TAX_RATE = decimal.Decimal(
-    secret.get("DEFAULT_TAX_RATE", "0.0825"),
-    context=decimal.Context(prec=4, rounding=decimal.ROUND_HALF_UP),
-)
+decimal.getcontext().prec = 4
+decimal.getcontext().rounding = decimal.ROUND_HALF_UP
+DEFAULT_TAX_RATE = decimal.Decimal(secret.get("DEFAULT_TAX_RATE", "0.0825")) * 1
 EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")
 EMAIL_HOST_USER = secret.get("EMAIL_HOST_USER")
 MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
@@ -57,7 +57,6 @@ TWILIO_TOKEN = secret.get("TWILIO_TOKEN")
 WIALON_ADMIN_ID = secret.get("WIALON_ADMIN_ID")
 WIALON_DEFAULT_PLAN = secret.get("WIALON_DEFAULT_PLAN")
 WIALON_HOST = secret.get("WIALON_HOST")
-WIALON_SESSION_LOGLEVEL = logging.WARNING
 WIALON_TOKEN = secret.get("WIALON_TOKEN")
 WIALON_UNACTIVATED_GROUP = secret.get("WIALON_UNACTIVATED_GROUP")
 
