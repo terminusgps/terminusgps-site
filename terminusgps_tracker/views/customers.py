@@ -362,7 +362,7 @@ class CustomerShippingAddressCreateView(
     partial_template_name = "terminusgps_tracker/addresses/partials/_create.html"
     permission_denied_message = "Please login in order to view this content."
     raise_exception = False
-    success_url = reverse_lazy("payments")
+    success_url = reverse_lazy("tracker:payments")
     template_name = "terminusgps_tracker/addresses/create.html"
 
     def get_initial(self) -> dict[str, typing.Any]:
@@ -524,7 +524,7 @@ class CustomerPaymentMethodCreateView(
     permission_denied_message = "Please login in order to view this content."
     queryset = CustomerPaymentMethod.objects.none()
     raise_exception = False
-    success_url = reverse_lazy("payments")
+    success_url = reverse_lazy("tracker:payments")
     template_name = "terminusgps_tracker/payments/create.html"
 
     def get_initial(self) -> dict[str, typing.Any]:
