@@ -150,7 +150,7 @@ class CustomerSubscription(models.Model):
         """
         Creates the subscription in Authorizenet if necessary.
 
-        Updates the subscription status if possible.
+        Syncs the subscription :py:attr:`status`, :py:attr:`payment` and :py:attr:`address` with Authorizenet.
 
         """
         if self.authorizenet_id and not self.tier:
@@ -164,14 +164,9 @@ class CustomerSubscription(models.Model):
             self.authorizenet_id = self.authorizenet_create_subscription()
 
         if self.authorizenet_id:
-            self.authorizenet_refresh_status()
-            subscription_profile = self.authorizenet_get_subscription_profile()
-            self.address, _ = CustomerShippingAddress.objects.get_or_create(
-                customer=self.customer, authorizenet_id=subscription_profile.address_id
-            )
-            self.payment, _ = CustomerPaymentMethod.objects.get_or_create(
-                customer=self.customer, authorizenet_id=subscription_profile.payment_id
-            )
+            self.authorizenet_sync_status()
+            self.authorizenet_sync_payment_method()
+            self.authorizenet_sync_shipping_address()
         super().save(**kwargs)
 
     def get_absolute_url(self) -> str:
@@ -180,6 +175,8 @@ class CustomerSubscription(models.Model):
 
     def delete(self, *args, **kwargs) -> tuple[int, dict[str, int]]:
         """Cancels the subscription in Authorizenet if necessary before deleting the object."""
+        if self.authorizenet_id:
+            self.authorizenet_sync_status()
         if self.authorizenet_id and self.status != self.SubscriptionStatus.CANCELED:
             self.authorizenet_cancel_subscription()
         return super().delete(*args, **kwargs)
@@ -200,10 +197,62 @@ class CustomerSubscription(models.Model):
             )
 
     def calculate_amount_plus_tax(self) -> decimal.Decimal:
-        """Returns the amount + tax for the subscription as a :py:obj:`~decimal.Decimal`."""
+        """
+        Returns the amount + tax for the subscription as a :py:obj:`~decimal.Decimal`.
+
+        :raises AssertionError: If :py:attr:`tier` wasn't set.
+        :returns: The subscription amount + tax.
+        :rtype: :py:obj:`~decimal.Decimal`
+
+        """
+        assert self.tier, "Subscription tier wasn't set."
+
         return round(
             self.tier.amount + (self.tier.amount * settings.DEFAULT_TAX_RATE), ndigits=2
         )
+
+    @transaction.atomic
+    def authorizenet_sync_payment_method(self) -> None:
+        """
+        Creates or retrieves a :model:`terminusgps_tracker.CustomerPaymentMethod` based on the Authorizenet subscription profile and sets :py:attr:`payment` to it.
+
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
+        if self.authorizenet_id:
+            subscription_profile = self.authorizenet_get_subscription_profile()
+            self.payment, _ = CustomerPaymentMethod.objects.get_or_create(
+                customer=self.customer, authorizenet_id=subscription_profile.payment_id
+            )
+
+    @transaction.atomic
+    def authorizenet_sync_shipping_address(self) -> None:
+        """
+        Creates or retrieves a :model:`terminusgps_tracker.CustomerShippingAddress` based on the Authorizenet subscription profile and sets :py:attr:`address` to it.
+
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
+        if self.authorizenet_id:
+            subscription_profile = self.authorizenet_get_subscription_profile()
+            self.address, _ = CustomerShippingAddress.objects.get_or_create(
+                customer=self.customer, authorizenet_id=subscription_profile.address_id
+            )
+
+    @transaction.atomic
+    def authorizenet_sync_status(self) -> None:
+        """
+        Refreshes the subscription status from Authorizenet.
+
+        :returns: Nothing.
+        :rtype: :py:obj:`None`
+
+        """
+        if self.authorizenet_id:
+            subscription_profile = self.authorizenet_get_subscription_profile()
+            self.status = subscription_profile.status
 
     def _generate_subscription_obj(
         self, add_tax: bool = True
@@ -218,8 +267,8 @@ class CustomerSubscription(models.Model):
         :rtype: :py:obj:`~authorizenet.apicontractsv1.ARBSubscriptionType`
 
         """
-        assert self.address.authorizenet_id, "Address id wasn't set."
-        assert self.payment.authorizenet_id, "Payment id wasn't set."
+        assert self.address.authorizenet_id, "Address id was not set."
+        assert self.payment.authorizenet_id, "Payment id was not set."
         assert self.tier, "Subscription tier wasn't set."
 
         return apicontractsv1.ARBSubscriptionType(
@@ -268,18 +317,6 @@ class CustomerSubscription(models.Model):
             subscription_profile = self.authorizenet_get_subscription_profile()
             subscription_profile.delete()
 
-    @transaction.atomic
-    def authorizenet_refresh_status(self) -> None:
-        """
-        Refreshes the subscription status from Authorizenet.
-
-        :returns: Nothing.
-        :rtype: :py:obj:`None`
-
-        """
-        if self.authorizenet_id:
-            self.status = self.authorizenet_get_subscription_profile().status
-
     def authorizenet_create_subscription(
         self, start: datetime.datetime | None = None
     ) -> int:
@@ -303,7 +340,6 @@ class CustomerSubscription(models.Model):
         now = start or timezone.now()
         subscription_obj = self._generate_subscription_obj()
         subscription_obj.paymentSchedule = self.generate_payment_schedule(now)
-
         subscription_profile = SubscriptionProfile(self.customer.authorizenet_id)
         return subscription_profile.create(self._generate_subscription_obj())
 
@@ -326,33 +362,47 @@ class CustomerSubscription(models.Model):
         profile_id, sub_id = self.customer.authorizenet_id, self.authorizenet_id
         return SubscriptionProfile(customer_profile_id=profile_id, id=sub_id)
 
-    def generate_monthly_payment_interval(
-        self,
-    ) -> apicontractsv1.paymentScheduleTypeInterval:
-        """
-        Generates a monthly charge payment interval for the subscription.
-
-        :returns: A payment interval.
-        :rtype: :py:obj:`~authorizenet.apicontractsv1.paymentScheduleTypeInterval`
-
-        """
-        return apicontractsv1.paymentScheduleTypeInterval(
-            length=1, unit=apicontractsv1.ARBSubscriptionUnitEnum.months
-        )
-
     def generate_payment_schedule(
-        self, start_date: datetime.datetime
+        self,
+        start_date: datetime.datetime,
+        interval: apicontractsv1.paymentScheduleTypeInterval | None = None,
     ) -> apicontractsv1.paymentScheduleType:
         """
-        Generates a payment schedule for the subscription.
+        Returns a payment schedule starting on ``start_date``.
 
-        :returns: A payment schedule.
+        If ``interval`` is not provided, an interval charging the customer once per month is generated and used.
+
+        :param start_date: The start date for the payment schedule.
+        :type start_date: :py:obj:`~datetime.datetime`
+        :param interval: An optional Authorizenet payment schedule interval object. The default interval charges a customer once a month.
+        :type interval :py:obj:`~authorizenet.apicontractsv1.paymentScheduleIntervalType` | :py:obj:`None`
+        :returns: A payment schedule object.
         :rtype: :py:obj:`~authorizenet.apicontractsv1.paymentScheduleType`
+
+        .. seealso:: :py:meth:`~terminusgps_tracker.models.CustomerSubscription.generate_monthly_payment_interval` for details on the default value of ``interval``.
 
         """
         return apicontractsv1.paymentScheduleType(
-            interval=self.generate_monthly_payment_interval(),
+            interval=interval or self.generate_payment_interval(),
             startDate=start_date,
             totalOccurrences=self.total_months,
             trialOccurrences=self.trial_months,
         )
+
+    @staticmethod
+    def generate_payment_interval(
+        length: int = 1,
+        unit: apicontractsv1.ARBSubscriptionUnitEnum = apicontractsv1.ARBSubscriptionUnitEnum.months,
+    ) -> apicontractsv1.paymentScheduleTypeInterval:
+        """
+        Returns a payment interval that charges a customer ``length`` time(s) every ``unit``.
+
+        :param length: Total number of occurrences during one interval for the payment schedule. Default is ``1``.
+        :type length: :py:obj:`int`
+        :param unit: A unit of time. Default is :py:obj:`~authorizenet.apicontractsv1.ARBSubscriptionUnitEnum.months`.
+        :type unit: :py:obj:`~authorizenet.apicontractsv1.ARBSubscriptionUnitEnum`
+        :returns: A payment interval.
+        :rtype: :py:obj:`~authorizenet.apicontractsv1.paymentScheduleTypeInterval`
+
+        """
+        return apicontractsv1.paymentScheduleTypeInterval(length=length, unit=unit)
