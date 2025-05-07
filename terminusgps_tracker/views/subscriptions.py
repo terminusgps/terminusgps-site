@@ -204,7 +204,7 @@ class CustomerSubscriptionDeleteView(
     partial_template_name = "terminusgps_tracker/subscriptions/partials/_delete.html"
     permission_denied_message = "Please login in order to view this content."
     raise_exception = False
-    success_url = reverse_lazy("dashboard")
+    success_url = reverse_lazy("tracker:dashboard")
     template_name = "terminusgps_tracker/subscriptions/delete.html"
 
     def get_object(self, queryset=None) -> CustomerSubscription:
