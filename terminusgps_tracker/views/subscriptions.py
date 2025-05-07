@@ -30,6 +30,9 @@ class SubscriptionTierListView(
     partial_template_name = "terminusgps_tracker/subscriptions/partials/_tier_list.html"
     template_name = "terminusgps_tracker/subscriptions/tier_list.html"
 
+    def get_queryset(self):
+        return super().get_queryset()[:3]
+
 
 class CustomerSubscriptionTransactionsView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
