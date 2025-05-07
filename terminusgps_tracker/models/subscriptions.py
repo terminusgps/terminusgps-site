@@ -340,6 +340,7 @@ class CustomerSubscription(models.Model):
         now = start or timezone.now()
         subscription_obj = self._generate_subscription_obj()
         subscription_obj.paymentSchedule = self.generate_payment_schedule(now)
+        subscription_obj.trialAmount = "0.00"
         subscription_profile = SubscriptionProfile(self.customer.authorizenet_id)
         return subscription_profile.create(subscription_obj)
 
