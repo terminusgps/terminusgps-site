@@ -341,7 +341,7 @@ class CustomerSubscription(models.Model):
         subscription_obj = self._generate_subscription_obj()
         subscription_obj.paymentSchedule = self.generate_payment_schedule(now)
         subscription_profile = SubscriptionProfile(self.customer.authorizenet_id)
-        return subscription_profile.create(self._generate_subscription_obj())
+        return subscription_profile.create(subscription_obj)
 
     def authorizenet_get_subscription_profile(self) -> SubscriptionProfile:
         """
