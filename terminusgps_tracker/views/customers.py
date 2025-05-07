@@ -195,6 +195,11 @@ class CustomerAccountView(
 
         Value: ``"Your Account"``
 
+    ``title``
+        The subtitle for the view/webpage.
+
+        Value: ``"Update your account information"``
+
     ``class``
         The `tailwindcss`_ class used for the view.
 
@@ -223,7 +228,11 @@ class CustomerAccountView(
     """
 
     content_type = "text/html"
-    extra_context = {"title": "Your Account", "class": "flex flex-col gap-8"}
+    extra_context = {
+        "title": "Your Account",
+        "subtitle": "Update your account information",
+        "class": "flex flex-col gap-8",
+    }
     http_method_names = ["get"]
     login_url = reverse_lazy("login")
     partial_template_name = "terminusgps_tracker/partials/_account.html"
@@ -499,7 +508,7 @@ class CustomerShippingAddressDeleteView(
     partial_template_name = "terminusgps_tracker/addresses/partials/_delete.html"
     permission_denied_message = "Please login in order to view this content."
     raise_exception = False
-    success_url = reverse_lazy("list addresses")
+    success_url = reverse_lazy("tracker:list addresses")
     template_name = "terminusgps_tracker/addresses/delete.html"
 
     def get_queryset(
@@ -670,7 +679,7 @@ class CustomerPaymentMethodDeleteView(
     partial_template_name = "terminusgps_tracker/payments/partials/_delete.html"
     permission_denied_message = "Please login in order to view this content."
     raise_exception = False
-    success_url = reverse_lazy("list payments")
+    success_url = reverse_lazy("tracker:list payments")
     template_name = "terminusgps_tracker/payments/delete.html"
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
