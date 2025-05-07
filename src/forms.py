@@ -8,6 +8,38 @@ from django.utils.translation import gettext_lazy as _
 from terminusgps.wialon.validators import validate_wialon_password
 
 
+class TerminusgpsEmailSupportForm(forms.Form):
+    email = forms.EmailField(
+        label="Your Email Address",
+        widget=forms.widgets.EmailInput(
+            attrs={
+                "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                "placeholder": "peter@terminusgps.com",
+            }
+        ),
+    )
+    subject = forms.CharField(
+        label="Subject",
+        max_length=1024,
+        widget=forms.widgets.TextInput(
+            attrs={
+                "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                "placeholder": "Subscription doesn't update...",
+            }
+        ),
+    )
+    message = forms.CharField(
+        label="Message",
+        max_length=2048,
+        widget=forms.widgets.Textarea(
+            attrs={
+                "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                "placeholder": "I expected something to happen but something else happened instead...",
+            }
+        ),
+    )
+
+
 class TerminusgpsEmailVerificationForm(forms.Form):
     otp = forms.CharField(
         label="One-time Password (OTP)",

@@ -31,6 +31,22 @@ urlpatterns = [
         views.TerminusgpsPasswordResetCompleteView.as_view(),
         name="password reset complete",
     ),
+    path("support/", views.TerminusgpsSupportView.as_view(), name="support"),
+    path(
+        "support/email/",
+        views.TerminusgpsSupportEmailView.as_view(),
+        name="email support",
+    ),
+    path(
+        "support/call/", views.TerminusgpsSupportCallView.as_view(), name="call support"
+    ),
+    path(
+        "support/chat/", views.TerminusgpsSupportChatView.as_view(), name="chat support"
+    ),
+    path("privacy/", views.TerminusgpsPrivacyPolicyView.as_view(), name="privacy"),
+    path("apps/", views.TerminusgpsMobileAppView.as_view(), name="mobile apps"),
+    path("source/", views.TerminusgpsSourceCodeView.as_view(), name="source code"),
+    path("hosting/", views.TerminusgpsHostingView.as_view(), name="hosting"),
     path("install/", include("terminusgps_install.urls", namespace="install")),
     path("", include("terminusgps_tracker.urls", namespace="tracker")),
 ]

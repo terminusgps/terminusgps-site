@@ -17,12 +17,6 @@ from .customers import (
     CustomerShippingAddressListView,
     CustomerSupportView,
 )
-from .generic import (
-    TrackerHostingView,
-    TrackerMobileAppView,
-    TrackerPrivacyPolicyView,
-    TrackerSourceCodeView,
-)
 from .subscriptions import (
     CustomerSubscriptionDeleteView,
     CustomerSubscriptionDetailView,

@@ -9,11 +9,13 @@ from django.contrib.auth.views import (
     PasswordResetDoneView,
     PasswordResetView,
 )
+from django.core.exceptions import ImproperlyConfigured
+from django.core.mail import EmailMessage
 from django.forms import ValidationError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView
+from django.views.generic import FormView, RedirectView, TemplateView
 from terminusgps.authorizenet.controllers import AuthorizenetControllerExecutionError
 from terminusgps.authorizenet.profiles import CustomerProfile
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
@@ -24,7 +26,128 @@ from wialon.api import WialonError
 
 from terminusgps_tracker.models import Customer
 
-from .forms import TerminusgpsAuthenticationForm, TerminusgpsRegisterForm
+from .forms import (
+    TerminusgpsAuthenticationForm,
+    TerminusgpsEmailSupportForm,
+    TerminusgpsRegisterForm,
+)
+
+if settings.configured and not hasattr(settings, "TRACKER_APP_CONFIG"):
+    raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
+
+
+class TerminusgpsSourceCodeView(RedirectView):
+    """
+    Redirects the client to the application's source code repository.
+
+    **HTTP Methods**:
+        - GET
+
+    """
+
+    http_method_names = ["get"]
+    permanent = True
+    url = settings.TRACKER_APP_CONFIG.get("REPOSITORY_URL")
+
+
+class TerminusgpsHostingView(RedirectView):
+    """
+    Redirects the client to the the Terminus GPS hosting site.
+
+    **HTTP Methods**:
+        - GET
+
+    """
+
+    http_method_names = ["get"]
+    permanent = True
+    url = settings.TRACKER_APP_CONFIG.get("HOSTING_URL")
+
+
+class TerminusgpsPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Privacy Policy",
+        "subtitle": "How we use your data",
+        "class": "flex flex-col gap-4",
+    }
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps/partials/_privacy.html"
+    template_name = "terminusgps/privacy.html"
+
+
+class TerminusgpsMobileAppView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Mobile Apps",
+        "subtitle": "Take your tracking to-go with our mobile apps",
+        "class": "flex flex-col gap-4",
+    }
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps/partials/_mobile_app.html"
+    template_name = "terminusgps/mobile_app.html"
+
+
+class TerminusgpsSupportView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Support",
+        "subtitle": "Drop us a line",
+        "class": "flex flex-col gap-4",
+    }
+    http_method_names = ["get"]
+    template_name = "terminusgps/support.html"
+    partial_template_name = "terminusgps/partials/_support.html"
+
+
+class TerminusgpsSupportCallView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Call Support",
+        "subtitle": "Give us a ring and we'll get back to you asap",
+        "class": "flex flex-col gap-4",
+    }
+    http_method_names = ["get"]
+    template_name = "terminusgps/support_call.html"
+    partial_template_name = "terminusgps/partials/_support_call.html"
+
+
+class TerminusgpsSupportEmailView(HtmxTemplateResponseMixin, FormView):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Email Support",
+        "subtitle": "Shoot us an email and we'll get back to you asap",
+        "class": "flex flex-col gap-4",
+    }
+    http_method_names = ["get", "post"]
+    template_name = "terminusgps/support_email.html"
+    partial_template_name = "terminusgps/partials/_support_email.html"
+    form_class = TerminusgpsEmailSupportForm
+
+    def form_valid(
+        self, form: TerminusgpsEmailSupportForm
+    ) -> HttpResponse | HttpResponseRedirect:
+        email = EmailMessage(
+            subject=form.cleaned_data["subject"],
+            body=form.cleaned_data["message"],
+            to=["support@terminusgps.com"],
+            cc=["blake@terminusgps.com"],
+            reply_to=[form.cleaned_data["email"]],
+        )
+        email.send(fail_silently=True)
+        return super().form_valid(form=form)
+
+
+class TerminusgpsSupportChatView(HtmxTemplateResponseMixin, FormView):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Chat Support",
+        "subtitle": "Send us a message and we'll get back to you asap",
+        "class": "flex flex-col gap-4",
+    }
+    http_method_names = ["get", "post"]
+    template_name = "terminusgps/support_chat.html"
+    partial_template_name = "terminusgps/partials/_support_chat.html"
 
 
 class TerminusgpsPasswordResetView(HtmxTemplateResponseMixin, PasswordResetView):
