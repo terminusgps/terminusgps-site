@@ -8,8 +8,8 @@
     </div>
 </div>
 {% else %}
-<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+<table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
+    <thead class="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
         <tr>
             <th scope="col" class="px-6 py-3">
                 Name
@@ -20,12 +20,12 @@
     </thead>
     <tbody>
         {% for asset in asset_list %}
-        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+        <tr class="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
             <td class="px-6 py-4">
                 {{ asset.name }}
             </td>
             <td class="px-6 py-4">
-                <a class="font-semibold text-terminus-red-800 underline decoration-terminus-black decoration-2 underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted" href="{{ asset.get_absolute_url }}">View Asset</a>
+                <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted md:me-6 dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{{ asset.get_absolute_url }}">View Asset</a>
             </td>
         </tr>
         {% endfor %}

@@ -1,7 +1,7 @@
 import typing
 
 from django import forms
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.urls import reverse_lazy
@@ -97,7 +97,7 @@ class CustomerSubscriptionDetailView(
 
 
 class CustomerSubscriptionUpdateView(
-    PermissionRequiredMixin, HtmxTemplateResponseMixin, UpdateView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, UpdateView
 ):
     content_type = "text/html"
     context_object_name = "subscription"
@@ -113,13 +113,12 @@ class CustomerSubscriptionUpdateView(
     permission_denied_message = "You do not have permission to view this."
     raise_exception = False
     template_name = "terminusgps_tracker/subscriptions/update.html"
-    permission_required = "terminusgps_tracker.update_customersubscription"
 
     def get_form(self, form_class=None) -> forms.ModelForm:
         form = super().get_form(form_class=form_class)
         form.fields["tier"].widget.choices = [
             (tier.pk, _(f"{tier.name} - ${tier.amount}/mo"))
-            for tier in SubscriptionTier.objects.all()
+            for tier in SubscriptionTier.objects.all()[:3]
         ]
         return form
 

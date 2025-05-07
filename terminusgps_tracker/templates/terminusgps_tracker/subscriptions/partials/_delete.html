@@ -1,9 +1,9 @@
-<form class="{{ class }}" hx-target="#subscription" hx-post="{% url 'cancel subscription' subscription.pk %}" hx-swap="outerHTML">
+<form class="{{ class }}" hx-target="#subscription" hx-post="{% url 'tracker:cancel subscription' subscription.pk %}" hx-swap="outerHTML">
     {% csrf_token %}
     {{ form }}
     <h2 class="text-lg font-semibold text-center">Cancel your {{ subscription.tier|lower }} subscription?</h2>
     <div class="flex flex-col gap-2">
         <input class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit" value="Confirm">
-        <input class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200" type="button" value="Back" hx-get="{% url 'detail subscription' subscription.pk %}">
+        <input class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200" type="button" value="Back" hx-get="{% url 'tracker:detail subscription' subscription.pk %}">
     </div>
 </form>
