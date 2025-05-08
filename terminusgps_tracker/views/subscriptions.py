@@ -131,15 +131,18 @@ class CustomerSubscriptionUpdateView(
     def get_initial(self) -> dict[str, typing.Any]:
         initial: dict[str, typing.Any] = super().get_initial()
         customer: Customer = self.get_object().customer
-        addresses = customer.addresses.filter()
-        payments = customer.payments.filter()
 
-        if self.request.GET.get("tier"):
-            initial["tier"] = self.request.GET.get("tier", 1)
-        if addresses.exists():
-            initial["address"] = addresses.filter(default=True).first()
-        if payments.exists():
-            initial["payment"] = payments.filter(default=True).first()
+        initial["tier"] = self.request.GET.get("tier", 1)
+        initial["address"] = (
+            customer.addresses.filter(default=True).first()
+            if customer.addresses.exists()
+            else None
+        )
+        initial["payment"] = (
+            customer.payments.filter(default=True).first()
+            if customer.payments.exists()
+            else None
+        )
         return initial
 
     def form_valid(self, form: CustomerSubscriptionUpdateForm) -> HttpResponse:
@@ -181,11 +184,6 @@ class CustomerSubscriptionUpdateView(
             subscription.payment = form.cleaned_data["payment"]
             subscription.save()
             subscription.authorizenet_update_subscription()
-        else:
-            subscription.tier = form.cleaned_data["tier"]
-            subscription.address = form.cleaned_data["address"]
-            subscription.payment = form.cleaned_data["payment"]
-            subscription.save()
         return super().form_valid(form=form)
 
     def get_success_url(self) -> str:
