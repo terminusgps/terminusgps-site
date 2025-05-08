@@ -105,7 +105,8 @@ class CustomerSubscription(models.Model):
     )
     """Total number of months for the subscription."""
     trial_months = models.PositiveIntegerField(
-        choices=[(0, _("0 months")), (1, _("1 month"))], default=0
+        choices=[(0, _("0 months")), (12, _("12 months")), (24, _("24 months"))],
+        default=0,
     )
     """Total number of trial months for the subscription."""
     tier = models.ForeignKey(
