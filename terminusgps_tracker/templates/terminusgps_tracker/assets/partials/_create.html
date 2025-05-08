@@ -1,7 +1,6 @@
 <form method="post" action="" class="{{ class }}">
     {% csrf_token %}
     {% if form.non_field_errors %}<div class="inset-shadow w-full animate-jiggle rounded border border-red-600 bg-red-200 p-2 text-red-600">{{ form.non_field_errors }}</div>{% endif %}
-    {{ form.account_id }}
     <div class="flex flex-col justify-between gap-2 md:flex-row">
         <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
             {{ form.imei_number.label }}

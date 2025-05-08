@@ -21,7 +21,6 @@ class CustomerAssetCreateForm(forms.Form):
             attrs={"class": default_field_class, "placeholder": "867730050855555"}
         ),
     )
-    account_id = forms.CharField(widget=forms.widgets.HiddenInput())
 
 
 class InstallerAssetCreateForm(forms.Form):

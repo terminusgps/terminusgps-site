@@ -11,18 +11,15 @@ from django.contrib.auth.views import (
 )
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import EmailMessage
-from django.forms import ValidationError
+from django.db import transaction
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, RedirectView, TemplateView
-from terminusgps.authorizenet.controllers import AuthorizenetControllerExecutionError
 from terminusgps.authorizenet.profiles import CustomerProfile
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon import constants
 from terminusgps.wialon.items import WialonResource, WialonUser
 from terminusgps.wialon.session import WialonSession
-from wialon.api import WialonError
 
 from terminusgps_tracker.models import Customer
 
@@ -492,56 +489,52 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     def form_valid(
         self, form: TerminusgpsRegisterForm
     ) -> HttpResponse | HttpResponseRedirect:
-        try:
-            ids = self.wialon_registration_flow(form)
-            customer = Customer.objects.create(
-                user=get_user_model().objects.create_user(
-                    username=form.cleaned_data["username"],
-                    password=form.cleaned_data["password1"],
-                ),
-                wialon_user_id=ids.get("end_user_id"),
-                wialon_resource_id=ids.get("resource_id"),
-            )
-            customer.authorizenet_id = CustomerProfile(
-                email=form.cleaned_data["username"], merchant_id=customer.pk
-            ).id
-            return super().form_valid(form=form)
-        except WialonError as e:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Whoops! %(error)s"), code="invalid", params={"error": e}
-                ),
-            )
-            return self.form_invalid(form=form)
-        except AuthorizenetControllerExecutionError as e:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Whoops! %(error)s"), code="invalid", params={"error": e}
-                ),
-            )
-            return self.form_invalid(form=form)
+        user = get_user_model().objects.create_user(
+            username=form.cleaned_data["username"],
+            password=form.cleaned_data["password1"],
+        )
+
+        customer = Customer.objects.create(user=user)
+        customer = self.wialon_registration_flow(form, customer)
+        customer = self.authorizenet_registration_flow(form, customer)
+        customer.save()
+        return super().form_valid(form=form)
 
     @staticmethod
-    def wialon_registration_flow(form: TerminusgpsRegisterForm) -> dict[str, str]:
+    @transaction.atomic
+    def authorizenet_registration_flow(
+        form: TerminusgpsRegisterForm, customer: Customer
+    ) -> Customer:
         """
-        Creates Wialon objects and returns a dictionary map to their ids.
+        Creates a customer profile in Authorizenet and saves its id to the customer.
 
         :param form: A Terminus GPS registration form.
         :type form: :py:obj:`~terminusgps_tracker.forms.TerminusgpsRegisterForm`
-        :returns: A dictionary map of Wialon object ids.
-        :rtype: :py:obj:`dict`
+        :param customer: A customer object.
+        :type customer: :py:obj:`~terminusgps_tracker.models.customers.Customer`
+        :returns: A customer object with :py:attr:`authorizenet_id` set.
+        :rtype: :py:obj:`~terminusgps_tracker.models.customers.Customer`
 
-        Response format:
+        """
+        email_addr = str(form.cleaned_data["username"])
+        customer_profile = CustomerProfile(email=email_addr, merchant_id=customer.pk)
+        customer.authorizenet_id = customer_profile.id
+        return customer
 
-        +-------------------+---------------+
-        | key               | type          |
-        +===================+===============+
-        | ``"end_user_id"`` | :py:obj:`str` |
-        +-------------------+---------------+
-        | ``"resource_id"`` | :py:obj:`str` |
-        +-------------------+---------------+
+    @staticmethod
+    @transaction.atomic
+    def wialon_registration_flow(
+        form: TerminusgpsRegisterForm, customer: Customer
+    ) -> Customer:
+        """
+        Creates Wialon objects and saves their ids to the customer.
+
+        :param form: A Terminus GPS registration form.
+        :type form: :py:obj:`~terminusgps_tracker.forms.TerminusgpsRegisterForm`
+        :param customer: A customer object.
+        :type customer: :py:obj:`~terminusgps_tracker.models.customers.Customer`
+        :returns: A customer object with :py:attr:`end_user_id` and :py:attr:`resource_id` set.
+        :rtype: :py:obj:`tuple`
 
         """
         username: str = form.cleaned_data["username"]
@@ -575,6 +568,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
             resource.create_account("terminusgps_ext_hist")
             resource.enable_account()
             resource.set_settings_flags()
-            resource.add_days(7)
 
-        return {"end_user_id": str(end_user.id), "resource_id": str(resource.id)}
+            customer.wialon_user_id = end_user.id
+            customer.wialon_resource_id = resource.id
+            return customer
