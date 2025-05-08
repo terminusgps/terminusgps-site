@@ -62,7 +62,7 @@ class Customer(models.Model):
         """
         if self.authorizenet_id:
             return CustomerProfile(id=self.authorizenet_id)
-        return CustomerProfile(merchant_id=self.user.pk, email=self.user.username)
+        return CustomerProfile(merchant_id=str(self.user.pk), email=self.user.username)
 
     @transaction.atomic
     def authorizenet_sync_payment_profiles(self) -> None:

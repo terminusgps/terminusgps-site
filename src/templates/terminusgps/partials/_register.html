@@ -1,4 +1,4 @@
-<form class="{{ class }}" action="{% url 'register' %}" method="post" hx-boost="true">
+<form class="{{ class }}" action="{% url 'register' %}" method="post">
     {{ form.non_field_errors }}
     {% csrf_token %}
     <div class="flex w-full flex-col gap-1 p-2">
@@ -42,7 +42,7 @@
     </div>
     <div class="mt-4 flex flex-col gap-4">
         <input class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit" value="Register">
-        <p class="text-center text-sm dark:text-gray-200">Already have an account? <a class="font-semibold text-terminus-red-800 underline decoration-terminus-black decoration-2 underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted" href="{% url 'login' %}">Click here</a> to login.</p>
+        <p class="text-center text-sm dark:text-gray-200">Already have an account? <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'login' %}">Click here</a> to login.</p>
         <input class="hidden" type="hidden" name="next" value="{{ next }}"></input>
     </div>
 </form>

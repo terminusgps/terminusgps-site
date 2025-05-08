@@ -107,7 +107,6 @@ class TerminusgpsRegisterForm(UserCreationForm):
         ),
         validators=[validate_wialon_password],
     )
-    account_id = forms.CharField(widget=widgets.HiddenInput())
 
     def clean(self) -> dict[str, Any] | None:
         cleaned_data: dict[str, Any] | None = super().clean()

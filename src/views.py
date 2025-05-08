@@ -500,7 +500,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
         customer = self.wialon_registration_flow(form, customer)
         customer = self.authorizenet_registration_flow(form, customer)
         customer.save()
-        return super().form_valid(form=form)
+        return HttpResponseRedirect(self.get_success_url())
 
     @staticmethod
     @transaction.atomic
