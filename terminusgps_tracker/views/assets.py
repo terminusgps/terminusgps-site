@@ -76,7 +76,7 @@ class CustomerAssetCreateView(HtmxTemplateResponseMixin, FormView):
     def get_success_url(self, asset: CustomerAsset | None) -> str:
         if asset is not None:
             return asset.get_absolute_url()
-        return reverse("list assets")
+        return reverse("tracker:list assets")
 
     def get_initial(self) -> dict[str, Any]:
         initial: dict[str, Any] = super().get_initial()
@@ -131,6 +131,7 @@ class CustomerAssetCreateView(HtmxTemplateResponseMixin, FormView):
                 resource = WialonResource(
                     id=customer.wialon_resource_id, session=session
                 )
+
                 if unit.name != form.cleaned_data["name"]:
                     unit.rename(form.cleaned_data["name"])
                 resource.migrate_unit(unit)
