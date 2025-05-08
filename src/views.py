@@ -572,6 +572,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
             resource.create_account("terminusgps_ext_hist")
             resource.enable_account()
             resource.set_settings_flags()
+            resource.add_days(7)
 
             customer.wialon_user_id = end_user.id
             customer.wialon_resource_id = resource.id
