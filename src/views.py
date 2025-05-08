@@ -492,6 +492,8 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
         user = get_user_model().objects.create_user(
             username=form.cleaned_data["username"],
             password=form.cleaned_data["password1"],
+            first_name=form.cleaned_data["first_name"],
+            last_name=form.cleaned_data["last_name"],
         )
 
         customer = Customer.objects.create(user=user)
