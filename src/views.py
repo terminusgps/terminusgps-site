@@ -519,7 +519,9 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
 
         """
         email_addr = str(form.cleaned_data["username"])
-        customer_profile = CustomerProfile(email=email_addr, merchant_id=customer.pk)
+        customer_profile = CustomerProfile(
+            email=email_addr, merchant_id=str(customer.pk)
+        )
         customer.authorizenet_id = customer_profile.id
         return customer
 
