@@ -687,9 +687,8 @@ class CustomerPaymentMethodDeleteView(
 
         if prompt is None or not prompt.isdigit():
             return HttpResponse(status=400)
-        if int(prompt) != self.get_object().authorizenet_get_payment_profile().last_4:
+        if prompt != self.get_object().authorizenet_get_payment_profile().last_4:
             return HttpResponse(status=400)
-
         return super().post(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet[CustomerPaymentMethod, CustomerPaymentMethod]:

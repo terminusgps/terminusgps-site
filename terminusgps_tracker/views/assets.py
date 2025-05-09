@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon import constants
-from terminusgps.wialon.items import WialonResource, WialonUnit, WialonUser
+from terminusgps.wialon.items import WialonResource, WialonUser
 from terminusgps.wialon.session import WialonSession
 from terminusgps.wialon.utils import get_unit_by_imei
 from wialon.api import WialonError
@@ -113,8 +113,8 @@ class CustomerAssetCreateView(HtmxTemplateResponseMixin, FormView):
 
         try:
             with WialonSession() as session:
-                unit_id = get_unit_by_imei(imei_number, session)
-                if unit_id is None:
+                unit = get_unit_by_imei(imei_number, session)
+                if unit is None:
                     form.add_error(
                         "imei_number",
                         ValidationError(
@@ -126,7 +126,6 @@ class CustomerAssetCreateView(HtmxTemplateResponseMixin, FormView):
                     )
                     return self.form_invalid(form=form)
 
-                unit = WialonUnit(id=unit_id, session=session)
                 user = WialonUser(id=customer.wialon_user_id, session=session)
                 resource = WialonResource(
                     id=customer.wialon_resource_id, session=session

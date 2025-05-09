@@ -1,10 +1,12 @@
 import typing
 
 from django import forms
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
-from django.http import HttpResponse
-from django.urls import reverse_lazy
+from django.db import transaction
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.urls import reverse, reverse_lazy
 from django.utils.dateparse import parse_datetime
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
@@ -116,8 +118,44 @@ class CustomerSubscriptionUpdateView(
     permission_denied_message = "You do not have permission to view this."
     raise_exception = False
     template_name = "terminusgps_tracker/subscriptions/update.html"
+    success_url = reverse_lazy("tracker:dashboard")
+
+    def dispatch(
+        self, request: HttpRequest, *args, **kwargs
+    ) -> HttpResponse | HttpResponseRedirect:
+        subscription = self.get_object()
+        customer = subscription.customer
+
+        if not customer.addresses.exists():
+            messages.error(
+                request,
+                _(
+                    "Please add at least one shipping address before updating your subscription."
+                ),
+            )
+            request.headers["HX-Boosted"] = "true"
+            return HttpResponseRedirect(reverse("tracker:payments"))
+        if not customer.payments.exists():
+            messages.error(
+                request,
+                _(
+                    "Please add at least one payment method before updating your subscription."
+                ),
+            )
+            request.headers["HX-Boosted"] = "true"
+            return HttpResponseRedirect(reverse("tracker:payments"))
+        return super().dispatch(request, *args, **kwargs)
 
     def get_form(self, form_class=None) -> forms.ModelForm:
+        """
+        Adds the first three subscription tiers to the model form and returns it.
+
+        :param form_class: A form class.
+        :type form_class: :py:obj:`~django.forms.Form` | :py:obj:`None`
+        :returns: A customer subscription update form.
+        :rtype: :py:obj:`~django.forms.ModelForm`
+
+        """
         form = super().get_form(form_class=form_class)
         form.fields["tier"].widget.choices = [
             (tier.pk, _(f"{tier.name} - ${tier.amount}/mo"))
@@ -126,26 +164,39 @@ class CustomerSubscriptionUpdateView(
         return form
 
     def get_object(self, queryset=None) -> CustomerSubscription:
-        return CustomerSubscription.objects.get(customer__user=self.request.user)
+        """Returns the subscription for the customer."""
+        return CustomerSubscription.objects.get_or_create(
+            customer__user=self.request.user
+        )[0]
+
+    def get_success_url(self, subscription: CustomerSubscription | None = None) -> str:
+        """Returns a URL pointing to the detail view for the subscription."""
+        if subscription is not None:
+            return subscription.get_absolute_url()
+        return super().get_success_url()
 
     def get_initial(self) -> dict[str, typing.Any]:
+        """Sets the initial tier, payment method and shipping address for the form."""
         initial: dict[str, typing.Any] = super().get_initial()
         customer: Customer = self.get_object().customer
 
         initial["tier"] = self.request.GET.get("tier", 1)
-        initial["address"] = (
-            customer.addresses.filter(default=True).first()
-            if customer.addresses.exists()
-            else None
-        )
-        initial["payment"] = (
-            customer.payments.filter(default=True).first()
-            if customer.payments.exists()
-            else None
-        )
+        initial["address"] = customer.addresses.filter(default=True).first()
+        initial["payment"] = customer.payments.filter(default=True).first()
         return initial
 
-    def form_valid(self, form: CustomerSubscriptionUpdateForm) -> HttpResponse:
+    def form_valid(
+        self, form: CustomerSubscriptionUpdateForm
+    ) -> HttpResponse | HttpResponseRedirect:
+        """
+        Updates the customer's subscription in Authorizenet based on the form.
+
+        :param form: A customer subscription update form.
+        :type form: :py:obj:`~terminusgps_tracker.forms.subscriptions.CustomerSubscriptionUpdateForm`
+        :returns: An HTTP response.
+        :rtype: :py:obj:`~django.http.HttpResponse` | :py:obj:`~django.http.HttpResponseRedirect`
+
+        """
         if not form.cleaned_data["tier"]:
             form.add_error(
                 None,
@@ -154,24 +205,27 @@ class CustomerSubscriptionUpdateView(
                 ),
             )
             return self.form_invalid(form=form)
-        if not form.cleaned_data["payment"]:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Please add at least one payment method before proceeding.")
-                ),
-            )
-            return self.form_invalid(form=form)
-        if not form.cleaned_data["address"]:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Please add at least one shipping address before proceeding.")
-                ),
-            )
-            return self.form_invalid(form=form)
 
         subscription: CustomerSubscription = self.get_object()
+        subscription = self.update_customer_subscription(subscription, form)
+        return HttpResponseRedirect(self.get_success_url(subscription))
+
+    @staticmethod
+    @transaction.atomic
+    def update_customer_subscription(
+        subscription: CustomerSubscription, form: CustomerSubscriptionUpdateForm
+    ) -> CustomerSubscription:
+        """
+        Updates a customer subscription if necessary based on the form, then returns it.
+
+        :param subscription: A customer subscription.
+        :type subscription: :py:obj:`~terminusgps_tracker.models.subscriptions.CustomerSubscription`
+        :param form: A customer subscription update form.
+        :type form: :py:obj:`~terminusgps_tracker.forms.subscriptions.CustomerSubscriptionUpdateForm`
+        :returns: The customer subscription.
+        :rtype: :py:obj:`~terminusgps_tracker.models.subscriptions.CustomerSubscription`
+
+        """
         if any(
             [
                 subscription.tier != form.cleaned_data["tier"],
@@ -184,10 +238,7 @@ class CustomerSubscriptionUpdateView(
             subscription.payment = form.cleaned_data["payment"]
             subscription.save()
             subscription.authorizenet_update_subscription()
-        return super().form_valid(form=form)
-
-    def get_success_url(self) -> str:
-        return self.get_object().get_absolute_url()
+        return subscription
 
 
 class CustomerSubscriptionDeleteView(
