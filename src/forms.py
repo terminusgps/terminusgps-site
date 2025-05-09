@@ -1,6 +1,7 @@
 from typing import Any
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.validators import validate_email
 from django.forms import ValidationError, widgets
@@ -13,7 +14,7 @@ class TerminusgpsEmailSupportForm(forms.Form):
         label="Your Email Address",
         widget=forms.widgets.EmailInput(
             attrs={
-                "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "peter@terminusgps.com",
             }
         ),
@@ -23,7 +24,7 @@ class TerminusgpsEmailSupportForm(forms.Form):
         max_length=1024,
         widget=forms.widgets.TextInput(
             attrs={
-                "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "Subscription doesn't update...",
             }
         ),
@@ -33,7 +34,7 @@ class TerminusgpsEmailSupportForm(forms.Form):
         max_length=2048,
         widget=forms.widgets.Textarea(
             attrs={
-                "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "I expected something to happen but something else happened instead...",
             }
         ),
@@ -44,30 +45,24 @@ class TerminusgpsEmailVerificationForm(forms.Form):
     otp = forms.CharField(
         label="One-time Password (OTP)",
         max_length=6,
-        widget=widgets.TextInput(
-            attrs={
-                "class": "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100 bg-white border border-gray-600"
-            }
-        ),
+        widget=widgets.TextInput(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
     )
 
 
 class TerminusgpsRegisterForm(UserCreationForm):
     field_order = ["first_name", "last_name", "username", "password1", "password2"]
-    default_css_class = "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300"
-
     first_name = forms.CharField(
         label="First Name",
         max_length=64,
         widget=widgets.TextInput(
-            attrs={"class": default_css_class, "placeholder": "First"}
+            attrs={"class": settings.DEFAULT_FIELD_CLASS, "placeholder": "First"}
         ),
     )
     last_name = forms.CharField(
         label="Last Name",
         max_length=64,
         widget=widgets.TextInput(
-            attrs={"class": default_css_class, "placeholder": "Last"}
+            attrs={"class": settings.DEFAULT_FIELD_CLASS, "placeholder": "Last"}
         ),
     )
     username = forms.CharField(
@@ -77,7 +72,7 @@ class TerminusgpsRegisterForm(UserCreationForm):
         validators=[validate_email],
         widget=widgets.EmailInput(
             attrs={
-                "class": default_css_class,
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "email@terminusgps.com",
                 "inputmode": "email",
             }
@@ -87,7 +82,7 @@ class TerminusgpsRegisterForm(UserCreationForm):
         label="Password",
         widget=widgets.PasswordInput(
             attrs={
-                "class": default_css_class,
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "minlength": 4,
                 "maxlength": 64,
                 "inputmode": "text",
@@ -99,7 +94,7 @@ class TerminusgpsRegisterForm(UserCreationForm):
         label="Confirm Password",
         widget=widgets.PasswordInput(
             attrs={
-                "class": default_css_class,
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "minlength": 4,
                 "maxlength": 64,
                 "inputmode": "text",
@@ -121,7 +116,6 @@ class TerminusgpsRegisterForm(UserCreationForm):
 
 
 class TerminusgpsAuthenticationForm(AuthenticationForm):
-    default_css_class = "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300"
     error_messages = {
         "invalid_login": "Couldn't find a user with those credentials. Please try again."
     }
@@ -132,7 +126,7 @@ class TerminusgpsAuthenticationForm(AuthenticationForm):
         validators=[validate_email],
         widget=widgets.EmailInput(
             attrs={
-                "class": default_css_class,
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "email@terminusgps.com",
                 "autofocus": True,
                 "inputmode": "email",
@@ -142,5 +136,5 @@ class TerminusgpsAuthenticationForm(AuthenticationForm):
     password = forms.CharField(
         min_length=8,
         max_length=64,
-        widget=widgets.PasswordInput(attrs={"class": default_css_class}),
+        widget=widgets.PasswordInput(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
     )

@@ -3,6 +3,7 @@ from typing import Any
 
 from authorizenet.apicontractsv1 import creditCardType, customerAddressType
 from django import forms
+from django.conf import settings
 from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.forms import widgets as base_widgets
 from django.utils import timezone
@@ -18,35 +19,35 @@ class AddressWidget(base_widgets.MultiWidget):
             widgets = {
                 "street": base_widgets.TextInput(
                     attrs={
-                        "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                        "class": settings.DEFAULT_FIELD_CLASS,
                         "placeholder": "Street",
                         "maxlength": 128,
                     }
                 ),
                 "city": base_widgets.TextInput(
                     attrs={
-                        "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                        "class": settings.DEFAULT_FIELD_CLASS,
                         "placeholder": "City",
                         "maxlength": 128,
                     }
                 ),
                 "state": base_widgets.TextInput(
                     attrs={
-                        "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                        "class": settings.DEFAULT_FIELD_CLASS,
                         "placeholder": "State",
                         "maxlength": 64,
                     }
                 ),
                 "country": base_widgets.TextInput(
                     attrs={
-                        "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                        "class": settings.DEFAULT_FIELD_CLASS,
                         "placeholder": "Country",
                         "maxlength": 64,
                     }
                 ),
                 "zip": base_widgets.TextInput(
                     attrs={
-                        "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                        "class": settings.DEFAULT_FIELD_CLASS,
                         "placeholder": "Zip #",
                         "maxlength": 12,
                     }
@@ -75,7 +76,7 @@ class CreditCardWidget(base_widgets.MultiWidget):
             widgets = {
                 "number": base_widgets.TextInput(
                     attrs={
-                        "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                        "class": settings.DEFAULT_FIELD_CLASS,
                         "placeholder": "Card #",
                         "minlength": 16,
                         "maxlength": 19,
@@ -83,7 +84,7 @@ class CreditCardWidget(base_widgets.MultiWidget):
                 ),
                 "expiry_month": base_widgets.TextInput(
                     attrs={
-                        "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                        "class": settings.DEFAULT_FIELD_CLASS,
                         "placeholder": "MM",
                         "minlength": 2,
                         "maxlength": 2,
@@ -91,7 +92,7 @@ class CreditCardWidget(base_widgets.MultiWidget):
                 ),
                 "expiry_year": base_widgets.TextInput(
                     attrs={
-                        "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                        "class": settings.DEFAULT_FIELD_CLASS,
                         "placeholder": "YY",
                         "minlength": 2,
                         "maxlength": 2,
@@ -99,7 +100,7 @@ class CreditCardWidget(base_widgets.MultiWidget):
                 ),
                 "ccv": base_widgets.TextInput(
                     attrs={
-                        "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                        "class": settings.DEFAULT_FIELD_CLASS,
                         "placeholder": "CCV #",
                         "minlength": 3,
                         "maxlength": 4,
@@ -147,7 +148,6 @@ class AddressField(forms.MultiValueField):
 
 
 class CreditCardField(forms.MultiValueField):
-    field_class: str = "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300"
     widget = CreditCardWidget
 
     def __init__(self, **kwargs) -> None:

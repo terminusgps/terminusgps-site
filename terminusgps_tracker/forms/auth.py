@@ -1,6 +1,7 @@
 from typing import Any
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.validators import validate_email
 from django.forms import ValidationError, widgets
@@ -12,30 +13,25 @@ class TrackerEmailVerificationForm(forms.Form):
     otp = forms.CharField(
         label="One-time Password (OTP)",
         max_length=6,
-        widget=widgets.TextInput(
-            attrs={
-                "class": "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100 bg-white border border-gray-600"
-            }
-        ),
+        widget=widgets.TextInput(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
     )
 
 
 class TrackerRegisterForm(UserCreationForm):
     field_order = ["first_name", "last_name", "username", "password1", "password2"]
-    default_css_class = "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100 bg-white border border-gray-600"
 
     first_name = forms.CharField(
         label="First Name",
         max_length=64,
         widget=widgets.TextInput(
-            attrs={"class": default_css_class, "placeholder": "First"}
+            attrs={"class": settings.DEFAULT_FIELD_CLASS, "placeholder": "First"}
         ),
     )
     last_name = forms.CharField(
         label="Last Name",
         max_length=64,
         widget=widgets.TextInput(
-            attrs={"class": default_css_class, "placeholder": "Last"}
+            attrs={"class": settings.DEFAULT_FIELD_CLASS, "placeholder": "Last"}
         ),
     )
     username = forms.CharField(
@@ -45,7 +41,7 @@ class TrackerRegisterForm(UserCreationForm):
         validators=[validate_email],
         widget=widgets.EmailInput(
             attrs={
-                "class": default_css_class,
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "email@terminusgps.com",
                 "inputmode": "email",
             }
@@ -55,7 +51,7 @@ class TrackerRegisterForm(UserCreationForm):
         label="Password",
         widget=widgets.PasswordInput(
             attrs={
-                "class": default_css_class,
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "minlength": 4,
                 "maxlength": 64,
                 "inputmode": "text",
@@ -67,7 +63,7 @@ class TrackerRegisterForm(UserCreationForm):
         label="Confirm Password",
         widget=widgets.PasswordInput(
             attrs={
-                "class": default_css_class,
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "minlength": 4,
                 "maxlength": 64,
                 "inputmode": "text",
@@ -89,7 +85,6 @@ class TrackerRegisterForm(UserCreationForm):
 
 
 class TrackerAuthenticationForm(AuthenticationForm):
-    default_css_class = "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100 bg-white border border-gray-600"
     error_messages = {
         "invalid_login": "Couldn't find a user with those credentials. Please try again."
     }
@@ -100,7 +95,7 @@ class TrackerAuthenticationForm(AuthenticationForm):
         validators=[validate_email],
         widget=widgets.EmailInput(
             attrs={
-                "class": default_css_class,
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "email@terminusgps.com",
                 "autofocus": True,
                 "inputmode": "email",
@@ -110,5 +105,5 @@ class TrackerAuthenticationForm(AuthenticationForm):
     password = forms.CharField(
         min_length=8,
         max_length=64,
-        widget=widgets.PasswordInput(attrs={"class": default_css_class}),
+        widget=widgets.PasswordInput(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
     )

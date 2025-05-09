@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 
 from terminusgps_tracker.forms.fields import AddressField, CreditCardField
 
@@ -8,7 +9,7 @@ class CustomerPaymentMethodCreateForm(forms.Form):
         max_length=64,
         widget=forms.widgets.TextInput(
             attrs={
-                "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "First Name",
                 "maxlength": 64,
             }
@@ -18,7 +19,7 @@ class CustomerPaymentMethodCreateForm(forms.Form):
         max_length=64,
         widget=forms.widgets.TextInput(
             attrs={
-                "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "Last Name",
                 "maxlength": 64,
             }
@@ -28,7 +29,7 @@ class CustomerPaymentMethodCreateForm(forms.Form):
         label="Phone #",
         widget=forms.widgets.TextInput(
             attrs={
-                "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "555-555-5555",
                 "maxlength": 32,
                 "pattern": "\\d\\d\\d-\\d\\d\\d-\\d\\d\\d\\d",
