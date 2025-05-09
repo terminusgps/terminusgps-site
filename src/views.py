@@ -218,7 +218,7 @@ class TerminusgpsPasswordResetView(HtmxTemplateResponseMixin, PasswordResetView)
         form.fields["email"].label = "Email Address"
         form.fields["email"].widget.attrs.update(
             {
-                "class": "w-full block rounded p-2 dark:bg-gray-600 dark:text-gray-100 bg-white border border-gray-600",
+                "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
                 "placeholder": "email@domain.com",
             }
         )
@@ -486,6 +486,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     partial_template_name = "terminusgps/partials/_register.html"
     success_url = reverse_lazy("tracker:dashboard")
 
+    @transaction.atomic
     def form_valid(
         self, form: TerminusgpsRegisterForm
     ) -> HttpResponse | HttpResponseRedirect:
