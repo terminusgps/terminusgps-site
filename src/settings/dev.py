@@ -35,12 +35,12 @@ CONNECT_SECRET = secret.get("CONNECT_SECRET")
 CORS_ORIGIN_ALLOW_ALL = True
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-DEFAULT_FROM_EMAIL = "noreply@terminusgps.com"
+DEFAULT_FROM_EMAIL = "support@terminusgps.com"
 DEFAULT_TAX_RATE = decimal.Decimal(
     secret.get("DEFAULT_TAX_RATE"),
     context=decimal.Context(prec=4, rounding=decimal.ROUND_HALF_UP),
 )
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
 EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")
 EMAIL_HOST_USER = secret.get("EMAIL_HOST_USER")

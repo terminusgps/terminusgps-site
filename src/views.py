@@ -62,6 +62,38 @@ class TerminusgpsHostingView(RedirectView):
 
 
 class TerminusgpsPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
+    """
+    Renders the privacy policy for the application.
+
+    **Context**
+
+    ``title``
+        The title for the view/webpage.
+
+        Value: ``"Privacy Policy"``
+
+    ``class``
+        The `tailwindcss`_ class used for the view.
+
+        Value: ``"flex flex-col gap-4"``
+
+    ``subtitle``
+        The subtitle for the view/webpage.
+
+        Value: ``"How we use your data"``
+
+    **HTTP Methods:**
+        - GET
+
+    **Template:**
+        :template:`terminusgps/privacy.html`
+
+    **Partial Template:**
+        :template:`terminusgps/partials/_privacy.html`
+
+    .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
+    """
+
     content_type = "text/html"
     extra_context = {
         "title": "Privacy Policy",
@@ -74,6 +106,39 @@ class TerminusgpsPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
 
 
 class TerminusgpsMobileAppView(HtmxTemplateResponseMixin, TemplateView):
+    """
+    Renders links to mobile app download pages for the application.
+
+    **Context**
+
+    ``title``
+        The title for the view/webpage.
+
+        Value: ``"Mobile Apps"``
+
+    ``class``
+        The `tailwindcss`_ class used for the view.
+
+        Value: ``"flex flex-col gap-4"``
+
+    ``subtitle``
+        The subtitle for the view/webpage.
+
+        Value: ``"Take your tracking to-go with our mobile apps"``
+
+    **HTTP Methods:**
+        - GET
+
+    **Template:**
+        :template:`terminusgps/mobile_app.html`
+
+    **Partial Template:**
+        :template:`terminusgps/partials/_mobile_app.html`
+
+    .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
+
+    """
+
     content_type = "text/html"
     extra_context = {
         "title": "Mobile Apps",
@@ -86,6 +151,39 @@ class TerminusgpsMobileAppView(HtmxTemplateResponseMixin, TemplateView):
 
 
 class TerminusgpsSupportView(HtmxTemplateResponseMixin, TemplateView):
+    """
+    Renders the support options for the application.
+
+    **Context**
+
+    ``title``
+        The title for the view/webpage.
+
+        Value: ``"Support"``
+
+    ``class``
+        The `tailwindcss`_ class used for the view.
+
+        Value: ``"flex flex-col gap-4"``
+
+    ``subtitle``
+        The subtitle for the view/webpage.
+
+        Value: ``"Drop us a line"``
+
+    **HTTP Methods:**
+        - GET
+
+    **Template:**
+        :template:`terminusgps/support.html`
+
+    **Partial Template:**
+        :template:`terminusgps/partials/_support.html`
+
+    .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
+
+    """
+
     content_type = "text/html"
     extra_context = {
         "title": "Support",
