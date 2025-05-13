@@ -7,6 +7,7 @@ from terminusgps_tracker.validators import validate_wialon_imei_number_available
 
 class CustomerAssetCreateForm(forms.Form):
     name = forms.CharField(
+        help_text="Please enter a memorable name for your new asset.",
         label="Asset Name",
         widget=forms.widgets.TextInput(
             attrs={
@@ -18,6 +19,7 @@ class CustomerAssetCreateForm(forms.Form):
         ),
     )
     imei_number = forms.CharField(
+        help_text="Please enter the IMEI # found on your device.",
         label="IMEI #",
         validators=[validate_wialon_imei_number_available],
         widget=forms.widgets.TextInput(
