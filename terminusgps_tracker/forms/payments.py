@@ -38,7 +38,7 @@ class CustomerPaymentMethodCreateForm(forms.Form):
             attrs={
                 "class": settings.DEFAULT_FIELD_CLASS,
                 "enterkeyhint": "next",
-                "inputmode": "numeric",
+                "inputmode": "text",
                 "maxlength": 32,
                 "pattern": "\\d\\d\\d-\\d\\d\\d-\\d\\d\\d\\d",
                 "placeholder": "713-904-5555",
