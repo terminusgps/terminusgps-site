@@ -13,7 +13,9 @@ class TrackerEmailVerificationForm(forms.Form):
     otp = forms.CharField(
         label="One-time Password (OTP)",
         max_length=6,
-        widget=widgets.TextInput(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
+        widget=widgets.TextInput(
+            attrs={"class": settings.DEFAULT_FIELD_CLASS, "inputmode": "numeric"}
+        ),
     )
 
 
@@ -24,14 +26,24 @@ class TrackerRegisterForm(UserCreationForm):
         label="First Name",
         max_length=64,
         widget=widgets.TextInput(
-            attrs={"class": settings.DEFAULT_FIELD_CLASS, "placeholder": "First"}
+            attrs={
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "placeholder": "First",
+                "inputmode": "text",
+                "enterkeyhint": "next",
+            }
         ),
     )
     last_name = forms.CharField(
         label="Last Name",
         max_length=64,
         widget=widgets.TextInput(
-            attrs={"class": settings.DEFAULT_FIELD_CLASS, "placeholder": "Last"}
+            attrs={
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "placeholder": "Last",
+                "inputmode": "text",
+                "enterkeyhint": "next",
+            }
         ),
     )
     username = forms.CharField(
@@ -44,6 +56,7 @@ class TrackerRegisterForm(UserCreationForm):
                 "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "email@terminusgps.com",
                 "inputmode": "email",
+                "enterkeyhint": "next",
             }
         ),
     )
@@ -55,6 +68,7 @@ class TrackerRegisterForm(UserCreationForm):
                 "minlength": 4,
                 "maxlength": 64,
                 "inputmode": "text",
+                "enterkeyhint": "next",
             }
         ),
         validators=[validate_wialon_password],
@@ -67,6 +81,7 @@ class TrackerRegisterForm(UserCreationForm):
                 "minlength": 4,
                 "maxlength": 64,
                 "inputmode": "text",
+                "enterkeyhint": "next",
             }
         ),
         validators=[validate_wialon_password],
@@ -99,11 +114,18 @@ class TrackerAuthenticationForm(AuthenticationForm):
                 "placeholder": "email@terminusgps.com",
                 "autofocus": True,
                 "inputmode": "email",
+                "enterkeyhint": "next",
             }
         ),
     )
     password = forms.CharField(
         min_length=8,
         max_length=64,
-        widget=widgets.PasswordInput(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
+        widget=widgets.PasswordInput(
+            attrs={
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "inputmode": "text",
+                "enterkeyhint": "next",
+            }
+        ),
     )

@@ -8,23 +8,36 @@ class CustomerShippingAddressCreateForm(forms.Form):
     first_name = forms.CharField(
         label="First Name",
         widget=forms.widgets.TextInput(
-            attrs={"class": settings.DEFAULT_FIELD_CLASS, "placeholder": "First"}
+            attrs={
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "placeholder": "First",
+                "inputmode": "text",
+                "enterkeyhint": "next",
+            }
         ),
     )
     last_name = forms.CharField(
         label="Last Name",
         widget=forms.widgets.TextInput(
-            attrs={"class": settings.DEFAULT_FIELD_CLASS, "placeholder": "Last"}
+            attrs={
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "placeholder": "Last",
+                "inputmode": "text",
+                "enterkeyhint": "next",
+            }
         ),
     )
     phone = forms.CharField(
         label="Phone #",
-        widget=forms.widgets.TextInput(
+        widget=forms.widgets.Input(
             attrs={
                 "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "555-555-5555",
                 "maxlength": 32,
                 "pattern": "\\d\\d\\d-\\d\\d\\d-\\d\\d\\d\\d",
+                "inputmode": "tel",
+                "type": "tel",
+                "enterkeyhint": "next",
             }
         ),
     )

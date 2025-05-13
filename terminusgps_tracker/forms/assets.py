@@ -9,7 +9,12 @@ class CustomerAssetCreateForm(forms.Form):
     name = forms.CharField(
         label="Asset Name",
         widget=forms.widgets.TextInput(
-            attrs={"class": settings.DEFAULT_FIELD_CLASS, "placeholder": "My Vehicle"}
+            attrs={
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "placeholder": "My Vehicle",
+                "inputmode": "text",
+                "enterkeyhint": "next",
+            }
         ),
     )
     imei_number = forms.CharField(
@@ -19,6 +24,8 @@ class CustomerAssetCreateForm(forms.Form):
             attrs={
                 "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "867730050855555",
+                "inputmode": "numeric",
+                "enterkeyhint": "next",
             }
         ),
     )
@@ -28,9 +35,21 @@ class InstallerAssetCreateForm(forms.Form):
     vin_number = forms.CharField(
         label="VIN #",
         validators=[validate_vin_number],
-        widget=forms.widgets.TextInput(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
+        widget=forms.widgets.TextInput(
+            attrs={
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "inputmode": "text",
+                "enterkeyhint": "next",
+            }
+        ),
     )
     imei_number = forms.CharField(
         label="IMEI #",
-        widget=forms.widgets.TextInput(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
+        widget=forms.widgets.TextInput(
+            attrs={
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "inputmode": "numeric",
+                "enterkeyhint": "next",
+            }
+        ),
     )

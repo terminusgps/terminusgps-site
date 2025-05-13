@@ -12,6 +12,8 @@ class CustomerPaymentMethodCreateForm(forms.Form):
                 "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "First Name",
                 "maxlength": 64,
+                "inputmode": "text",
+                "enterkeyhint": "next",
             }
         ),
     )
@@ -22,17 +24,22 @@ class CustomerPaymentMethodCreateForm(forms.Form):
                 "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "Last Name",
                 "maxlength": 64,
+                "inputmode": "text",
+                "enterkeyhint": "next",
             }
         ),
     )
     phone = forms.CharField(
         label="Phone #",
-        widget=forms.widgets.TextInput(
+        widget=forms.widgets.Input(
             attrs={
                 "class": settings.DEFAULT_FIELD_CLASS,
-                "placeholder": "555-555-5555",
+                "enterkeyhint": "next",
+                "inputmode": "tel",
                 "maxlength": 32,
                 "pattern": "\\d\\d\\d-\\d\\d\\d-\\d\\d\\d\\d",
+                "placeholder": "555-555-5555",
+                "type": "tel",
             }
         ),
     )
