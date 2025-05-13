@@ -1,42 +1,102 @@
 <form class="{{ class }}" action="{% url 'register' %}" method="post">
     {{ form.non_field_errors }}
     {% csrf_token %}
-    <div class="flex w-full flex-col gap-1 p-2">
+    <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
+        {% if form.username.help_text %}
+        <div class="group flex items-center gap-1">
+            <h2 class="select-none">{{ form.username.label }}<h2>
+            <svg hx-on:click="s=document.getElementById('{{ form.username.name }}_help').getAttribute('aria-expanded')==='true'?'false':'true';document.getElementById('{{ form.username.name }}_help').setAttribute('aria-expanded', s);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 hover:scale-125">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+            </svg>
+        </div>
+        {% else %}
         {{ form.username.label }}
+        {% endif %}
         {{ form.username }}
+        {% if form.username.help_text %}
+        <span id="{{ form.username.name }}_help" class="hidden aria-expanded:flex">{{ form.username.help_text }}</span>
+        {% endif %}
         {% if form.username.errors %}
-        <div class="mt-2 animate-jiggle rounded border border-red-800 bg-red-100 p-2 text-red-600">{{ form.username.errors }}</div>
+        <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.username.errors }}</div>
         {% endif %}
     </div>
-    <div class="flex flex-col md:flex-row">
-        <div class="flex w-full flex-col gap-1 p-2">
+    <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
+            {% if form.first_name.help_text %}
+            <div class="group flex items-center gap-1">
+                <h2 class="select-none">{{ form.first_name.label }}<h2>
+                <svg hx-on:click="s=document.getElementById('{{ form.first_name.name }}_help').getAttribute('aria-expanded')==='true'?'false':'true';document.getElementById('{{ form.first_name.name }}_help').setAttribute('aria-expanded', s);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 hover:scale-125">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                </svg>
+            </div>
+            {% else %}
             {{ form.first_name.label }}
+            {% endif %}
             {{ form.first_name }}
+            {% if form.first_name.help_text %}
+            <span id="{{ form.first_name.name }}_help" class="hidden aria-expanded:flex">{{ form.first_name.help_text }}</span>
+            {% endif %}
             {% if form.first_name.errors %}
-            <div class="mt-2 animate-jiggle rounded border border-red-800 bg-red-100 p-2 text-red-600">{{ form.first_name.errors }}</div>
+            <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.first_name.errors }}</div>
             {% endif %}
         </div>
-        <div class="flex w-full flex-col gap-1 p-2">
+        <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
+            {% if form.last_name.help_text %}
+            <div class="group flex items-center gap-1">
+                <h2 class="select-none">{{ form.last_name.label }}<h2>
+                <svg hx-on:click="s=document.getElementById('{{ form.last_name.name }}_help').getAttribute('aria-expanded')==='true'?'false':'true';document.getElementById('{{ form.last_name.name }}_help').setAttribute('aria-expanded', s);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 hover:scale-125">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                </svg>
+            </div>
+            {% else %}
             {{ form.last_name.label }}
+            {% endif %}
             {{ form.last_name }}
+            {% if form.last_name.help_text %}
+            <span id="{{ form.last_name.name }}_help" class="hidden aria-expanded:flex">{{ form.last_name.help_text }}</span>
+            {% endif %}
             {% if form.last_name.errors %}
-            <div class="mt-2 animate-jiggle rounded border border-red-800 bg-red-100 p-2 text-red-600">{{ form.last_name.errors }}</div>
+            <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.last_name.errors }}</div>
             {% endif %}
         </div>
     </div>
-    <div class="flex flex-col md:flex-row">
-        <div class="flex w-full flex-col gap-1 p-2">
+    <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
+            {% if form.password1.help_text %}
+            <div class="group flex items-center gap-1">
+                <h2 class="select-none">{{ form.password1.label }}<h2>
+                <svg hx-on:click="s=document.getElementById('{{ form.password1.name }}_help').getAttribute('aria-expanded')==='true'?'false':'true';document.getElementById('{{ form.password1.name }}_help').setAttribute('aria-expanded', s);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 hover:scale-125">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                </svg>
+            </div>
+            {% else %}
             {{ form.password1.label }}
+            {% endif %}
             {{ form.password1 }}
+            {% if form.password1.help_text %}
+            <span id="{{ form.password1.name }}_help" class="hidden aria-expanded:flex">{{ form.password1.help_text|safe }}</span>
+            {% endif %}
             {% if form.password1.errors %}
-            <div class="mt-2 animate-jiggle rounded border border-red-800 bg-red-100 p-2 text-red-600">{{ form.password1.errors }}</div>
+            <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.password1.errors }}</div>
             {% endif %}
         </div>
-        <div class="flex w-full flex-col gap-1 p-2">
+        <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
+            {% if form.password2.help_text %}
+            <div class="group flex items-center gap-1">
+                <h2 class="select-none">{{ form.password2.label }}<h2>
+                <svg hx-on:click="s=document.getElementById('{{ form.password2.name }}_help').getAttribute('aria-expanded')==='true'?'false':'true';document.getElementById('{{ form.password2.name }}_help').setAttribute('aria-expanded', s);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 hover:scale-125">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+                </svg>
+            </div>
+            {% else %}
             {{ form.password2.label }}
+            {% endif %}
             {{ form.password2 }}
+            {% if form.password2.help_text %}
+            <span id="{{ form.password2.name }}_help" class="hidden aria-expanded:flex">{{ form.password2.help_text|safe }}</span>
+            {% endif %}
             {% if form.password2.errors %}
-            <div hx-on:load="console.log(this.getAttribute('class'));" class="mt-2 animate-jiggle rounded border border-red-800 bg-red-100 p-2 text-red-600">{{ form.password2.errors }}</div>
+            <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.password2.errors }}</div>
             {% endif %}
         </div>
     </div>

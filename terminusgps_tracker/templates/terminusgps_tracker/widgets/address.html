@@ -1,5 +1,9 @@
 {% spaceless %}
 <div class="flex flex-col gap-2">
-    {% for widget in widget.subwidgets %}{% include widget.template_name %}{% endfor %}
+    {% for widget in widget.subwidgets %}
+        {% if forloop.revcounter0|divisibleby:"2" and not forloop.first %}<div class="flex gap-2">{% endif %}
+        {% include widget.template_name %}
+        {% if not forloop.revcounter0|divisibleby:"2" %}</div>{% endif %}
+    {% endfor %}
 </div>
 {% endspaceless %}

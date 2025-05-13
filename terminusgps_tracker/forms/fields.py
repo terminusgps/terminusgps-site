@@ -165,8 +165,8 @@ class CreditCardField(forms.MultiValueField):
             ),
             forms.IntegerField(
                 label="Card Expiration Year",
-                max_value=99,
                 min_value=int(f"{timezone.now():%y}"),  # Current year
+                max_value=99,
             ),
             forms.CharField(
                 label="Card CCV #",

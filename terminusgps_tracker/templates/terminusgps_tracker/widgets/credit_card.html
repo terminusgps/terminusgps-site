@@ -1,5 +1,13 @@
 {% spaceless %}
 <div class="flex flex-col gap-2">
-    {% for widget in widget.subwidgets %}{% include widget.template_name %}{% endfor %}
+    {% for widget in widget.subwidgets %}
+    {% if forloop.counter == 2 %}
+    <div class="flex gap-2">
+    {% endif %}
+    {% include widget.template_name %}
+    {% if forloop.counter == 3 %}
+    </div>
+    {% endif %}
+    {% endfor %}
 </div>
 {% endspaceless %}

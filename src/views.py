@@ -1,3 +1,6 @@
+import datetime
+
+from dateutil.relativedelta import relativedelta
 from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -11,11 +14,14 @@ from django.contrib.auth.views import (
 )
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import EmailMessage
+from django.core.validators import validate_email
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import FormView, RedirectView, TemplateView
 from terminusgps.authorizenet.profiles import CustomerProfile
+from terminusgps.authorizenet.utils import get_days_between
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon import constants
 from terminusgps.wialon.items import WialonResource, WialonUser
@@ -28,6 +34,7 @@ from .forms import (
     TerminusgpsEmailSupportForm,
     TerminusgpsRegisterForm,
 )
+from .validators import validate_username_exists
 
 if settings.configured and not hasattr(settings, "TRACKER_APP_CONFIG"):
     raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
@@ -312,8 +319,13 @@ class TerminusgpsPasswordResetView(HtmxTemplateResponseMixin, PasswordResetView)
         :rtype: :py:obj:`~django.forms.Form`
 
         """
+        help_text = (
+            "Please enter the email address associated with your Terminus GPS account."
+        )
         form = super().get_form(form_class)
         form.fields["email"].label = "Email Address"
+        form.fields["email"].help_text = help_text
+        form.fields["email"].validators = [validate_email, validate_username_exists]
         form.fields["email"].widget.attrs.update(
             {
                 "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
@@ -640,6 +652,12 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
         :rtype: :py:obj:`tuple`
 
         """
+
+        def calculate_account_days(start_date: datetime.date) -> int:
+            return get_days_between(
+                start_date, start_date + relativedelta(months=1, day=start_date.day)
+            )
+
         username: str = form.cleaned_data["username"]
         password: str = form.cleaned_data["password1"]
 
@@ -671,7 +689,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
             resource.create_account("terminusgps_ext_hist")
             resource.enable_account()
             resource.set_settings_flags()
-            resource.add_days(7)
+            resource.add_days(calculate_account_days(timezone.now()))
 
             customer.wialon_user_id = end_user.id
             customer.wialon_resource_id = resource.id

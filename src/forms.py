@@ -52,6 +52,7 @@ class TerminusgpsEmailVerificationForm(forms.Form):
 class TerminusgpsRegisterForm(UserCreationForm):
     field_order = ["first_name", "last_name", "username", "password1", "password2"]
     first_name = forms.CharField(
+        help_text="Please enter your first name.",
         label="First Name",
         max_length=64,
         widget=widgets.TextInput(
@@ -59,6 +60,7 @@ class TerminusgpsRegisterForm(UserCreationForm):
         ),
     )
     last_name = forms.CharField(
+        help_text="Please enter your last name.",
         label="Last Name",
         max_length=64,
         widget=widgets.TextInput(
@@ -66,6 +68,7 @@ class TerminusgpsRegisterForm(UserCreationForm):
         ),
     )
     username = forms.CharField(
+        help_text="Please enter a valid email address.",
         label="Email Address",
         min_length=4,
         max_length=150,
@@ -79,6 +82,7 @@ class TerminusgpsRegisterForm(UserCreationForm):
         ),
     )
     password1 = forms.CharField(
+        help_text="<div class='flex-col'><h2>Password requirements:</h2><ul class='p-2 list-disc list-inside'><li>1 uppercase letter</li><li>1 lowercase letter</li><li>3 digits</li><li>1 special symbol</li><ul></div>",
         label="Password",
         widget=widgets.PasswordInput(
             attrs={
@@ -91,6 +95,7 @@ class TerminusgpsRegisterForm(UserCreationForm):
         validators=[validate_wialon_password],
     )
     password2 = forms.CharField(
+        help_text="<div class='flex-col'><h2>Password requirements:</h2><ul class='p-2 list-disc list-inside'><li>1 uppercase letter</li><li>1 lowercase letter</li><li>3 digits</li><li>1 special symbol</li><ul></div>",
         label="Confirm Password",
         widget=widgets.PasswordInput(
             attrs={
@@ -120,6 +125,7 @@ class TerminusgpsAuthenticationForm(AuthenticationForm):
         "invalid_login": "Couldn't find a user with those credentials. Please try again."
     }
     username = forms.CharField(
+        help_text="Please enter the email address associated with your Terminus GPS account.",
         label="Email Address",
         min_length=4,
         max_length=150,
@@ -130,11 +136,15 @@ class TerminusgpsAuthenticationForm(AuthenticationForm):
                 "placeholder": "email@terminusgps.com",
                 "autofocus": True,
                 "inputmode": "email",
+                "enterkeyhint": "next",
             }
         ),
     )
     password = forms.CharField(
+        help_text="Please enter the password associated with your Terminus GPS account.",
         min_length=8,
         max_length=64,
-        widget=widgets.PasswordInput(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
+        widget=widgets.PasswordInput(
+            attrs={"class": settings.DEFAULT_FIELD_CLASS, "enterkeyhint": "next"}
+        ),
     )

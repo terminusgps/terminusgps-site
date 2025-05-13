@@ -6,38 +6,53 @@ from terminusgps_tracker.forms.fields import AddressField, CreditCardField
 
 class CustomerPaymentMethodCreateForm(forms.Form):
     first_name = forms.CharField(
+        help_text="Please enter your first name.",
         max_length=64,
         widget=forms.widgets.TextInput(
             attrs={
                 "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "First Name",
                 "maxlength": 64,
+                "inputmode": "text",
+                "enterkeyhint": "next",
             }
         ),
     )
     last_name = forms.CharField(
+        help_text="Please enter your last name.",
         max_length=64,
         widget=forms.widgets.TextInput(
             attrs={
                 "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "Last Name",
                 "maxlength": 64,
+                "inputmode": "text",
+                "enterkeyhint": "next",
             }
         ),
     )
     phone = forms.CharField(
+        help_text="Please enter your phone number in the format:&nbsp;<em>555-555-5555</em>",
         label="Phone #",
-        widget=forms.widgets.TextInput(
+        widget=forms.widgets.Input(
             attrs={
                 "class": settings.DEFAULT_FIELD_CLASS,
-                "placeholder": "555-555-5555",
+                "enterkeyhint": "next",
+                "inputmode": "tel",
                 "maxlength": 32,
                 "pattern": "\\d\\d\\d-\\d\\d\\d-\\d\\d\\d\\d",
+                "placeholder": "555-555-5555",
+                "type": "tel",
             }
         ),
     )
-    credit_card = CreditCardField(label="Credit Card")
-    address = AddressField(label="Address")
+    credit_card = CreditCardField(
+        label="Credit Card",
+        help_text="Please enter a valid credit card number and code.",
+    )
+    address = AddressField(
+        label="Address", help_text="Please enter a valid shipping address."
+    )
     default = forms.BooleanField(
         label="Set as default payment method?",
         required=False,
