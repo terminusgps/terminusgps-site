@@ -1,3 +1,6 @@
+import datetime
+
+from dateutil.relativedelta import relativedelta
 from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -14,8 +17,10 @@ from django.core.mail import EmailMessage
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import FormView, RedirectView, TemplateView
 from terminusgps.authorizenet.profiles import CustomerProfile
+from terminusgps.authorizenet.utils import get_days_between
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon import constants
 from terminusgps.wialon.items import WialonResource, WialonUser
@@ -640,6 +645,12 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
         :rtype: :py:obj:`tuple`
 
         """
+
+        def calculate_account_days(start_date: datetime.date) -> int:
+            return get_days_between(
+                start_date, start_date + relativedelta(months=1, day=start_date.day)
+            )
+
         username: str = form.cleaned_data["username"]
         password: str = form.cleaned_data["password1"]
 
@@ -671,7 +682,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
             resource.create_account("terminusgps_ext_hist")
             resource.enable_account()
             resource.set_settings_flags()
-            resource.add_days(7)
+            resource.add_days(calculate_account_days(timezone.now()))
 
             customer.wialon_user_id = end_user.id
             customer.wialon_resource_id = resource.id

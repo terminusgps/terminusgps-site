@@ -11,6 +11,22 @@ from django.utils import timezone
 from terminusgps_tracker.validators import validate_credit_card_number
 
 
+class AuthorizenetAddressWidget(base_widgets.MultiWidget):
+    template_name = "terminusgps_tracker/widgets/wialon_address.html"
+
+    def decompress(self, value: Any):
+        if value is None:
+            return [None] * len(self.widgets)
+
+        return {
+            "street": value.address,
+            "city": value.city,
+            "state": value.state,
+            "country": value.country,
+            "zip": value.zip,
+        }
+
+
 class AddressWidget(base_widgets.MultiWidget):
     template_name = "terminusgps_tracker/widgets/address.html"
 

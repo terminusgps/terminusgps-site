@@ -1,5 +1,9 @@
+from dateutil.relativedelta import relativedelta
 from django.contrib import admin, messages
+from django.utils import timezone
 from django.utils.translation import ngettext
+from terminusgps.authorizenet.utils import get_days_between
+from terminusgps.wialon.items import WialonResource
 from terminusgps.wialon.session import WialonSession
 
 from terminusgps_tracker.models.customers import (
@@ -17,12 +21,13 @@ from terminusgps_tracker.models.subscriptions import (
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ["authorizenet_id", "user"]
+    list_display = ["user"]
     actions = [
         "refresh_customer_payment_methods",
         "refresh_customer_shipping_addresses",
         "block_customer_accounts",
         "unblock_customer_accounts",
+        "add_customer_account_days",
     ]
     fieldsets = [
         (None, {"fields": ["user", "email_verified"]}),
@@ -30,6 +35,33 @@ class CustomerAdmin(admin.ModelAdmin):
         ("Wialon", {"fields": ["wialon_user_id", "wialon_resource_id"]}),
     ]
     readonly_fields = ["email_verified"]
+
+    @admin.action(description="Add days to selected customer accounts")
+    def add_customer_account_days(self, request, queryset):
+        now = timezone.now()
+        with WialonSession() as session:
+            for customer in queryset:
+                if (
+                    hasattr(customer, "subscription")
+                    and customer.subscription.status
+                    == CustomerSubscription.SubscriptionStatus.ACTIVE
+                ):
+                    next_month = now + relativedelta(months=1, day=now.day)
+                    account = WialonResource(
+                        id=customer.wialon_resource_id, session=session
+                    )
+                    account.add_days(get_days_between(now, next_month))
+
+        self.message_user(
+            request,
+            ngettext(
+                "Updated %(count)s customer account days.",
+                "Updated %(count)s customers account days.",
+                len(queryset),
+            )
+            % {"count": len(queryset)},
+            messages.SUCCESS,
+        )
 
     @admin.action(description="Refresh selected customers payment methods")
     def refresh_customer_payment_methods(self, request, queryset):
@@ -153,14 +185,14 @@ class CustomerShippingAddressAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerSubscription)
 class CustomerSubscriptionAdmin(admin.ModelAdmin):
-    list_display = ["authorizenet_id", "customer", "status"]
+    list_display = ["customer", "status"]
     list_filter = ["status"]
     readonly_fields = ["status"]
     actions = ["refresh_subscriptions_status"]
 
     @admin.action(description="Refresh selected subscription statuses")
     def refresh_subscriptions_status(self, request, queryset):
-        [sub.authorizenet_refresh_status() for sub in queryset if sub.authorizenet_id]
+        [sub.authorizenet_sync_status() for sub in queryset if sub.authorizenet_id]
         self.message_user(
             request,
             ngettext(
