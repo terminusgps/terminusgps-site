@@ -45,7 +45,13 @@ class TerminusgpsEmailVerificationForm(forms.Form):
     otp = forms.CharField(
         label="One-time Password (OTP)",
         max_length=6,
-        widget=widgets.TextInput(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
+        widget=widgets.TextInput(
+            attrs={
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "inputmode": "text",
+                "enterkeyhint": "done",
+            }
+        ),
     )
 
 
@@ -56,7 +62,12 @@ class TerminusgpsRegisterForm(UserCreationForm):
         label="First Name",
         max_length=64,
         widget=widgets.TextInput(
-            attrs={"class": settings.DEFAULT_FIELD_CLASS, "placeholder": "First"}
+            attrs={
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "placeholder": "First",
+                "inputmode": "text",
+                "enterkeyhint": "next",
+            }
         ),
     )
     last_name = forms.CharField(
@@ -64,7 +75,12 @@ class TerminusgpsRegisterForm(UserCreationForm):
         label="Last Name",
         max_length=64,
         widget=widgets.TextInput(
-            attrs={"class": settings.DEFAULT_FIELD_CLASS, "placeholder": "Last"}
+            attrs={
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "placeholder": "Last",
+                "inputmode": "text",
+                "enterkeyhint": "next",
+            }
         ),
     )
     username = forms.CharField(
@@ -78,6 +94,7 @@ class TerminusgpsRegisterForm(UserCreationForm):
                 "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "email@terminusgps.com",
                 "inputmode": "email",
+                "enterkeyhint": "next",
             }
         ),
     )
@@ -90,6 +107,7 @@ class TerminusgpsRegisterForm(UserCreationForm):
                 "minlength": 4,
                 "maxlength": 64,
                 "inputmode": "text",
+                "enterkeyhint": "next",
             }
         ),
         validators=[validate_wialon_password],
@@ -103,6 +121,7 @@ class TerminusgpsRegisterForm(UserCreationForm):
                 "minlength": 4,
                 "maxlength": 64,
                 "inputmode": "text",
+                "enterkeyhint": "done",
             }
         ),
         validators=[validate_wialon_password],
@@ -145,6 +164,6 @@ class TerminusgpsAuthenticationForm(AuthenticationForm):
         min_length=8,
         max_length=64,
         widget=widgets.PasswordInput(
-            attrs={"class": settings.DEFAULT_FIELD_CLASS, "enterkeyhint": "next"}
+            attrs={"class": settings.DEFAULT_FIELD_CLASS, "enterkeyhint": "done"}
         ),
     )
