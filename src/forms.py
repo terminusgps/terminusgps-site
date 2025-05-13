@@ -120,6 +120,7 @@ class TerminusgpsAuthenticationForm(AuthenticationForm):
         "invalid_login": "Couldn't find a user with those credentials. Please try again."
     }
     username = forms.CharField(
+        help_text="Please enter the email address associated with your Terminus GPS account.",
         label="Email Address",
         min_length=4,
         max_length=150,
@@ -134,6 +135,7 @@ class TerminusgpsAuthenticationForm(AuthenticationForm):
         ),
     )
     password = forms.CharField(
+        help_text="Please enter the password associated with your Terminus GPS account.",
         min_length=8,
         max_length=64,
         widget=widgets.PasswordInput(attrs={"class": settings.DEFAULT_FIELD_CLASS}),

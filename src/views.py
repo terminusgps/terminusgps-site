@@ -14,6 +14,7 @@ from django.contrib.auth.views import (
 )
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import EmailMessage
+from django.core.validators import validate_email
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
@@ -33,6 +34,7 @@ from .forms import (
     TerminusgpsEmailSupportForm,
     TerminusgpsRegisterForm,
 )
+from .validators import validate_username_exists
 
 if settings.configured and not hasattr(settings, "TRACKER_APP_CONFIG"):
     raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
@@ -317,8 +319,13 @@ class TerminusgpsPasswordResetView(HtmxTemplateResponseMixin, PasswordResetView)
         :rtype: :py:obj:`~django.forms.Form`
 
         """
+        help_text = (
+            "Please enter the email address associated with your Terminus GPS account."
+        )
         form = super().get_form(form_class)
         form.fields["email"].label = "Email Address"
+        form.fields["email"].help_text = help_text
+        form.fields["email"].validators = [validate_email, validate_username_exists]
         form.fields["email"].widget.attrs.update(
             {
                 "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
