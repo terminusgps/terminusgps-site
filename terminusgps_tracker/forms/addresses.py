@@ -32,18 +32,18 @@ class CustomerShippingAddressCreateForm(forms.Form):
         ),
     )
     phone = forms.CharField(
-        help_text="Please enter your phone number in the format:&nbsp;<em>555-555-5555</em>",
+        help_text="Please enter your phone number in the format:&nbsp;<em>713-904-5555</em>",
         label="Phone #",
         max_length=19,
         widget=forms.widgets.Input(
             attrs={
                 "class": settings.DEFAULT_FIELD_CLASS,
-                "placeholder": "555-555-5555",
+                "enterkeyhint": "next",
+                "inputmode": "numeric",
                 "maxlength": 32,
                 "pattern": "\\d\\d\\d-\\d\\d\\d-\\d\\d\\d\\d",
-                "inputmode": "tel",
+                "placeholder": "713-904-5555",
                 "type": "tel",
-                "enterkeyhint": "next",
             }
         ),
     )
