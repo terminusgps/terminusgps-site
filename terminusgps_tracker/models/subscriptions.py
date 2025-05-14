@@ -143,6 +143,10 @@ class CustomerSubscription(models.Model):
     )
     """Current Authorizenet subscription status."""
 
+    class Meta:
+        verbose_name = "subscription"
+        verbose_name_plural = "subscriptions"
+
     def __str__(self) -> str:
         """Returns a string representation of the subscription in the format ``"<CUSTOMER NAME>'s Subscription"``."""
         return f"{self.customer}'s Subscription"

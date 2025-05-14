@@ -1,5 +1,6 @@
 import pyotp
 from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
 from django.urls import reverse
 from terminusgps.authorizenet.profiles import (
@@ -9,6 +10,33 @@ from terminusgps.authorizenet.profiles import (
 )
 from terminusgps.wialon.items import WialonResource
 from terminusgps.wialon.session import WialonSession
+
+
+class CustomerCoupon(models.Model):
+    """A customer coupon."""
+
+    redeemed = models.BooleanField(default=False)
+    """Whether or not the coupon is redeemed."""
+    percent_off = models.PositiveSmallIntegerField(
+        default=15, validators=[MinValueValidator(15), MaxValueValidator(100)]
+    )
+    """The percentage off of a cost."""
+    total_months = models.PositiveIntegerField(
+        default=1, validators=[MinValueValidator(1), MaxValueValidator(24)]
+    )
+    """Total number of months the coupon grants its percentage off for."""
+    customer = models.ForeignKey(
+        "terminusgps_tracker.Customer", on_delete=models.CASCADE, related_name="coupons"
+    )
+    """The customer the coupon can be redeemed by."""
+
+    class Meta:
+        verbose_name = "coupon"
+        verbose_name_plural = "coupons"
+
+    def __str__(self) -> str:
+        """Returns the coupon in the format: <CUSTOMER EMAIL>'s <PERCENT_OFF>% off coupon."""
+        return f"{self.customer.user.username}'s {self.percent_off}% off coupon"
 
 
 class Customer(models.Model):
@@ -133,6 +161,10 @@ class CustomerAsset(models.Model):
     wialon_id = models.PositiveIntegerField()
     """A Wialon unit id."""
 
+    class Meta:
+        verbose_name = "asset"
+        verbose_name_plural = "assets"
+
     def __str__(self) -> str:
         """Returns the asset's id in format: ``'Asset #<pk>'``"""
         return f"Asset #{self.pk}"
@@ -155,6 +187,10 @@ class CustomerPaymentMethod(models.Model):
     """An Authorizenet payment profile id."""
     default = models.BooleanField(default=False)
     """Whether or not the payment method is set as default."""
+
+    class Meta:
+        verbose_name = "payment method"
+        verbose_name_plural = "payment methods"
 
     def __str__(self) -> str:
         """Returns the payment method id in format: ``'Payment Method #<authorizenet_id>'``."""
@@ -206,8 +242,8 @@ class CustomerShippingAddress(models.Model):
     """Whether or not the shipping address is set as default."""
 
     class Meta:
-        verbose_name = "customer shipping address"
-        verbose_name_plural = "customer shipping addresses"
+        verbose_name = "shipping address"
+        verbose_name_plural = "shipping addresses"
 
     def __str__(self) -> str:
         """Returns the shipping address id in format: ``'Shipping Address #<authorizenet_id>'``."""

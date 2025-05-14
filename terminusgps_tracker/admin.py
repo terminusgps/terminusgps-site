@@ -9,6 +9,7 @@ from terminusgps.wialon.session import WialonSession
 from terminusgps_tracker.models.customers import (
     Customer,
     CustomerAsset,
+    CustomerCoupon,
     CustomerPaymentMethod,
     CustomerShippingAddress,
 )
@@ -17,6 +18,84 @@ from terminusgps_tracker.models.subscriptions import (
     SubscriptionFeature,
     SubscriptionTier,
 )
+
+
+@admin.register(CustomerCoupon)
+class CustomerCouponAdmin(admin.ModelAdmin):
+    list_display = ["__str__", "redeemed"]
+    actions = ["redeem_coupons", "unredeem_coupons"]
+
+    @admin.action(description="Redeem selected coupons")
+    def redeem_coupons(self, request, queryset):
+        results_map = {"skipped": [], "success": []}
+
+        for coupon in queryset:
+            if coupon.redeemed:
+                results_map["skipped"].append(coupon)
+                continue
+            results_map["success"].append(coupon)
+            coupon.redeemed = True
+            coupon.save()
+
+        if results_map["skipped"]:
+            self.message_user(
+                request,
+                ngettext(
+                    "%(count)s coupon was already redeemed and was skipped.",
+                    "%(count)s coupons were already redeemed and were skipped.",
+                    len(results_map["skipped"]),
+                )
+                % {"count": len(results_map["skipped"])},
+                messages.WARNING,
+            )
+
+        if results_map["success"]:
+            self.message_user(
+                request,
+                ngettext(
+                    "%(count)s coupon was redeemed.",
+                    "%(count)s coupons were redeemed.",
+                    len(results_map["success"]),
+                )
+                % {"count": len(results_map["success"])},
+                messages.SUCCESS,
+            )
+
+    @admin.action(description="Unredeem selected coupons")
+    def unredeem_coupons(self, request, queryset):
+        results_map = {"skipped": [], "success": []}
+
+        for coupon in queryset:
+            if not coupon.redeemed:
+                results_map["skipped"].append(coupon)
+                continue
+            results_map["success"].append(coupon)
+            coupon.redeemed = False
+            coupon.save()
+
+        if results_map["skipped"]:
+            self.message_user(
+                request,
+                ngettext(
+                    "%(count)s coupon was already unredeemed and was skipped.",
+                    "%(count)s coupons were already unredeemed and were skipped.",
+                    len(results_map["skipped"]),
+                )
+                % {"count": len(results_map["skipped"])},
+                messages.WARNING,
+            )
+
+        if results_map["success"]:
+            self.message_user(
+                request,
+                ngettext(
+                    "%(count)s coupon was unredeemed.",
+                    "%(count)s coupons were unredeemed.",
+                    len(results_map["success"]),
+                )
+                % {"count": len(results_map["success"])},
+                messages.SUCCESS,
+            )
 
 
 @admin.register(Customer)
