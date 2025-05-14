@@ -560,7 +560,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     ``class``
         The `tailwindcss`_ class used for the view.
 
-        Value: ``"p-4 flex flex-col gap-2"``
+        Value: ``"p-4 flex flex-col gap-4"``
 
     ``title``
         The title for the view/webpage.
@@ -588,7 +588,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     extra_context = {
         "title": "Register",
         "subtitle": "You'll know where yours are...",
-        "class": "p-4 flex flex-col gap-2",
+        "class": "p-4 flex flex-col gap-4",
     }
     form_class = TerminusgpsRegisterForm
     http_method_names = ["get", "post"]
