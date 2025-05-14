@@ -99,7 +99,6 @@ class TerminusgpsRegisterForm(UserCreationForm):
         ),
     )
     password1 = forms.CharField(
-        help_text="<div class='flex-col'><h2>Password requirements:</h2><ul class='p-2 list-disc list-inside'><li>1 uppercase letter</li><li>1 lowercase letter</li><li>3 digits</li><li>1 special symbol</li><ul></div>",
         label="Password",
         widget=widgets.PasswordInput(
             attrs={
@@ -113,7 +112,6 @@ class TerminusgpsRegisterForm(UserCreationForm):
         validators=[validate_wialon_password],
     )
     password2 = forms.CharField(
-        help_text="<div class='flex-col'><h2>Password requirements:</h2><ul class='p-2 list-disc list-inside'><li>1 uppercase letter</li><li>1 lowercase letter</li><li>3 digits</li><li>1 special symbol</li><ul></div>",
         label="Confirm Password",
         widget=widgets.PasswordInput(
             attrs={
