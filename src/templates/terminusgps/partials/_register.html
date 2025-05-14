@@ -1,4 +1,14 @@
-<form class="{{ class }}" action="{% url 'register' %}" method="post">
+<form class="{{ class }}" action="{% url 'register' %}" method="post" hx-indicator="#loading" novalidate hx-post="{% url 'register' %}" hx-swap="outerHTML">
+    <div id="loading" class="group static inset-0 h-1/2 w-1/2 select-none htmx-indicator">
+        <div class="hidden items-center group-[.htmx-request]:flex absolute inset-0 justify-center bg-gray-400/60 dark:bg-gray-800/60">
+            <div class="p-4 bg-gray-400 dark:bg-gray-800 rounded flex items-center gap-2 border">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 animate-spin">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+                <h2>Creating your account...</h2>
+            </div>
+        </div>
+    </div>
     {{ form.non_field_errors }}
     {% csrf_token %}
     <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
@@ -20,7 +30,7 @@
         <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.username.errors }}</div>
         {% endif %}
     </div>
-    <div class="flex flex-col md:flex-row gap-4">
+    <div class="flex flex-col gap-4 md:flex-row">
         <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
             {% if form.first_name.help_text %}
             <div class="group flex items-center gap-1">
@@ -60,7 +70,7 @@
             {% endif %}
         </div>
     </div>
-    <div class="flex flex-col md:flex-row gap-4">
+    <div class="flex flex-col gap-4 md:flex-row">
         <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
             {% if form.password1.help_text %}
             <div class="group flex items-center gap-1">
@@ -100,12 +110,12 @@
             {% endif %}
         </div>
     </div>
-    <div class="flex flex-col md:flex-row gap-4">
-        <div class="flex flex-col gap-4 w-full">
+    <div class="flex flex-col gap-4 md:flex-row">
+        <div class="flex w-full flex-col gap-4">
             <h2 class="font-bold">Password Requirements:</h2>
-            <h3 class="font-light text-pretty me-4">Your <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="https://terminusgps.com/">Terminus GPS</a> account password must contain each of these.</h3>
+            <h3 class="me-4 font-light text-pretty">Your <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="https://terminusgps.com/">Terminus GPS</a> account password must contain each of these.</h3>
         </div>
-        <ul class="flex w-full flex-col gap-2 list-disc list-inside">
+        <ul class="flex w-full list-inside list-disc flex-col gap-2">
             <li class="cursor-help" title="ABCDEFGHIJKLMNOPQRSTUVWXYZ">One uppercase letter.</li>
             <li class="cursor-help" title="abcdefghijklmnopqrstuvwxyz">One lowercase letter.</li>
             <li class="cursor-help" title="!@#$%^*()[]{}:;'">One special symbol.</li>
