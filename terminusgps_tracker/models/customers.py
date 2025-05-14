@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
 from django.urls import reverse
+from django.utils import timezone
 from terminusgps.authorizenet.profiles import (
     AddressProfile,
     CustomerProfile,
@@ -29,6 +30,8 @@ class CustomerCoupon(models.Model):
         "terminusgps_tracker.Customer", on_delete=models.CASCADE, related_name="coupons"
     )
     """The customer the coupon can be redeemed by."""
+    datetime_redeemed = models.DateTimeField(null=True, blank=True, default=None)
+    """Date and time the coupon was redeemed."""
 
     class Meta:
         verbose_name = "coupon"
@@ -37,6 +40,15 @@ class CustomerCoupon(models.Model):
     def __str__(self) -> str:
         """Returns the coupon in the format: <CUSTOMER EMAIL>'s <PERCENT_OFF>% off coupon."""
         return f"{self.customer.user.username}'s {self.percent_off}% off coupon"
+
+    @transaction.atomic
+    def redeem(self) -> None:
+        self.datetime_redeemed = timezone.now()
+        self.redeemed = True
+        subscription = self.customer.subscription
+
+        self.customer.subscription.trial_months = self.total_months
+        self.customer.subscription.trial_amount = None
 
 
 class Customer(models.Model):

@@ -1,6 +1,7 @@
 from .customers import (
     Customer,
     CustomerAsset,
+    CustomerCoupon,
     CustomerPaymentMethod,
     CustomerShippingAddress,
 )

@@ -5,6 +5,7 @@ from .assets import (
 )
 from .customers import (
     CustomerAccountView,
+    CustomerCouponsView,
     CustomerDashboardView,
     CustomerPaymentMethodCreateView,
     CustomerPaymentMethodDeleteView,

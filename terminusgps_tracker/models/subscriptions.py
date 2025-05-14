@@ -4,6 +4,7 @@ import decimal
 from authorizenet import apicontractsv1
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
 from django.urls import reverse
 from django.utils import timezone
@@ -101,14 +102,15 @@ class CustomerSubscription(models.Model):
     authorizenet_id = models.PositiveIntegerField(null=True, blank=True, default=None)
     """An Authorizenet subscription id."""
     total_months = models.PositiveIntegerField(
-        choices=[(12, _("1 year")), (24, _("2 years")), (9999, _("∞"))], default=9999
+        default=1, validators=[MinValueValidator(1), MaxValueValidator(36)]
     )
     """Total number of months for the subscription."""
-    trial_months = models.PositiveIntegerField(
-        choices=[(0, _("0 months")), (12, _("12 months")), (24, _("24 months"))],
-        default=0,
+    trial_months = models.IntegerField(
+        default=0, validators=[MinValueValidator(0), MaxValueValidator(36)]
     )
     """Total number of trial months for the subscription."""
+    trial_amount = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
+    """$ amount to charge during trial period."""
     tier = models.ForeignKey(
         "terminusgps_tracker.SubscriptionTier",
         on_delete=models.SET_NULL,
@@ -201,20 +203,24 @@ class CustomerSubscription(models.Model):
                 }
             )
 
-    def calculate_amount_plus_tax(self) -> decimal.Decimal:
+    @staticmethod
+    def add_tax(
+        amount: decimal.Decimal, tax_rate: decimal.Decimal | None = None
+    ) -> decimal.Decimal:
         """
-        Returns the amount + tax for the subscription as a :py:obj:`~decimal.Decimal`.
+        Returns the amount + tax.
 
-        :raises AssertionError: If :py:attr:`tier` wasn't set.
-        :returns: The subscription amount + tax.
+        :param amount: Base amount to add tax to.
+        :type amount: :py:obj:`~decimal.Decimal`
+        :param tax_rate: Tax rate to use for the calculation. Default is :confval:`DEFAULT_TAX_RATE`.
+        :type tax_rate: :py:obj:`~decimal.Decimal` | :py:obj:`None`
+        :returns: The amount + tax.
         :rtype: :py:obj:`~decimal.Decimal`
 
         """
-        assert self.tier, "Subscription tier wasn't set."
-
-        return round(
-            self.tier.amount + (self.tier.amount * settings.DEFAULT_TAX_RATE), ndigits=2
-        )
+        if not tax_rate:
+            tax_rate = settings.DEFAULT_TAX_RATE
+        return round(amount * (1 + tax_rate), ndigits=2)
 
     @transaction.atomic
     def authorizenet_sync_payment_method(self) -> None:
@@ -278,7 +284,7 @@ class CustomerSubscription(models.Model):
 
         return apicontractsv1.ARBSubscriptionType(
             name=f"{self.tier.name} Subscription",
-            amount=self.calculate_amount_plus_tax() if add_tax else self.tier.amount,
+            amount=self.add_tax(self.tier.amount) if add_tax else self.tier.amount,
             profile=apicontractsv1.customerProfileIdType(
                 customerProfileId=str(self.customer.authorizenet_id),
                 customerPaymentProfileId=str(self.payment.authorizenet_id),
@@ -345,7 +351,7 @@ class CustomerSubscription(models.Model):
         now = start or timezone.now()
         subscription_obj = self._generate_subscription_obj()
         subscription_obj.paymentSchedule = self.generate_payment_schedule(now)
-        subscription_obj.trialAmount = "0.00"
+        subscription_obj.trialAmount = str(self.trial_amount)
         subscription_profile = SubscriptionProfile(self.customer.authorizenet_id)
         return subscription_profile.create(subscription_obj)
 

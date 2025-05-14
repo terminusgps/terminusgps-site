@@ -31,6 +31,7 @@ from terminusgps_tracker.forms import (
 )
 from terminusgps_tracker.models import (
     Customer,
+    CustomerCoupon,
     CustomerPaymentMethod,
     CustomerShippingAddress,
     CustomerSubscription,
@@ -105,6 +106,37 @@ class CustomerDashboardView(
         context["subtitle"] = mark_safe(
             f"Check out the Terminus GPS <a class='text-terminus-red-800 underline decoration-terminus-black decoration underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:hover:text-terminus-red-200 dark:decoration-white' href='{reverse('mobile apps')}'>mobile app</a>!"
         )
+        return context
+
+
+class CustomerCouponsView(
+    LoginRequiredMixin,
+    TrackerAppConfigContextMixin,
+    HtmxTemplateResponseMixin,
+    ListView,
+):
+    content_type = "text/html"
+    context_object_name = "coupon_list"
+    extra_context = {
+        "title": "Coupons",
+        "subtitle": "Redeem a coupon for your account",
+        "class": "flex flex-col gap-4",
+    }
+    http_method_names = ["get"]
+    login_url = reverse_lazy("login")
+    model = CustomerCoupon
+    partial_template_name = "terminusgps_tracker/partials/_coupons.html"
+    permission_denied_message = "Please login in order to view this content."
+    raise_exception = False
+    template_name = "terminusgps_tracker/coupons.html"
+
+    def get_queryset(self):
+        return Customer.objects.get(user=self.request.user).coupons.all()
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["redeemed_list"] = self.get_queryset().filter(redeemed=True)
+        context["available_list"] = self.get_queryset().filter(redeemed=False)
         return context
 
 
