@@ -73,7 +73,7 @@ class TerminusgpsAboutView(HtmxTemplateResponseMixin, TemplateView):
     extra_context = {
         "title": "About",
         "subtitle": "Why Terminus GPS does what it does",
-        "class": "flex flex-col gap-4",
+        "class": "flex flex-col gap-8",
     }
     http_method_names = ["get"]
     partial_template_name = "terminusgps/partials/_about.html"
@@ -85,7 +85,7 @@ class TerminusgpsTermsAndConditionsView(HtmxTemplateResponseMixin, TemplateView)
     extra_context = {
         "title": "Terms & Conditions",
         "subtitle": "You agree to these by using Terminus GPS services",
-        "class": "flex flex-col gap-4",
+        "class": "flex flex-col gap-8",
     }
     http_method_names = ["get"]
     partial_template_name = "terminusgps/partials/_terms.html"
@@ -97,7 +97,7 @@ class TerminusgpsFrequentlyAskedQuestionsView(HtmxTemplateResponseMixin, Templat
     extra_context = {
         "title": "Frequently Asked Questions",
         "subtitle": "May you find the answer to your burning question",
-        "class": "flex flex-col gap-4",
+        "class": "flex flex-col gap-8",
     }
     http_method_names = ["get"]
     partial_template_name = "terminusgps/partials/_faq.html"
