@@ -118,7 +118,7 @@ class TerminusgpsPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
     ``class``
         The `tailwindcss`_ class used for the view.
 
-        Value: ``"flex flex-col gap-4"``
+        Value: ``"flex flex-col gap-8"``
 
     ``subtitle``
         The subtitle for the view/webpage.
@@ -141,7 +141,7 @@ class TerminusgpsPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
     extra_context = {
         "title": "Privacy Policy",
         "subtitle": "How we use your data",
-        "class": "flex flex-col gap-4",
+        "class": "flex flex-col gap-8",
     }
     http_method_names = ["get"]
     partial_template_name = "terminusgps/partials/_privacy.html"
