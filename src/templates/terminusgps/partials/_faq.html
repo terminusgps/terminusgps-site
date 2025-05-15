@@ -1,97 +1,117 @@
 <div class="{{ class }}">
     <div class="flex flex-col gap-2">
         <h2 class="text-xl font-semibold text-terminus-red-400">How does it work?</h2>
-        <p class="indent-4">The device is a <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="https://en.wikipedia.org/wiki/Mobile_broadband_modem">cellular modem</a> with a GPS receiver.  The device transmits the location of your vehicle as it moves around on Earth's surface.</p>
-        <p class="indent-4">These transmissions are recieved by our software then presented to you.</p>
-        <p class="indent-4">Typically, device location data is updated in <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'hosting' %}">the platform</a> every 5 minutes while the vehicle is in motion and every 12 hours while motionless.</p>
+        <div class="mx-4 flex flex-col gap-2 text-pretty">
+            <p>The device is a <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="https://en.wikipedia.org/wiki/Mobile_broadband_modem">cellular modem</a> with a GPS receiver.  The device transmits the location of your vehicle as it moves around on Earth's surface.</p>
+            <p>These transmissions are recieved by our software then presented to you.</p>
+            <p>Typically, device location data is updated in <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'hosting' %}">the platform</a> every 5 minutes while the vehicle is in motion and every 12 hours while motionless.</p>
+        </div>
     </div>
     <div class="flex flex-col gap-2">
         <h2 class="text-xl font-semibold text-terminus-red-400">What is "GPS"?</h2>
-        <p class="indent-4">GPS is an acronym for <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="https://en.wikipedia.org/wiki/Global_Positioning_System">Global Positioning System</a>: a constellation of ~30 strategically spaced satellites orbiting Earth.</p>
-        <p class="indent-4">Our software utilizes geographic data collected from these satellites to pinpoint the (near-exact) location of your GPS-enabled device.</p>
+        <div class="mx-4 flex flex-col gap-2 text-pretty">
+            <p>GPS is an acronym for <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="https://en.wikipedia.org/wiki/Global_Positioning_System">Global Positioning System</a>: a constellation of ~30 strategically spaced satellites orbiting Earth.</p>
+            <p>Our software utilizes geographic data collected from these satellites to pinpoint the (near-exact) location of your GPS-enabled device.</p>
+        </div>
     </div>
     <div class="flex flex-col gap-2">
         <h2 class="text-xl font-semibold text-terminus-red-400">How reliable is the system?</h2>
-        <p class="indent-4">We have a <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="https://status.wialon.com/">99% reliability</a> of <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'hosting' %}">the platform</a> using multiple servers to keep you up-to-date with immediate location data.</p>
-        <p class="indent-4">Occasionally the device may lose cellular signal (similar to your mobile phone losing signal) but the device's on-board memory will hold the plotted information until it can reconnect. When the device is without a signal, it constantly searches for the nearest cell signal.</p>
-        <p class="indent-4">Sometimes when a vehicle is driven into a large underground parking structure or a metal building with few or no windows, the device may lose signal. Once the vehicle exits the "dead-zone" location, it immediately attempts to regain a cellular signal and continue operating normally.</p>
+        <div class="mx-4 flex flex-col gap-2 text-pretty">
+            <p>We have a <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="https://status.wialon.com/">99% reliability</a> of <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'hosting' %}">the platform</a> using multiple servers to keep you up-to-date with immediate location data.</p>
+            <p>Occasionally the device may lose cellular signal (similar to your mobile phone losing signal) but the device's on-board memory will hold the plotted information until it can reconnect. When the device is without a signal, it constantly searches for the nearest cell signal.</p>
+            <p>Sometimes when a vehicle is driven into a large underground parking structure or a metal building with few or no windows, the device may lose signal. Once the vehicle exits the "dead-zone" location, it immediately attempts to regain a cellular signal and continue operating normally.</p>
+        </div>
     </div>
     <div class="flex flex-col gap-2">
         <h2 class="text-xl font-semibold text-terminus-red-400">How much power does it draw on the vehicle?</h2>
-        <p class="indent-4">The device operates in either a <strong>Deep Sleep</strong> or <strong>Sleep on Network</strong> state while the vehicle is motionless, i.e., parked.</p>
-        <p class="indent-4">The device draws a miniscule amount of amperage while the vehicle is motionless, roughly equivalent to that of your radio's head unit.</p>
-        <p class="indent-4">Once vehicle motion is detected (driving or in-tow) or the ignition is turned on, the device operates in an <strong>Active Tracking</strong> state.</p>
-        <div class="relative mt-2 overflow-x-auto">
-            <table class="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
-                <thead class="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
-                    <tr>
-                        <th scope="col" class="px-6 py-3">
-                            GPS Device State
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                            Power Consumption
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-                        <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 dark:text-white">
-                            Deep Sleep
-                        </th>
-                        <td class="px-6 py-4">
-                            &lt;3mA @ 12V
-                        </td>
-                    </tr>
-                    <tr class="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-                        <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 dark:text-white">
-                            Sleep on Network
-                        </th>
-                        <td class="px-6 py-4">
-                            &lt;10mA @ 12V
-                        </td>
-                    </tr>
-                    <tr class="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-                        <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 dark:text-white">
-                            Active Tracking
-                        </th>
-                        <td class="px-6 py-4">
-                            &lt;70mA @ 12V
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="mx-4 flex flex-col gap-2 text-pretty">
+            <p>The device operates in either a <strong>Deep Sleep</strong> or <strong>Sleep on Network</strong> state while the vehicle is motionless, i.e., parked.</p>
+            <p>The device draws a miniscule amount of amperage while the vehicle is motionless, roughly equivalent to that of your radio's head unit.</p>
+            <p>Once vehicle motion is detected (driving or in-tow) or the ignition is turned on, the device operates in an <strong>Active Tracking</strong> state.</p>
+            <div class="relative mt-2 overflow-x-auto">
+                <table class="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
+                    <thead class="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">
+                                GPS Device State
+                            </th>
+                            <th scope="col" class="px-6 py-3">
+                                Power Consumption
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+                            <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 dark:text-white">
+                                Deep Sleep
+                            </th>
+                            <td class="px-6 py-4">
+                                &lt;3mA @ 12V
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+                            <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 dark:text-white">
+                                Sleep on Network
+                            </th>
+                            <td class="px-6 py-4">
+                                &lt;10mA @ 12V
+                            </td>
+                        </tr>
+                        <tr class="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+                            <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 dark:text-white">
+                                Active Tracking
+                            </th>
+                            <td class="px-6 py-4">
+                                &lt;70mA @ 12V
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     <div class="flex flex-col gap-2">
         <h2 class="text-xl font-semibold text-terminus-red-400">Will it tell me the history of where the vehicle has been?</h2>
-    <p class="indent-4"><a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'hosting' %}">The platform</a> holds the last 90 days of device history. You may view your device's history at any time in the platform.</p>
+        <div class="mx-4 flex flex-col gap-2 text-pretty">
+            <p><a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'hosting' %}">The platform</a> holds the last 90 days of device history. You may view your device's history at any time in the platform.</p>
+        </div>
     </div>
     <div class="flex flex-col gap-2">
         <h2 class="text-xl font-semibold text-terminus-red-400">Is the reported mileage on the platform accurate?</h2>
-        <p class="indent-4">Yes, <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'hosting' %}">the platform</a> records mileage post install and adds it to your vehicle's original mileage.</p>
-        <p class="indent-4">If you didn't input your vehicle's starting mileage post install, then the reported mileage will <em>only count miles driven post install</em>. This can be updated at any time.</p>
+        <div class="mx-4 flex flex-col gap-2 text-pretty">
+            <p>Yes, <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'hosting' %}">the platform</a> records mileage post install and adds it to your vehicle's original mileage.</p>
+            <p>If you didn't input your vehicle's starting mileage post install, then the reported mileage will <em>only count miles driven post install</em>. This can be updated at any time.</p>
+        </div>
     </div>
     <div class="flex flex-col gap-2">
         <h2 class="text-xl font-semibold text-terminus-red-400">Where is the device installed?</h2>
-        <p class="indent-4">The device should be installed by a Terminus GPS professional in a strategic location within the vehicle for maximum coverage while remaining hidden from the outside.</p>
-        <p class="indent-4">Professionally installed devices <em>don't</em> interfere with other vehicle electronics.</p>
+        <div class="mx-4 flex flex-col gap-2 text-pretty">
+            <p>The device should be installed by a Terminus GPS professional in a strategic location within the vehicle for maximum coverage while remaining hidden from the outside.</p>
+            <p>Professionally installed devices <em>don't</em> interfere with other vehicle electronics.</p>
+        </div>
     </div>
     <div class="flex flex-col gap-2">
         <h2 class="text-xl font-semibold text-terminus-red-400">What is a geofence area?</h2>
-        <p class="indent-4">A <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="https://help.wialon.com/en/wialon-hosting/user-guide/monitoring-system/geofences">geofence</a> area is a section of Earth's surface you designate as a place or point of interest, e.g., school, home, work, friend's house.</p>
-        <p class="indent-4">You may create geofence areas within <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'hosting' %}">the platform</a>.</p>
+        <div class="mx-4 flex flex-col gap-2 text-pretty">
+            <p>A <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="https://help.wialon.com/en/wialon-hosting/user-guide/monitoring-system/geofences">geofence</a> area is a section of Earth's surface you designate as a place or point of interest, e.g., school, home, work, friend's house.</p>
+            <p>You may create geofence areas within <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'hosting' %}">the platform</a>.</p>
+        </div>
     </div>
     <div class="flex flex-col gap-2">
         <h2 class="text-xl font-semibold text-terminus-red-400">When will it tell me that the vehicle has reached a geofence area?</h2>
-        <p class="indent-4"><a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'hosting' %}">The platform</a> saves the alert in history as soon as the device reports it.</p>
-        <p class="indent-4">When the vehicle exits or enters geofence area, an alert may be dispatched to your mobile phone<sup><a href="#f1">[1]</a></sup>.</p>
+        <div class="mx-4 flex flex-col gap-2 text-pretty">
+            <p><a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'hosting' %}">The platform</a> saves the alert in history as soon as the device reports it.</p>
+            <p>When the vehicle exits or enters geofence area, an alert may be dispatched to your mobile phone<sup><a href="#f1">[1]</a></sup>.</p>
+        </div>
     </div>
     <div class="flex flex-col gap-2">
         <h2 class="text-xl font-semibold text-terminus-red-400">Can I install this myself?</h2>
-        <p class="indent-4">While we offer <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="https://www.terminusgps.com/product-page/obdii-tracking-plug-and-play-device">plug-and-play devices</a>, we <em>always</em> recommend our customers opt for a professionally installed device first.</p>
-        <p class="indent-4">Remember: an easy install is a trivial uninstall!</p>
+        <div class="mx-4 flex flex-col gap-2 text-pretty">
+            <p>While we offer <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="https://www.terminusgps.com/product-page/obdii-tracking-plug-and-play-device">plug-and-play devices</a>, we <em>always</em> recommend our customers opt for a professionally installed device first.</p>
+            <p>Remember: an easy install is a trivial uninstall!</p>
+        </div>
     </div>
-    <div id="footnotes" class="flex flex-col gap-4 -mx-8 bg-gray-200 p-8 shadow-inner dark:bg-terminus-gray-700">
+    <div id="footnotes" class="-mx-8 flex flex-col gap-4 bg-gray-200 p-8 shadow-inner dark:bg-terminus-gray-700">
         <h2 class="text-lg font-light tracking-wide text-terminus-red-400">Footnotes</h2>
         <p id="f1" class="px-4">[1]: Mobile phone notifications are only dispatched according to your configuration in <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'hosting' %}">the platform</a>. Additional rates may apply for live notifications.</p>
     </div>
