@@ -68,6 +68,42 @@ class TerminusgpsHostingView(RedirectView):
     url = settings.TRACKER_APP_CONFIG.get("HOSTING_URL")
 
 
+class TerminusgpsAboutView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {
+        "title": "About",
+        "subtitle": "Why Terminus GPS does what it does",
+        "class": "flex flex-col gap-4",
+    }
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps/partials/_about.html"
+    template_name = "terminusgps/about.html"
+
+
+class TerminusgpsTermsAndConditionsView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Terms & Conditions",
+        "subtitle": "You agree to these by using Terminus GPS services",
+        "class": "flex flex-col gap-4",
+    }
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps/partials/_terms.html"
+    template_name = "terminusgps/terms.html"
+
+
+class TerminusgpsFrequentlyAskedQuestionsView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Frequently Asked Questions",
+        "subtitle": "May you find the answer to your burning question",
+        "class": "flex flex-col gap-4",
+    }
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps/partials/_faq.html"
+    template_name = "terminusgps/faq.html"
+
+
 class TerminusgpsPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
     """
     Renders the privacy policy for the application.

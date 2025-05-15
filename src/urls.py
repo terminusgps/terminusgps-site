@@ -47,6 +47,9 @@ urlpatterns = [
     path("apps/", views.TerminusgpsMobileAppView.as_view(), name="mobile apps"),
     path("source/", views.TerminusgpsSourceCodeView.as_view(), name="source code"),
     path("hosting/", views.TerminusgpsHostingView.as_view(), name="hosting"),
+    path("about/", views.TerminusgpsAboutView.as_view(), name="about"),
+    path("terms/", views.TerminusgpsTermsAndConditionsView.as_view(), name="terms"),
+    path("faq/", views.TerminusgpsFrequentlyAskedQuestionsView.as_view(), name="faq"),
     path("", include("terminusgps_tracker.urls", namespace="tracker")),
 ]
 

@@ -43,12 +43,14 @@ class CustomerCoupon(models.Model):
 
     @transaction.atomic
     def redeem(self) -> None:
+        raise NotImplementedError
+
         self.datetime_redeemed = timezone.now()
         self.redeemed = True
-        subscription = self.customer.subscription
 
+        subscription = self.customer.subscription
         self.customer.subscription.trial_months = self.total_months
-        self.customer.subscription.trial_amount = None
+        self.customer.subscription.trial_amount = self.customer.subscription.tier.amount
 
 
 class Customer(models.Model):
