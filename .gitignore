@@ -8,12 +8,9 @@ media/
 .*
 !.gitignore
 
-*.jpg
 *.mp4
-*.webm
 *.csv
 *.xlsx
-*.png
 
 
 package-lock.json
