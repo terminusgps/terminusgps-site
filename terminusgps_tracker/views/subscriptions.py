@@ -166,7 +166,9 @@ class CustomerSubscriptionUpdateView(
         form = super().get_form(form_class=form_class)
         form.fields["tier"].widget.choices = [
             (tier.pk, _(f"{tier.name} - ${tier.amount}/mo"))
-            for tier in SubscriptionTier.objects.all()[:3]
+            for tier in SubscriptionTier.objects.exclude(
+                name__icontains="custom"
+            ).order_by("amount")[:3]
         ]
         return form
 
