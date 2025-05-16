@@ -7,7 +7,7 @@
                 <p class="font-serif text-lg text-terminus-red-900 md:text-xl dark:text-gray-200">${{ tier.amount }}/mo</p>
             </div>
         </div>
-        <p class="mt-8 indent-4">{{ tier.desc }}</p>
+        <p class="mt-8">{{ tier.desc }}</p>
         <ul id="{{ tier.name|lower }}-features" class="flex flex-col py-4">
         {% for feature in tier.features.all %}
             <li class="-mx-4 border-b bg-gray-300 p-4 first:border-t dark:bg-gray-600">
