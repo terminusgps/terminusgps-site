@@ -96,7 +96,7 @@ class TerminusgpsFrequentlyAskedQuestionsView(HtmxTemplateResponseMixin, Templat
     content_type = "text/html"
     extra_context = {
         "title": "Frequently Asked Questions",
-        "subtitle": "May you find the answer to your burning question",
+        "subtitle": "You have questions, we have answers",
         "class": "flex flex-col gap-8",
     }
     http_method_names = ["get"]

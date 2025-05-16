@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils.dateparse import parse_datetime
@@ -32,8 +33,14 @@ class SubscriptionTierListView(
     partial_template_name = "terminusgps_tracker/subscriptions/partials/_tier_list.html"
     template_name = "terminusgps_tracker/subscriptions/tier_list.html"
 
-    def get_queryset(self):
-        return super().get_queryset()[:3]
+    def get_queryset(self) -> QuerySet:
+        """Returns non-custom subscription tiers for the view."""
+        return (
+            super()
+            .get_queryset()
+            .exclude(name__icontains="custom")
+            .order_by("amount")[:3]
+        )
 
 
 class CustomerSubscriptionTransactionsView(
