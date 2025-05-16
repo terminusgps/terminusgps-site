@@ -32,9 +32,9 @@ class VinNumberScanFormView(HtmxTemplateResponseMixin, FormView):
                 ValidationError(
                     _(
                         "Whoops! No barcode was detected in the uploaded image. Please upload a new image."
-                    )
+                    ),
+                    code="invalid",
                 ),
-                code="invalid",
             )
             return self.form_invalid(form=form)
         extracted_vin: str = results[0].data.decode("utf-8")

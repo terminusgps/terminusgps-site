@@ -8,7 +8,9 @@ class VinNumberScanForm(forms.Form):
         label="Upload Image",
         allow_empty_file=False,
         validators=[validate_image_file_extension],
-        widget=forms.widgets.FileInput(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
+        widget=forms.widgets.FileInput(
+            attrs={"class": settings.DEFAULT_FIELD_CLASS, "hx-preserve": True}
+        ),
     )
 
 
