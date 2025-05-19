@@ -5,11 +5,9 @@ from django.db import models
 class Installer(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
     """A Django user."""
-    accounts = models.ForeignKey(
+    accounts = models.ManyToManyField(
         "terminusgps_installer.WialonAccount",
-        on_delete=models.CASCADE,
         related_name="installers",
-        null=True,
         blank=True,
         default=None,
     )
