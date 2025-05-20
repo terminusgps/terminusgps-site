@@ -5,13 +5,9 @@ from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.core.validators import validate_email
 from django.forms import ValidationError, widgets
-from django.forms.renderers import TemplatesSetting
 from django.utils.translation import gettext_lazy as _
 from terminusgps.wialon.validators import validate_wialon_password
 
-
-class TerminusgpsFormRenderer(TemplatesSetting):
-    field_template_name = "terminusgps/field.html"
 
 
 class TerminusgpsEmailSupportForm(forms.Form):
