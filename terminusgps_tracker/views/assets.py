@@ -65,6 +65,7 @@ class CustomerAssetCreateView(HtmxTemplateResponseMixin, FormView):
     extra_context = {
         "title": "Register Asset",
         "subtitle": "Add an asset to your account",
+        "class": "flex flex-col gap-8",
     }
     context_object_name = "asset"
     form_class = CustomerAssetCreateForm

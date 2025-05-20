@@ -16,12 +16,13 @@ ALLOWED_HOSTS = [".terminusgps.com"]
 CSRF_COOKIE_SECURE = True
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-DEFAULT_FROM_EMAIL = "support@terminusgps.com"
 DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300"
+DEFAULT_FROM_EMAIL = "support@terminusgps.com"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+FORM_RENDERER = "terminusgps.django.forms.renderer.TerminusgpsFormRenderer"
 INTERNAL_IPS = ["127.0.0.1", "0.0.0.0"]
 LANGUAGE_CODE = "en-us"
 LOGIN_URL = "/login/"
@@ -188,6 +189,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.forms",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
+    # "terminusgps_installer.apps.TerminusgpsInstallerConfig",
 ]
 
 MIDDLEWARE = [

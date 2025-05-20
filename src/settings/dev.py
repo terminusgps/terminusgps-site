@@ -23,11 +23,12 @@ secret: dict[str, str | None] = {
     "TRACKER_ENCRYPTION_KEY": os.getenv("TRACKER_ENCRYPTION_KEY"),
     "EMAIL_HOST_USER": os.getenv("EMAIL_HOST_USER"),
     "EMAIL_HOST_PASSWORD": os.getenv("EMAIL_HOST_PASSWORD"),
+    "WIALON_ADMIN_ACCOUNT": os.getenv("WIALON_ADMIN_ACCOUNT"),
 }
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300"
+DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[#errors]:text-red-800 group-has-[#errors]:bg-red-100"
 LOGIN_URL = "/login/"
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,6 +37,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FROM_EMAIL = "support@terminusgps.com"
+FORM_RENDERER = "terminusgps.django.forms.renderer.TerminusgpsFormRenderer"
 DEFAULT_TAX_RATE = decimal.Decimal(
     secret.get("DEFAULT_TAX_RATE"),
     context=decimal.Context(prec=4, rounding=decimal.ROUND_HALF_UP),
@@ -73,6 +75,7 @@ WIALON_HOST = secret.get("WIALON_HOST")
 WIALON_SESSION_LOGLEVEL = logging.DEBUG
 WIALON_TOKEN = secret.get("WIALON_TOKEN")
 WIALON_UNACTIVATED_GROUP = secret.get("WIALON_UNACTIVATED_GROUP")
+WIALON_ADMIN_ACCOUNT = secret.get("WIALON_ADMIN_ACCOUNT")
 WSGI_APPLICATION = "src.wsgi.application"
 
 
@@ -182,6 +185,7 @@ INSTALLED_APPS = [
     "django.forms",
     "django_browser_reload",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
+    "terminusgps_installer.apps.TerminusgpsInstallerConfig",
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,8 @@
+<form class="{{ class }}" action="{% url 'installer:scan vin' %}" method="post" enctype="multipart/form-data" hx-encoding="multipart/form-data" hx-boost="true">
+    {% if form.non_field_errors %}
+    <div class="mt-2 animate-jiggle rounded border border-red-800 bg-red-100 p-2 text-red-600">{{ form.non_field_errors }}</div>
+    {% endif %}
+    {% csrf_token %}
+    {{ form.image.as_field_group }}
+    <input class="-mt-4 w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400 dark:border-terminus-gray-300" type="submit">
+</form>

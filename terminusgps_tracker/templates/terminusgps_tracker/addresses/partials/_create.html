@@ -1,84 +1,12 @@
 <form id="address-form" action="{% url 'tracker:create address' %}" method="post" class="{{ class }}">
     {% csrf_token %}
     {% if form.non_field_errors %}<div class="inset-shadow w-full p-2 text-red-600">{{ form.non_field_errors }}</div>{% endif %}
-    <div class="flex justify-between gap-2">
-        <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
-            {% if form.first_name.help_text %}
-            <div class="group flex items-center gap-1">
-                <h2 class="select-none">{{ form.first_name.label }}<h2>
-                <svg hx-on:click="s=document.getElementById('{{ form.first_name.name }}_help').getAttribute('aria-expanded')==='true'?'false':'true';document.getElementById('{{ form.first_name.name }}_help').setAttribute('aria-expanded', s);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 hover:scale-125">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
-                </svg>
-            </div>
-            {% else %}
-            {{ form.first_name.label }}
-            {% endif %}
-            {{ form.first_name }}
-            {% if form.first_name.help_text %}
-            <span id="{{ form.first_name.name }}_help" class="hidden aria-expanded:flex">{{ form.first_name.help_text }}</span>
-            {% endif %}
-            {% if form.first_name.errors %}
-            <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.first_name.errors }}</div>
-            {% endif %}
-        </div>
-        <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
-            {% if form.last_name.help_text %}
-            <div class="group flex items-center gap-1">
-                <h2 class="select-none">{{ form.last_name.label }}<h2>
-                <svg hx-on:click="s=document.getElementById('{{ form.last_name.name }}_help').getAttribute('aria-expanded')==='true'?'false':'true';document.getElementById('{{ form.last_name.name }}_help').setAttribute('aria-expanded', s);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 hover:scale-125">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
-                </svg>
-            </div>
-            {% else %}
-            {{ form.last_name.label }}
-            {% endif %}
-            {{ form.last_name }}
-            {% if form.last_name.help_text %}
-            <span id="{{ form.last_name.name }}_help" aria-expanded="false" class="hidden aria-expanded:flex">{{ form.last_name.help_text }}</span>
-            {% endif %}
-            {% if form.last_name.errors %}
-            <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.last_name.errors }}</div>
-            {% endif %}
-        </div>
+    <div class="flex items-center gap-2">
+        {{ form.first_name.as_field_group }}
+        {{ form.last_name.as_field_group }}
     </div>
-    <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
-        {% if form.phone.help_text %}
-        <div class="group flex items-center gap-1">
-            <h2 class="select-none">{{ form.phone.label }}<h2>
-            <svg hx-on:click="s=document.getElementById('{{ form.phone.name }}_help').getAttribute('aria-expanded')==='true'?'false':'true';document.getElementById('{{ form.phone.name }}_help').setAttribute('aria-expanded', s);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 hover:scale-125">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
-            </svg>
-        </div>
-        {% else %}
-        {{ form.phone.label }}
-        {% endif %}
-        {{ form.phone }}
-        {% if form.phone.help_text %}
-        <span id="{{ form.phone.name }}_help" aria-expanded="false" class="hidden aria-expanded:flex">{{ form.phone.help_text|safe }}</span>
-        {% endif %}
-        {% if form.phone.errors %}
-        <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.phone.errors }}</div>
-        {% endif %}
-    </div>
-    <div class="flex w-full flex-col gap-2 has-[#errors]:bg-red-200 has-[#errors]:p-2">
-        {% if form.address.help_text %}
-        <div class="group flex items-center gap-1">
-            <h2 class="select-none">{{ form.address.label }}<h2>
-            <svg hx-on:click="s=document.getElementById('{{ form.address.name }}_help').getAttribute('aria-expanded')==='true'?'false':'true';document.getElementById('{{ form.address.name }}_help').setAttribute('aria-expanded', s);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 hover:scale-125">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
-            </svg>
-        </div>
-        {% else %}
-        {{ form.address.label }}
-        {% endif %}
-        {{ form.address }}
-        {% if form.address.help_text %}
-        <span id="{{ form.address.name }}_help" aria-expanded="false" class="hidden aria-expanded:flex">{{ form.address.help_text|safe }}</span>
-        {% endif %}
-        {% if form.address.errors %}
-        <div class="border border-red-800 bg-red-100 p-2 text-red-600">{{ form.address.errors }}</div>
-        {% endif %}
-    </div>
+    {{ form.phone.as_field_group }}
+    {{ form.address.as_field_group }}
     <div class="flex items-center gap-2">
         {{ form.default.label }}
         {{ form.default }}

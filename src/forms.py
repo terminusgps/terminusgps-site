@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from terminusgps.wialon.validators import validate_wialon_password
 
 
+
 class TerminusgpsEmailSupportForm(forms.Form):
     email = forms.EmailField(
         label="Your Email Address",
@@ -126,14 +127,14 @@ class TerminusgpsRegisterForm(UserCreationForm):
     )
 
     def clean(self) -> dict[str, Any] | None:
+        """Raises :py:exec:`~django.core.execeptions.ValidationError` if the passwords don't match."""
         cleaned_data: dict[str, Any] | None = super().clean()
+
         if isinstance(cleaned_data, dict):
             password1 = cleaned_data.get("password1")
             password2 = cleaned_data.get("password2")
-
             if password1 and password2 and password1 != password2:
                 raise ValidationError(_("Passwords do not match."), code="invalid")
-
         return cleaned_data
 
 

@@ -32,7 +32,7 @@ class CustomerPaymentMethodCreateForm(forms.Form):
         ),
     )
     phone = forms.CharField(
-        help_text="Please enter your phone number in the format:&nbsp;<em>713-904-5555</em>",
+        help_text="Please enter your phone number in the format: 555-555-5555",
         label="Phone #",
         widget=forms.widgets.Input(
             attrs={
