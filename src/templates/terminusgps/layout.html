@@ -5,6 +5,12 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ title }} | Terminus GPS</title>
+        <meta property="og:title" content="{{ title }}">
+        <meta property="og:locale" content="en_US">
+        <meta property="og:site_name" content="Terminus GPS">
+        <meta property="og:type" content="{{ og_type|default:'website' }}">
+        <meta property="og:url" content="{{ request.META.HTTP_REFERER }}">
+        <meta property="og:image" content="{% static 'terminusgps/logo.svg' %}">
         <link href="{% static 'terminusgps/favicon.ico' %}" rel="shortcut icon" type="image/x-icon">
         <link href="{% static 'terminusgps/css/output.css' %}" rel="stylesheet" type="text/css">
         <script src="{% static 'terminusgps/js/htmx.min.js' %}" defer></script>
