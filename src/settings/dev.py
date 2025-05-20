@@ -28,7 +28,7 @@ secret: dict[str, str | None] = {
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300"
+DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[#errors]:text-red-800 group-has-[#errors]:bg-red-100"
 LOGIN_URL = "/login/"
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +37,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FROM_EMAIL = "support@terminusgps.com"
+FORM_RENDERER = "src.forms.TerminusgpsFormRenderer"
 DEFAULT_TAX_RATE = decimal.Decimal(
     secret.get("DEFAULT_TAX_RATE"),
     context=decimal.Context(prec=4, rounding=decimal.ROUND_HALF_UP),

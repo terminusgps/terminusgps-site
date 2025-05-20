@@ -134,10 +134,12 @@ class UnitCreationFormView(LoginRequiredMixin, HtmxTemplateResponseMixin, FormVi
     template_name = "terminusgps_installer/create_unit.html"
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        """Adds :py:attr:`session_manager` to the view."""
         super().setup(request, *args, **kwargs)
         self.session_manager = WialonSessionManager(token=settings.WIALON_TOKEN)
 
     def get_form(self, form_class=None) -> UnitCreationForm:
+        """Retrieves the latest hw types from Wialon and populates the form before returning it."""
         form = super().get_form(form_class=form_class)
         session = self.session_manager.get_session(sid=None)
         form.fields["hw_type"].choices = [
@@ -147,6 +149,7 @@ class UnitCreationFormView(LoginRequiredMixin, HtmxTemplateResponseMixin, FormVi
         return form
 
     def get_initial(self, *args, **kwargs) -> dict[str, typing.Any]:
+        """Sets the initial form inputs to query parameters."""
         initial: dict[str, typing.Any] = super().get_initial(*args, **kwargs)
         initial["vin_number"] = self.request.GET.get("vin_number", "")
         initial["imei_number"] = self.request.GET.get("imei_number", "")
@@ -156,15 +159,18 @@ class UnitCreationFormView(LoginRequiredMixin, HtmxTemplateResponseMixin, FormVi
         return initial
 
     def form_valid(self, form: UnitCreationForm) -> HttpResponse | HttpResponseRedirect:
+        """Creates a Wialon unit using the form data and migrates it into an account."""
         vin_number: str = form.cleaned_data["vin_number"]
         imei_number: str = form.cleaned_data["imei_number"]
         account_id: str = form.cleaned_data["account_id"]
         hw_type_id: str = form.cleaned_data["hw_type"]
+        migration_mask: int = wialon_constants.ACCESSMASK_UNIT_MIGRATION
+
         session: WialonSession = self.session_manager.get_session(sid=None)
         resource: WialonResource = WialonResource(id=account_id, session=session)
         unit: WialonUnit | None = wialon_utils.get_unit_by_imei(imei_number, session)
 
-        if resource is None or not resource.is_account:
+        if not resource or not resource.is_account:
             form.add_error(
                 "account_id",
                 ValidationError(
@@ -174,7 +180,7 @@ class UnitCreationFormView(LoginRequiredMixin, HtmxTemplateResponseMixin, FormVi
                 ),
             )
             return self.form_invalid(form=form)
-        if unit is None:
+        if not unit:
             form.add_error(
                 "imei_number",
                 ValidationError(
@@ -187,9 +193,8 @@ class UnitCreationFormView(LoginRequiredMixin, HtmxTemplateResponseMixin, FormVi
             )
             return self.form_invalid(form=form)
 
-        access_mask = wialon_constants.ACCESSMASK_UNIT_MIGRATION
         user = WialonUser(id=resource.creator_id, session=session)
-        user.grant_access(unit, access_mask=access_mask)
+        user.grant_access(unit, access_mask=migration_mask)
         resource.migrate_unit(unit)
         unit.update_pfield(wialon_constants.WialonProfileField.VIN, vin_number)
         return super().form_valid(form=form)

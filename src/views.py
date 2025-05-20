@@ -56,7 +56,7 @@ class TerminusgpsSourceCodeView(RedirectView):
 
 class TerminusgpsHostingView(RedirectView):
     """
-    Redirects the client to the the Terminus GPS hosting site.
+    Redirects the client to the the Terminus GPS hosting platform.
 
     **HTTP Methods**:
         - GET
@@ -69,6 +69,14 @@ class TerminusgpsHostingView(RedirectView):
 
 
 class TerminusgpsAboutView(HtmxTemplateResponseMixin, TemplateView):
+    """
+    Renders an about page.
+
+    **HTTP Methods**:
+        - GET
+
+    """
+
     content_type = "text/html"
     extra_context = {
         "title": "About",
@@ -81,6 +89,14 @@ class TerminusgpsAboutView(HtmxTemplateResponseMixin, TemplateView):
 
 
 class TerminusgpsTermsAndConditionsView(HtmxTemplateResponseMixin, TemplateView):
+    """
+    Renders a terms and conditions page.
+
+    **HTTP Methods**:
+        - GET
+
+    """
+
     content_type = "text/html"
     extra_context = {
         "title": "Terms & Conditions",
@@ -93,6 +109,14 @@ class TerminusgpsTermsAndConditionsView(HtmxTemplateResponseMixin, TemplateView)
 
 
 class TerminusgpsFrequentlyAskedQuestionsView(HtmxTemplateResponseMixin, TemplateView):
+    """
+    Renders a frequently asked questions page.
+
+    **HTTP Methods**:
+        - GET
+
+    """
+
     content_type = "text/html"
     extra_context = {
         "title": "Frequently Asked Questions",
@@ -106,7 +130,7 @@ class TerminusgpsFrequentlyAskedQuestionsView(HtmxTemplateResponseMixin, Templat
 
 class TerminusgpsPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
     """
-    Renders the privacy policy for the application.
+    Renders a privacy policy page.
 
     **Context**
 
@@ -135,6 +159,7 @@ class TerminusgpsPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
         :template:`terminusgps/partials/_privacy.html`
 
     .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
+
     """
 
     content_type = "text/html"
@@ -363,10 +388,7 @@ class TerminusgpsPasswordResetView(HtmxTemplateResponseMixin, PasswordResetView)
         form.fields["email"].help_text = help_text
         form.fields["email"].validators = [validate_email, validate_username_exists]
         form.fields["email"].widget.attrs.update(
-            {
-                "class": "p-2 w-full bg-stone-100 dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300",
-                "placeholder": "email@domain.com",
-            }
+            {"class": settings.DEFAULT_FIELD_CLASS, "placeholder": "email@domain.com"}
         )
         return form
 
@@ -513,7 +535,7 @@ class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
     ``class``
         The `tailwindcss`_ class used for the view.
 
-        Value: ``"p-4 flex flex-col gap-2"``
+        Value: ``"flex flex-col gap-8"``
 
     ``title``
         The title for the view/webpage.
@@ -544,7 +566,7 @@ class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
     extra_context = {
         "title": "Login",
         "subtitle": "We know where ours are... do you?",
-        "class": "p-4 flex flex-col gap-2",
+        "class": "flex flex-col gap-4",
     }
     http_method_names = ["get", "post"]
     next_page = reverse_lazy("tracker:dashboard")
@@ -596,7 +618,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     ``class``
         The `tailwindcss`_ class used for the view.
 
-        Value: ``"p-4 flex flex-col gap-4"``
+        Value: ``"flex flex-col gap-4"``
 
     ``title``
         The title for the view/webpage.
@@ -624,7 +646,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     extra_context = {
         "title": "Register",
         "subtitle": "You'll know where yours are...",
-        "class": "p-4 flex flex-col gap-4",
+        "class": "flex flex-col gap-4",
     }
     form_class = TerminusgpsRegisterForm
     http_method_names = ["get", "post"]
