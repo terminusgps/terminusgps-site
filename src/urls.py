@@ -50,7 +50,7 @@ urlpatterns = [
     path("about/", views.TerminusgpsAboutView.as_view(), name="about"),
     path("terms/", views.TerminusgpsTermsAndConditionsView.as_view(), name="terms"),
     path("faq/", views.TerminusgpsFrequentlyAskedQuestionsView.as_view(), name="faq"),
-    path("install/", include("terminusgps_installer.urls", namespace="installer")),
+    # path("install/", include("terminusgps_installer.urls", namespace="installer")),
     path("", include("terminusgps_tracker.urls", namespace="tracker")),
 ]
 
