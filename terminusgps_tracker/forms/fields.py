@@ -22,6 +22,7 @@ class AddressWidget(base_widgets.MultiWidget):
                         "class": settings.DEFAULT_FIELD_CLASS,
                         "placeholder": "Street",
                         "maxlength": 128,
+                        "enterkeyhint": "next",
                     }
                 ),
                 "city": base_widgets.TextInput(
@@ -29,6 +30,7 @@ class AddressWidget(base_widgets.MultiWidget):
                         "class": settings.DEFAULT_FIELD_CLASS,
                         "placeholder": "City",
                         "maxlength": 128,
+                        "enterkeyhint": "next",
                     }
                 ),
                 "state": base_widgets.TextInput(
@@ -36,6 +38,7 @@ class AddressWidget(base_widgets.MultiWidget):
                         "class": settings.DEFAULT_FIELD_CLASS,
                         "placeholder": "State",
                         "maxlength": 64,
+                        "enterkeyhint": "next",
                     }
                 ),
                 "country": base_widgets.TextInput(
@@ -43,6 +46,7 @@ class AddressWidget(base_widgets.MultiWidget):
                         "class": settings.DEFAULT_FIELD_CLASS,
                         "placeholder": "Country",
                         "maxlength": 64,
+                        "enterkeyhint": "next",
                     }
                 ),
                 "zip": base_widgets.TextInput(
@@ -50,6 +54,7 @@ class AddressWidget(base_widgets.MultiWidget):
                         "class": settings.DEFAULT_FIELD_CLASS,
                         "placeholder": "Zip #",
                         "maxlength": 12,
+                        "enterkeyhint": "next",
                     }
                 ),
             }
@@ -80,6 +85,8 @@ class CreditCardWidget(base_widgets.MultiWidget):
                         "placeholder": "Card #",
                         "minlength": 16,
                         "maxlength": 19,
+                        "enterkeyhint": "next",
+                        "inputmode": "numeric",
                     }
                 ),
                 "expiry_month": base_widgets.TextInput(
@@ -88,6 +95,8 @@ class CreditCardWidget(base_widgets.MultiWidget):
                         "placeholder": "MM",
                         "minlength": 2,
                         "maxlength": 2,
+                        "enterkeyhint": "next",
+                        "inputmode": "numeric",
                     }
                 ),
                 "expiry_year": base_widgets.TextInput(
@@ -96,6 +105,8 @@ class CreditCardWidget(base_widgets.MultiWidget):
                         "placeholder": "YY",
                         "minlength": 2,
                         "maxlength": 2,
+                        "enterkeyhint": "next",
+                        "inputmode": "numeric",
                     }
                 ),
                 "ccv": base_widgets.TextInput(
@@ -104,6 +115,8 @@ class CreditCardWidget(base_widgets.MultiWidget):
                         "placeholder": "CCV #",
                         "minlength": 3,
                         "maxlength": 4,
+                        "enterkeyhint": "next",
+                        "inputmode": "numeric",
                     }
                 ),
             }

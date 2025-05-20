@@ -36,7 +36,6 @@ class VinNumberScanConfirmForm(forms.Form):
                 "hx-indicator": "#vin-info-spinner",
                 "enterkeyhint": "enter",
                 "inputmode": "text",
-                "spellcheck": False,
             }
         ),
     )
@@ -53,7 +52,6 @@ class UnitCreationForm(forms.Form):
                 "placeholder": "AA0AAAA0AAA000000",
                 "enterkeyhint": "next",
                 "inputmode": "text",
-                "spellcheck": False,
             }
         ),
     )
@@ -67,14 +65,15 @@ class UnitCreationForm(forms.Form):
                 "placeholder": "867730050855555",
                 "enterkeyhint": "next",
                 "inputmode": "numeric",
-                "spellcheck": False,
             }
         ),
     )
     hw_type = forms.ChoiceField(
         help_text="Please select a hardware type for the device you installed.",
         label="Hardware Type",
-        widget=forms.widgets.Select(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
+        widget=forms.widgets.Select(
+            attrs={"class": settings.DEFAULT_FIELD_CLASS, "enterkeyhint": "next"}
+        ),
     )
     account_id = forms.CharField(
         help_text="Please enter a Wialon account # to migrate the new unit into.",
@@ -83,7 +82,7 @@ class UnitCreationForm(forms.Form):
             attrs={
                 "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "12345678",
-                "enterkeyhint": "done",
+                "enterkeyhint": "next",
                 "inputmode": "numeric",
             }
         ),
