@@ -1,0 +1,18 @@
+[
+    {
+        "model": "terminusgps_installer.WialonAccount",
+        "pk": 1,
+        "fields": {
+            "id": 27885442,
+            "name": "Terminus-1000"
+        }
+    },
+    {
+        "model": "terminusgps_installer.WialonAccount",
+        "pk": 2,
+        "fields": {
+            "id": 14930611,
+            "name": "Admin terminusgps"
+        }
+    }
+]

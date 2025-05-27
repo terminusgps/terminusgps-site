@@ -1,18 +1,53 @@
 from django import forms
 from django.conf import settings
-from django.core.validators import validate_image_file_extension
 from django.urls import reverse_lazy
+from terminusgps.wialon.validators import validate_imei_number, validate_vin_number
+
+from terminusgps_installer.models import WialonAccount
 
 
-class VinNumberScanForm(forms.Form):
+class WialonAssetCommandExecutionForm(forms.Form):
+    verbose = forms.BooleanField(
+        help_text="Check this box if you want the command to return a verbose output after execution.",
+        initial=False,
+        label="Verbose",
+        required=False,
+        widget=forms.widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
+    )
+
+
+class InstallJobCreationForm(forms.Form):
+    imei_number = forms.CharField(
+        label="IMEI #",
+        help_text="Please enter the IMEI number found on the device.",
+        max_length=19,
+        validators=[validate_imei_number],
+        widget=forms.widgets.TextInput(
+            attrs={
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "inputmode": "numeric",
+                "placeholder": "869738060095555",
+                "enterkeyhint": "next",
+            }
+        ),
+    )
+    account = forms.ModelChoiceField(
+        label="Wialon Account",
+        help_text="Please select a Wialon account to migrate the new asset into.",
+        queryset=WialonAccount.objects.all(),
+        widget=forms.widgets.Select(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
+    )
+
+
+class BarcodeScanForm(forms.Form):
     image = forms.ImageField(
         label="Upload Image",
+        help_text="Please upload an image of a barcode or QR code.",
         allow_empty_file=False,
-        validators=[validate_image_file_extension],
         widget=forms.widgets.FileInput(
             attrs={
                 "class": settings.DEFAULT_FIELD_CLASS,
-                "hx-preserve": True,
+                "hx-preserve": "true",
                 "accept": "image/*",
                 "capture": "environment",
                 "enterkeyhint": "done",
@@ -21,74 +56,75 @@ class VinNumberScanForm(forms.Form):
     )
 
 
-class VinNumberScanConfirmForm(forms.Form):
-    vin_number = forms.CharField(
-        label="VIN #",
-        max_length=17,
+class ImeiNumberConfirmForm(forms.Form):
+    imei_number = forms.CharField(
+        label="IMEI #",
+        help_text="Please enter the IMEI number found on the device.",
+        max_length=19,
+        validators=[validate_imei_number],
         widget=forms.widgets.TextInput(
             attrs={
                 "class": settings.DEFAULT_FIELD_CLASS,
-                "placeholder": "AA0AAAA0AAA000000",
-                "hx-get": reverse_lazy("installer:scan vin info"),
+                "inputmode": "numeric",
+                "enterkeyhint": "next",
+            }
+        ),
+    )
+
+
+class VinNumberConfirmForm(forms.Form):
+    vin_number = forms.CharField(
+        label="VIN #",
+        required=False,
+        help_text="Please enter the VIN number for the vehicle the device is installed in.",
+        max_length=17,
+        validators=[validate_vin_number],
+        widget=forms.widgets.TextInput(
+            attrs={
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "inputmode": "text",
+                "enterkeyhint": "next",
+                "hx-get": reverse_lazy("installer:info vin"),
                 "hx-trigger": "load, input changed delay:150ms",
-                "hx-include": "this",
+                "hx-include": "#id_vin_number",
                 "hx-target": "#vin-info",
                 "hx-indicator": "#vin-info-spinner",
-                "enterkeyhint": "enter",
-                "inputmode": "text",
             }
         ),
     )
 
 
-class UnitCreationForm(forms.Form):
-    vin_number = forms.CharField(
-        help_text="Please enter a VIN # for the vehicle you installed the device into.",
-        label="VIN #",
-        max_length=17,
-        widget=forms.widgets.TextInput(
-            attrs={
-                "class": settings.DEFAULT_FIELD_CLASS,
-                "placeholder": "AA0AAAA0AAA000000",
-                "enterkeyhint": "next",
-                "inputmode": "text",
-            }
-        ),
-    )
+class WialonAssetCreateForm(forms.Form):
     imei_number = forms.CharField(
-        help_text="Please enter an IMEI # for the device you installed into the vehicle.",
         label="IMEI #",
+        help_text="Please enter the IMEI number found on the device.",
         max_length=19,
+        validators=[validate_imei_number],
         widget=forms.widgets.TextInput(
             attrs={
                 "class": settings.DEFAULT_FIELD_CLASS,
-                "placeholder": "867730050855555",
-                "enterkeyhint": "next",
                 "inputmode": "numeric",
+                "enterkeyhint": "next",
             }
         ),
     )
-    hw_type = forms.ChoiceField(
-        help_text="Please select a hardware type for the device you installed.",
-        label="Hardware Type",
-        widget=forms.widgets.Select(
-            attrs={"class": settings.DEFAULT_FIELD_CLASS, "enterkeyhint": "next"}
-        ),
-    )
-    account_id = forms.CharField(
-        help_text="Please enter a Wialon account # to migrate the new unit into.",
-        label="Wialon Account #",
+    vin_number = forms.CharField(
+        label="VIN #",
+        required=False,
+        help_text="Please enter the VIN number for the vehicle the device is installed in.",
+        max_length=17,
+        validators=[validate_vin_number],
         widget=forms.widgets.TextInput(
             attrs={
                 "class": settings.DEFAULT_FIELD_CLASS,
-                "placeholder": "12345678",
+                "inputmode": "text",
                 "enterkeyhint": "next",
-                "inputmode": "numeric",
             }
         ),
     )
-    verified = forms.BooleanField(
-        label="By checking this box, you verify the information above accurately describes your install job.",
-        widget=forms.widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
-        initial=False,
+    account = forms.ModelChoiceField(
+        label="Wialon Account",
+        help_text="Please select a Wialon account to migrate the new unit into.",
+        queryset=WialonAccount.objects.all(),
+        widget=forms.widgets.Select(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
     )

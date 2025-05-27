@@ -1,8 +1,39 @@
 import argparse
 import json
 import os
+import subprocess
 
 from django.core.management.base import BaseCommand, CommandError
+
+
+def get_node_dependencies() -> list[str]:
+    """
+    Retrives a list of application dependencies from ``package.json``.
+
+    Returns an empty list if ``package.json`` does not exist.
+
+    :returns: A list of application dependencies as strings.
+    :rtype: :py:obj:`list`
+
+    """
+    if not os.path.isfile("package.json"):
+        return []
+
+    with open("package.json", "r") as file:
+        return json.load(file).get("devDependencies", {}).keys()
+
+
+def node_package_installed(name: str) -> bool:
+    """
+    Checks whether or not a node package is installed.
+
+    :param name: A npm package name.
+    :type name: :py:obj:`str`
+    :returns: Whether or not node package ``name`` is installed.
+    :rtype: :py:obj:`bool`
+
+    """
+    return name in get_node_dependencies()
 
 
 class Command(BaseCommand):
@@ -42,70 +73,51 @@ class Command(BaseCommand):
         :rtype: :py:obj:`None`
 
         """
-        subcommand = options["subcommand"]
         try:
-            command = self.generate_command(subcommand)
-            os.system(command)
+            command = self.generate_command(options["subcommand"])
+            subprocess.run(command, check=True)
         except ValueError as e:
             raise CommandError(e)
 
-    def generate_command(self, subcommand: str | None) -> str:
+    def generate_command(self, subcommand: str | None) -> list[str]:
         """
         Generates a tailwind command based on the provided subcommand.
 
-        :returns: A command to be executed by :py:func:`os.system`.
-        :rtype: :py:obj:`str`
-
-        """
-        input, output = self.get_input_filepath(), self.get_output_filepath()
-        match subcommand:
-            case "start":
-                styled = self.style.NOTICE
-                message = "Starting tailwind compiler..."
-                command = f"npx @tailwindcss/cli -i {input} -o {output} --watch"
-            case "build":
-                styled = self.style.NOTICE
-                message = "Building tailwind for production..."
-                command = f"npx @tailwindcss/cli -i {input} -o {output} --minify"
-            case "install":
-                if not self.node_package_installed("tailwindcss"):
-                    styled = self.style.NOTICE
-                    message = "Installing tailwind..."
-                    command = "npm install -D tailwindcss @tailwindcss/cli"
-                else:
-                    styled = self.style.WARNING
-                    message = "Tailwind is already installed, building for production instead..."
-                    command = f"npx @tailwindcss/cli -i {input} -o {output} --minify"
-            case _:
-                raise ValueError("Invalid subcommand '%(cmd)s'" % {"cmd": subcommand})
-        self.stdout.write(styled(message))
-        return command
-
-    def get_node_dependencies(self) -> list[str]:
-        """
-        Retrives a list of application dependencies from ``package.json``.
-
-        Returns an empty list if ``package.json`` does not exist.
-
-        :returns: A list of application dependencies as strings.
+        :returns: A command to be executed by :py:func:`subprocess.run`.
         :rtype: :py:obj:`list`
 
         """
-        if not os.path.isfile("package.json"):
-            return []
+        input, output = self.get_input_filepath(), self.get_output_filepath()
+        base_command = ["npx", "@tailwindcss/cli", "-i", input, "-o", output]
 
-        with open("package.json", "r") as file:
-            return json.load(file).get("devDependencies").keys()
-
-    def node_package_installed(self, name: str) -> bool:
-        """
-        Checks whether or not a node package is installed.
-
-        :returns: Whether or not node package ``name`` is installed.
-        :rtype: :py:obj:`bool`
-
-        """
-        return name in self.get_node_dependencies()
+        match subcommand:
+            case "start":
+                style = self.style.NOTICE
+                message = "Starting tailwind compiler..."
+                command = base_command + ["--watch"]
+            case "build":
+                style = self.style.NOTICE
+                message = "Building tailwind for production..."
+                command = base_command + ["--minify"]
+            case "install":
+                if not node_package_installed("tailwindcss"):
+                    style = self.style.NOTICE
+                    message = "Installing tailwind..."
+                    command = [
+                        "npm",
+                        "install",
+                        "-D",
+                        "tailwindcss",
+                        "@tailwindcss/cli",
+                    ]
+                else:
+                    style = self.style.WARNING
+                    message = "Tailwind is already installed, building for production instead..."
+                    command = base_command + ["--minify"]
+            case _:
+                raise ValueError(f"Invalid subcommand '{subcommand}'.")
+        self.stdout.write(style(message))
+        return command
 
     def get_input_filepath(self) -> str:
         """Returns an input filepath for the tailwind compiler."""

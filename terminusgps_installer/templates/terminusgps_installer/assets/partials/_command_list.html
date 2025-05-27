@@ -1,0 +1,10 @@
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+        <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+<div id="{{ asset.pk }}-command-list" class="{{ class }}">
+{% for cmd in command_list %}<div id="{{ cmd.id }}" hx-get="{{ cmd.get_absolute_url }}" hx-trigger="load" hx-target="this"></div>{% endfor %}
+</div>

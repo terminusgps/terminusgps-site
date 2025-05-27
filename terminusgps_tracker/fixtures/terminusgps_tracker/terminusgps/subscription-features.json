@@ -5,7 +5,7 @@
         "fields": {
             "name": "GPS Tracking",
             "amount": null,
-            "desc": "Access to the Terminus GPS Hosting interface; a platform that simplifies monitoring your vehicles no matter where they are on the planet."
+            "desc": "Access to the Terminus GPS platform; an interface that simplifies monitoring your vehicles no matter where they are on the planet."
         }
     },
     {

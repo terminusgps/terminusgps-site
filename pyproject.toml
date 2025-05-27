@@ -19,8 +19,8 @@ dependencies = [
     "lxml==4.9.4",
     "numpy==2.0.1",
     "pandas==2.2.3",
-    "pillow==10.4.0",
-    "python-terminusgps==37.0.0",
+    "pillow==11.2.1",
+    "python-terminusgps==37.3.0",
     "python-wialon==1.2.4",
     "django-otp>=1.6.0",
     "pyotp>=2.9.0",
@@ -76,5 +76,4 @@ skip-magic-trailing-comma = true
 [dependency-groups]
 dev = [
     "certifi>=2025.1.31",
-    "django-browser-reload>=1.18.0",
 ]

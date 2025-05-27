@@ -1,0 +1,9 @@
+<div class="{{ class }}">
+    <div class="flex flex-col gap-4 rounded border p-4">
+        <div class="flex justify-between">
+            <h2 class="text-xl text-gray-800">{{ asset.name }}</h2>
+            <h3 class="text-xl tracking-wider text-gray-400">ID #{{ asset.pk }}</h3>
+        </div>
+        <div id="command-list" hx-get="{% url 'installer:command list' asset_pk=asset.pk %}" hx-trigger="load" hx-target="this"></div>
+    </div>
+</div>

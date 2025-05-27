@@ -1,0 +1,4 @@
+<div id="command-{{ command.id }}" class="{{ class }}">
+    <h2 class="font-semibold">{{ command.name }}</h2>
+    <div hx-get="{{ command.get_execution_url }}" hx-target="this" hx-trigger="load" hx-swap="outerHTML"></div>
+</div>

@@ -183,7 +183,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
-    "django_browser_reload",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
     "terminusgps_installer.apps.TerminusgpsInstallerConfig",
 ]
@@ -196,7 +195,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
 

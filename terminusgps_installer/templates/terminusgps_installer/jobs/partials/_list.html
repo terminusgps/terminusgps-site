@@ -1,0 +1,38 @@
+<div class="relative overflow-x-auto">
+    <table class="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
+        <thead class="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="px-6 py-3">
+                    ID
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Date Created
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Account
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Details
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in job_list %}
+            <tr class="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+                <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 dark:text-white">
+                    {{ job.pk }}
+                </th>
+                <td class="px-6 py-4">
+                    {{ job.date_created|date:'M j, Y' }}
+                </td>
+                <td class="px-6 py-4">
+                    {{ job.account.name }}
+                </td>
+                <td class="px-6 py-4">
+                    <a href="{{ job.get_absolute_url }}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
