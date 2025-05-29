@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models, transaction
 from django.urls import reverse, reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from terminusgps.wialon.items import WialonUnit
 from terminusgps.wialon.session import WialonSession
 
@@ -10,8 +11,8 @@ class Installer(models.Model):
     """A Django user."""
 
     class Meta:
-        verbose_name = "installer"
-        verbose_name_plural = "installers"
+        verbose_name = _("installer")
+        verbose_name_plural = _("installers")
 
     def __str__(self) -> str:
         return self.user.username
@@ -30,7 +31,7 @@ class InstallJob(models.Model):
     """A Wialon account for the install job."""
     asset = models.ForeignKey(
         "terminusgps_installer.WialonAsset",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="job",
     )
     """Wialon assets for the install job."""
@@ -38,6 +39,12 @@ class InstallJob(models.Model):
     """Date install job was created."""
     date_modified = models.DateTimeField(auto_now=True)
     """Date install job was last modified."""
+    completed = models.BooleanField(default=False)
+    """Whether or not the install job is complete."""
+
+    class Meta:
+        verbose_name = _("install job")
+        verbose_name_plural = _("install jobs")
 
     def __str__(self) -> str:
         return f"Job #{self.pk}"
@@ -53,8 +60,8 @@ class WialonAccount(models.Model):
     """Wialon account name."""
 
     class Meta:
-        verbose_name = "account"
-        verbose_name_plural = "accounts"
+        verbose_name = _("account")
+        verbose_name_plural = _("accounts")
 
     def __str__(self) -> str:
         return self.name
@@ -65,26 +72,31 @@ class WialonAsset(models.Model):
     """Wialon asset id."""
     name = models.CharField(max_length=128)
     """Wialon asset name."""
+    imei = models.CharField(max_length=19)
+    """Wialon asset IMEI #."""
 
     class Meta:
-        verbose_name = "asset"
-        verbose_name_plural = "assets"
+        verbose_name = _("asset")
+        verbose_name_plural = _("assets")
 
     def __str__(self) -> str:
         return self.name
 
     def save(self, session: WialonSession | None = None, **kwargs) -> None:
+        super().save(**kwargs)
         if session and self._wialon_commands_need_sync(session):
             self._wialon_sync_commands(session)
-        return super().save(**kwargs)
 
     def get_absolute_url(self) -> str:
         return reverse_lazy("installer:asset detail", kwargs={"pk": self.pk})
 
+    def get_icon_url(self, border: int = 32) -> str:
+        return f"http://hst-api.wialon.com/avl_item_image/{self.pk}/{border}/icon.png"
+
     @transaction.atomic
     def _wialon_sync_commands(self, session: WialonSession) -> list:
         new_command_objs = [
-            WialonAssetCommand(id=cmd_id, name=name, asset=self)
+            WialonAssetCommand(cmd_id=cmd_id, name=name, asset=self)
             for cmd_id, name in self._wialon_get_available_commands(session).items()
             if cmd_id not in self._wialon_get_existing_command_ids()
         ]
@@ -97,19 +109,22 @@ class WialonAsset(models.Model):
 
     @transaction.atomic
     def _wialon_commands_need_sync(self, session: WialonSession) -> bool:
-        existing_count = self.commands.count()
-        if existing_count == 0:
-            return True
-
+        existing_commands = self.commands.all()
         available_commands = self._wialon_get_available_commands(session)
-        if not available_commands:
-            return False
 
-        return existing_count != len(available_commands)
+        if existing_commands.count() == 0:
+            return True
+        return (
+            existing_commands.count() != len(available_commands)
+            if available_commands
+            else False
+        )
 
     def _wialon_get_existing_command_ids(self) -> set[int]:
         return set(
-            WialonAssetCommand.objects.filter(asset=self).values_list("id", flat=True)
+            WialonAssetCommand.objects.filter(asset=self).values_list(
+                "cmd_id", flat=True
+            )
         )
 
     def _wialon_get_available_commands(self, session: WialonSession) -> dict[str, int]:
@@ -122,8 +137,54 @@ class WialonAsset(models.Model):
 
 
 class WialonAssetCommand(models.Model):
-    id = models.PositiveBigIntegerField(primary_key=True)
+    class WialonAssetCommandType(models.TextChoices):
+        BLOCK_ENGINE = "block_engine", _("Block Engine")
+        """Block engine."""
+        UNBLOCK_ENGINE = "unblock_engine", _("Unblock Engine")
+        """Unblock engine."""
+        CUSTOM_MESSAGE = "custom_msg", _("Custom Message")
+        """Custom message."""
+        DRIVER_MESSAGE = "driver_msg", _("Driver Message")
+        """Message to the driver."""
+        DOWNLOAD_MESSAGES = "download_msgs", _("Download Messages")
+        """Download messages."""
+        QUERY_POSITION = "query_pos", _("Query Position")
+        """Request coordinates."""
+        QUERY_PHOTO = "query_photo", _("Query Photo")
+        """Request a photo."""
+        OUTPUT_ON = "output_on", _("Output On")
+        """Activate output."""
+        OUTPUT_OFF = "output_off", _("Output Off")
+        """Deactivate output."""
+        SEND_POSITION = "send_pos", _("Send Position")
+        """Send coordinates."""
+        SET_REPORT_INTERVAL = "set_report_interval", _("Set Report Interval")
+        """Set the interval for sending data."""
+        UPLOAD_CONFIG = "upload_cfg", _("Upload Configuration")
+        """Upload configuration."""
+        UPLOAD_FIRMWARE = "upload_sw", _("Upload Firmware")
+        """Upload firmware."""
+
+    class WialonAssetCommandLinkType(models.TextChoices):
+        AUTO = "", _("Auto")
+        """Deliver with an automatically determined protocol."""
+        TCP = "tcp", _("TCP")
+        """Deliver using TCP protocol."""
+        UDP = "udp", _("UDP")
+        """Deliver using UDP protocol."""
+        VRT = "vrt", _("Virtual")
+        """Deliver using a virtual protocol."""
+        GSM = "gsm", _("GSM/SMS")
+        """Deliver using gsm/sms protocol."""
+
+    cmd_id = models.PositiveBigIntegerField()
     """Wialon asset command id."""
+    cmd_type = models.CharField(
+        max_length=64,
+        choices=WialonAssetCommandType.choices,
+        default=WialonAssetCommandType.CUSTOM_MESSAGE,
+    )
+    """Wialon asset command type."""
     name = models.CharField(max_length=64)
     """Wialon asset command name."""
     asset = models.ForeignKey(
@@ -132,13 +193,21 @@ class WialonAssetCommand(models.Model):
         related_name="commands",
     )
     """Associated asset for the command."""
+    message = models.CharField(max_length=128, null=True, blank=True, default=None)
+    """Message to send with the command."""
 
     class Meta:
-        verbose_name = "asset command"
-        verbose_name_plural = "asset commands"
+        verbose_name = _("asset command")
+        verbose_name_plural = _("asset commands")
+        unique_together = ("asset", "cmd_id")
 
     def __str__(self) -> str:
         return self.name
+
+    def save(self, session: WialonSession | None = None, **kwargs) -> None:
+        if session and self._wialon_needs_sync():
+            self._wialon_sync(session)
+        return super().save(**kwargs)
 
     def get_absolute_url(self) -> str:
         return reverse(
@@ -146,8 +215,32 @@ class WialonAssetCommand(models.Model):
             kwargs={"asset_pk": self.asset.pk, "pk": self.pk},
         )
 
-    def get_execution_url(self) -> str:
+    def get_execute_url(self) -> str:
         return reverse(
             "installer:command execute",
             kwargs={"asset_pk": self.asset.pk, "pk": self.pk},
         )
+
+    def execute(
+        self, session: WialonSession, link_type: str = "", timeout: int = 30
+    ) -> None:
+        session.wialon_api.unit_exec_cmd(
+            **{
+                "itemId": self.asset.pk,
+                "commandName": self.name,
+                "linkType": link_type,
+                "timeout": timeout,
+                "param": self.message,
+            }
+        )
+
+    def _wialon_needs_sync(self) -> bool:
+        return bool(self.message)
+
+    @transaction.atomic
+    def _wialon_sync(self, session: WialonSession) -> None:
+        response = session.wialon_api.unit_get_command_definition_data(
+            **{"itemId": self.asset.pk, "col": [self.cmd_id]}
+        )[0]
+        self.message = response.get("p")
+        self.cmd_type = response.get("c")

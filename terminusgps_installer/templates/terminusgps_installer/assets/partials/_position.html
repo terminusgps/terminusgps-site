@@ -1,4 +1,6 @@
-{{ map_url }}
-<img class="" src="{{ map_url }}" alt="Asset Map">
-<p class="text-gray-400">Retrieved on {{ pos.t|date:'F n, Y' }} at {{ pos.t|date:'P' }}</p>
-<p class="text-gray-500">Altitude: {{ pos.z }}ft</div>
+<div class="{{ class }}">
+    <img class="" src="" alt="Asset Map">
+    <p class="text-gray-500">Altitude: {{ pos.z|floatformat:2|default:'0.0' }}ft</div>
+    <p class="text-gray-400">Longitude: {{ pos.x|floatformat:2|default:'0.0' }}</div>
+    <p class="text-gray-400">Latitude: {{ pos.y|floatformat:2|default:'0.0' }}</div>
+</div>

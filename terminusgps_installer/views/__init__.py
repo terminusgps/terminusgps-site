@@ -8,7 +8,13 @@ from .assets import (
     WialonAssetUpdateView,
 )
 from .installers import InstallerDashboardView
-from .jobs import InstallJobCreateView, InstallJobDetailView, InstallJobListView
+from .jobs import (
+    InstallJobCompleteSuccessView,
+    InstallJobCompleteView,
+    InstallJobCreateView,
+    InstallJobDetailView,
+    InstallJobListView,
+)
 from .scanners import (
     ImeiNumberInfoView,
     ImeiNumberScanConfirmView,

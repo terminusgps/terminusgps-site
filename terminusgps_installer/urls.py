@@ -9,6 +9,16 @@ urlpatterns = [
     path("jobs/create/", views.InstallJobCreateView.as_view(), name="job create"),
     path("jobs/<int:pk>/", views.InstallJobDetailView.as_view(), name="job detail"),
     path(
+        "jobs/<int:pk>/complete/",
+        views.InstallJobCompleteView.as_view(),
+        name="job complete",
+    ),
+    path(
+        "jobs/<int:pk>/complete/success/",
+        views.InstallJobCompleteSuccessView.as_view(),
+        name="job complete success",
+    ),
+    path(
         "commands/<int:asset_pk>/",
         views.WialonAssetCommandListView.as_view(),
         name="command list",

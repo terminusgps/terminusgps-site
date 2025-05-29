@@ -3,15 +3,33 @@ from django.conf import settings
 from django.urls import reverse_lazy
 from terminusgps.wialon.validators import validate_imei_number, validate_vin_number
 
-from terminusgps_installer.models import WialonAccount
+from terminusgps_installer.models import WialonAccount, WialonAssetCommand
 
 
 class WialonAssetCommandExecutionForm(forms.Form):
-    verbose = forms.BooleanField(
-        help_text="Check this box if you want the command to return a verbose output after execution.",
-        initial=False,
-        label="Verbose",
+    link_type = forms.ChoiceField(
+        choices=WialonAssetCommand.WialonAssetCommandLinkType.choices,
+        help_text="Please select a link type to execute the asset command with.",
+        initial=WialonAssetCommand.WialonAssetCommandLinkType.AUTO,
+        label="Link Type",
         required=False,
+        widget=forms.widgets.Select(
+            attrs={"class": settings.DEFAULT_FIELD_CLASS + " text-center"}
+        ),
+    )
+
+
+class InstallJobCompletionForm(forms.Form):
+    position_retrieved = forms.BooleanField(
+        help_text="Check this box if the unit's position was properly retrieved and rendered in a map.",
+        initial=False,
+        label="Unit position was retrieved",
+        widget=forms.widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
+    )
+    commands_executed = forms.BooleanField(
+        help_text="Check this box if test commands were properly executed by the unit.",
+        initial=False,
+        label="Unit commands were executed",
         widget=forms.widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
     )
 

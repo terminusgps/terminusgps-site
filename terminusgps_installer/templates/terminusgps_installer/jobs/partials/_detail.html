@@ -1,15 +1,18 @@
-<div class="{{ class }}">
+<div class="flex flex-col gap-8">
     <div class="flex flex-col gap-4">
-        <h2>Account</h2>
-        <p>{{ job.account.name }}</p>
+        <h2 class="text-xl font-semibold text-terminus-red-400">Account</h2>
+        <p class="text-lg">{{ job.account.name }}</p>
     </div>
     <div class="flex flex-col gap-4">
         <div class="flex gap-2">
-            <h2>Asset</h2>
-            <svg id="asset-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="htmx-indicator hidden size-6 animate-spin has-[.htmx-request]:flex">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
+            <h2 class="text-xl font-semibold text-terminus-red-400">Asset</h2>
         </div>
         <div id="{{ job.asset.pk }}" hx-get="{{ job.asset.get_absolute_url }}" hx-target="this" hx-trigger="load" hx-indicator="#asset-spinner"></div>
     </div>
+    {% if not job.completed %}
+    <div class="flex flex-col gap-4">
+        <h2 class="text-xl font-semibold text-terminus-red-400">Completion Form</h2>
+        <div class="flex flex-col gap-4 rounded border p-4" hx-get="{% url 'installer:job complete' pk=job.pk %}" hx-target="this" hx-trigger="load"></div>
+    </div>
+    {% endif %}
 </div>

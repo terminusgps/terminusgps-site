@@ -1,4 +1,4 @@
-<div id="command-{{ command.id }}" class="{{ class }}">
-    <h2 class="font-semibold">{{ command.name }}</h2>
-    <div hx-get="{{ command.get_execution_url }}" hx-target="this" hx-trigger="load" hx-swap="outerHTML"></div>
+<div id="command-{{ command.id }}" class="flex flex-col items-center justify-between gap-4 rounded border bg-gray-200 p-4 md:flex-row dark:bg-gray-800">
+    <h2 class="mx-4 font-semibold">{{ command.name }}</h2>
+    <div hx-get="{{ command.get_execute_url }}" hx-target="this" hx-trigger="load" hx-swap="outerHTML"></div>
 </div>
