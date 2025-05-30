@@ -144,11 +144,12 @@ class WialonAsset(models.Model):
         :rtype: :py:obj:`None`
 
         """
-        self._wialon_sync_data(session)
-        self._wialon_sync_commands(session)
+        unit = WialonUnit(id=self.pk, session=session)
+        self._wialon_sync_data(unit)
+        self._wialon_sync_commands(unit)
 
     @transaction.atomic
-    def _wialon_sync_data(self, session: WialonSession) -> None:
+    def _wialon_sync_data(self, unit: WialonUnit) -> None:
         """
         Updates and sets :py:attr:`name` and :py:attr:`imei` using the Wialon API.
 
@@ -158,24 +159,23 @@ class WialonAsset(models.Model):
         :rtype: :py:obj:`None`
 
         """
-        unit = WialonUnit(id=self.pk, session=session)
         self.name = unit.name
         self.imei = unit.imei_number
 
     @transaction.atomic
-    def _wialon_sync_commands(self, session: WialonSession) -> None:
+    def _wialon_sync_commands(self, unit: WialonUnit) -> None:
         """
         Syncs asset command data with the Wialon API.
 
-        :param session: A valid Wialon API session.
-        :type session: :py:obj:`~terminusgps.wialon.session.WialonSession`
+        :param unit: A Wialon unit.
+        :type unit: :py:obj:`~terminusgps.wialon.items.units.WialonUnit`
         :returns: Nothing.
         :rtype: :py:obj:`None`
 
         """
         new_command_objs = [
             WialonAssetCommand(cmd_id=cmd_id, name=name, asset=self)
-            for cmd_id, name in self._wialon_get_available_commands(session).items()
+            for cmd_id, name in self._wialon_get_available_commands(unit).items()
             if cmd_id not in self._wialon_get_existing_command_ids()
         ]
         if new_command_objs:
@@ -191,12 +191,13 @@ class WialonAsset(models.Model):
             )
         )
 
-    def _wialon_get_available_commands(self, session: WialonSession) -> dict[str, int]:
+    @staticmethod
+    def _wialon_get_available_commands(unit: WialonUnit) -> dict[int, str]:
         """
         Returns a dictionary of commands assigned to the asset in Wialon.
 
-        :param session: A valid Wialon API session.
-        :type session: :py:obj:`~terminusgps.wialon.session.WialonSession`
+        :param unit: A Wialon unit.
+        :type unit: :py:obj:`~terminusgps.wialon.items.units.WialonUnit`
         :returns: A dictionary of commands assigned to the asset.
         :rtype: :py:obj:`dict`
 
@@ -209,7 +210,6 @@ class WialonAsset(models.Model):
         +----------------+---------------+
 
         """
-        unit = WialonUnit(id=self.id, session=session)
         return {
             cmd["id"]: cmd["n"]
             for cmd in unit.available_commands.values()

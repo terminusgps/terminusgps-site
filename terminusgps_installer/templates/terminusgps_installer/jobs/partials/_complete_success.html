@@ -1,1 +1,4 @@
-<div class="" hx-get="{% url 'installer:job complete' pk=job.pk %}" hx-trigger="load delay:3s">You completed Job #{{ job.pk }} and installed '{{ job.asset.name }}'!</div>
+<div class="flex flex-col gap-4">
+    <p class="">You completed Job #{{ job.pk }} and installed '{{ job.asset.name }}'!</p>
+    <a href="{% url 'installer:dashboard' %}" class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400 dark:border-terminus-gray-300">Go to dashboard</a>
+</div>

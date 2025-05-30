@@ -8,6 +8,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
+from terminusgps.wialon.items import WialonUnit
 from terminusgps.wialon.session import WialonSession
 
 from terminusgps_installer.forms import WialonAssetCommandExecutionForm
@@ -37,13 +38,20 @@ class WialonAssetPositionView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
 ):
     content_type = "text/html"
-    extra_context = {"title": "Asset Position", "class": "flex flex-col gap-4"}
+    extra_context = {"title": "Asset Position"}
     login_url = reverse_lazy("login")
     model = WialonAsset
     partial_template_name = "terminusgps_installer/assets/partials/_position.html"
     permission_denied_message = "Please login to view this content."
     raise_exception = False
     template_name = "terminusgps_installer/assets/position.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        with WialonSession() as session:
+            unit = WialonUnit(id=self.kwargs["pk"], session=session)
+            context["pos"] = unit.get_position()
+        return context
 
 
 class WialonAssetMessagesView(

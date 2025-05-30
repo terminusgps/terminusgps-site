@@ -36,7 +36,7 @@ class InstallJobCompletionForm(forms.Form):
 class InstallJobCreationForm(forms.Form):
     imei_number = forms.CharField(
         label="IMEI #",
-        help_text="Please enter the IMEI number found on the device.",
+        help_text="Please enter the IMEI # found on the device.",
         max_length=19,
         validators=[validate_imei_number],
         widget=forms.widgets.TextInput(
@@ -50,7 +50,7 @@ class InstallJobCreationForm(forms.Form):
     )
     account = forms.ModelChoiceField(
         label="Wialon Account",
-        help_text="Please select a Wialon account to migrate the new asset into.",
+        help_text="Please select a Wialon account associated with the installation job.",
         queryset=WialonAccount.objects.all(),
         widget=forms.widgets.Select(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
     )
