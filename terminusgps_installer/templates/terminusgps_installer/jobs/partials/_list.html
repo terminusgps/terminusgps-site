@@ -19,13 +19,13 @@
         <tbody>
             {% for job in job_list %}
             <tr class="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-                <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 dark:text-white select-all">
+                <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 select-all dark:text-white">
                     {{ job.asset.name }}
                 </th>
                 <td class="px-6 py-4 select-all">
                     {{ job.asset.imei }}
                 </td>
-                <td class="px-6 py-4 select-all whitespace-nowrap">
+                <td class="px-6 py-4 whitespace-nowrap select-all">
                     {{ job.account.name }}
                 </td>
                 <td class="px-6 py-4">

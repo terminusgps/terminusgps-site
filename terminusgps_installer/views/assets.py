@@ -6,7 +6,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import DetailView, FormView, ListView, UpdateView
+from django.views.generic import DetailView, FormView, ListView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon.session import WialonSession
 
@@ -29,20 +29,8 @@ class WialonAssetDetailView(LoginRequiredMixin, HtmxTemplateResponseMixin, Detai
         asset = self.get_object()
         if asset.commands.count() == 0:
             with WialonSession() as session:
-                asset.save(session)
+                asset.wialon_sync(session)
         return super().get(request, *args, **kwargs)
-
-
-class WialonAssetUpdateView(LoginRequiredMixin, HtmxTemplateResponseMixin, UpdateView):
-    content_type = "text/html"
-    context_object_name = "asset"
-    extra_context = {"title": "Update Asset", "class": "flex flex-col gap-8"}
-    login_url = reverse_lazy("login")
-    model = WialonAsset
-    partial_template_name = "terminusgps_installer/assets/partials/_update.html"
-    permission_denied_message = "Please login to view this content."
-    raise_exception = False
-    template_name = "terminusgps_installer/assets/update.html"
 
 
 class WialonAssetPositionView(
@@ -58,15 +46,33 @@ class WialonAssetPositionView(
     template_name = "terminusgps_installer/assets/position.html"
 
 
+class WialonAssetMessagesView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
+):
+    content_type = "text/html"
+    extra_context = {"title": "Asset Messages"}
+    login_url = reverse_lazy("login")
+    model = WialonAsset
+    partial_template_name = "terminusgps_installer/assets/partials/_messages.html"
+    permission_denied_message = "Please login to view this content."
+    raise_exception = False
+    template_name = "terminusgps_installer/assets/messages.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        return context
+
+
 class WialonAssetCommandListView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, ListView
 ):
     content_type = "text/html"
     context_object_name = "command_list"
-    extra_context = {"title": "Command", "class": "flex flex-col gap-4"}
+    extra_context = {"title": "Command"}
     http_method_names = ["get"]
     login_url = reverse_lazy("login")
     model = WialonAssetCommand
+    queryset = WialonAssetCommand.objects.none()
     partial_template_name = "terminusgps_installer/assets/partials/_command_list.html"
     permission_denied_message = "Please login to view this content."
     raise_exception = False
@@ -80,13 +86,20 @@ class WialonAssetCommandListView(
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet:
+        qs = super().get_queryset()
         asset: WialonAsset | None = self._get_asset()
-        return asset.commands.all() if asset is not None else WialonAsset.objects.none()
+        return (
+            asset.commands.all().order_by(self.get_ordering())
+            if asset is not None
+            else qs
+        )
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["title"] = f"{self._get_asset().name} Commands"
-        context["asset"] = self._get_asset()
+        asset = self._get_asset()
+        if asset is not None:
+            context["title"] = f"{asset.name} Commands"
+            context["asset"] = asset
         return context
 
     def _get_asset(self) -> WialonAsset | None:
@@ -136,10 +149,7 @@ class WialonAssetCommandExecuteView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, FormView
 ):
     content_type = "text/html"
-    extra_context = {
-        "title": "Execute Command",
-        "class": "w-full md:w-1/2 flex flex-col gap-2",
-    }
+    extra_context = {"title": "Execute Command"}
     context_object_name = "command"
     http_method_names = ["get", "post"]
     login_url = reverse_lazy("login")

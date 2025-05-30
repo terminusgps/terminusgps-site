@@ -1,1 +1,1 @@
-<p class="flex flex-col items-center justify-between gap-2 rounded border bg-gray-200 p-4 drop-shadow md:flex-row dark:bg-gray-800 font-semibold" hx-get="{{ command.get_absolute_url }}" hx-target="#command-{{ command.pk }}" hx-trigger="load delay:3s">Successfully executed '{{ command.name|default:'the command' }}'!</p>
+<p class="font-semibold" hx-get="{{ command.get_absolute_url }}" hx-target="#command-{{ command.pk }}" hx-trigger="load delay:3s" hx-swap="outerHTML">Successfully executed '{{ command.name|default:'the command' }}'!</p>

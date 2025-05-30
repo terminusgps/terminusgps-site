@@ -1,5 +1,5 @@
-<div id="command-list-{{ asset.pk }}" class="{{ class }}">
-{% for cmd in page_obj %}<div id="command-{{ cmd.id }}" hx-get="{{ cmd.get_absolute_url }}" hx-trigger="load" hx-target="this"></div>{% endfor %}
+<div id="command-list-{{ asset.pk }}" class="flex flex-col gap-4">
+{% for cmd in page_obj %}<div id="command-{{ cmd.id }}" hx-get="{{ cmd.get_absolute_url }}" hx-trigger="load" hx-target="this" hx-swap="outerHTML"></div>{% endfor %}
     <div id="pagination" class="flex items-center justify-between" hx-target="#command-list-{{ asset.pk }}">
         <div class="flex gap-4">
         {% if page_obj.has_previous %}
@@ -18,7 +18,7 @@
             </svg>
         {% endif %}
         </div>
-        <span id="page-number">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}</span>
+        <span id="page-number" class="font-light tracking-widest">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}</span>
         <div class="flex gap-4">
         {% if page_obj.has_next %}
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 cursor-pointer text-terminus-red-400 dark:text-terminus-red-800" hx-get="{% url 'installer:command list' asset_pk=asset.pk %}?page={{ page_obj.next_page_number }}">

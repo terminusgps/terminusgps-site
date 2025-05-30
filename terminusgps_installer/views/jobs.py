@@ -13,7 +13,12 @@ from terminusgps.wialon.items import WialonUnit
 from terminusgps.wialon.session import WialonSession
 
 from terminusgps_installer.forms import InstallJobCompletionForm, InstallJobCreationForm
-from terminusgps_installer.models import Installer, InstallJob, WialonAsset
+from terminusgps_installer.models import (
+    Installer,
+    InstallJob,
+    WialonAccount,
+    WialonAsset,
+)
 
 
 class InstallJobListView(LoginRequiredMixin, HtmxTemplateResponseMixin, ListView):
@@ -27,6 +32,17 @@ class InstallJobListView(LoginRequiredMixin, HtmxTemplateResponseMixin, ListView
     permission_denied_message = "Please login to view this content."
     raise_exception = False
     template_name = "terminusgps_installer/jobs/list.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        if self.request.GET.get("completed"):
+            if self.request.GET["completed"] == "true":
+                context["title"] = "Completed Jobs"
+                context["subtitle"] = "Review your past jobs"
+            elif self.request.GET["completed"] == "false":
+                context["title"] = "On-going Jobs"
+                context["subtitle"] = "Complete your on-going jobs"
+        return context
 
     def get_queryset(self):
         qs = (
@@ -87,7 +103,6 @@ class InstallJobCompleteView(LoginRequiredMixin, HtmxTemplateResponseMixin, Form
     @staticmethod
     @transaction.atomic
     def _complete_job(job: InstallJob) -> InstallJob:
-        print("Setting job as completed...")
         job.completed = True
         job.save()
         return job
@@ -130,7 +145,7 @@ class InstallJobDetailView(LoginRequiredMixin, HtmxTemplateResponseMixin, Detail
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["title"] = f"Install Job #{self.kwargs['pk']}"
+        context["title"] = f"Install Job #{self.get_object().pk}"
         return context
 
     def get_queryset(self):
@@ -145,7 +160,10 @@ class InstallJobDetailView(LoginRequiredMixin, HtmxTemplateResponseMixin, Detail
 class InstallJobCreateView(LoginRequiredMixin, HtmxTemplateResponseMixin, FormView):
     content_type = "text/html"
     context_object_name = "job"
-    extra_context = {"title": "Create Install Job", "class": "flex flex-col gap-8"}
+    extra_context = {
+        "title": "Create Install Job",
+        "subtitle": "Setting up your new install job",
+    }
     http_method_names = ["get", "post"]
     login_url = reverse_lazy("login")
     permission_denied_message = "Please login to view this content."
@@ -154,11 +172,26 @@ class InstallJobCreateView(LoginRequiredMixin, HtmxTemplateResponseMixin, FormVi
     partial_template_name = "terminusgps_installer/jobs/partials/_create.html"
     form_class = InstallJobCreationForm
 
+    def get_form(self, form_class=None) -> InstallJobCreationForm:
+        """
+        Sets possible account choices on the form based on the installer.
+
+        :returns: An install job creation form.
+        :rtype: :py:obj:`~terminusgps_installer.forms.InstallJobCreationForm`
+
+        """
+        form = super().get_form(form_class=form_class)
+        installer, _ = Installer.objects.get_or_create(user=self.request.user)
+        form.fields["account"].queryset = installer.accounts.all()
+        return form
+
     @transaction.atomic
     def form_valid(
         self, form: InstallJobCreationForm
     ) -> HttpResponse | HttpResponseRedirect:
         imei_number: str = form.cleaned_data["imei_number"]
+        account: WialonAccount = form.cleaned_data["account"]
+
         with WialonSession() as session:
             unit = wialon_utils.get_unit_by_imei(imei=imei_number, session=session)
             if unit is None:
@@ -175,24 +208,21 @@ class InstallJobCreateView(LoginRequiredMixin, HtmxTemplateResponseMixin, FormVi
                 return self.form_invalid(form=form)
 
             asset = self.create_wialon_asset(unit)
-            asset = self.create_wialon_asset_commands(asset, session)
-            job = InstallJob.objects.create(
-                installer=Installer.objects.get(user=self.request.user),
-                account=form.cleaned_data["account"],
-                asset=asset,
-            )
+            job = self.create_install_job(asset, account)
             return HttpResponseRedirect(job.get_absolute_url())
-
-    @transaction.atomic
-    def create_wialon_asset_commands(
-        self, asset: WialonAsset, session: WialonSession
-    ) -> WialonAsset:
-        if asset.commands.count() == 0:
-            asset.save(session)
-        return asset
 
     @transaction.atomic
     def create_wialon_asset(self, unit: WialonUnit) -> WialonAsset:
         return WialonAsset.objects.create(
             id=unit.id, name=unit.name, imei=unit.imei_number
+        )
+
+    @transaction.atomic
+    def create_install_job(
+        self, asset: WialonAsset, account: WialonAccount
+    ) -> InstallJob:
+        return InstallJob.objects.create(
+            installer=Installer.objects.get(user=self.request.user),
+            account=account,
+            asset=asset,
         )

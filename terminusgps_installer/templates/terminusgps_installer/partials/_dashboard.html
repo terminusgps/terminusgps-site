@@ -1,18 +1,10 @@
 <div class="flex flex-col gap-8">
     <div class="flex flex-col gap-4">
-        <h2 class="text-lg font-semibold text-terminus-red-800 md:text-xl dark:text-terminus-red-300">On-going Installs</h2>
-        <div id="ongoing-jobs-list" hx-get="{% url 'installer:job list' %}?completed=false" hx-trigger="load" hx-swap="outerHTML"></div>
+        <h2 class="text-lg font-semibold text-terminus-red-800 md:text-xl dark:text-terminus-red-300">Your Jobs</h2>
+        <div id="ongoing-jobs-list" hx-get="{% url 'installer:job list' %}?completed=false" hx-trigger="load" hx-swap="outerHTML" hx-target="this"></div>
     </div>
     <div class="flex flex-col gap-2">
-        <a hx-boost="true" hx-indicator="#loading" href="{% url 'installer:job create' %}" class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400 dark:border-terminus-gray-300">Create New Job</a>
-        <a hx-boost="true" hx-indicator="#loading" href="{% url 'installer:job list' %}?completed=true" class="group flex items-center justify-between rounded border-2 border-red-800 bg-red-300 p-4 text-red-800 transition-all duration-300 ease-in-out hover:bg-red-100">
-            <span class="font-semibold">View Completed Jobs</span>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="flex size-6 group-hover:hidden">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-            </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden size-6 group-hover:flex">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
-            </svg>
-        </a>
+        <a hx-boost="true" href="{% url 'installer:job create' %}" class="w-full cursor-pointer rounded border border-terminus-black bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400 dark:border-terminus-gray-300">Create Job</a>
+        <a hx-boost="true" href="{% url 'installer:job list' %}?completed=true" class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-center text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200 dark:border-gray-400">View Completed</a>
     </div>
 </div>
