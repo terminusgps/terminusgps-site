@@ -33,7 +33,9 @@ class Installer(models.Model):
 
 class InstallJob(models.Model):
     installer = models.ForeignKey(
-        "terminusgps_installer.Installer", on_delete=models.CASCADE, related_name="jobs"
+        "terminusgps_installer.Installer",
+        on_delete=models.CASCADE,
+        related_name="jobs",
     )
     """An installer assigned to the install job."""
     account = models.ForeignKey(
@@ -67,11 +69,17 @@ class InstallJob(models.Model):
         """Returns a URL pointing to the install job's detail view."""
         return reverse("installer:job detail", kwargs={"pk": self.pk})
 
+    def get_complete_url(self) -> str:
+        """Returns a URL pointing to the install job's completion view."""
+        return reverse("installer:job complete", kwargs={"pk": self.pk})
+
 
 class WialonAccount(models.Model):
     id = models.PositiveBigIntegerField(primary_key=True)
     """Wialon account id."""
-    name = models.CharField(max_length=128, null=True, blank=True, default=None)
+    name = models.CharField(
+        max_length=128, null=True, blank=True, default=None
+    )
     """Wialon account name."""
     uid = models.IntegerField(null=True, blank=True, default=None)
     """Wialon account user id."""
@@ -126,12 +134,22 @@ class WialonAsset(models.Model):
         verbose_name_plural = _("assets")
 
     def __str__(self) -> str:
-        """Returns the asset name."""
+        """Returns the asset's name."""
         return self.name
 
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the asset's detail view."""
         return reverse_lazy("installer:asset detail", kwargs={"pk": self.pk})
+
+    def get_update_url(self) -> str:
+        """Returns a URL pointing to the asset's update view."""
+        return reverse_lazy("installer:asset update", kwargs={"pk": self.pk})
+
+    def get_command_list_url(self) -> str:
+        """Returns a URL pointing to the asset's command list view."""
+        return reverse_lazy(
+            "installer:command list", kwargs={"asset_pk": self.pk}
+        )
 
     @transaction.atomic
     def wialon_sync(self, session: WialonSession) -> None:
@@ -173,10 +191,13 @@ class WialonAsset(models.Model):
         :rtype: :py:obj:`None`
 
         """
+        available_commands = self._wialon_get_available_commands(unit).items()
+        existing_command_ids = self._wialon_get_existing_command_ids()
+
         new_command_objs = [
             WialonAssetCommand(cmd_id=cmd_id, name=name, asset=self)
-            for cmd_id, name in self._wialon_get_available_commands(unit).items()
-            if cmd_id not in self._wialon_get_existing_command_ids()
+            for cmd_id, name in available_commands
+            if cmd_id not in existing_command_ids
         ]
         if new_command_objs:
             WialonAssetCommand.objects.bulk_create(
@@ -274,7 +295,9 @@ class WialonAssetCommand(models.Model):
         related_name="commands",
     )
     """Associated asset for the command."""
-    message = models.CharField(max_length=128, null=True, blank=True, default=None)
+    message = models.CharField(
+        max_length=128, null=True, blank=True, default=None
+    )
     """Message to send with the command."""
 
     class Meta:

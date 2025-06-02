@@ -1,36 +1,37 @@
 import typing
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon import utils as wialon_utils
-from terminusgps.wialon.items import WialonUnit
 from terminusgps.wialon.session import WialonSession
 
-from terminusgps_installer.forms import InstallJobCompletionForm, InstallJobCreationForm
+from terminusgps_installer.forms import (
+    InstallJobCompletionForm,
+    InstallJobCreationForm,
+)
 from terminusgps_installer.models import (
     Installer,
     InstallJob,
     WialonAccount,
     WialonAsset,
 )
+from terminusgps_installer.views.mixins import InstallerRequiredMixin
 
 
-class InstallJobListView(LoginRequiredMixin, HtmxTemplateResponseMixin, ListView):
+class InstallJobListView(
+    InstallerRequiredMixin, HtmxTemplateResponseMixin, ListView
+):
     content_type = "text/html"
     context_object_name = "job_list"
     extra_context = {"title": "Install Jobs List"}
     http_method_names = ["get"]
-    login_url = reverse_lazy("login")
     model = InstallJob
     partial_template_name = "terminusgps_installer/jobs/partials/_list.html"
-    permission_denied_message = "Please login to view this content."
-    raise_exception = False
     template_name = "terminusgps_installer/jobs/list.html"
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
@@ -60,22 +61,24 @@ class InstallJobListView(LoginRequiredMixin, HtmxTemplateResponseMixin, ListView
         return qs
 
 
-class InstallJobCompleteView(LoginRequiredMixin, HtmxTemplateResponseMixin, FormView):
+class InstallJobCompleteView(
+    InstallerRequiredMixin, HtmxTemplateResponseMixin, FormView
+):
     content_type = "text/html"
     context_object_name = "job"
     extra_context = {"title": "Complete Install Job"}
     http_method_names = ["get", "post"]
-    login_url = reverse_lazy("login")
-    partial_template_name = "terminusgps_installer/jobs/partials/_complete.html"
-    permission_denied_message = "Please login to view this content."
-    raise_exception = False
+    partial_template_name = (
+        "terminusgps_installer/jobs/partials/_complete.html"
+    )
     template_name = "terminusgps_installer/jobs/complete.html"
     form_class = InstallJobCompletionForm
-    success_url = reverse_lazy("installer:dashboard")
 
     def get_success_url(self, job: InstallJob | None = None) -> str:
         if job is not None:
-            return reverse("installer:job complete success", kwargs={"pk": job.pk})
+            return reverse(
+                "installer:job complete success", kwargs={"pk": job.pk}
+            )
         return super().get_success_url()
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
@@ -109,38 +112,38 @@ class InstallJobCompleteView(LoginRequiredMixin, HtmxTemplateResponseMixin, Form
 
     def _get_job(self) -> InstallJob | None:
         return (
-            InstallJob.objects.select_related("asset").get(pk=self.kwargs["pk"])
+            InstallJob.objects.select_related("asset").get(
+                pk=self.kwargs["pk"]
+            )
             if self.kwargs.get("pk")
             else None
         )
 
 
 class InstallJobCompleteSuccessView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
+    InstallerRequiredMixin, HtmxTemplateResponseMixin, DetailView
 ):
     content_type = "text/html"
     extra_context = {"title": "Completed Install Job"}
     http_method_names = ["get"]
-    login_url = reverse_lazy("login")
-    partial_template_name = "terminusgps_installer/jobs/partials/_complete_success.html"
-    permission_denied_message = "Please login to view this content."
-    raise_exception = False
+    partial_template_name = (
+        "terminusgps_installer/jobs/partials/_complete_success.html"
+    )
     template_name = "terminusgps_installer/jobs/complete_success.html"
     model = InstallJob
-    queryset = InstallJob.objects.select_related("asset")
+    queryset = InstallJob.objects.select_related("asset", "account")
     context_object_name = "job"
 
 
-class InstallJobDetailView(LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView):
+class InstallJobDetailView(
+    InstallerRequiredMixin, HtmxTemplateResponseMixin, DetailView
+):
     content_type = "text/html"
     context_object_name = "job"
     extra_context = {"title": "Install Job Details"}
     http_method_names = ["get"]
-    login_url = reverse_lazy("login")
     model = InstallJob
     partial_template_name = "terminusgps_installer/jobs/partials/_detail.html"
-    permission_denied_message = "Please login to view this content."
-    raise_exception = False
     template_name = "terminusgps_installer/jobs/detail.html"
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
@@ -152,25 +155,24 @@ class InstallJobDetailView(LoginRequiredMixin, HtmxTemplateResponseMixin, Detail
         return (
             super()
             .get_queryset()
-            .select_related("installer__user", "asset", "account")
+            .select_related("asset", "account")
             .filter(installer__user=self.request.user)
         )
 
 
-class InstallJobCreateView(LoginRequiredMixin, HtmxTemplateResponseMixin, FormView):
+class InstallJobCreateView(
+    InstallerRequiredMixin, HtmxTemplateResponseMixin, FormView
+):
     content_type = "text/html"
     context_object_name = "job"
     extra_context = {
         "title": "Create Install Job",
         "subtitle": "Setting up your new install job",
     }
-    http_method_names = ["get", "post"]
-    login_url = reverse_lazy("login")
-    permission_denied_message = "Please login to view this content."
-    raise_exception = False
-    template_name = "terminusgps_installer/jobs/create.html"
-    partial_template_name = "terminusgps_installer/jobs/partials/_create.html"
     form_class = InstallJobCreationForm
+    http_method_names = ["get", "post"]
+    partial_template_name = "terminusgps_installer/jobs/partials/_create.html"
+    template_name = "terminusgps_installer/jobs/create.html"
 
     def get_form(self, form_class=None) -> InstallJobCreationForm:
         """
@@ -181,7 +183,7 @@ class InstallJobCreateView(LoginRequiredMixin, HtmxTemplateResponseMixin, FormVi
 
         """
         form = super().get_form(form_class=form_class)
-        installer, _ = Installer.objects.get_or_create(user=self.request.user)
+        installer = Installer.objects.get(user=self.request.user)
         form.fields["account"].queryset = installer.accounts.all()
         return form
 
@@ -189,11 +191,24 @@ class InstallJobCreateView(LoginRequiredMixin, HtmxTemplateResponseMixin, FormVi
     def form_valid(
         self, form: InstallJobCreationForm
     ) -> HttpResponse | HttpResponseRedirect:
+        """
+        Creates an install job and associated objects based on the form before redirecting the client to the new install job's detail view.
+
+        If the provided ``imei_number`` from the form is not associated with a Wialon unit, renders the form with errors.
+
+        :param form: An install job creation form.
+        :type form: :py:obj:`~terminusgps_installer.forms.InstallJobCreationForm`
+        :returns: An http response.
+        :rtype: :py:obj:`~django.http.HttpResponse` | :py:obj:`~django.http.HttpResponseRedirect`
+
+        """
         imei_number: str = form.cleaned_data["imei_number"]
         account: WialonAccount = form.cleaned_data["account"]
 
         with WialonSession() as session:
-            unit = wialon_utils.get_unit_by_imei(imei=imei_number, session=session)
+            unit = wialon_utils.get_unit_by_imei(
+                imei=imei_number, session=session
+            )
             if unit is None:
                 form.add_error(
                     "imei_number",
@@ -207,22 +222,12 @@ class InstallJobCreateView(LoginRequiredMixin, HtmxTemplateResponseMixin, FormVi
                 )
                 return self.form_invalid(form=form)
 
-            asset = self.create_wialon_asset(unit)
-            job = self.create_install_job(asset, account)
+            asset = WialonAsset.objects.create(
+                id=unit.id, name=unit.name, imei=unit.imei_number
+            )
+            job = InstallJob.objects.create(
+                installer=Installer.objects.get(user=self.request.user),
+                asset=asset,
+                account=account,
+            )
             return HttpResponseRedirect(job.get_absolute_url())
-
-    @transaction.atomic
-    def create_wialon_asset(self, unit: WialonUnit) -> WialonAsset:
-        return WialonAsset.objects.create(
-            id=unit.id, name=unit.name, imei=unit.imei_number
-        )
-
-    @transaction.atomic
-    def create_install_job(
-        self, asset: WialonAsset, account: WialonAccount
-    ) -> InstallJob:
-        return InstallJob.objects.create(
-            installer=Installer.objects.get(user=self.request.user),
-            account=account,
-            asset=asset,
-        )

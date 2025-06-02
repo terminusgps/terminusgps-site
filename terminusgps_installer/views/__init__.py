@@ -5,6 +5,7 @@ from .assets import (
     WialonAssetCommandListView,
     WialonAssetDetailView,
     WialonAssetPositionView,
+    WialonAssetUpdateView,
 )
 from .installers import InstallerDashboardView
 from .jobs import (

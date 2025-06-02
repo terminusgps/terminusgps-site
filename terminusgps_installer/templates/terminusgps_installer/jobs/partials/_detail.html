@@ -12,7 +12,7 @@
     {% if not job.completed %}
     <div class="flex flex-col gap-4">
         <h2 class="text-xl font-semibold text-terminus-red-400">Completion Form</h2>
-        <div class="flex flex-col gap-4 rounded border p-4" hx-get="{% url 'installer:job complete' pk=job.pk %}" hx-target="this" hx-trigger="load"></div>
+        <div class="flex flex-col gap-4 rounded border bg-white p-4 dark:bg-gray-800" hx-get="{{ job.get_complete_url }}" hx-target="this" hx-trigger="load"></div>
     </div>
     {% endif %}
 </div>

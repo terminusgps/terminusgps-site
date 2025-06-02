@@ -42,6 +42,11 @@ urlpatterns = [
         "assets/<int:pk>/", views.WialonAssetDetailView.as_view(), name="asset detail"
     ),
     path(
+        "assets/<int:pk>/update/",
+        views.WialonAssetUpdateView.as_view(),
+        name="asset update",
+    ),
+    path(
         "assets/<int:pk>/position/",
         views.WialonAssetPositionView.as_view(),
         name="asset position",
