@@ -34,7 +34,10 @@ class CustomerDashboardView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
 ):
     content_type = "text/html"
-    extra_context = {"title": "Dashboard"}
+    extra_context = {
+        "title": "Dashboard",
+        "subtitle": "Download the Terminus GPS mobile app today!",
+    }
     http_method_names = ["get"]
     login_url = reverse_lazy("login")
     partial_template_name = "terminusgps_tracker/partials/_dashboard.html"
@@ -57,7 +60,10 @@ class CustomerAccountView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
 ):
     content_type = "text/html"
-    extra_context = {"title": "Account"}
+    extra_context = {
+        "title": "Account",
+        "subtitle": "Update your payment information",
+    }
     http_method_names = ["get"]
     login_url = reverse_lazy("login")
     partial_template_name = "terminusgps_tracker/partials/_account.html"

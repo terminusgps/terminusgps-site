@@ -1,11 +1,11 @@
-<div id="account" class="flex flex-col gap-8">
+<div class="flex flex-col gap-8">
     <section id="payments" class="flex flex-col gap-4">
-        <h2 class="text-xl font-semibold text-terminus-red-800">Payment Methods</h2>
+        <h2 class="text-xl font-semibold text-terminus-red-800 dark:text-terminus-red-400">Payment Methods</h2>
         <div id="payment-list" hx-get="{% url 'tracker:payment list' %}" hx-target="this" hx-trigger="load"></div>
         <a hx-boost="true" href="{% url 'tracker:payment create' %}" class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400">New Payment Method</a>
     </section>
     <section id="addresses" class="flex flex-col gap-4">
-        <h2 class="text-xl font-semibold text-terminus-red-800">Shipping Addresses</h2>
+        <h2 class="text-xl font-semibold text-terminus-red-800 dark:text-terminus-red-400">Shipping Addresses</h2>
         <div id="address-list" hx-get="{% url 'tracker:address list' %}" hx-target="this" hx-trigger="load"></div>
         <a hx-boost="true" href="{% url 'tracker:address create' %}" class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400">New Shipping Address</a>
     </section>

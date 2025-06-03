@@ -1,269 +1,268 @@
+import datetime
+import decimal
 import typing
 
-from django import forms
-from django.contrib import messages
+from authorizenet import apicontractsv1
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.urls import reverse, reverse_lazy
-from django.utils.dateparse import parse_datetime
+from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import (
+    DetailView,
+    FormView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
+from terminusgps.authorizenet.profiles import SubscriptionProfile
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
-from terminusgps_tracker.forms import CustomerSubscriptionUpdateForm
-from terminusgps_tracker.models import Customer, CustomerSubscription, SubscriptionTier
-from terminusgps_tracker.views.mixins import TrackerAppConfigContextMixin
+from terminusgps_tracker.forms import SubscriptionCreationForm
+from terminusgps_tracker.models import (
+    Customer,
+    CustomerPaymentMethod,
+    CustomerShippingAddress,
+    Subscription,
+    SubscriptionTier,
+)
 
 
-class SubscriptionTierListView(
-    HtmxTemplateResponseMixin, TrackerAppConfigContextMixin, ListView
-):
+def calculate_amount_plus_tax(
+    amount: decimal.Decimal, tax_rate: decimal.Decimal | None = None
+) -> decimal.Decimal:
+    if tax_rate is None:
+        tax_rate = settings.DEFAULT_TAX_RATE
+    return round(amount * (1 + tax_rate), ndigits=2)
+
+
+class SubscriptionTierListView(HtmxTemplateResponseMixin, ListView):
     content_type = "text/html"
-    extra_context = {
-        "title": "Subscription Plans",
-        "subtitle": "We have a plan for your plan",
-        "class": "flex flex-col gap-4",
-    }
     context_object_name = "tier_list"
+    extra_context = {"title": "Subscription Tiers"}
     http_method_names = ["get"]
     model = SubscriptionTier
-    partial_template_name = "terminusgps_tracker/subscriptions/partials/_tier_list.html"
+    order_by = "amount"
+    partial_template_name = (
+        "terminusgps_tracker/subscriptions/partials/_tier_list.html"
+    )
+    queryset = SubscriptionTier.objects.exclude(name__icontains="custom")
     template_name = "terminusgps_tracker/subscriptions/tier_list.html"
 
-    def get_queryset(self) -> QuerySet:
-        """Returns non-custom subscription tiers for the view."""
-        return (
-            super()
-            .get_queryset()
-            .exclude(name__icontains="custom")
-            .order_by("amount")[:3]
-        )
+
+class SubscriptionTierDetailView(HtmxTemplateResponseMixin, DetailView):
+    content_type = "text/html"
+    context_object_name = "tier"
+    extra_context = {"title": "Subscription Tier Details"}
+    http_method_names = ["get"]
+    model = SubscriptionTier
+    order_by = "amount"
+    template_name = "terminusgps_tracker/subscriptions/tier_detail.html"
+    partial_template_name = (
+        "terminusgps_tracker/subscriptions/partials/_tier_detail.html"
+    )
 
 
-class CustomerSubscriptionTransactionsView(
+class SubscriptionPricingView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {"title": "Pricing"}
+    http_method_names = ["get"]
+    template_name = "terminusgps_tracker/subscriptions/pricing.html"
+    partial_template_name = (
+        "terminusgps_tracker/subscriptions/partials/_pricing.html"
+    )
+
+
+class SubscriptionDetailView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
 ):
     content_type = "text/html"
-    extra_context = {
-        "title": "Subscription Transactions",
-        "class": "flex flex-col gap-4",
-    }
+    context_object_name = "subscription"
+    extra_context = {"title": "Subscription Details"}
     http_method_names = ["get"]
     login_url = reverse_lazy("login")
-    model = CustomerSubscription
-    partial_template_name = (
-        "terminusgps_tracker/subscriptions/partials/_transactions.html"
+    model = Subscription
+    partial_template_name = "terminusgps_tracker/subscriptions/_detail.html"
+    permission_denied_message = "Please login to view this content."
+    queryset = Subscription.objects.select_related(
+        "payment", "address", "tier"
     )
-    permission_denied_message = "Please login in order to view this content."
-    raise_exception = False
-    template_name = "terminusgps_tracker/subscriptions/transactions.html"
-
-    def get_object(self, queryset=None) -> CustomerSubscription:
-        customer, _ = Customer.objects.get_or_create(user=self.request.user)
-        subscription, _ = CustomerSubscription.objects.get_or_create(customer=customer)
-        return subscription
-
-    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        transactions = (
-            self.get_object().authorizenet_get_subscription_profile().transactions
-        )
-        context["transaction_list"] = [
-            {
-                "response": str(t.response),
-                "submitTimeUTC": parse_datetime(str(t.submitTimeUTC)),
-                "payNum": int(t.payNum),
-                "attemptNum": int(t.attemptNum),
-            }
-            for t in transactions
-            if transactions
-        ]
-        return context
-
-
-class CustomerSubscriptionDetailView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
-):
-    content_type = "text/html"
-    extra_context = {
-        "class": "flex flex-col gap-4 border p-4 rounded bg-white dark:bg-terminus-gray-700 dark:border-terminus-gray-500"
-    }
-    context_object_name = "subscription"
-    http_method_names = ["get", "patch"]
-    login_url = reverse_lazy("login")
-    model = CustomerSubscription
-    partial_template_name = "terminusgps_tracker/subscriptions/partials/_detail.html"
-    permission_denied_message = "Please login in order to view this content."
     raise_exception = False
     template_name = "terminusgps_tracker/subscriptions/detail.html"
 
-    def get_object(self, queryset=None) -> CustomerSubscription | None:
-        return (
-            CustomerSubscription.objects.get(customer__user=self.request.user)
-            if self.request.user and self.request.user.is_authenticated
-            else None
-        )
+    def get_object(self) -> Subscription | None:
+        try:
+            return Subscription.objects.get(customer__user=self.request.user)
+        except Subscription.DoesNotExist:
+            return
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        if self.get_object():
+            subscription = self.get_object()
+            context["title"] = (
+                f"{subscription.customer.user.first_name}'s Subscription"
+            )
+            context["subtitle"] = "Thanks for subscribing!"
+            context["paymentProfile"] = (
+                self.get_object()
+                .payment.authorizenet_get_payment_profile()
+                .paymentProfile
+            )
+            context["addressProfile"] = (
+                self.get_object()
+                .address.authorizenet_get_address_profile()
+                .address
+            )
+        return context
 
 
-class CustomerSubscriptionUpdateView(
+class SubscriptionUpdateView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, UpdateView
 ):
     content_type = "text/html"
-    context_object_name = "subscription"
-    extra_context = {
-        "title": "Update Subscription",
-        "class": "flex flex-col gap-4 border p-4 rounded bg-white dark:bg-terminus-gray-700 dark:border-terminus-gray-500",
-    }
-    form_class = CustomerSubscriptionUpdateForm
     http_method_names = ["get", "post"]
+    extra_context = {"title": "Subscription Update"}
     login_url = reverse_lazy("login")
-    model = CustomerSubscription
-    partial_template_name = "terminusgps_tracker/subscriptions/partials/_update.html"
-    permission_denied_message = "You do not have permission to view this."
+    permission_denied_message = "Please login to view this content."
     raise_exception = False
     template_name = "terminusgps_tracker/subscriptions/update.html"
-    success_url = reverse_lazy("tracker:dashboard")
+    partial_template_name = (
+        "terminusgps_tracker/subscriptions/partials/_update.html"
+    )
+    model = Subscription
+    queryset = Subscription.objects.select_related("customer")
 
-    def dispatch(
-        self, request: HttpRequest, *args, **kwargs
-    ) -> HttpResponse | HttpResponseRedirect:
-        subscription = self.get_object()
-        customer = subscription.customer
-
-        if not customer.addresses.exists():
-            messages.error(
-                request,
-                _(
-                    "Please add at least one shipping address before updating your subscription."
-                ),
-            )
-            request.headers["HX-Boosted"] = "true"
-            return HttpResponseRedirect(reverse("tracker:payments"))
-        if not customer.payments.exists():
-            messages.error(
-                request,
-                _(
-                    "Please add at least one payment method before updating your subscription."
-                ),
-            )
-            request.headers["HX-Boosted"] = "true"
-            return HttpResponseRedirect(reverse("tracker:payments"))
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_form(self, form_class=None) -> forms.ModelForm:
-        """
-        Adds the first three subscription tiers to the model form and returns it.
-
-        :param form_class: A form class.
-        :type form_class: :py:obj:`~django.forms.Form` | :py:obj:`None`
-        :returns: A customer subscription update form.
-        :rtype: :py:obj:`~django.forms.ModelForm`
-
-        """
-        form = super().get_form(form_class=form_class)
-        form.fields["tier"].widget.choices = [
-            (tier.pk, _(f"{tier.name} - ${tier.amount}/mo"))
-            for tier in SubscriptionTier.objects.exclude(
-                name__icontains="custom"
-            ).order_by("amount")[:3]
-        ]
-        return form
-
-    def get_object(self, queryset=None) -> CustomerSubscription:
-        """Returns the subscription for the customer."""
-        return CustomerSubscription.objects.get_or_create(
-            customer__user=self.request.user
-        )[0]
-
-    def get_success_url(self, subscription: CustomerSubscription | None = None) -> str:
-        """Returns a URL pointing to the detail view for the subscription."""
-        if subscription is not None:
-            return subscription.get_absolute_url()
-        return super().get_success_url()
-
-    def get_initial(self) -> dict[str, typing.Any]:
-        """Sets the initial tier, payment method and shipping address for the form."""
-        initial: dict[str, typing.Any] = super().get_initial()
-        customer: Customer = self.get_object().customer
-
-        initial["tier"] = self.request.GET.get("tier", 1)
-        initial["address"] = customer.addresses.filter(default=True).first()
-        initial["payment"] = customer.payments.filter(default=True).first()
-        return initial
-
-    def form_valid(
-        self, form: CustomerSubscriptionUpdateForm
-    ) -> HttpResponse | HttpResponseRedirect:
-        """
-        Updates the customer's subscription in Authorizenet based on the form.
-
-        :param form: A customer subscription update form.
-        :type form: :py:obj:`~terminusgps_tracker.forms.subscriptions.CustomerSubscriptionUpdateForm`
-        :returns: An HTTP response.
-        :rtype: :py:obj:`~django.http.HttpResponse` | :py:obj:`~django.http.HttpResponseRedirect`
-
-        """
-        if not form.cleaned_data["tier"]:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Please select a subscription tier before proceeding.")
-                ),
-            )
-            return self.form_invalid(form=form)
-
-        subscription: CustomerSubscription = self.get_object()
-        subscription = self.update_customer_subscription(subscription, form)
-        return HttpResponseRedirect(self.get_success_url(subscription))
-
-    @staticmethod
-    @transaction.atomic
-    def update_customer_subscription(
-        subscription: CustomerSubscription, form: CustomerSubscriptionUpdateForm
-    ) -> CustomerSubscription:
-        """
-        Updates a customer subscription if necessary based on the form, then returns it.
-
-        :param subscription: A customer subscription.
-        :type subscription: :py:obj:`~terminusgps_tracker.models.subscriptions.CustomerSubscription`
-        :param form: A customer subscription update form.
-        :type form: :py:obj:`~terminusgps_tracker.forms.subscriptions.CustomerSubscriptionUpdateForm`
-        :returns: The customer subscription.
-        :rtype: :py:obj:`~terminusgps_tracker.models.subscriptions.CustomerSubscription`
-
-        """
-        if any(
-            [
-                subscription.tier != form.cleaned_data["tier"],
-                subscription.address != form.cleaned_data["address"],
-                subscription.payment != form.cleaned_data["payment"],
-            ]
-        ):
-            subscription.tier = form.cleaned_data["tier"]
-            subscription.address = form.cleaned_data["address"]
-            subscription.payment = form.cleaned_data["payment"]
-            subscription.save()
-            subscription.authorizenet_update_subscription()
-        return subscription
+    def get_object(self) -> Subscription:
+        return Subscription.objects.get(customer__user=self.request.user)
 
 
-class CustomerSubscriptionDeleteView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, DeleteView
+class SubscriptionCreateView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, FormView
 ):
     content_type = "text/html"
-    context_object_name = "subscription"
-    extra_context = {"class": "flex flex-col gap-4"}
-    http_method_names = ["get", "post"]
+    http_method_name = ["get", "post"]
+    extra_context = {"title": "Subscription Creation"}
     login_url = reverse_lazy("login")
-    model = CustomerSubscription
-    partial_template_name = "terminusgps_tracker/subscriptions/partials/_delete.html"
-    permission_denied_message = "Please login in order to view this content."
+    permission_denied_message = "Please login to view this content."
     raise_exception = False
-    success_url = reverse_lazy("tracker:dashboard")
-    template_name = "terminusgps_tracker/subscriptions/delete.html"
+    template_name = "terminusgps_tracker/subscriptions/create.html"
+    partial_template_name = (
+        "terminusgps_tracker/subscriptions/partials/_create.html"
+    )
+    form_class = SubscriptionCreationForm
+    success_url = reverse_lazy("tracker:subscription detail")
 
-    def get_object(self, queryset=None) -> CustomerSubscription:
-        return CustomerSubscription.objects.get(customer__user=self.request.user)
+    def get_form(self, form_class=None) -> SubscriptionCreationForm:
+        form = super().get_form(form_class=form_class)
+        tier_qs = SubscriptionTier.objects.exclude(name__icontains="custom")
+        address_choices = self.generate_shipping_address_choices()
+        payment_choices = self.generate_payment_method_choices()
+        form.fields["tier"].queryset = tier_qs
+        form.fields["address"].choices = address_choices
+        form.fields["payment"].choices = payment_choices
+        return form
+
+    def get_initial(self, **kwargs) -> dict[str, typing.Any]:
+        initial: dict[str, typing.Any] = super().get_initial(**kwargs)
+        initial["tier"] = (
+            SubscriptionTier.objects.exclude(name__icontains="custom")
+            .order_by("amount")
+            .first()
+        )
+        return initial
+
+    def generate_payment_method_choices(self) -> list[tuple[int, str]]:
+        choices = []
+        if CustomerPaymentMethod.objects.filter(
+            customer__user=self.request.user
+        ).exists():
+            customer_payments = CustomerPaymentMethod.objects.filter(
+                customer__user=self.request.user
+            )
+            for payment in customer_payments:
+                card_type = payment.authorizenet_get_payment_profile().paymentProfile.payment.creditCard.cardType
+                card_last_4 = int(
+                    str(
+                        payment.authorizenet_get_payment_profile().paymentProfile.payment.creditCard.cardNumber
+                    )[-4:]
+                )
+                choices.append(
+                    (payment.pk, _(f"{card_type} ending in {card_last_4}"))
+                )
+        return choices
+
+    def generate_shipping_address_choices(self) -> list[tuple[int, str]]:
+        choices = []
+        if CustomerShippingAddress.objects.filter(
+            customer__user=self.request.user
+        ).exists():
+            customer_addresses = CustomerShippingAddress.objects.filter(
+                customer__user=self.request.user
+            )
+            for address in customer_addresses:
+                choices.append(
+                    (
+                        address.pk,
+                        _(
+                            str(
+                                address.authorizenet_get_address_profile().address.address
+                            )
+                        ),
+                    )
+                )
+        return choices
+
+    @transaction.atomic
+    def form_valid(
+        self, form: SubscriptionCreationForm
+    ) -> HttpResponse | HttpResponseRedirect:
+        customer = Customer.objects.get(user=self.request.user)
+        subscription_obj = self.authorizenet_generate_subscription_obj(
+            start_date=timezone.now(),
+            customer=customer,
+            tier=form.cleaned_data["tier"],
+            payment=form.cleaned_data["payment"],
+            address=form.cleaned_data["address"],
+        )
+        subscription_profile = SubscriptionProfile(
+            customer_profile_id=customer.authorizenet_profile_id
+        )
+        Subscription.objects.create(
+            id=subscription_profile.create(subscription_obj),
+            customer=customer,
+            tier=form.cleaned_data["tier"],
+            address=form.cleaned_data["address"],
+            payment=form.cleaned_data["payment"],
+        )
+        return super().form_valid(form=form)
+
+    @staticmethod
+    def authorizenet_generate_subscription_obj(
+        start_date: datetime.datetime,
+        customer: Customer,
+        tier: SubscriptionTier,
+        payment: CustomerPaymentMethod,
+        address: CustomerShippingAddress,
+    ) -> apicontractsv1.ARBSubscriptionType:
+        return apicontractsv1.ARBSubscriptionType(
+            name=f"{customer}'s {tier} Subscription",
+            paymentSchedule=apicontractsv1.paymentScheduleType(
+                interval=apicontractsv1.paymentScheduleTypeInterval(
+                    length=str(1),
+                    unit=apicontractsv1.ARBSubscriptionUnitEnum.months,
+                ),
+                startDate=f"{start_date:%Y-%m-%d}",
+                totalOccurrences=str(9999),
+                trialOccurrences=str(0),
+            ),
+            amount=str(calculate_amount_plus_tax(tier.amount)),
+            trialAmount=(0.00),
+            profile=apicontractsv1.customerProfileIdType(
+                customerProfileId=str(customer.authorizenet_profile_id),
+                customerPaymentProfileId=str(payment.id),
+                customerAddressId=str(address.id),
+            ),
+        )

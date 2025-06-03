@@ -1,19 +1,21 @@
 from django import forms
 from django.conf import settings
-from django.utils.translation import gettext_lazy as _
 
-from terminusgps_tracker.models.subscriptions import CustomerSubscription
+from terminusgps_tracker.models.subscriptions import Subscription
 
 
-class CustomerSubscriptionUpdateForm(forms.ModelForm):
+class SubscriptionCreationForm(forms.ModelForm):
     class Meta:
-        model = CustomerSubscription
+        model = Subscription
         fields = ["address", "payment", "tier"]
         widgets = {
             "tier": forms.widgets.Select(
-                choices=[(1, _("Basic")), (2, _("Standard")), (3, _("Premium"))],
-                attrs={"class": settings.DEFAULT_FIELD_CLASS, "required": True},
+                attrs={"class": settings.DEFAULT_FIELD_CLASS}
             ),
-            "address": forms.widgets.HiddenInput(),
-            "payment": forms.widgets.HiddenInput(),
+            "address": forms.widgets.Select(
+                attrs={"class": settings.DEFAULT_FIELD_CLASS}
+            ),
+            "payment": forms.widgets.Select(
+                attrs={"class": settings.DEFAULT_FIELD_CLASS}
+            ),
         }

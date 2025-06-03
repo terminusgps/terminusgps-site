@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -91,6 +92,51 @@ class Subscription(models.Model):
         "terminusgps_tracker.Customer", on_delete=models.CASCADE
     )
     """Associated customer."""
+    payment = models.OneToOneField(
+        "terminusgps_tracker.CustomerPaymentMethod", on_delete=models.CASCADE
+    )
+    """Associated payment method."""
+    address = models.OneToOneField(
+        "terminusgps_tracker.CustomerShippingAddress", on_delete=models.CASCADE
+    )
+    """Associated payment method."""
+
+    class Meta:
+        verbose_name = _("subscription")
+        verbose_name_plural = _("subscriptions")
 
     def __str__(self) -> str:
         return f"{self.customer}'s Subscription"
+
+    def save(self, **kwargs) -> None:
+        self.full_clean()
+        super().save(**kwargs)
+
+    def clean(self):
+        super().clean()
+        if (
+            self.payment
+            and hasattr(self, "customer")
+            and self.customer
+            and self.payment.customer != self.customer
+        ):
+            raise ValidationError(
+                {
+                    "payment": _(
+                        "Payment method must belong to the same customer as the subscription."
+                    )
+                }
+            )
+        if (
+            self.address
+            and hasattr(self, "customer")
+            and self.customer
+            and self.address.customer != self.customer
+        ):
+            raise ValidationError(
+                {
+                    "address": _(
+                        "Shipping address must belong to the same customer as the subscription."
+                    )
+                }
+            )

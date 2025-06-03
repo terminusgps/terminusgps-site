@@ -12,5 +12,5 @@
         <p>{{ paymentProfile.billTo.address }}</p>
         <p>{{ paymentProfile.billTo.city }}, {{ paymentProfile.billTo.state }}, {{ paymentProfile.billTo.country }} {{ paymentProfile.billTo.zip }}</p>
     </div>
-    <input class="w-full cursor-pointer rounded border border-current bg-gray-50 p-2 text-center text-red-800 transition-colors duration-300 ease-in-out hover:bg-red-50" type="button" value="Delete" hx-delete="{{ payment.get_absolute_url }}" hx-target="#payment-{{ payment.pk }}" hx-swap="delete" hx-prompt="Please enter the last 4 digits of the payment method credit card to confirm deletion.">
+    <input class="w-full cursor-pointer rounded border border-current bg-gray-50 p-2 text-center text-red-800 transition-colors duration-300 ease-in-out hover:bg-red-50" type="button" value="Delete" hx-delete="{{ payment.get_absolute_url }}" hx-target="#payment-{{ payment.pk }}" hx-swap="delete" hx-prompt="Please enter the last 4 digits of the payment method credit card to confirm.">
 </section>

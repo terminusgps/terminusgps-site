@@ -8,3 +8,11 @@ from .customers import (
     CustomerShippingAddressDetailView,
     CustomerShippingAddressListView,
 )
+from .subscriptions import (
+    SubscriptionCreateView,
+    SubscriptionDetailView,
+    SubscriptionPricingView,
+    SubscriptionTierDetailView,
+    SubscriptionTierListView,
+    SubscriptionUpdateView,
+)
