@@ -4,9 +4,8 @@ from django.conf import settings
 from terminusgps_tracker.forms.fields import AddressField, CreditCardField
 
 
-class CustomerPaymentMethodCreateForm(forms.Form):
+class CustomerPaymentMethodCreationForm(forms.Form):
     first_name = forms.CharField(
-        help_text="Please enter your first name.",
         max_length=64,
         widget=forms.widgets.TextInput(
             attrs={
@@ -19,7 +18,6 @@ class CustomerPaymentMethodCreateForm(forms.Form):
         ),
     )
     last_name = forms.CharField(
-        help_text="Please enter your last name.",
         max_length=64,
         widget=forms.widgets.TextInput(
             attrs={
@@ -57,11 +55,15 @@ class CustomerPaymentMethodCreateForm(forms.Form):
         label="Set as default payment method?",
         required=False,
         initial=True,
-        widget=forms.widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
+        widget=forms.widgets.CheckboxInput(
+            attrs={"class": "accent-terminus-red-700"}
+        ),
     )
     create_shipping_address = forms.BooleanField(
         label="Create shipping address from billing address?",
         required=False,
         initial=True,
-        widget=forms.widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
+        widget=forms.widgets.CheckboxInput(
+            attrs={"class": "accent-terminus-red-700"}
+        ),
     )

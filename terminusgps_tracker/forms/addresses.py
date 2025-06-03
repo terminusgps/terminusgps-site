@@ -4,9 +4,8 @@ from django.conf import settings
 from terminusgps_tracker.forms.fields import AddressField
 
 
-class CustomerShippingAddressCreateForm(forms.Form):
+class CustomerShippingAddressCreationForm(forms.Form):
     first_name = forms.CharField(
-        help_text="Please enter your first name.",
         label="First Name",
         max_length=64,
         widget=forms.widgets.TextInput(
@@ -19,7 +18,6 @@ class CustomerShippingAddressCreateForm(forms.Form):
         ),
     )
     last_name = forms.CharField(
-        help_text="Please enter your last name.",
         label="Last Name",
         max_length=64,
         widget=forms.widgets.TextInput(
@@ -55,5 +53,7 @@ class CustomerShippingAddressCreateForm(forms.Form):
         label="Set as default shipping address?",
         required=False,
         initial=True,
-        widget=forms.widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
+        widget=forms.widgets.CheckboxInput(
+            attrs={"class": "accent-terminus-red-700"}
+        ),
     )

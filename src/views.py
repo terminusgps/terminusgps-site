@@ -88,7 +88,9 @@ class TerminusgpsAboutView(HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps/about.html"
 
 
-class TerminusgpsTermsAndConditionsView(HtmxTemplateResponseMixin, TemplateView):
+class TerminusgpsTermsAndConditionsView(
+    HtmxTemplateResponseMixin, TemplateView
+):
     """
     Renders a terms and conditions page.
 
@@ -108,7 +110,9 @@ class TerminusgpsTermsAndConditionsView(HtmxTemplateResponseMixin, TemplateView)
     template_name = "terminusgps/terms.html"
 
 
-class TerminusgpsFrequentlyAskedQuestionsView(HtmxTemplateResponseMixin, TemplateView):
+class TerminusgpsFrequentlyAskedQuestionsView(
+    HtmxTemplateResponseMixin, TemplateView
+):
     """
     Renders a frequently asked questions page.
 
@@ -313,7 +317,9 @@ class TerminusgpsSupportChatView(HtmxTemplateResponseMixin, FormView):
     partial_template_name = "terminusgps/partials/_support_chat.html"
 
 
-class TerminusgpsPasswordResetView(HtmxTemplateResponseMixin, PasswordResetView):
+class TerminusgpsPasswordResetView(
+    HtmxTemplateResponseMixin, PasswordResetView
+):
     """
     Renders a password reset form and sends a password reset email.
 
@@ -380,15 +386,19 @@ class TerminusgpsPasswordResetView(HtmxTemplateResponseMixin, PasswordResetView)
         :rtype: :py:obj:`~django.forms.Form`
 
         """
-        help_text = (
-            "Please enter the email address associated with your Terminus GPS account."
-        )
+        help_text = "Please enter the email address associated with your Terminus GPS account."
         form = super().get_form(form_class)
         form.fields["email"].label = "Email Address"
         form.fields["email"].help_text = help_text
-        form.fields["email"].validators = [validate_email, validate_username_exists]
+        form.fields["email"].validators = [
+            validate_email,
+            validate_username_exists,
+        ]
         form.fields["email"].widget.attrs.update(
-            {"class": settings.DEFAULT_FIELD_CLASS, "placeholder": "email@domain.com"}
+            {
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "placeholder": "email@domain.com",
+            }
         )
         return form
 
@@ -460,7 +470,10 @@ class TerminusgpsPasswordResetConfirmView(
     """
 
     content_type = "text/html"
-    extra_context = {"title": "Confirm Password Reset", "class": "flex flex-col gap-4"}
+    extra_context = {
+        "title": "Confirm Password Reset",
+        "class": "flex flex-col gap-4",
+    }
     http_method_names = ["get", "post"]
     template_name = "terminusgps/password_reset_confirm.html"
     partial_template_name = "terminusgps/partials/_password_reset_confirm.html"
@@ -523,7 +536,9 @@ class TerminusgpsPasswordResetCompleteView(
     extra_context = {"title": "Completed Password Reset"}
     http_method_names = ["get"]
     template_name = "terminusgps/password_reset_complete.html"
-    partial_template_name = "terminusgps/partials/_password_reset_complete.html"
+    partial_template_name = (
+        "terminusgps/partials/_password_reset_complete.html"
+    )
 
 
 class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
@@ -646,7 +661,6 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     extra_context = {
         "title": "Register",
         "subtitle": "You'll know where yours are...",
-        "class": "flex flex-col gap-4",
     }
     form_class = TerminusgpsRegisterForm
     http_method_names = ["get", "post"]
@@ -691,7 +705,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
         customer_profile = CustomerProfile(
             email=email_addr, merchant_id=str(customer.pk)
         )
-        customer.authorizenet_id = customer_profile.id
+        customer.authorizenet_profile_id = customer_profile.id
         return customer
 
     @staticmethod
@@ -713,7 +727,8 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
 
         def calculate_account_days(start_date: datetime.date) -> int:
             return get_days_between(
-                start_date, start_date + relativedelta(months=1, day=start_date.day)
+                start_date,
+                start_date + relativedelta(months=1, day=start_date.day),
             )
 
         username: str = form.cleaned_data["username"]

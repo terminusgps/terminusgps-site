@@ -1,4 +1,4 @@
-<form class="{{ class }}" action="{% url 'register' %}" method="post" hx-indicator="#loading" novalidate hx-post="{% url 'register' %}" hx-swap="outerHTML">
+<form class="flex flex-col gap-4" action="{% url 'register' %}" method="post" hx-indicator="#loading" novalidate hx-post="{% url 'register' %}" hx-swap="outerHTML">
     <div id="loading" class="group htmx-indicator static inset-0 h-1/2 w-1/2 select-none">
         <div class="absolute inset-0 hidden items-center justify-center bg-gray-400/60 group-[.htmx-request]:flex dark:bg-gray-800/60">
             <div class="flex items-center gap-2 rounded border bg-gray-400 p-4 dark:bg-gray-800">

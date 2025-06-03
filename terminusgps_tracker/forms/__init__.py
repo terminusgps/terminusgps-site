@@ -4,8 +4,5 @@ from django.core.exceptions import ImproperlyConfigured
 if settings.configured and not hasattr(settings, "DEFAULT_FIELD_CLASS"):
     raise ImproperlyConfigured("'DEFAULT_FIELD_CLASS' setting is required.")
 
-from .addresses import CustomerShippingAddressCreateForm
-from .assets import CustomerAssetCreateForm
-from .coupons import CustomerCouponRedeemForm
-from .payments import CustomerPaymentMethodCreateForm
-from .subscriptions import CustomerSubscriptionUpdateForm
+from .addresses import CustomerShippingAddressCreationForm
+from .payments import CustomerPaymentMethodCreationForm
