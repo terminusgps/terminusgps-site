@@ -7,6 +7,10 @@ from .customers import (
     CustomerShippingAddressCreateView,
     CustomerShippingAddressDetailView,
     CustomerShippingAddressListView,
+    CustomerSubscriptionView,
+    CustomerSupportView,
+    CustomerTransactionListView,
+    CustomerTransactionsView,
 )
 from .subscriptions import (
     SubscriptionCreateView,

@@ -6,7 +6,7 @@ from authorizenet import apicontractsv1
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -81,16 +81,26 @@ class SubscriptionDetailView(
     content_type = "text/html"
     context_object_name = "subscription"
     extra_context = {"title": "Subscription Details"}
-    http_method_names = ["get"]
+    http_method_names = ["get", "delete"]
     login_url = reverse_lazy("login")
     model = Subscription
-    partial_template_name = "terminusgps_tracker/subscriptions/_detail.html"
+    partial_template_name = (
+        "terminusgps_tracker/subscriptions/partials/_detail.html"
+    )
     permission_denied_message = "Please login to view this content."
     queryset = Subscription.objects.select_related(
         "payment", "address", "tier"
     )
     raise_exception = False
     template_name = "terminusgps_tracker/subscriptions/detail.html"
+
+    def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        if not self.get_object() or not self.request.headers.get("HX-Request"):
+            return HttpResponse(status=403)
+        subscription = self.get_object()
+        subscription.authorizenet_cancel()
+        subscription.delete()
+        return super().get(request, *args, **kwargs)
 
     def get_object(self) -> Subscription | None:
         try:
@@ -102,19 +112,11 @@ class SubscriptionDetailView(
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         if self.get_object():
             subscription = self.get_object()
-            context["title"] = (
-                f"{subscription.customer.user.first_name}'s Subscription"
-            )
-            context["subtitle"] = "Thanks for subscribing!"
             context["paymentProfile"] = (
-                self.get_object()
-                .payment.authorizenet_get_payment_profile()
-                .paymentProfile
+                subscription.payment.authorizenet_get_payment_profile().paymentProfile
             )
             context["addressProfile"] = (
-                self.get_object()
-                .address.authorizenet_get_address_profile()
-                .address
+                subscription.address.authorizenet_get_address_profile().address
             )
         return context
 

@@ -13,7 +13,6 @@ from django.contrib.auth.views import (
     PasswordResetView,
 )
 from django.core.exceptions import ImproperlyConfigured
-from django.core.mail import EmailMessage
 from django.core.validators import validate_email
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseRedirect
@@ -29,11 +28,7 @@ from terminusgps.wialon.session import WialonSession
 
 from terminusgps_tracker.models import Customer
 
-from .forms import (
-    TerminusgpsAuthenticationForm,
-    TerminusgpsEmailSupportForm,
-    TerminusgpsRegisterForm,
-)
+from .forms import TerminusgpsAuthenticationForm, TerminusgpsRegisterForm
 from .validators import validate_username_exists
 
 if settings.configured and not hasattr(settings, "TRACKER_APP_CONFIG"):
@@ -220,101 +215,6 @@ class TerminusgpsMobileAppView(HtmxTemplateResponseMixin, TemplateView):
     http_method_names = ["get"]
     partial_template_name = "terminusgps/partials/_mobile_app.html"
     template_name = "terminusgps/mobile_app.html"
-
-
-class TerminusgpsSupportView(HtmxTemplateResponseMixin, TemplateView):
-    """
-    Renders the support options for the application.
-
-    **Context**
-
-    ``title``
-        The title for the view/webpage.
-
-        Value: ``"Support"``
-
-    ``class``
-        The `tailwindcss`_ class used for the view.
-
-        Value: ``"flex flex-col gap-4"``
-
-    ``subtitle``
-        The subtitle for the view/webpage.
-
-        Value: ``"Drop us a line"``
-
-    **HTTP Methods:**
-        - GET
-
-    **Template:**
-        :template:`terminusgps/support.html`
-
-    **Partial Template:**
-        :template:`terminusgps/partials/_support.html`
-
-    .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
-
-    """
-
-    content_type = "text/html"
-    extra_context = {
-        "title": "Support",
-        "subtitle": "Drop us a line",
-        "class": "flex flex-col gap-4",
-    }
-    http_method_names = ["get"]
-    template_name = "terminusgps/support.html"
-    partial_template_name = "terminusgps/partials/_support.html"
-
-
-class TerminusgpsSupportCallView(HtmxTemplateResponseMixin, TemplateView):
-    content_type = "text/html"
-    extra_context = {
-        "title": "Call Support",
-        "subtitle": "Give us a ring and we'll get back to you asap",
-        "class": "flex flex-col gap-4",
-    }
-    http_method_names = ["get"]
-    template_name = "terminusgps/support_call.html"
-    partial_template_name = "terminusgps/partials/_support_call.html"
-
-
-class TerminusgpsSupportEmailView(HtmxTemplateResponseMixin, FormView):
-    content_type = "text/html"
-    extra_context = {
-        "title": "Email Support",
-        "subtitle": "Shoot us an email and we'll get back to you asap",
-        "class": "flex flex-col gap-4",
-    }
-    http_method_names = ["get", "post"]
-    template_name = "terminusgps/support_email.html"
-    partial_template_name = "terminusgps/partials/_support_email.html"
-    form_class = TerminusgpsEmailSupportForm
-
-    def form_valid(
-        self, form: TerminusgpsEmailSupportForm
-    ) -> HttpResponse | HttpResponseRedirect:
-        email = EmailMessage(
-            subject=form.cleaned_data["subject"],
-            body=form.cleaned_data["message"],
-            to=["support@terminusgps.com"],
-            cc=["blake@terminusgps.com"],
-            reply_to=[form.cleaned_data["email"]],
-        )
-        email.send(fail_silently=True)
-        return super().form_valid(form=form)
-
-
-class TerminusgpsSupportChatView(HtmxTemplateResponseMixin, FormView):
-    content_type = "text/html"
-    extra_context = {
-        "title": "Chat Support",
-        "subtitle": "Send us a message and we'll get back to you asap",
-        "class": "flex flex-col gap-4",
-    }
-    http_method_names = ["get", "post"]
-    template_name = "terminusgps/support_chat.html"
-    partial_template_name = "terminusgps/partials/_support_chat.html"
 
 
 class TerminusgpsPasswordResetView(

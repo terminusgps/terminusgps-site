@@ -9,7 +9,9 @@ secret: dict[str, str | None] = {
     "SECRET_KEY": os.getenv("SECRET_KEY"),
     "CONNECT_SECRET": os.getenv("CONNECT_SECRET"),
     "MERCHANT_AUTH_LOGIN_ID": os.getenv("MERCHANT_AUTH_LOGIN_ID"),
-    "MERCHANT_AUTH_TRANSACTION_KEY": os.getenv("MERCHANT_AUTH_TRANSACTION_KEY"),
+    "MERCHANT_AUTH_TRANSACTION_KEY": os.getenv(
+        "MERCHANT_AUTH_TRANSACTION_KEY"
+    ),
     "DEFAULT_TAX_RATE": os.getenv("DEFAULT_TAX_RATE", "0.085"),
     "TWILIO_TOKEN": os.getenv("TWILIO_TOKEN"),
     "TWILIO_SID": os.getenv("TWILIO_SID"),
@@ -61,7 +63,7 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "static/"
-TIME_ZONE = "America/Chicago"
+TIME_ZONE = "US/Central"
 TRACKER_ENCRYPTION_KEY = secret.get("TRACKER_ENCRYPTION_KEY")
 TWILIO_FROM_NUMBER = secret.get("TWILIO_FROM_NUMBER")
 TWILIO_MESSAGING_SID = secret.get("TWILIO_MESSAGING_SID")
@@ -171,7 +173,9 @@ TRACKER_APP_CONFIG = {
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+    },
 }
 
 INSTALLED_APPS = [
@@ -216,7 +220,10 @@ TEMPLATES = [
 
 
 DATABASES = {
-    "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -224,6 +231,10 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"
+    },
 ]

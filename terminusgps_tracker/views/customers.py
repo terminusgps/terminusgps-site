@@ -1,4 +1,3 @@
-import datetime
 import typing
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -6,7 +5,6 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 from terminusgps.authorizenet.controllers import (
@@ -45,16 +43,6 @@ class CustomerDashboardView(
     raise_exception = False
     template_name = "terminusgps_tracker/dashboard.html"
 
-    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        now = timezone.now()
-        context["now"] = now
-        context["greeting"] = self.get_greeting(now)
-        return context
-
-    def get_greeting(self, dt: datetime.datetime) -> str:
-        return "Good morning" if dt.hour <= 12 else "Good afternoon"
-
 
 class CustomerAccountView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
@@ -78,6 +66,87 @@ class CustomerAccountView(
         if customer.addresses.count == 0:
             customer.authorizenet_sync_address_profiles()
         return super().get(request, *args, **kwargs)
+
+
+class CustomerSubscriptionView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Your Subscription",
+        "subtitle": "Update your subscription plan",
+    }
+    http_method_names = ["get"]
+    login_url = reverse_lazy("login")
+    partial_template_name = "terminusgps_tracker/partials/_subscription.html"
+    permission_denied_message = "Please login to view this content."
+    raise_exception = False
+    template_name = "terminusgps_tracker/subscription.html"
+
+
+class CustomerTransactionsView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Transactions",
+        "subtitle": "Inspect your subscription transactions",
+    }
+    http_method_names = ["get"]
+    login_url = reverse_lazy("login")
+    partial_template_name = "terminusgps_tracker/partials/_transactions.html"
+    permission_denied_message = "Please login to view this content."
+    raise_exception = False
+    template_name = "terminusgps_tracker/transactions.html"
+
+
+class CustomerSupportView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Support",
+        "subtitle": "Drop us a line and we'll get in touch",
+    }
+    http_method_names = ["get"]
+    login_url = reverse_lazy("login")
+    partial_template_name = "terminusgps_tracker/partials/_support.html"
+    permission_denied_message = "Please login to view this content."
+    raise_exception = False
+    template_name = "terminusgps_tracker/support.html"
+
+
+class CustomerTransactionListView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+):
+    content_type = "text/html"
+    extra_context = {"title": "Transaction List"}
+    http_method_names = ["get"]
+    login_url = reverse_lazy("login")
+    partial_template_name = (
+        "terminusgps_tracker/partials/_transaction_list.html"
+    )
+    permission_denied_message = "Please login to view this content."
+    raise_exception = False
+    template_name = "terminusgps_tracker/transaction_list.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["transaction_list"] = self.get_subscription_transactions()
+        return context
+
+    def get_subscription_transactions(self) -> list[dict[str, typing.Any]]:
+        return (
+            self.get_customer().subscription.authorizenet_get_transactions()
+            if self.get_customer()
+            else []
+        )
+
+    def get_customer(self) -> Customer | None:
+        try:
+            return Customer.objects.get(user=self.request.user)
+        except Customer.DoesNotExist:
+            return
 
 
 class CustomerPaymentMethodListView(
@@ -200,8 +269,11 @@ class CustomerShippingAddressDetailView(
             customer_profile_id=customer_address.customer.authorizenet_profile_id,
             id=customer_address.pk,
         )
-        address_profile.delete()
-        customer_address.delete()
+        try:
+            address_profile.delete()
+            customer_address.delete()
+        except AuthorizenetControllerExecutionError:
+            return HttpResponse(status=406)
         return HttpResponse(status=200)
 
     def get_queryset(self):
@@ -291,21 +363,30 @@ class CustomerPaymentMethodCreateView(
     ) -> HttpResponse | HttpResponseRedirect:
         try:
             customer = Customer.objects.get(user=self.request.user)
+            address = generate_customer_address(form)
+            payment = generate_customer_payment(form)
             payment_profile = PaymentProfile(
                 customer_profile_id=customer.authorizenet_profile_id,
                 default=form.cleaned_data["default"],
             )
             CustomerPaymentMethod.objects.create(
-                id=payment_profile.create(
-                    address=generate_customer_address(form),
-                    payment=generate_customer_payment(form),
-                ),
+                id=payment_profile.create(address=address, payment=payment),
                 customer=customer,
             )
+            if form.cleaned_data["create_shipping_address"]:
+                address_profile = AddressProfile(
+                    customer_profile_id=customer.authorizenet_profile_id,
+                    default=form.cleaned_data["default"],
+                )
+                CustomerShippingAddress.objects.create(
+                    id=address_profile.create(address), customer=customer
+                )
         except AuthorizenetControllerExecutionError as e:
             message = _("Whoops! '%(error)s'")
             if e.code == "E00039":
-                message = _("Whoops! This payment method already exists.")
+                message = _(
+                    "Whoops! The payment method or shipping address already exists."
+                )
             form.add_error(
                 None, ValidationError(message, code="invalid", params={"e": e})
             )

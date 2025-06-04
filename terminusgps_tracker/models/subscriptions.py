@@ -1,6 +1,9 @@
+import typing
+
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
+from terminusgps.authorizenet.profiles import SubscriptionProfile
 
 
 class SubscriptionTier(models.Model):
@@ -111,6 +114,20 @@ class Subscription(models.Model):
     def save(self, **kwargs) -> None:
         self.full_clean()
         super().save(**kwargs)
+
+    @transaction.atomic
+    def authorizenet_cancel(self) -> None:
+        subscription_profile = SubscriptionProfile(
+            customer_profile_id=self.customer.user.pk, id=self.pk
+        )
+        subscription_profile.cancel()
+        self.status = self.SubscriptionStatus.CANCELED
+
+    def authorizenet_get_transactions(self) -> list[dict[str, typing.Any]]:
+        subscription_profile = SubscriptionProfile(
+            customer_profile_id=self.customer.user.pk, id=self.pk
+        )
+        return subscription_profile.transactions
 
     def clean(self):
         super().clean()

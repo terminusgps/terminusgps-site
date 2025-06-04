@@ -7,6 +7,17 @@ urlpatterns = [
     path("", views.CustomerDashboardView.as_view(), name="dashboard"),
     path("pricing/", views.SubscriptionPricingView.as_view(), name="pricing"),
     path("account/", views.CustomerAccountView.as_view(), name="account"),
+    path("support/", views.CustomerSupportView.as_view(), name="support"),
+    path(
+        "transactions/",
+        views.CustomerTransactionsView.as_view(),
+        name="transactions",
+    ),
+    path(
+        "transactions/list/",
+        views.CustomerTransactionListView.as_view(),
+        name="transaction list",
+    ),
     path(
         "tiers/list/",
         views.SubscriptionTierListView.as_view(),
@@ -19,6 +30,11 @@ urlpatterns = [
     ),
     path(
         "subscription/",
+        views.CustomerSubscriptionView.as_view(),
+        name="subscription",
+    ),
+    path(
+        "subscription/details/",
         views.SubscriptionDetailView.as_view(),
         name="subscription detail",
     ),
