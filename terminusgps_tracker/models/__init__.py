@@ -1,8 +1,2 @@
-from .customers import (
-    Customer,
-    CustomerPaymentMethod,
-    CustomerShippingAddress,
-    CustomerWialonAccount,
-    CustomerWialonUnit,
-)
+from .customers import Customer, CustomerPaymentMethod, CustomerShippingAddress
 from .subscriptions import Subscription, SubscriptionFeature, SubscriptionTier

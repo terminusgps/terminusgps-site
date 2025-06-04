@@ -5,8 +5,6 @@ from terminusgps_tracker.models.customers import (
     Customer,
     CustomerPaymentMethod,
     CustomerShippingAddress,
-    CustomerWialonAccount,
-    CustomerWialonUnit,
 )
 from terminusgps_tracker.models.subscriptions import (
     Subscription,
@@ -58,17 +56,6 @@ class CustomerAdmin(admin.ModelAdmin):
             % {"count": len(queryset)},
             messages.SUCCESS,
         )
-
-
-@admin.register(CustomerWialonAccount)
-class CustomerWialonAccountAdmin(admin.ModelAdmin):
-    list_display = ["id", "customer"]
-
-
-@admin.register(CustomerWialonUnit)
-class CustomerWialonUnitAdmin(admin.ModelAdmin):
-    list_display = ["id", "customer"]
-    list_filter = ["customer"]
 
 
 @admin.register(CustomerPaymentMethod)

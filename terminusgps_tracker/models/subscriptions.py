@@ -1,9 +1,26 @@
+import datetime
+import decimal
 import typing
 
+from authorizenet import apicontractsv1
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from terminusgps.authorizenet.profiles import SubscriptionProfile
+from terminusgps.authorizenet.utils import (
+    generate_monthly_subscription_schedule,
+)
+
+from .customers import CustomerPaymentMethod, CustomerShippingAddress
+
+
+def calculate_amount_plus_tax(
+    amount: decimal.Decimal, tax_rate: decimal.Decimal | None = None
+) -> decimal.Decimal:
+    if tax_rate is None:
+        tax_rate = settings.DEFAULT_TAX_RATE
+    return round(amount * (1 + tax_rate), ndigits=2)
 
 
 class SubscriptionTier(models.Model):
@@ -76,6 +93,8 @@ class Subscription(models.Model):
 
     id = models.PositiveBigIntegerField(primary_key=True)
     """Authorizenet subscription id."""
+    start_date = models.DateField(auto_now_add=True)
+    """Start date for the subscription."""
     tier = models.OneToOneField(
         "terminusgps_tracker.SubscriptionTier",
         on_delete=models.SET_NULL,
@@ -109,25 +128,104 @@ class Subscription(models.Model):
         verbose_name_plural = _("subscriptions")
 
     def __str__(self) -> str:
-        return f"{self.customer}'s Subscription"
+        return (
+            f"{self.customer}'s {self.tier} Subscription"
+            if self.tier is not None
+            else f"{self.customer}'s Subscription"
+        )
 
     def save(self, **kwargs) -> None:
         self.full_clean()
         super().save(**kwargs)
 
+    def authorizenet_get_profile(self) -> SubscriptionProfile:
+        """Returns the Authorizenet subscription profile for the subscription."""
+        return SubscriptionProfile(
+            customer_profile_id=self.customer.authorizenet_profile_id,
+            id=self.pk,
+        )
+
+    @transaction.atomic
+    def authorizenet_sync(self) -> None:
+        """Syncs the subscription's status, payment method and shipping address with Authorizenet."""
+        self.authorizenet_sync_status()
+        self.authorizenet_sync_payment()
+        self.authorizenet_sync_address()
+
+    @transaction.atomic
+    def authorizenet_sync_status(self) -> None:
+        """Syncs the subscription's status with Authorizenet."""
+        new_status = self.authorizenet_get_profile().status
+        if new_status is not None:
+            self.status = new_status
+
+    @transaction.atomic
+    def authorizenet_sync_payment(self) -> None:
+        """Syncs the subscription's payment method with Authorizenet."""
+        payment_id = self.authorizenet_get_profile().payment_id
+        if payment_id is not None:
+            self.payment, _ = CustomerPaymentMethod.objects.filter(
+                customer=self.customer
+            ).get_or_create(pk=payment_id, customer=self.customer)
+
+    @transaction.atomic
+    def authorizenet_sync_address(self) -> None:
+        """Syncs the subscription's shipping address with Authorizenet."""
+        address_id = self.authorizenet_get_profile().address_id
+        if address_id is not None:
+            self.address, _ = CustomerShippingAddress.objects.filter(
+                customer=self.customer
+            ).get_or_create(pk=address_id, customer=self.customer)
+
     @transaction.atomic
     def authorizenet_cancel(self) -> None:
-        subscription_profile = SubscriptionProfile(
-            customer_profile_id=self.customer.user.pk, id=self.pk
-        )
-        subscription_profile.cancel()
+        """Cancels the subscription with Authorizenet."""
+        self.authorizenet_get_profile().delete()
         self.status = self.SubscriptionStatus.CANCELED
 
-    def authorizenet_get_transactions(self) -> list[dict[str, typing.Any]]:
-        subscription_profile = SubscriptionProfile(
-            customer_profile_id=self.customer.user.pk, id=self.pk
+    @transaction.atomic
+    def authorizenet_update(self) -> None:
+        """Updates the subscription with Authorizenet."""
+        sobj = self.generate_subscription_obj(
+            self.start_date, with_schedule=False
         )
-        return subscription_profile.transactions
+        self.authorizenet_get_profile().update(sobj)
+
+    def authorizenet_get_transactions(self) -> list[dict[str, typing.Any]]:
+        """Returns a list of subscription transactions from Authorizenet."""
+        return self.authorizenet_get_profile().transactions
+
+    def get_subscription_name(self) -> str:
+        """Returns a subscription name in the format: <EMAIL>'s <TIER> Subscription"""
+        email_addr = (
+            self.customer.user.email
+            if self.customer.user.email
+            else self.customer.user.username
+        )
+        return f"{email_addr}'s {self.tier} Subscription"
+
+    def generate_subscription_obj(
+        self,
+        start_date: datetime.date,
+        total_occurrences: int = 9999,
+        trial_occurrences: int = 0,
+        with_schedule: bool = False,
+    ) -> apicontractsv1.ARBSubscriptionType:
+        sub_obj = apicontractsv1.ARBSubscriptionType(
+            name=self.get_subscription_name(),
+            amount=str(calculate_amount_plus_tax(self.tier.amount)),
+            trialAmount=str(0.00),
+            profile=apicontractsv1.customerProfileIdType(
+                customerProfileId=str(self.customer.authorizenet_profile_id),
+                customerPaymentProfileId=str(self.payment.id),
+                customerAddressId=str(self.address.id),
+            ),
+        )
+        if with_schedule:
+            sub_obj.paymentSchedule = generate_monthly_subscription_schedule(
+                start_date, total_occurrences, trial_occurrences
+            )
+        return sub_obj
 
     def clean(self):
         super().clean()

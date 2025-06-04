@@ -7,8 +7,6 @@ from terminusgps.authorizenet.profiles import (
     CustomerProfile,
     PaymentProfile,
 )
-from terminusgps.wialon.items import WialonResource, WialonUnit
-from terminusgps.wialon.session import WialonSession
 
 
 class Customer(models.Model):
@@ -76,82 +74,6 @@ class Customer(models.Model):
         )
 
 
-class CustomerWialonUnit(models.Model):
-    id = models.PositiveBigIntegerField(primary_key=True)
-    """Wialon unit id."""
-    name = models.CharField(max_length=64, null=True, blank=True, default=None)
-    """Wialon unit name."""
-    imei = models.CharField(max_length=19, null=True, blank=True, default=None)
-    """Wialon unit IMEI #."""
-    customer = models.ForeignKey(
-        "terminusgps_tracker.Customer",
-        on_delete=models.CASCADE,
-        related_name="units",
-    )
-    """Associated customer."""
-
-    class Meta:
-        verbose_name = _("customer wialon unit")
-        verbose_name_plural = _("customer wialon units")
-
-    def __str__(self) -> str:
-        """Returns the unit's id in the format: Unit #<pk>"""
-        return f"Unit #{self.pk}"
-
-    def wialon_needs_sync(self) -> bool:
-        """Returns :py:obj:`True` if :py:attr:`name` or :py:attr:`imei` aren't set."""
-        return bool(self.name) or bool(self.imei)
-
-    @transaction.atomic
-    def wialon_sync(self, session: WialonSession) -> None:
-        """
-        Retrieves the unit from Wialon and updates :py:attr:`name` and :py:attr:`imei`.
-
-        :param session: A valid Wialon API session.
-        :type session: :py:obj:`~terminusgps.wialon.session.WialonSession`
-
-        """
-        unit = WialonUnit(id=self.pk, session=session)
-        self.name = unit.name
-        self.imei = unit.imei_number
-
-
-class CustomerWialonAccount(models.Model):
-    id = models.PositiveBigIntegerField(primary_key=True)
-    """Wialon resource/account id."""
-    name = models.CharField(max_length=64, null=True, blank=True, default=None)
-    """Wialon resource/account name."""
-    customer = models.OneToOneField(
-        "terminusgps_tracker.Customer",
-        on_delete=models.CASCADE,
-        related_name="account",
-    )
-    """Associated customer."""
-
-    class Meta:
-        verbose_name = _("customer wialon account")
-        verbose_name_plural = _("customer wialon accounts")
-
-    def __str__(self) -> str:
-        return f"Account #{self.pk}"
-
-    @transaction.atomic
-    def wialon_sync(self, session: WialonSession) -> None:
-        """
-        Retrieves the resource/account from Wialon and updates :py:attr:`name`.
-
-        :param session: A valid Wialon API session.
-        :type session: :py:obj:`~terminusgps.wialon.session.WialonSession`
-
-        """
-        resource = WialonResource(id=self.pk, session=session)
-        self.name = resource.name
-
-    def wialon_needs_sync(self) -> bool:
-        """Returns :py:obj:`True` if :py:attr:`name` isn't set."""
-        return bool(self.name)
-
-
 class CustomerPaymentMethod(models.Model):
     id = models.PositiveBigIntegerField(primary_key=True)
     """Authorizenet customer payment profile id."""
@@ -161,6 +83,8 @@ class CustomerPaymentMethod(models.Model):
         related_name="payments",
     )
     """Associated customer."""
+    default = models.BooleanField(default=False)
+    """Whether or not the payment method is set as default."""
 
     class Meta:
         verbose_name = _("customer payment method")
@@ -173,11 +97,18 @@ class CustomerPaymentMethod(models.Model):
         """Returns a URL pointing to the payment method's detail view."""
         return reverse("tracker:payment detail", kwargs={"pk": self.pk})
 
-    def authorizenet_get_payment_profile(self) -> dict | None:
+    def authorizenet_get_profile(self) -> dict | None:
         """Returns payment profile data from Authorizenet."""
         cprofile = self.customer.authorizenet_get_customer_profile()
         pprofile = PaymentProfile(customer_profile_id=cprofile.id, id=self.pk)
         return pprofile._authorizenet_get_payment_profile()
+
+    def authorizenet_get_last_4(self) -> int:
+        """Returns the last 4 digits of the payment method credit card."""
+        pprofile = self.authorizenet_get_profile()
+        return int(
+            str(pprofile.paymentProfile.payment.creditCard.cardNumber)[-4:]
+        )
 
 
 class CustomerShippingAddress(models.Model):
@@ -189,6 +120,8 @@ class CustomerShippingAddress(models.Model):
         related_name="addresses",
     )
     """Associated customer."""
+    default = models.BooleanField(default=False)
+    """Whether or not the shipping address is set as default."""
 
     class Meta:
         verbose_name = _("customer shipping address")
@@ -201,7 +134,7 @@ class CustomerShippingAddress(models.Model):
         """Returns a URL pointing to the shipping address' detail view."""
         return reverse("tracker:address detail", kwargs={"pk": self.pk})
 
-    def authorizenet_get_address_profile(self) -> dict | None:
+    def authorizenet_get_profile(self) -> dict | None:
         """Returns address profile data from Authorizenet."""
         cprofile = self.customer.authorizenet_get_customer_profile()
         aprofile = AddressProfile(customer_profile_id=cprofile.id, id=self.pk)

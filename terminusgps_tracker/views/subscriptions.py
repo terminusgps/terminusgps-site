@@ -1,8 +1,8 @@
-import datetime
 import decimal
 import typing
 
 from authorizenet import apicontractsv1
+from django import forms
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
@@ -18,6 +18,9 @@ from django.views.generic import (
     UpdateView,
 )
 from terminusgps.authorizenet.profiles import SubscriptionProfile
+from terminusgps.authorizenet.utils import (
+    generate_monthly_subscription_schedule,
+)
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
 from terminusgps_tracker.forms import SubscriptionCreationForm
@@ -110,13 +113,14 @@ class SubscriptionDetailView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        if self.get_object():
-            subscription = self.get_object()
+        subscription = self.get_object()
+        if subscription is not None:
+            subscription.authorizenet_sync()
             context["paymentProfile"] = (
-                subscription.payment.authorizenet_get_payment_profile().paymentProfile
+                subscription.payment.authorizenet_get_profile().paymentProfile
             )
             context["addressProfile"] = (
-                subscription.address.authorizenet_get_address_profile().address
+                subscription.address.authorizenet_get_profile().address
             )
         return context
 
@@ -136,9 +140,89 @@ class SubscriptionUpdateView(
     )
     model = Subscription
     queryset = Subscription.objects.select_related("customer")
+    fields = ["tier", "payment", "address"]
+    success_url = reverse_lazy("tracker:subscription detail")
+
+    def form_valid(
+        self, form: forms.ModelForm
+    ) -> HttpResponse | HttpResponseRedirect:
+        subscription = self.get_object()
+        if any(
+            [
+                subscription.address != form.cleaned_data["address"],
+                subscription.payment != form.cleaned_data["payment"],
+                subscription.tier != form.cleaned_data["tier"],
+            ]
+        ):
+            subscription.address = form.cleaned_data["address"]
+            subscription.payment = form.cleaned_data["payment"]
+            subscription.tier = form.cleaned_data["tier"]
+            subscription.authorizenet_update()
+            subscription.save()
+        return super().form_valid(form=form)
+
+    def get_form(self, form_class=None) -> forms.ModelForm:
+        form = super().get_form(form_class=form_class)
+        tier_qs = SubscriptionTier.objects.exclude(name__icontains="custom")
+        address_choices = self.generate_shipping_address_choices()
+        payment_choices = self.generate_payment_method_choices()
+        form.fields["tier"].queryset = tier_qs
+        form.fields["tier"].widget.attrs.update(
+            {"class": settings.DEFAULT_FIELD_CLASS}
+        )
+        form.fields["address"].choices = address_choices
+        form.fields["address"].widget.attrs.update(
+            {"class": settings.DEFAULT_FIELD_CLASS}
+        )
+        form.fields["payment"].choices = payment_choices
+        form.fields["payment"].widget.attrs.update(
+            {"class": settings.DEFAULT_FIELD_CLASS}
+        )
+        return form
 
     def get_object(self) -> Subscription:
         return Subscription.objects.get(customer__user=self.request.user)
+
+    def generate_payment_method_choices(self) -> list[tuple[int, str]]:
+        choices = []
+        if CustomerPaymentMethod.objects.filter(
+            customer__user=self.request.user
+        ).exists():
+            customer_payments = CustomerPaymentMethod.objects.filter(
+                customer__user=self.request.user
+            )
+            for payment in customer_payments:
+                card_type = payment.authorizenet_get_profile().paymentProfile.payment.creditCard.cardType
+                card_last_4 = int(
+                    str(
+                        payment.authorizenet_get_profile().paymentProfile.payment.creditCard.cardNumber
+                    )[-4:]
+                )
+                choices.append(
+                    (payment.pk, _(f"{card_type} ending in {card_last_4}"))
+                )
+        return choices
+
+    def generate_shipping_address_choices(self) -> list[tuple[int, str]]:
+        choices = []
+        if CustomerShippingAddress.objects.filter(
+            customer__user=self.request.user
+        ).exists():
+            customer_addresses = CustomerShippingAddress.objects.filter(
+                customer__user=self.request.user
+            )
+            for address in customer_addresses:
+                choices.append(
+                    (
+                        address.pk,
+                        _(
+                            str(
+                                address.authorizenet_get_profile().address.address
+                            )
+                        ),
+                    )
+                )
+        return choices
 
 
 class SubscriptionCreateView(
@@ -185,10 +269,10 @@ class SubscriptionCreateView(
                 customer__user=self.request.user
             )
             for payment in customer_payments:
-                card_type = payment.authorizenet_get_payment_profile().paymentProfile.payment.creditCard.cardType
+                card_type = payment.authorizenet_get_profile().paymentProfile.payment.creditCard.cardType
                 card_last_4 = int(
                     str(
-                        payment.authorizenet_get_payment_profile().paymentProfile.payment.creditCard.cardNumber
+                        payment.authorizenet_get_profile().paymentProfile.payment.creditCard.cardNumber
                     )[-4:]
                 )
                 choices.append(
@@ -210,7 +294,7 @@ class SubscriptionCreateView(
                         address.pk,
                         _(
                             str(
-                                address.authorizenet_get_address_profile().address.address
+                                address.authorizenet_get_profile().address.address
                             )
                         ),
                     )
@@ -222,49 +306,31 @@ class SubscriptionCreateView(
         self, form: SubscriptionCreationForm
     ) -> HttpResponse | HttpResponseRedirect:
         customer = Customer.objects.get(user=self.request.user)
-        subscription_obj = self.authorizenet_generate_subscription_obj(
-            start_date=timezone.now(),
-            customer=customer,
-            tier=form.cleaned_data["tier"],
-            payment=form.cleaned_data["payment"],
-            address=form.cleaned_data["address"],
-        )
-        subscription_profile = SubscriptionProfile(
-            customer_profile_id=customer.authorizenet_profile_id
-        )
-        Subscription.objects.create(
-            id=subscription_profile.create(subscription_obj),
-            customer=customer,
-            tier=form.cleaned_data["tier"],
-            address=form.cleaned_data["address"],
-            payment=form.cleaned_data["payment"],
-        )
-        return super().form_valid(form=form)
+        address = form.cleaned_data["address"]
+        payment = form.cleaned_data["payment"]
+        tier = form.cleaned_data["tier"]
 
-    @staticmethod
-    def authorizenet_generate_subscription_obj(
-        start_date: datetime.datetime,
-        customer: Customer,
-        tier: SubscriptionTier,
-        payment: CustomerPaymentMethod,
-        address: CustomerShippingAddress,
-    ) -> apicontractsv1.ARBSubscriptionType:
-        return apicontractsv1.ARBSubscriptionType(
+        subscription_profile = SubscriptionProfile(
+            customer_profile_id=customer.user.pk, id=None
+        )
+        sub_obj = apicontractsv1.ARBSubscriptionType(
             name=f"{customer}'s {tier} Subscription",
-            paymentSchedule=apicontractsv1.paymentScheduleType(
-                interval=apicontractsv1.paymentScheduleTypeInterval(
-                    length=str(1),
-                    unit=apicontractsv1.ARBSubscriptionUnitEnum.months,
-                ),
-                startDate=f"{start_date:%Y-%m-%d}",
-                totalOccurrences=str(9999),
-                trialOccurrences=str(0),
+            paymentSchedule=generate_monthly_subscription_schedule(
+                timezone.now()
             ),
             amount=str(calculate_amount_plus_tax(tier.amount)),
-            trialAmount=(0.00),
+            trialAmount=str(0.00),
             profile=apicontractsv1.customerProfileIdType(
                 customerProfileId=str(customer.authorizenet_profile_id),
                 customerPaymentProfileId=str(payment.id),
                 customerAddressId=str(address.id),
             ),
         )
+        Subscription.objects.create(
+            id=subscription_profile.create(sub_obj),
+            customer=customer,
+            tier=tier,
+            address=address,
+            payment=payment,
+        )
+        return super().form_valid(form=form)

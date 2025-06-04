@@ -5,8 +5,8 @@ from . import views
 app_name = "tracker"
 urlpatterns = [
     path("", views.CustomerDashboardView.as_view(), name="dashboard"),
-    path("pricing/", views.SubscriptionPricingView.as_view(), name="pricing"),
     path("account/", views.CustomerAccountView.as_view(), name="account"),
+    path("pricing/", views.SubscriptionPricingView.as_view(), name="pricing"),
     path("support/", views.CustomerSupportView.as_view(), name="support"),
     path(
         "transactions/",
@@ -49,7 +49,7 @@ urlpatterns = [
         name="subscription update",
     ),
     path(
-        "payments/",
+        "payments/list/",
         views.CustomerPaymentMethodListView.as_view(),
         name="payment list",
     ),
@@ -64,7 +64,7 @@ urlpatterns = [
         name="payment detail",
     ),
     path(
-        "addresses/",
+        "addresses/list/",
         views.CustomerShippingAddressListView.as_view(),
         name="address list",
     ),

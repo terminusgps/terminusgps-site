@@ -59,14 +59,6 @@ class CustomerAccountView(
     raise_exception = False
     template_name = "terminusgps_tracker/account.html"
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        customer = Customer.objects.get(user=self.request.user)
-        if customer.payments.count == 0:
-            customer.authorizenet_sync_payment_profiles()
-        if customer.addresses.count == 0:
-            customer.authorizenet_sync_address_profiles()
-        return super().get(request, *args, **kwargs)
-
 
 class CustomerSubscriptionView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
@@ -158,13 +150,18 @@ class CustomerPaymentMethodListView(
     http_method_names = ["get"]
     login_url = reverse_lazy("login")
     model = CustomerPaymentMethod
+    ordering = "id"
     paginate_by = 4
     partial_template_name = "terminusgps_tracker/payments/partials/_list.html"
     permission_denied_message = "Please login to view this content."
     queryset = CustomerPaymentMethod.objects.none()
     raise_exception = False
     template_name = "terminusgps_tracker/payments/list.html"
-    ordering = "id"
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        customer = Customer.objects.get(user=request.user)
+        customer.authorizenet_sync_payment_profiles()
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
         return CustomerPaymentMethod.objects.filter(
@@ -193,10 +190,7 @@ class CustomerPaymentMethodDetailView(
         if not request.headers.get("HX-Request"):
             return HttpResponse(status=403)
         prompt = request.headers.get("HX-Prompt", "")
-        pprofile = self.get_object().authorizenet_get_payment_profile()
-        last_4 = int(
-            str(pprofile.paymentProfile.payment.creditCard.cardNumber)[4:]
-        )
+        last_4 = self.get_object().authorizenet_get_last_4()
         if prompt and prompt.isdigit() and int(prompt) == last_4:
             customer_payment = self.get_object()
             payment_profile = PaymentProfile(
@@ -216,7 +210,7 @@ class CustomerPaymentMethodDetailView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        pprofile = self.get_object().authorizenet_get_payment_profile()
+        pprofile = self.get_object().authorizenet_get_profile()
         context["paymentProfile"] = pprofile.paymentProfile
         return context
 
@@ -230,13 +224,18 @@ class CustomerShippingAddressListView(
     http_method_names = ["get"]
     login_url = reverse_lazy("login")
     model = CustomerShippingAddress
+    ordering = "id"
     paginate_by = 4
     partial_template_name = "terminusgps_tracker/addresses/partials/_list.html"
     permission_denied_message = "Please login to view this content."
     queryset = CustomerShippingAddress.objects.none()
     raise_exception = False
     template_name = "terminusgps_tracker/addresses/list.html"
-    ordering = "id"
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        customer = Customer.objects.get(user=request.user)
+        customer.authorizenet_sync_address_profiles()
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
         return CustomerShippingAddress.objects.filter(
@@ -264,12 +263,13 @@ class CustomerShippingAddressDetailView(
     def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if not request.headers.get("HX-Request"):
             return HttpResponse(status=403)
-        customer_address = self.get_object()
-        address_profile = AddressProfile(
-            customer_profile_id=customer_address.customer.authorizenet_profile_id,
-            id=customer_address.pk,
-        )
         try:
+            customer_address = self.get_object()
+            address_profile = AddressProfile(
+                customer_profile_id=customer_address.customer.authorizenet_profile_id,
+                id=customer_address.pk,
+                default=customer_address.default,
+            )
             address_profile.delete()
             customer_address.delete()
         except AuthorizenetControllerExecutionError:
@@ -283,7 +283,7 @@ class CustomerShippingAddressDetailView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        aprofile = self.get_object().authorizenet_get_address_profile()
+        aprofile = self.get_object().authorizenet_get_profile()
         context["addressProfile"] = aprofile.address
         return context
 
