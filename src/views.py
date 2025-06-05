@@ -69,19 +69,10 @@ class TerminusgpsContactView(HtmxTemplateResponseMixin, TemplateView):
 class TerminusgpsTermsAndConditionsView(
     HtmxTemplateResponseMixin, TemplateView
 ):
-    """
-    Renders a terms and conditions page.
-
-    **HTTP Methods**:
-        - GET
-
-    """
-
     content_type = "text/html"
     extra_context = {
         "title": "Terms & Conditions",
         "subtitle": "You agree to these by using Terminus GPS services",
-        "class": "flex flex-col gap-8",
     }
     http_method_names = ["get"]
     partial_template_name = "terminusgps/partials/_terms.html"
@@ -91,19 +82,10 @@ class TerminusgpsTermsAndConditionsView(
 class TerminusgpsFrequentlyAskedQuestionsView(
     HtmxTemplateResponseMixin, TemplateView
 ):
-    """
-    Renders a frequently asked questions page.
-
-    **HTTP Methods**:
-        - GET
-
-    """
-
     content_type = "text/html"
     extra_context = {
         "title": "Frequently Asked Questions",
         "subtitle": "You have questions, we have answers",
-        "class": "flex flex-col gap-8",
     }
     http_method_names = ["get"]
     partial_template_name = "terminusgps/partials/_faq.html"
@@ -566,7 +548,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
         customer = self.wialon_registration_flow(form, customer)
         customer = self.authorizenet_registration_flow(form, customer)
         customer.save()
-        return HttpResponseRedirect(self.get_success_url())
+        return super().form_valid(form=form)
 
     @staticmethod
     @transaction.atomic
