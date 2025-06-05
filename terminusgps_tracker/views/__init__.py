@@ -11,6 +11,10 @@ from .customers import (
     CustomerSupportView,
     CustomerTransactionListView,
     CustomerTransactionsView,
+    CustomerWialonUnitCreateView,
+    CustomerWialonUnitDetailView,
+    CustomerWialonUnitListView,
+    CustomerWialonUnitsView,
 )
 from .subscriptions import (
     SubscriptionCreateView,

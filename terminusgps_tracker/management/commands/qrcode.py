@@ -58,10 +58,13 @@ class Command(BaseCommand):
 
     def create_qr_code(self, imei_number: str) -> qrcode.QRCode:
         qr = qrcode.QRCode(
-            version=1, error_correction=qrcode.ERROR_CORRECT_L, box_size=10, border=4
+            version=1,
+            error_correction=qrcode.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
         )
         qr.add_data(
-            f"{self.protocol}://{self.domain}/assets/create/?imei={imei_number}"
+            f"{self.protocol}://{self.domain}/units/create/?imei={imei_number}"
         )
         qr.make_image(fill_color="black", back_color="white")
         return qr

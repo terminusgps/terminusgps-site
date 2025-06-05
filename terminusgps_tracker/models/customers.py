@@ -7,16 +7,24 @@ from terminusgps.authorizenet.profiles import (
     CustomerProfile,
     PaymentProfile,
 )
+from terminusgps.wialon.items import WialonUnit
+from terminusgps.wialon.session import WialonSession
 
 
 class Customer(models.Model):
+    """A human user."""
+
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
     """A Django user."""
-    authorizenet_profile_id = models.IntegerField()
+    authorizenet_profile_id = models.IntegerField(
+        default=None, null=True, blank=True
+    )
     """Authorizenet customer profile id."""
-    wialon_user_id = models.IntegerField()
+    wialon_user_id = models.IntegerField(default=None, null=True, blank=True)
     """Wialon user id."""
-    wialon_resource_id = models.IntegerField()
+    wialon_resource_id = models.IntegerField(
+        default=None, null=True, blank=True
+    )
     """Wialon resource/account id."""
 
     class Meta:
@@ -74,17 +82,53 @@ class Customer(models.Model):
         )
 
 
+class CustomerWialonUnit(models.Model):
+    """A Wialon unit for a customer."""
+
+    id = models.PositiveBigIntegerField(primary_key=True)
+    """Wialon unit id."""
+    name = models.CharField(max_length=64, null=True, blank=True, default=None)
+    """Wialon unit name."""
+    imei = models.PositiveBigIntegerField(null=True, blank=True, default=None)
+    """Wialon unit IMEI number."""
+    customer = models.ForeignKey(
+        "terminusgps_tracker.Customer",
+        on_delete=models.CASCADE,
+        related_name="units",
+    )
+    """Associated customer."""
+
+    class Meta:
+        verbose_name = _("customer wialon unit")
+        verbose_name_plural = _("customer wialon units")
+
+    def __str__(self) -> str:
+        return self.name if self.name else f"Unit #{self.pk}"
+
+    def get_absolute_url(self) -> str:
+        return reverse("tracker:unit detail", kwargs={"pk": self.pk})
+
+    @transaction.atomic
+    def wialon_sync(self) -> None:
+        with WialonSession() as session:
+            unit = WialonUnit(id=self.pk, session=session)
+            self.name = unit.name
+            self.imei = unit.imei_number
+
+
 class CustomerPaymentMethod(models.Model):
+    """A payment method for a customer."""
+
     id = models.PositiveBigIntegerField(primary_key=True)
     """Authorizenet customer payment profile id."""
+    default = models.BooleanField(default=False)
+    """Whether or not the payment method is set as default."""
     customer = models.ForeignKey(
         "terminusgps_tracker.Customer",
         on_delete=models.CASCADE,
         related_name="payments",
     )
     """Associated customer."""
-    default = models.BooleanField(default=False)
-    """Whether or not the payment method is set as default."""
 
     class Meta:
         verbose_name = _("customer payment method")
@@ -112,16 +156,18 @@ class CustomerPaymentMethod(models.Model):
 
 
 class CustomerShippingAddress(models.Model):
+    """A shipping address for a customer."""
+
     id = models.PositiveBigIntegerField(primary_key=True)
     """Authorizenet customer shipping profile id."""
+    default = models.BooleanField(default=False)
+    """Whether or not the shipping address is set as default."""
     customer = models.ForeignKey(
         "terminusgps_tracker.Customer",
         on_delete=models.CASCADE,
         related_name="addresses",
     )
     """Associated customer."""
-    default = models.BooleanField(default=False)
-    """Whether or not the shipping address is set as default."""
 
     class Meta:
         verbose_name = _("customer shipping address")

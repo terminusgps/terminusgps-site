@@ -1,5 +1,3 @@
-from typing import Any
-
 from django.template import Library
 from django.utils.safestring import SafeString, mark_safe
 
@@ -73,11 +71,6 @@ def credit_card_icon(name: str) -> SafeString:
                 </svg>
                 """
             )
-
-
-@register.inclusion_tag("terminusgps_tracker/icons/social_media_icon.html")
-def social_media_icon(social: dict[str, Any], size: int = 8) -> dict[str, Any]:
-    return {"social": social, "size": size}
 
 
 @register.filter(name="social_icon")

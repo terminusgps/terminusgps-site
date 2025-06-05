@@ -8,6 +8,22 @@ urlpatterns = [
     path("account/", views.CustomerAccountView.as_view(), name="account"),
     path("pricing/", views.SubscriptionPricingView.as_view(), name="pricing"),
     path("support/", views.CustomerSupportView.as_view(), name="support"),
+    path("units/", views.CustomerWialonUnitsView.as_view(), name="units"),
+    path(
+        "units/list/",
+        views.CustomerWialonUnitListView.as_view(),
+        name="unit list",
+    ),
+    path(
+        "units/create/",
+        views.CustomerWialonUnitCreateView.as_view(),
+        name="unit create",
+    ),
+    path(
+        "units/<int:pk>/",
+        views.CustomerWialonUnitDetailView.as_view(),
+        name="unit detail",
+    ),
     path(
         "transactions/",
         views.CustomerTransactionsView.as_view(),

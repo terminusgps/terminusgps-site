@@ -5,6 +5,7 @@ from terminusgps_tracker.models.customers import (
     Customer,
     CustomerPaymentMethod,
     CustomerShippingAddress,
+    CustomerWialonUnit,
 )
 from terminusgps_tracker.models.subscriptions import (
     Subscription,
@@ -15,7 +16,7 @@ from terminusgps_tracker.models.subscriptions import (
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ["user"]
+    list_display = ["id", "authorizenet_profile_id", "user"]
     actions = [
         "authorizenet_sync_payment_profiles",
         "authorizenet_sync_address_profiles",
@@ -58,6 +59,29 @@ class CustomerAdmin(admin.ModelAdmin):
         )
 
 
+@admin.register(CustomerWialonUnit)
+class CustomerWialonUnitAdmin(admin.ModelAdmin):
+    list_display = ["name", "imei", "id"]
+    actions = ["wialon_sync"]
+
+    @admin.action(description="Sync selected unit data with Wialon")
+    def wialon_sync(self, request, queryset):
+        for unit in queryset:
+            unit.wialon_sync()
+            unit.save()
+
+        self.message_user(
+            request,
+            ngettext(
+                "%(count)s unit had its data synced with Wialon.",
+                "%(count)s units had their data synced with Wialon.",
+                len(queryset),
+            )
+            % {"count": len(queryset)},
+            messages.SUCCESS,
+        )
+
+
 @admin.register(CustomerPaymentMethod)
 class CustomerPaymentMethodAdmin(admin.ModelAdmin):
     list_display = ["id", "customer"]
@@ -77,6 +101,24 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ["customer", "status"]
     list_filter = ["status"]
     readonly_fields = ["status"]
+    actions = ["authorizenet_sync"]
+
+    @admin.action(description="Sync selected subscriptions with Authorizenet")
+    def authorizenet_sync(self, request, queryset):
+        for sub in queryset:
+            sub.authorizenet_sync()
+            sub.save()
+
+        self.message_user(
+            request,
+            ngettext(
+                "%(count)s subscription was synced with Authorizenet.",
+                "%(count)s subscriptions were synced with Authorizenet.",
+                len(queryset),
+            )
+            % {"count": len(queryset)},
+            messages.SUCCESS,
+        )
 
 
 @admin.register(SubscriptionTier)

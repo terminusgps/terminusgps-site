@@ -16,15 +16,21 @@ from terminusgps.authorizenet.utils import (
     generate_customer_payment,
 )
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
+from terminusgps.wialon import constants as wialon_constants
+from terminusgps.wialon import utils as wialon_utils
+from terminusgps.wialon.items import WialonResource, WialonUnit, WialonUser
+from terminusgps.wialon.session import WialonSession
 
 from terminusgps_tracker.forms import (
     CustomerPaymentMethodCreationForm,
     CustomerShippingAddressCreationForm,
+    CustomerWialonUnitCreationForm,
 )
 from terminusgps_tracker.models.customers import (
     Customer,
     CustomerPaymentMethod,
     CustomerShippingAddress,
+    CustomerWialonUnit,
 )
 
 
@@ -108,6 +114,128 @@ class CustomerSupportView(
     template_name = "terminusgps_tracker/support.html"
 
 
+class CustomerWialonUnitsView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Units",
+        "subtitle": "Your currently active units",
+    }
+    http_method_names = ["get"]
+    login_url = reverse_lazy("login")
+    partial_template_name = "terminusgps_tracker/partials/_units.html"
+    permission_denied_message = "Please login to view this content."
+    raise_exception = False
+    template_name = "terminusgps_tracker/units.html"
+
+
+class CustomerWialonUnitDetailView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
+):
+    content_type = "text/html"
+    context_object_name = "unit"
+    extra_context = {"title": "Unit Details"}
+    http_method_names = ["get"]
+    login_url = reverse_lazy("login")
+    model = CustomerWialonUnit
+    partial_template_name = "terminusgps_tracker/units/partials/_detail.html"
+    permission_denied_message = "Please login to view this content."
+    queryset = CustomerWialonUnit.objects.none()
+    raise_exception = False
+    template_name = "terminusgps_tracker/units/detail.html"
+
+    def get_queryset(self):
+        return CustomerWialonUnit.objects.filter(
+            customer__user=self.request.user
+        )
+
+
+class CustomerWialonUnitListView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, ListView
+):
+    content_type = "text/html"
+    context_object_name = "unit_list"
+    extra_context = {"title": "Unit List"}
+    http_method_names = ["get"]
+    login_url = reverse_lazy("login")
+    model = CustomerWialonUnit
+    partial_template_name = "terminusgps_tracker/units/partials/_list.html"
+    permission_denied_message = "Please login to view this content."
+    queryset = CustomerWialonUnit.objects.none()
+    raise_exception = False
+    template_name = "terminusgps_tracker/units/list.html"
+
+    def get_queryset(self):
+        return CustomerWialonUnit.objects.filter(
+            customer__user=self.request.user
+        )
+
+
+class CustomerWialonUnitCreateView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, FormView
+):
+    content_type = "text/html"
+    extra_context = {"title": "Create Unit"}
+    http_method_names = ["get", "post"]
+    login_url = reverse_lazy("login")
+    partial_template_name = "terminusgps_tracker/units/partials/_create.html"
+    permission_denied_message = "Please login to view this content."
+    raise_exception = False
+    template_name = "terminusgps_tracker/units/create.html"
+    form_class = CustomerWialonUnitCreationForm
+    success_url = reverse_lazy("tracker:units")
+
+    def get_initial(self) -> dict[str, typing.Any]:
+        initial: dict[str, typing.Any] = super().get_initial()
+        if self.request.GET.get("imei"):
+            initial["imei"] = self.request.GET.get("imei")
+        return initial
+
+    def form_valid(
+        self, form: CustomerWialonUnitCreationForm
+    ) -> HttpResponse | HttpResponseRedirect:
+        new_name = form.cleaned_data["name"]
+        imei_number = form.cleaned_data["imei"]
+        customer = Customer.objects.get(user=self.request.user)
+        with WialonSession() as session:
+            unit: WialonUnit | None = wialon_utils.get_unit_by_imei(
+                imei=imei_number, session=session
+            )
+            if unit is None:
+                form.add_error(
+                    "imei",
+                    ValidationError(
+                        _(
+                            "Whoops! There aren't any units with IMEI #%(imei_number)s."
+                        ),
+                        code="invalid",
+                        params={"imei_number": imei_number},
+                    ),
+                )
+                return self.form_invalid(form=form)
+            resource = WialonResource(
+                id=customer.wialon_resource_id, session=session
+            )
+            super_user = WialonUser(id=resource.creator_id, session=session)
+            end_user = WialonUser(id=customer.wialon_user_id, session=session)
+            unit.rename(new_name)
+            super_user.grant_access(
+                unit, access_mask=wialon_constants.ACCESSMASK_UNIT_MIGRATION
+            )
+            end_user.grant_access(
+                unit, access_mask=wialon_constants.ACCESSMASK_UNIT_BASIC
+            )
+            resource.migrate_unit(unit)
+            CustomerWialonUnit.objects.create(
+                id=unit.id,
+                name=unit.name,
+                imei=unit.imei_number,
+                customer=customer,
+            )
+        return super().form_valid(form=form)
+
+
 class CustomerTransactionListView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
 ):
@@ -124,21 +252,13 @@ class CustomerTransactionListView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["transaction_list"] = self.get_subscription_transactions()
+        context["transaction_list"] = self.get_transaction_list()
         return context
 
-    def get_subscription_transactions(self) -> list[dict[str, typing.Any]]:
-        return (
-            self.get_customer().subscription.authorizenet_get_transactions()
-            if self.get_customer()
-            else []
-        )
-
-    def get_customer(self) -> Customer | None:
-        try:
-            return Customer.objects.get(user=self.request.user)
-        except Customer.DoesNotExist:
-            return
+    def get_transaction_list(self) -> list[dict[str, typing.Any]]:
+        """Returns a list of transactions for the customer's subscription."""
+        customer = Customer.objects.get(user=self.request.user)
+        return customer.subscription.authorizenet_get_transactions()
 
 
 class CustomerPaymentMethodListView(

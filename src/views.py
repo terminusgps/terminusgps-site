@@ -22,7 +22,7 @@ from django.views.generic import FormView, RedirectView, TemplateView
 from terminusgps.authorizenet.profiles import CustomerProfile
 from terminusgps.authorizenet.utils import get_days_between
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
-from terminusgps.wialon import constants
+from terminusgps.wialon import constants, utils
 from terminusgps.wialon.items import WialonResource, WialonUser
 from terminusgps.wialon.session import WialonSession
 
@@ -640,7 +640,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
                 session=session,
                 creator_id=settings.WIALON_ADMIN_ID,
                 name=f"super_{username}",  # super_email@domain.com
-                password=password,
+                password=utils.generate_wialon_password(),
             )
             resource = WialonResource(
                 id=None,

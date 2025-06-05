@@ -186,9 +186,7 @@ class Subscription(models.Model):
     @transaction.atomic
     def authorizenet_update(self) -> None:
         """Updates the subscription with Authorizenet."""
-        sobj = self.generate_subscription_obj(
-            self.start_date, with_schedule=False
-        )
+        sobj = self.generate_subscription_obj()
         self.authorizenet_get_profile().update(sobj)
 
     def authorizenet_get_transactions(self) -> list[dict[str, typing.Any]]:
@@ -206,10 +204,9 @@ class Subscription(models.Model):
 
     def generate_subscription_obj(
         self,
-        start_date: datetime.date,
+        start_date: datetime.date | None = None,
         total_occurrences: int = 9999,
         trial_occurrences: int = 0,
-        with_schedule: bool = False,
     ) -> apicontractsv1.ARBSubscriptionType:
         sub_obj = apicontractsv1.ARBSubscriptionType(
             name=self.get_subscription_name(),
@@ -221,7 +218,7 @@ class Subscription(models.Model):
                 customerAddressId=str(self.address.id),
             ),
         )
-        if with_schedule:
+        if start_date is not None:
             sub_obj.paymentSchedule = generate_monthly_subscription_schedule(
                 start_date, total_occurrences, trial_occurrences
             )
