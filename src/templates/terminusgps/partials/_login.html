@@ -1,4 +1,4 @@
-<form class="{{ class }}" action="{% url 'login' %}" method="post" hx-boost="true">
+<form class="flex flex-col gap-4" action="{% url 'login' %}" method="post" hx-boost="true">
     {% if form.non_field_errors %}
     <div class="my-2 animate-jiggle rounded border border-red-800 bg-red-100 p-2 text-red-600">{{ form.non_field_errors }}</div>
     {% endif %}

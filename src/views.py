@@ -93,44 +93,10 @@ class TerminusgpsFrequentlyAskedQuestionsView(
 
 
 class TerminusgpsPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
-    """
-    Renders a privacy policy page.
-
-    **Context**
-
-    ``title``
-        The title for the view/webpage.
-
-        Value: ``"Privacy Policy"``
-
-    ``class``
-        The `tailwindcss`_ class used for the view.
-
-        Value: ``"flex flex-col gap-8"``
-
-    ``subtitle``
-        The subtitle for the view/webpage.
-
-        Value: ``"How we use your data"``
-
-    **HTTP Methods:**
-        - GET
-
-    **Template:**
-        :template:`terminusgps/privacy.html`
-
-    **Partial Template:**
-        :template:`terminusgps/partials/_privacy.html`
-
-    .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
-
-    """
-
     content_type = "text/html"
     extra_context = {
         "title": "Privacy Policy",
         "subtitle": "How we use your data",
-        "class": "flex flex-col gap-8",
     }
     http_method_names = ["get"]
     partial_template_name = "terminusgps/partials/_privacy.html"
@@ -138,44 +104,10 @@ class TerminusgpsPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
 
 
 class TerminusgpsMobileAppView(HtmxTemplateResponseMixin, TemplateView):
-    """
-    Renders links to mobile app download pages for the application.
-
-    **Context**
-
-    ``title``
-        The title for the view/webpage.
-
-        Value: ``"Mobile Apps"``
-
-    ``class``
-        The `tailwindcss`_ class used for the view.
-
-        Value: ``"flex flex-col gap-4"``
-
-    ``subtitle``
-        The subtitle for the view/webpage.
-
-        Value: ``"Take your tracking to-go with our mobile apps"``
-
-    **HTTP Methods:**
-        - GET
-
-    **Template:**
-        :template:`terminusgps/mobile_app.html`
-
-    **Partial Template:**
-        :template:`terminusgps/partials/_mobile_app.html`
-
-    .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
-
-    """
-
     content_type = "text/html"
     extra_context = {
         "title": "Mobile Apps",
         "subtitle": "Take your tracking to-go with our mobile apps",
-        "class": "flex flex-col gap-4",
     }
     http_method_names = ["get"]
     partial_template_name = "terminusgps/partials/_mobile_app.html"
@@ -185,55 +117,11 @@ class TerminusgpsMobileAppView(HtmxTemplateResponseMixin, TemplateView):
 class TerminusgpsPasswordResetView(
     HtmxTemplateResponseMixin, PasswordResetView
 ):
-    """
-    Renders a password reset form and sends a password reset email.
-
-    **Context**
-
-    ``class``
-        The `tailwindcss`_ class used for the view.
-
-        Value: ``"flex flex-col gap-4"``
-
-    ``form``
-        A form that takes an email address for a password reset.
-
-    ``title``
-        The title for the view/webpage.
-
-        Value: ``"Password Reset"``
-
-    ``subtitle``
-        The subtitle for the view/webpage.
-
-        Value: ``"Forgot your password?"``
-
-    **HTTP Methods:**
-        - GET
-        - POST
-
-    **Template:**
-        :template:`terminusgps/password_reset.html`
-
-    **Partial Template:**
-        :template:`terminusgps/partials/_password_reset.html`
-
-    **Email Template:**
-        :template:`terminusgps/emails/password_reset.txt`
-
-    **Subject Template:**
-        :template:`terminusgps/emails/password_reset_subject.txt`
-
-    .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
-
-    """
-
     content_type = "text/html"
     email_template_name = "terminusgps/emails/password_reset.txt"
     extra_context = {
         "title": "Password Reset",
         "subtitle": "Forgot your password?",
-        "class": "flex flex-col gap-4",
     }
     http_method_names = ["get", "post"]
     template_name = "terminusgps/password_reset.html"
@@ -271,27 +159,6 @@ class TerminusgpsPasswordResetView(
 class TerminusgpsPasswordResetDoneView(
     HtmxTemplateResponseMixin, PasswordResetDoneView
 ):
-    """
-    Renders a confirmation that a password reset email was sent successfully.
-
-    **Context**
-
-    ``title``
-        The title for the view/webpage.
-
-        Value: ``"Done Password Reset"``
-
-    **HTTP Methods:**
-        - GET
-
-    **Template:**
-        :template:`terminusgps/password_reset_done.html`
-
-    **Partial Template:**
-        :template:`terminusgps/partials/_password_reset_done.html`
-
-    """
-
     content_type = "text/html"
     extra_context = {"title": "Done Password Reset"}
     http_method_names = ["get"]
@@ -302,43 +169,8 @@ class TerminusgpsPasswordResetDoneView(
 class TerminusgpsPasswordResetConfirmView(
     HtmxTemplateResponseMixin, PasswordResetConfirmView
 ):
-    """
-    Renders a form to update a password to a new password.
-
-    **Context**
-
-    ``form``
-        A password reset form.
-
-    ``class``
-        The `tailwindcss`_ class used for the view.
-
-        Value: ``"flex flex-col gap-4"``
-
-    ``title``
-        The title for the view/webpage.
-
-        Value: ``"Confirm Password Reset"``
-
-    **HTTP Methods:**
-        - GET
-        - POST
-
-    **Template:**
-        :template:`terminusgps/password_reset_confirm.html`
-
-    **Partial Template:**
-        :template:`terminusgps/partials/_password_reset_confirm.html`
-
-    .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
-
-    """
-
     content_type = "text/html"
-    extra_context = {
-        "title": "Confirm Password Reset",
-        "class": "flex flex-col gap-4",
-    }
+    extra_context = {"title": "Confirm Password Reset"}
     http_method_names = ["get", "post"]
     template_name = "terminusgps/password_reset_confirm.html"
     partial_template_name = "terminusgps/partials/_password_reset_confirm.html"
@@ -369,34 +201,6 @@ class TerminusgpsPasswordResetConfirmView(
 class TerminusgpsPasswordResetCompleteView(
     HtmxTemplateResponseMixin, PasswordResetCompleteView
 ):
-    """
-    Rendered after a password reset was completed successfully.
-
-    **Context**
-
-    ``class``
-        The `tailwindcss`_ class used for the view.
-
-        Value: ``"flex flex-col gap-4"``
-
-    ``title``
-        The title for the view/webpage.
-
-        Value: ``"Completed Password Reset"``
-
-    **HTTP Methods:**
-        - GET
-
-    **Template:**
-        :template:`terminusgps/password_reset_complete.html`
-
-    **Partial Template:**
-        :template:`terminusgps/partials/_password_reset_complete.html`
-
-    .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
-
-    """
-
     content_type = "text/html"
     extra_context = {"title": "Completed Password Reset"}
     http_method_names = ["get"]
@@ -407,46 +211,11 @@ class TerminusgpsPasswordResetCompleteView(
 
 
 class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
-    """
-    Renders a login form and logs a user in.
-
-    **Context**
-
-    ``class``
-        The `tailwindcss`_ class used for the view.
-
-        Value: ``"flex flex-col gap-8"``
-
-    ``title``
-        The title for the view/webpage.
-
-        Value: ``"Login"``
-
-    ``subtitle``
-        The subtitle for the view/webpage.
-
-        Value: ``"We know where ours are... do you?"``
-
-    **HTTP Methods:**
-        - GET
-        - POST
-
-    **Template:**
-        :template:`terminusgps/login.html`
-
-    **Partial Template:**
-        :template:`terminusgps/partials/_login.html`
-
-    .. _tailwindcss: https://tailwindcss.com/docs/installation/using-vite
-
-    """
-
     authentication_form = TerminusgpsAuthenticationForm
     content_type = "text/html"
     extra_context = {
         "title": "Login",
         "subtitle": "We know where ours are... do you?",
-        "class": "flex flex-col gap-4",
     }
     http_method_names = ["get", "post"]
     next_page = reverse_lazy("tracker:dashboard")
@@ -457,29 +226,6 @@ class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
 
 
 class TerminusgpsLogoutView(HtmxTemplateResponseMixin, LogoutView):
-    """
-    Renders a logout button and logs a user out.
-
-    **Context**
-
-    ``title``
-        The title for the view/webpage.
-
-        Value: ``"Logout"``
-
-    **HTTP Methods:**
-        - GET
-        - POST
-        - OPTIONS
-
-    **Template:**
-        :template:`terminusgps/logout.html`
-
-    **Partial Template:**
-        :template:`terminusgps/partials/_logout.html`
-
-    """
-
     content_type = "text/html"
     extra_context = {"title": "Logout"}
     http_method_names = ["get", "post", "options"]
@@ -490,38 +236,6 @@ class TerminusgpsLogoutView(HtmxTemplateResponseMixin, LogoutView):
 
 
 class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
-    """
-    Registers a new user and redirects the client to the tracker dashboard.
-
-    **Context**
-
-    ``class``
-        The `tailwindcss`_ class used for the view.
-
-        Value: ``"flex flex-col gap-4"``
-
-    ``title``
-        The title for the view/webpage.
-
-        Value: ``"Register"``
-
-    ``subtitle``
-        The subtitle for the view/webpage.
-
-        Value: ``"You'll know where yours are..."``
-
-    **HTTP Methods:**
-        - GET
-        - POST
-
-    **Template:**
-        :template:`terminusgps/register.html`
-
-    **Partial Template:**
-        :template:`terminusgps/partials/_register.html`
-
-    """
-
     content_type = "text/html"
     extra_context = {
         "title": "Register",
