@@ -203,6 +203,12 @@ class CustomerWialonUnitCreateView(
             unit: WialonUnit | None = wialon_utils.get_unit_by_imei(
                 imei=imei_number, session=session
             )
+            resource = WialonResource(
+                id=customer.wialon_resource_id, session=session
+            )
+            super_user = WialonUser(id=resource.creator_id, session=session)
+            end_user = WialonUser(id=customer.wialon_user_id, session=session)
+
             if unit is None:
                 form.add_error(
                     "imei",
@@ -215,18 +221,14 @@ class CustomerWialonUnitCreateView(
                     ),
                 )
                 return self.form_invalid(form=form)
-            resource = WialonResource(
-                id=customer.wialon_resource_id, session=session
-            )
-            super_user = WialonUser(id=resource.creator_id, session=session)
-            end_user = WialonUser(id=customer.wialon_user_id, session=session)
-            unit.rename(new_name)
+
             super_user.grant_access(
                 unit, access_mask=wialon_constants.ACCESSMASK_UNIT_MIGRATION
             )
             end_user.grant_access(
                 unit, access_mask=wialon_constants.ACCESSMASK_UNIT_BASIC
             )
+            unit.rename(new_name)
             resource.migrate_unit(unit)
             CustomerWialonUnit.objects.create(
                 id=unit.id,

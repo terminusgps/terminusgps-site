@@ -70,7 +70,10 @@ class SubscriptionTierDetailView(HtmxTemplateResponseMixin, DetailView):
 
 class SubscriptionPricingView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
-    extra_context = {"title": "Pricing"}
+    extra_context = {
+        "title": "Pricing",
+        "subtitle": "We have a plan for your plan",
+    }
     http_method_names = ["get"]
     template_name = "terminusgps_tracker/subscriptions/pricing.html"
     partial_template_name = (

@@ -49,10 +49,7 @@ class TerminusgpsHostingView(RedirectView):
 
 class TerminusgpsAboutView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
-    extra_context = {
-        "title": "About",
-        "subtitle": "Why Terminus GPS does what it does",
-    }
+    extra_context = {"title": "About", "subtitle": "Why we do what we do"}
     http_method_names = ["get"]
     partial_template_name = "terminusgps/partials/_about.html"
     template_name = "terminusgps/about.html"
