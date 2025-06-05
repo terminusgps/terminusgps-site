@@ -36,51 +36,34 @@ if settings.configured and not hasattr(settings, "TRACKER_APP_CONFIG"):
 
 
 class TerminusgpsSourceCodeView(RedirectView):
-    """
-    Redirects the client to the application's source code repository.
-
-    **HTTP Methods**:
-        - GET
-
-    """
-
     http_method_names = ["get"]
     permanent = True
     url = settings.TRACKER_APP_CONFIG.get("REPOSITORY_URL")
 
 
 class TerminusgpsHostingView(RedirectView):
-    """
-    Redirects the client to the the Terminus GPS hosting platform.
-
-    **HTTP Methods**:
-        - GET
-
-    """
-
     http_method_names = ["get"]
     permanent = True
     url = settings.TRACKER_APP_CONFIG.get("HOSTING_URL")
 
 
 class TerminusgpsAboutView(HtmxTemplateResponseMixin, TemplateView):
-    """
-    Renders an about page.
-
-    **HTTP Methods**:
-        - GET
-
-    """
-
     content_type = "text/html"
     extra_context = {
         "title": "About",
         "subtitle": "Why Terminus GPS does what it does",
-        "class": "flex flex-col gap-8",
     }
     http_method_names = ["get"]
     partial_template_name = "terminusgps/partials/_about.html"
     template_name = "terminusgps/about.html"
+
+
+class TerminusgpsContactView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {"title": "Contact", "subtitle": "Get in touch with us"}
+    http_method_names = ["get"]
+    template_name = "terminusgps/contact.html"
+    partial_template_name = "terminusgps/partials/_contact.html"
 
 
 class TerminusgpsTermsAndConditionsView(

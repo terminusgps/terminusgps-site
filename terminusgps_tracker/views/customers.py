@@ -1,5 +1,6 @@
 import typing
 
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -40,7 +41,7 @@ class CustomerDashboardView(
     content_type = "text/html"
     extra_context = {
         "title": "Dashboard",
-        "subtitle": "Download the Terminus GPS mobile app today!",
+        "subtitle": settings.TRACKER_APP_CONFIG["MOTD"],
     }
     http_method_names = ["get"]
     login_url = reverse_lazy("login")

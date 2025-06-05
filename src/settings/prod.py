@@ -7,7 +7,9 @@ from terminusgps.aws.secrets import get_secret
 
 os.umask(0)
 secret: dict[str, str] = get_secret("terminusgps-site-live-env")
-db_secret: dict[str, str] = get_secret("rds!db-90c204bb-fdaf-483f-9305-66a13050cf3e")
+db_secret: dict[str, str] = get_secret(
+    "rds!db-90c204bb-fdaf-483f-9305-66a13050cf3e"
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
@@ -45,7 +47,9 @@ WSGI_APPLICATION = "src.wsgi.application"
 # Secret values
 decimal.getcontext().prec = 4
 decimal.getcontext().rounding = decimal.ROUND_HALF_UP
-DEFAULT_TAX_RATE = decimal.Decimal(secret.get("DEFAULT_TAX_RATE", "0.0825")) * 1
+DEFAULT_TAX_RATE = (
+    decimal.Decimal(secret.get("DEFAULT_TAX_RATE", "0.0825")) * 1
+)
 EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")
 EMAIL_HOST_USER = secret.get("EMAIL_HOST_USER")
 MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
@@ -161,7 +165,9 @@ LOGGING = {
             "filename": BASE_DIR / "debug.log",
         }
     },
-    "loggers": {"django": {"handlers": ["file"], "level": "DEBUG", "propagate": True}},
+    "loggers": {
+        "django": {"handlers": ["file"], "level": "DEBUG", "propagate": True}
+    },
 }
 
 STORAGES = {
@@ -177,7 +183,9 @@ STORAGES = {
     },
 }
 
-CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+CACHES = {
+    "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}
+}
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -236,6 +244,10 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"
+    },
 ]

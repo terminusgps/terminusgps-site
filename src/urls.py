@@ -58,6 +58,7 @@ urlpatterns = [
         views.TerminusgpsFrequentlyAskedQuestionsView.as_view(),
         name="faq",
     ),
+    path("contact/", views.TerminusgpsContactView.as_view(), name="contact"),
     path(
         "install/",
         include("terminusgps_installer.urls", namespace="installer"),
