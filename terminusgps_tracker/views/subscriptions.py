@@ -92,7 +92,7 @@ class SubscriptionDetailView(
     )
     permission_denied_message = "Please login to view this content."
     queryset = Subscription.objects.select_related(
-        "payment", "address", "tier"
+        "customer", "payment", "address", "tier"
     )
     raise_exception = False
     template_name = "terminusgps_tracker/subscriptions/detail.html"
@@ -314,7 +314,7 @@ class SubscriptionCreateView(
             customer_profile_id=customer.user.pk, id=None
         )
         sub_obj = apicontractsv1.ARBSubscriptionType(
-            name=f"{customer}'s {tier} Subscription",
+            name=f"{tier.name} Subscription",
             paymentSchedule=generate_monthly_subscription_schedule(
                 timezone.now()
             ),

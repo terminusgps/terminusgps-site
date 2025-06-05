@@ -95,7 +95,7 @@ class Subscription(models.Model):
     """Authorizenet subscription id."""
     start_date = models.DateField(auto_now_add=True)
     """Start date for the subscription."""
-    tier = models.OneToOneField(
+    tier = models.ForeignKey(
         "terminusgps_tracker.SubscriptionTier",
         on_delete=models.SET_NULL,
         blank=True,
@@ -186,21 +186,17 @@ class Subscription(models.Model):
     @transaction.atomic
     def authorizenet_update(self) -> None:
         """Updates the subscription with Authorizenet."""
-        sobj = self.generate_subscription_obj()
-        self.authorizenet_get_profile().update(sobj)
+        self.authorizenet_get_profile().update(
+            self.generate_subscription_obj()
+        )
 
     def authorizenet_get_transactions(self) -> list[dict[str, typing.Any]]:
         """Returns a list of subscription transactions from Authorizenet."""
         return self.authorizenet_get_profile().transactions
 
     def get_subscription_name(self) -> str:
-        """Returns a subscription name in the format: <EMAIL>'s <TIER> Subscription"""
-        email_addr = (
-            self.customer.user.email
-            if self.customer.user.email
-            else self.customer.user.username
-        )
-        return f"{email_addr}'s {self.tier} Subscription"
+        """Returns a subscription name in the format: <TIER> Subscription"""
+        return f"{self.tier} Subscription"
 
     def generate_subscription_obj(
         self,
@@ -208,6 +204,21 @@ class Subscription(models.Model):
         total_occurrences: int = 9999,
         trial_occurrences: int = 0,
     ) -> apicontractsv1.ARBSubscriptionType:
+        """
+        Generates and returns a subscription object for Authorizenet API calls.
+
+        If ``start_date`` is provided, adds a monthly payment schedule to the subscription starting on that date.
+
+        :param start_date: A start date for the subscription. Default is :py:obj:`None`
+        :type start_date: :py:obj:`~datetime.date` | :py:obj:`None`
+        :param total_occurrences: Total occurrences for the subscription interval. Default is :py:obj:`9999`.
+        :type total_occurrences: :py:obj:`int`
+        :param trial_occurrences: Trial occurrences for the subscription interval. Default is :py:obj:`0`.
+        :type trial_occurrences: :py:obj:`int`
+        :returns: A subscription object for Authorizenet API calls.
+        :rtype: :py:obj:`~authorizenet.apicontractsv1.ARBSubscriptionType`
+
+        """
         sub_obj = apicontractsv1.ARBSubscriptionType(
             name=self.get_subscription_name(),
             amount=str(calculate_amount_plus_tax(self.tier.amount)),
@@ -218,7 +229,7 @@ class Subscription(models.Model):
                 customerAddressId=str(self.address.id),
             ),
         )
-        if start_date is not None:
+        if start_date:
             sub_obj.paymentSchedule = generate_monthly_subscription_schedule(
                 start_date, total_occurrences, trial_occurrences
             )

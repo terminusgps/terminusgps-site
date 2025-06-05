@@ -317,9 +317,12 @@ class CustomerPaymentMethodDetailView(
                 customer_profile_id=customer_payment.customer.authorizenet_profile_id,
                 id=customer_payment.id,
             )
-            payment_profile.delete()
-            customer_payment.delete()
-            return HttpResponse(status=200)
+            try:
+                payment_profile.delete()
+                customer_payment.delete()
+                return HttpResponse(status=200)
+            except AuthorizenetControllerExecutionError:
+                return HttpResponse(status=406)
         else:
             return HttpResponse(status=406)
 

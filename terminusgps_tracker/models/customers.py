@@ -81,6 +81,12 @@ class Customer(models.Model):
             email=self.user.email if self.user.email else self.user.username,
         )
 
+    def wialon_get_remaining_days(self) -> int:
+        with WialonSession() as session:
+            return session.wialon_api.account_get_account_data(
+                **{"itemId": self.wialon_resource_id, "type": 1}
+            ).get("daysCounter", 0)
+
 
 class CustomerWialonUnit(models.Model):
     """A Wialon unit for a customer."""
