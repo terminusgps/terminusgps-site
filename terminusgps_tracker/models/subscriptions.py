@@ -1,6 +1,5 @@
 import datetime
 import decimal
-import typing
 
 from authorizenet import apicontractsv1
 from django.conf import settings
@@ -141,8 +140,8 @@ class Subscription(models.Model):
     def authorizenet_get_profile(self) -> SubscriptionProfile:
         """Returns the Authorizenet subscription profile for the subscription."""
         return SubscriptionProfile(
-            customer_profile_id=self.customer.authorizenet_profile_id,
-            id=self.pk,
+            customer_profile_id=str(self.customer.authorizenet_profile_id),
+            id=str(self.pk),
         )
 
     @transaction.atomic
@@ -155,27 +154,27 @@ class Subscription(models.Model):
     @transaction.atomic
     def authorizenet_sync_status(self) -> None:
         """Syncs the subscription's status with Authorizenet."""
-        new_status = self.authorizenet_get_profile().status
-        if new_status is not None:
-            self.status = new_status
+        current_status = self.authorizenet_get_profile().status
+        if current_status is not None:
+            self.status = current_status
 
     @transaction.atomic
     def authorizenet_sync_payment(self) -> None:
         """Syncs the subscription's payment method with Authorizenet."""
-        payment_id = self.authorizenet_get_profile().payment_id
-        if payment_id is not None:
+        current_payment_id = self.authorizenet_get_profile().payment_id
+        if current_payment_id is not None:
             self.payment, _ = CustomerPaymentMethod.objects.filter(
                 customer=self.customer
-            ).get_or_create(pk=payment_id, customer=self.customer)
+            ).get_or_create(pk=current_payment_id, customer=self.customer)
 
     @transaction.atomic
     def authorizenet_sync_address(self) -> None:
         """Syncs the subscription's shipping address with Authorizenet."""
-        address_id = self.authorizenet_get_profile().address_id
-        if address_id is not None:
+        current_address_id = self.authorizenet_get_profile().address_id
+        if current_address_id is not None:
             self.address, _ = CustomerShippingAddress.objects.filter(
                 customer=self.customer
-            ).get_or_create(pk=address_id, customer=self.customer)
+            ).get_or_create(pk=current_address_id, customer=self.customer)
 
     @transaction.atomic
     def authorizenet_cancel(self) -> None:
@@ -190,7 +189,7 @@ class Subscription(models.Model):
             self.generate_subscription_obj()
         )
 
-    def authorizenet_get_transactions(self) -> list[dict[str, typing.Any]]:
+    def authorizenet_get_transactions(self) -> list[dict[str, str]]:
         """Returns a list of subscription transactions from Authorizenet."""
         return self.authorizenet_get_profile().transactions
 

@@ -38,7 +38,6 @@ class Customer(models.Model):
     @transaction.atomic
     def authorizenet_sync_payment_profiles(self) -> None:
         """Retrieves payment profiles from Authorizenet and creates customer payment methods based on them."""
-        cprofile = self.authorizenet_get_customer_profile()
         current_payment_ids = set(
             CustomerPaymentMethod.objects.filter(customer=self).values_list(
                 "id", flat=True
@@ -46,7 +45,7 @@ class Customer(models.Model):
         )
         new_payment_objs = [
             CustomerPaymentMethod.objects.create(id=id, customer=self)
-            for id in cprofile.get_payment_profile_ids()
+            for id in self.authorizenet_get_customer_profile().get_payment_profile_ids()
             if id not in current_payment_ids
         ]
         if new_payment_objs:
@@ -57,7 +56,6 @@ class Customer(models.Model):
     @transaction.atomic
     def authorizenet_sync_address_profiles(self) -> None:
         """Retrieves address profiles from Authorizenet and creates customer shipping addresses based on them."""
-        cprofile = self.authorizenet_get_customer_profile()
         current_address_ids = set(
             CustomerShippingAddress.objects.filter(customer=self).values_list(
                 "id", flat=True
@@ -65,7 +63,7 @@ class Customer(models.Model):
         )
         new_address_objs = [
             CustomerShippingAddress.objects.create(id=id, customer=self)
-            for id in cprofile.get_address_profile_ids()
+            for id in self.authorizenet_get_customer_profile().get_address_profile_ids()
             if id not in current_address_ids
         ]
         if new_address_objs:
@@ -81,11 +79,12 @@ class Customer(models.Model):
             email=self.user.email if self.user.email else self.user.username,
         )
 
-    def wialon_get_remaining_days(self) -> int:
-        with WialonSession() as session:
-            return session.wialon_api.account_get_account_data(
-                **{"itemId": self.wialon_resource_id, "type": 1}
-            ).get("daysCounter", 0)
+    def wialon_get_remaining_days(self) -> int | None:
+        if self.wialon_resource_id:
+            with WialonSession() as session:
+                return session.wialon_api.account_get_account_data(
+                    **{"itemId": self.wialon_resource_id, "type": 1}
+                ).get("daysCounter", 0)
 
 
 class CustomerWialonUnit(models.Model):
@@ -149,16 +148,17 @@ class CustomerPaymentMethod(models.Model):
 
     def authorizenet_get_profile(self) -> dict | None:
         """Returns payment profile data from Authorizenet."""
-        cprofile = self.customer.authorizenet_get_customer_profile()
-        pprofile = PaymentProfile(customer_profile_id=cprofile.id, id=self.pk)
-        return pprofile._authorizenet_get_payment_profile()
+        return PaymentProfile(
+            customer_profile_id=str(self.customer.authorizenet_profile_id),
+            id=str(self.pk),
+        )._authorizenet_get_payment_profile(issuer_info=True)
 
-    def authorizenet_get_last_4(self) -> int:
+    def authorizenet_get_last_4(self) -> int | None:
         """Returns the last 4 digits of the payment method credit card."""
-        pprofile = self.authorizenet_get_profile()
-        return int(
-            str(pprofile.paymentProfile.payment.creditCard.cardNumber)[-4:]
-        )
+        return PaymentProfile(
+            customer_profile_id=str(self.customer.authorizenet_profile_id),
+            id=str(self.pk),
+        ).last_4
 
 
 class CustomerShippingAddress(models.Model):
@@ -188,6 +188,7 @@ class CustomerShippingAddress(models.Model):
 
     def authorizenet_get_profile(self) -> dict | None:
         """Returns address profile data from Authorizenet."""
-        cprofile = self.customer.authorizenet_get_customer_profile()
-        aprofile = AddressProfile(customer_profile_id=cprofile.id, id=self.pk)
-        return aprofile._authorizenet_get_shipping_address()
+        return AddressProfile(
+            customer_profile_id=str(self.customer.authorizenet_profile_id),
+            id=str(self.pk),
+        )._authorizenet_get_shipping_address()

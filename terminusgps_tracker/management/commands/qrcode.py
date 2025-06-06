@@ -1,7 +1,9 @@
 import argparse
+import urllib.parse
 
 import qrcode
 from django.core.management.base import BaseCommand
+from django.urls import reverse
 from PIL import Image, ImageDraw, ImageFont
 
 
@@ -63,9 +65,7 @@ class Command(BaseCommand):
             box_size=10,
             border=4,
         )
-        qr.add_data(
-            f"{self.protocol}://{self.domain}/units/create/?imei={imei_number}"
-        )
+        qr.add_data(self.generate_qr_code_data(imei_number))
         qr.make_image(fill_color="black", back_color="white")
         return qr
 
@@ -88,5 +88,10 @@ class Command(BaseCommand):
         y_pos = img_h - text_h - padding - 10
 
         overlay.text((x_pos, y_pos), text, font=font, fill="black")
-
         return img
+
+    def generate_qr_code_data(self, imei_number: str) -> str:
+        target_url = urllib.parse.urljoin(
+            f"{self.protocol}://{self.domain}", reverse("tracker:unit create")
+        )
+        return f"{target_url}?imei={imei_number}"

@@ -197,7 +197,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.forms",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
-    # "terminusgps_installer.apps.TerminusgpsInstallerConfig",
+    "terminusgps_installer.apps.TerminusgpsInstallerConfig",
 ]
 
 MIDDLEWARE = [
