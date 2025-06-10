@@ -107,25 +107,19 @@ class ProtectedCustomerViewTestCase(StaticLiveServerTestCase):
 
         # Create test authorizenet payment profile
         test_payment_profile = PaymentProfile(
-            customer_profile_id=str(
-                self.test_customer.authorizenet_profile_id
-            ),
-            id=None,
+            customer_profile_id=str(test_customer_profile_id), id=None
         )
+        # Create test authorizenet address profile
+        test_address_profile = AddressProfile(
+            customer_profile_id=str(test_customer_profile_id), id=None
+        )
+
         # Create test payment method
         self.test_payment_method = CustomerPaymentMethod.objects.create(
             id=test_payment_profile.create(
                 payment=self.test_payment_obj, address=self.test_address_obj
             ),
             customer=self.test_customer,
-        )
-
-        # Create test authorizenet address profile
-        test_address_profile = AddressProfile(
-            customer_profile_id=str(
-                self.test_customer.authorizenet_profile_id
-            ),
-            id=None,
         )
         # Create test shipping address
         self.test_shipping_address = CustomerShippingAddress.objects.create(
