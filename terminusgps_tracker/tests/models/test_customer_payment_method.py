@@ -72,25 +72,29 @@ class CustomerPaymentMethodTestCase(TestCase):
         self.test_user.delete()
 
     def test_authorizenet_get_profile(self) -> None:
-        cc_num = str(
+        expected_cc_num = "XXXX1111"
+        self.assertEqual(
+            expected_cc_num,
             self.test_customer_payment_method.authorizenet_get_profile()
             .find(f"{ANET_XMLNS}paymentProfile")
             .find(f"{ANET_XMLNS}payment")
             .find(f"{ANET_XMLNS}creditCard")
             .find(f"{ANET_XMLNS}cardNumber")
-            .text
+            .text,
         )
-        self.assertEqual(cc_num, "XXXX1111")
 
     def test_authorizenet_get_last_4(self) -> None:
-        last_4 = self.test_customer_payment_method.authorizenet_get_last_4()
-        self.assertEqual(last_4, 1111)
+        expected_last_4 = 1111
+        self.assertEqual(
+            expected_last_4,
+            self.test_customer_payment_method.authorizenet_get_last_4(),
+        )
 
     def test_get_absolute_url(self) -> None:
+        expected_url = reverse(
+            "tracker:payment detail",
+            kwargs={"pk": self.test_customer_payment_method.pk},
+        )
         self.assertEqual(
-            self.test_customer_payment_method.get_absolute_url(),
-            reverse(
-                "tracker:payment detail",
-                kwargs={"pk": self.test_customer_payment_method.pk},
-            ),
+            expected_url, self.test_customer_payment_method.get_absolute_url()
         )

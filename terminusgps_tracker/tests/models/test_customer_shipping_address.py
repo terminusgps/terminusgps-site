@@ -64,19 +64,21 @@ class CustomerShippingAddressTestCase(TestCase):
         self.test_user.delete()
 
     def test_authorizenet_get_profile(self) -> None:
-        street = str(
+        expected_street = "123 Main St"
+        self.assertEqual(
+            expected_street,
             self.test_customer_shipping_address.authorizenet_get_profile()
             .find(f"{ANET_XMLNS}address")
             .find(f"{ANET_XMLNS}address")
-            .text
+            .text,
         )
-        self.assertEqual(street, "123 Main St")
 
     def test_get_absolute_url(self) -> None:
+        expected_url = reverse(
+            "tracker:address detail",
+            kwargs={"pk": self.test_customer_shipping_address.pk},
+        )
         self.assertEqual(
+            expected_url,
             self.test_customer_shipping_address.get_absolute_url(),
-            reverse(
-                "tracker:address detail",
-                kwargs={"pk": self.test_customer_shipping_address.pk},
-            ),
         )
