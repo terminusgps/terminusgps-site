@@ -3,6 +3,7 @@ import logging
 import os
 import pathlib
 
+from authorizenet.constants import constants
 from terminusgps.aws.secrets import get_secret
 
 os.umask(0)
@@ -30,6 +31,8 @@ LANGUAGE_CODE = "en-us"
 LOGIN_URL = "/login/"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
+MERCHANT_AUTH_ENVIRONMENT = constants.PRODUCTION
+MERCHANT_AUTH_VALIDATION_MODE = "liveMode"
 ROOT_URLCONF = "src.urls"
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_HTTPONLY = True

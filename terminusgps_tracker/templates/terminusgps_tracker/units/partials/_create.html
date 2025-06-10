@@ -1,4 +1,5 @@
 <form class="flex flex-col gap-4" action="{% url 'tracker:unit create' %}" method="post" hx-post="{% url 'tracker:unit create' %}" hx-include="this">
+    {% if form.non_field_errors %}<div class="border border-current bg-red-200 p-4 text-red-700">{{ form.non_field_errors }}</div>{% endif %}
     {% csrf_token %}
     {{ form.name.as_field_group }}
     {{ form.imei.as_field_group }}

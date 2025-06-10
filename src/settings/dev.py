@@ -3,15 +3,13 @@ import logging
 import os
 from pathlib import Path
 
+from authorizenet.constants import constants
+
 os.umask(0)
 
 secret: dict[str, str | None] = {
     "SECRET_KEY": os.getenv("SECRET_KEY"),
     "CONNECT_SECRET": os.getenv("CONNECT_SECRET"),
-    "MERCHANT_AUTH_LOGIN_ID": os.getenv("MERCHANT_AUTH_LOGIN_ID"),
-    "MERCHANT_AUTH_TRANSACTION_KEY": os.getenv(
-        "MERCHANT_AUTH_TRANSACTION_KEY"
-    ),
     "DEFAULT_TAX_RATE": os.getenv("DEFAULT_TAX_RATE", "0.085"),
     "TWILIO_TOKEN": os.getenv("TWILIO_TOKEN"),
     "TWILIO_SID": os.getenv("TWILIO_SID"),
@@ -26,6 +24,10 @@ secret: dict[str, str | None] = {
     "EMAIL_HOST_USER": os.getenv("EMAIL_HOST_USER"),
     "EMAIL_HOST_PASSWORD": os.getenv("EMAIL_HOST_PASSWORD"),
     "WIALON_ADMIN_ACCOUNT": os.getenv("WIALON_ADMIN_ACCOUNT"),
+    "MERCHANT_AUTH_LOGIN_ID": os.getenv("MERCHANT_AUTH_LOGIN_ID"),
+    "MERCHANT_AUTH_TRANSACTION_KEY": os.getenv(
+        "MERCHANT_AUTH_TRANSACTION_KEY"
+    ),
 }
 
 
@@ -41,7 +43,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FROM_EMAIL = "support@terminusgps.com"
 FORM_RENDERER = "terminusgps.django.forms.renderer.TerminusgpsFormRenderer"
 DEFAULT_TAX_RATE = decimal.Decimal(
-    secret.get("DEFAULT_TAX_RATE"),
+    secret.get("DEFAULT_TAX_RATE", "0.085"),
     context=decimal.Context(prec=4, rounding=decimal.ROUND_HALF_UP),
 )
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -56,6 +58,8 @@ MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
 MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
 MERCHANT_AUTH_TRANSACTION_KEY = secret.get("MERCHANT_AUTH_TRANSACTION_KEY")
+MERCHANT_AUTH_ENVIRONMENT = constants.SANDBOX
+MERCHANT_AUTH_VALIDATION_MODE = "testMode"
 MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
 ROOT_URLCONF = "src.urls"
 SECRET_KEY = "3ow7#%v3y*o&1wr6%!rt4%c7^^wlx%f8hkhn!#-gf%mk!_tf=^"

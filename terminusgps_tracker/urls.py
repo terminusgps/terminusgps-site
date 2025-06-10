@@ -80,6 +80,11 @@ urlpatterns = [
         name="payment detail",
     ),
     path(
+        "payments/<int:pk>/delete/",
+        views.CustomerPaymentMethodDeleteView.as_view(),
+        name="payment delete",
+    ),
+    path(
         "addresses/list/",
         views.CustomerShippingAddressListView.as_view(),
         name="address list",
@@ -93,5 +98,10 @@ urlpatterns = [
         "addresses/<int:pk>/",
         views.CustomerShippingAddressDetailView.as_view(),
         name="address detail",
+    ),
+    path(
+        "addresses/<int:pk>/delete/",
+        views.CustomerShippingAddressDeleteView.as_view(),
+        name="address delete",
     ),
 ]

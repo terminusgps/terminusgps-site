@@ -1,12 +1,12 @@
+from .addresses import (
+    CustomerShippingAddressCreateView,
+    CustomerShippingAddressDeleteView,
+    CustomerShippingAddressDetailView,
+    CustomerShippingAddressListView,
+)
 from .customers import (
     CustomerAccountView,
     CustomerDashboardView,
-    CustomerPaymentMethodCreateView,
-    CustomerPaymentMethodDetailView,
-    CustomerPaymentMethodListView,
-    CustomerShippingAddressCreateView,
-    CustomerShippingAddressDetailView,
-    CustomerShippingAddressListView,
     CustomerSubscriptionView,
     CustomerSupportView,
     CustomerTransactionListView,
@@ -15,6 +15,12 @@ from .customers import (
     CustomerWialonUnitDetailView,
     CustomerWialonUnitListView,
     CustomerWialonUnitsView,
+)
+from .payments import (
+    CustomerPaymentMethodCreateView,
+    CustomerPaymentMethodDeleteView,
+    CustomerPaymentMethodDetailView,
+    CustomerPaymentMethodListView,
 )
 from .subscriptions import (
     SubscriptionCreateView,

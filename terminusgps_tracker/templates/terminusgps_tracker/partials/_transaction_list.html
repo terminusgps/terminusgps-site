@@ -1,4 +1,4 @@
-{% load tz terminusgps_tracker_text %}
+{% load tz %}
 <div class="relative overflow-x-auto">
     <table class="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
         <thead class="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
@@ -27,7 +27,7 @@
                     {{ t.attemptNum }}
                 </td>
                 <th scope="row" class="px-6 py-4 whitespace-nowrap">
-                    {{ t.submitTimeUTC|submittime_to_datetime|localtime }}
+                    {{ t.submitTimeUTC|localtime }}
                 </th>
                 <td class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 dark:text-white">
                     {{ t.response }}

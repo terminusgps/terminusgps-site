@@ -44,8 +44,8 @@ class Customer(models.Model):
             )
         )
         new_payment_objs = [
-            CustomerPaymentMethod.objects.create(id=id, customer=self)
-            for id in self.authorizenet_get_customer_profile().get_payment_profile_ids()
+            CustomerPaymentMethod(id=id, customer=self)
+            for id in self.authorizenet_get_payment_profile_ids()
             if id not in current_payment_ids
         ]
         if new_payment_objs:
@@ -62,8 +62,8 @@ class Customer(models.Model):
             )
         )
         new_address_objs = [
-            CustomerShippingAddress.objects.create(id=id, customer=self)
-            for id in self.authorizenet_get_customer_profile().get_address_profile_ids()
+            CustomerShippingAddress(id=id, customer=self)
+            for id in self.authorizenet_get_address_profile_ids()
             if id not in current_address_ids
         ]
         if new_address_objs:
@@ -77,6 +77,18 @@ class Customer(models.Model):
             id=str(self.authorizenet_profile_id),
             merchant_id=str(self.user.pk),
             email=self.user.email if self.user.email else self.user.username,
+        )
+
+    def authorizenet_get_address_profile_ids(self) -> list[int]:
+        """Returns a list of address profile ids for the customer profile from Authorizenet."""
+        return (
+            self.authorizenet_get_customer_profile().get_address_profile_ids()
+        )
+
+    def authorizenet_get_payment_profile_ids(self) -> list[int]:
+        """Returns a list of payment profile ids for the customer profile from Authorizenet."""
+        return (
+            self.authorizenet_get_customer_profile().get_payment_profile_ids()
         )
 
     def wialon_get_remaining_days(self) -> int | None:

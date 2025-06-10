@@ -1,0 +1,9 @@
+<form class="flex flex-col gap-4" action="{% url 'tracker:address delete' address.pk %}" method="post" hx-post="{% url 'tracker:address delete' address.pk %}" hx-include="this" hx-target="#address-list">
+    <p class="text-center">Delete '{{ addressProfile.address }}'?</p>
+    {% csrf_token %}
+    {{ form }}
+    <section id="buttons" class="flex flex-col gap-2">
+        <input class="w-full cursor-pointer rounded border border-current bg-gray-50 p-2 text-center text-red-800 transition-colors duration-300 ease-in-out hover:bg-red-50" type="submit" value="Delete" hx-post="{% url 'tracker:address delete' address.pk %}">
+        <input class="w-full cursor-pointer rounded border border-current bg-gray-300 p-2 text-center transition-colors duration-300 ease-in-out hover:bg-gray-200" type="button" value="Cancel" hx-get="{% url 'tracker:address detail' address.pk %}" hx-target="#address-{{ address.pk }}" hx-swap="outerHTML">
+    </section>
+</form>

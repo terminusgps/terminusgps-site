@@ -6,7 +6,8 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.db.models import QuerySet
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -17,6 +18,7 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
+from terminusgps.authorizenet.constants import ANET_XMLNS
 from terminusgps.authorizenet.profiles import SubscriptionProfile
 from terminusgps.authorizenet.utils import (
     generate_monthly_subscription_schedule,
@@ -36,6 +38,17 @@ from terminusgps_tracker.models import (
 def calculate_amount_plus_tax(
     amount: decimal.Decimal, tax_rate: decimal.Decimal | None = None
 ) -> decimal.Decimal:
+    """
+    Returns the amount + tax rate. Default tax rate is :confval:`DEFAULT_TAX_RATE` setting.
+
+    :param amount: Amount to add tax to.
+    :type amount: :py:obj:`~decimal.Decimal`
+    :param tax_rate: Tax rate to use in the calculation. Default is :confval:`DEFAULT_TAX_RATE`.
+    :type tax_rate: :py:obj:`~decimal.Decimal` | :py:obj:`None`
+    :returns: The amount + tax.
+    :rtype: :py:obj:`~decimal.Decimal`
+
+    """
     if tax_rate is None:
         tax_rate = settings.DEFAULT_TAX_RATE
     return round(amount * (1 + tax_rate), ndigits=2)
@@ -100,14 +113,6 @@ class SubscriptionDetailView(
     raise_exception = False
     template_name = "terminusgps_tracker/subscriptions/detail.html"
 
-    def delete(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not self.get_object() or not self.request.headers.get("HX-Request"):
-            return HttpResponse(status=403)
-        subscription = self.get_object()
-        subscription.authorizenet_cancel()
-        subscription.delete()
-        return super().get(request, *args, **kwargs)
-
     def get_object(self) -> Subscription | None:
         try:
             return Subscription.objects.get(customer__user=self.request.user)
@@ -120,10 +125,14 @@ class SubscriptionDetailView(
         if subscription is not None:
             subscription.authorizenet_sync()
             context["paymentProfile"] = (
-                subscription.payment.authorizenet_get_profile().paymentProfile
+                subscription.payment.authorizenet_get_profile().find(
+                    f"{ANET_XMLNS}paymentProfile"
+                )
             )
             context["addressProfile"] = (
-                subscription.address.authorizenet_get_profile().address
+                subscription.address.authorizenet_get_profile().find(
+                    f"{ANET_XMLNS}address"
+                )
             )
         return context
 
@@ -166,18 +175,19 @@ class SubscriptionUpdateView(
 
     def get_form(self, form_class=None) -> forms.ModelForm:
         form = super().get_form(form_class=form_class)
-        tier_qs = SubscriptionTier.objects.exclude(name__icontains="custom")
-        address_choices = self.generate_shipping_address_choices()
-        payment_choices = self.generate_payment_method_choices()
-        form.fields["tier"].queryset = tier_qs
+        form.fields["tier"].queryset = SubscriptionTier.objects.exclude(
+            name__icontains="custom"
+        )
         form.fields["tier"].widget.attrs.update(
             {"class": settings.DEFAULT_FIELD_CLASS}
         )
-        form.fields["address"].choices = address_choices
+        form.fields[
+            "address"
+        ].choices = self.generate_shipping_address_choices()
         form.fields["address"].widget.attrs.update(
             {"class": settings.DEFAULT_FIELD_CLASS}
         )
-        form.fields["payment"].choices = payment_choices
+        form.fields["payment"].choices = self.generate_payment_method_choices()
         form.fields["payment"].widget.attrs.update(
             {"class": settings.DEFAULT_FIELD_CLASS}
         )
@@ -188,43 +198,31 @@ class SubscriptionUpdateView(
 
     def generate_payment_method_choices(self) -> list[tuple[int, str]]:
         choices = []
-        if CustomerPaymentMethod.objects.filter(
+        for payment in CustomerPaymentMethod.objects.filter(
             customer__user=self.request.user
-        ).exists():
-            customer_payments = CustomerPaymentMethod.objects.filter(
-                customer__user=self.request.user
+        ):
+            credit_card = (
+                payment.authorizenet_get_profile()
+                .find(f"{ANET_XMLNS}paymentProfile")
+                .find(f"{ANET_XMLNS}payment")
+                .find(f"{ANET_XMLNS}creditCard")
             )
-            for payment in customer_payments:
-                card_type = payment.authorizenet_get_profile().paymentProfile.payment.creditCard.cardType
-                card_last_4 = int(
-                    str(
-                        payment.authorizenet_get_profile().paymentProfile.payment.creditCard.cardNumber
-                    )[-4:]
-                )
-                choices.append(
-                    (payment.pk, _(f"{card_type} ending in {card_last_4}"))
-                )
+            cc_type = credit_card.find(f"{ANET_XMLNS}cardType")
+            cc_last_4 = str(credit_card.find(f"{ANET_XMLNS}cardNumber"))[-4:]
+            choices.append((payment.pk, _(f"{cc_type} ending in {cc_last_4}")))
         return choices
 
     def generate_shipping_address_choices(self) -> list[tuple[int, str]]:
         choices = []
-        if CustomerShippingAddress.objects.filter(
+        for address in CustomerShippingAddress.objects.filter(
             customer__user=self.request.user
-        ).exists():
-            customer_addresses = CustomerShippingAddress.objects.filter(
-                customer__user=self.request.user
+        ):
+            street = (
+                address.authorizenet_get_profile()
+                .find(f"{ANET_XMLNS}address")
+                .find(f"{ANET_XMLNS}address")
             )
-            for address in customer_addresses:
-                choices.append(
-                    (
-                        address.pk,
-                        _(
-                            str(
-                                address.authorizenet_get_profile().address.address
-                            )
-                        ),
-                    )
-                )
+            choices.append((address.pk, street))
         return choices
 
 
@@ -246,9 +244,10 @@ class SubscriptionCreateView(
 
     def get_form(self, form_class=None) -> SubscriptionCreationForm:
         form = super().get_form(form_class=form_class)
-        tier_qs = SubscriptionTier.objects.exclude(name__icontains="custom")
+        tier_qs = self.generate_tier_qs()
         address_choices = self.generate_shipping_address_choices()
         payment_choices = self.generate_payment_method_choices()
+
         form.fields["tier"].queryset = tier_qs
         form.fields["address"].choices = address_choices
         form.fields["payment"].choices = payment_choices
@@ -256,52 +255,41 @@ class SubscriptionCreateView(
 
     def get_initial(self, **kwargs) -> dict[str, typing.Any]:
         initial: dict[str, typing.Any] = super().get_initial(**kwargs)
-        initial["tier"] = (
-            SubscriptionTier.objects.exclude(name__icontains="custom")
-            .order_by("amount")
-            .first()
-        )
+        initial["tier"] = self.generate_tier_qs().first()
         return initial
+
+    def generate_tier_qs(self) -> QuerySet[SubscriptionTier, SubscriptionTier]:
+        return SubscriptionTier.objects.exclude(
+            name__icontains="custom"
+        ).order_by("amount")
 
     def generate_payment_method_choices(self) -> list[tuple[int, str]]:
         choices = []
-        if CustomerPaymentMethod.objects.filter(
+        for payment in CustomerPaymentMethod.objects.filter(
             customer__user=self.request.user
-        ).exists():
-            customer_payments = CustomerPaymentMethod.objects.filter(
-                customer__user=self.request.user
+        ):
+            credit_card = (
+                payment.authorizenet_get_profile()
+                .find(f"{ANET_XMLNS}paymentProfile")
+                .find(f"{ANET_XMLNS}payment")
+                .find(f"{ANET_XMLNS}creditCard")
             )
-            for payment in customer_payments:
-                card_type = payment.authorizenet_get_profile().paymentProfile.payment.creditCard.cardType
-                card_last_4 = int(
-                    str(
-                        payment.authorizenet_get_profile().paymentProfile.payment.creditCard.cardNumber
-                    )[-4:]
-                )
-                choices.append(
-                    (payment.pk, _(f"{card_type} ending in {card_last_4}"))
-                )
+            cc_type = credit_card.find(f"{ANET_XMLNS}cardType")
+            cc_last_4 = str(credit_card.find(f"{ANET_XMLNS}cardNumber"))[-4:]
+            choices.append((payment.pk, _(f"{cc_type} ending in {cc_last_4}")))
         return choices
 
     def generate_shipping_address_choices(self) -> list[tuple[int, str]]:
         choices = []
-        if CustomerShippingAddress.objects.filter(
+        for address in CustomerShippingAddress.objects.filter(
             customer__user=self.request.user
-        ).exists():
-            customer_addresses = CustomerShippingAddress.objects.filter(
-                customer__user=self.request.user
+        ):
+            street = (
+                address.authorizenet_get_profile()
+                .find(f"{ANET_XMLNS}address")
+                .find(f"{ANET_XMLNS}address")
             )
-            for address in customer_addresses:
-                choices.append(
-                    (
-                        address.pk,
-                        _(
-                            str(
-                                address.authorizenet_get_profile().address.address
-                            )
-                        ),
-                    )
-                )
+            choices.append((address.pk, street))
         return choices
 
     @transaction.atomic

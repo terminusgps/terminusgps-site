@@ -14,8 +14,14 @@ from terminusgps_tracker.models import (
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ["id", "authorizenet_profile_id", "user"]
     actions = ["authorizenet_sync"]
+    list_display = [
+        "id",
+        "user",
+        "authorizenet_profile_id",
+        "wialon_resource_id",
+        "wialon_user_id",
+    ]
 
     @admin.action(
         description="Sync selected customer payment information with Authorizenet"
@@ -40,8 +46,10 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerWialonUnit)
 class CustomerWialonUnitAdmin(admin.ModelAdmin):
-    list_display = ["name", "imei", "id"]
     actions = ["wialon_sync"]
+    list_display = ["name", "customer", "imei", "id"]
+    list_filter = ["customer"]
+    readonly_fields = ["customer"]
 
     @admin.action(description="Sync selected unit data with Wialon")
     def wialon_sync(self, request, queryset):
@@ -65,6 +73,7 @@ class CustomerWialonUnitAdmin(admin.ModelAdmin):
 class CustomerPaymentMethodAdmin(admin.ModelAdmin):
     list_display = ["id", "customer"]
     list_filter = ["customer"]
+    readonly_fields = ["id", "customer"]
     view_on_site = False
 
 
@@ -72,6 +81,7 @@ class CustomerPaymentMethodAdmin(admin.ModelAdmin):
 class CustomerShippingAddressAdmin(admin.ModelAdmin):
     list_display = ["id", "customer"]
     list_filter = ["customer"]
+    readonly_fields = ["id", "customer"]
     view_on_site = False
 
 
