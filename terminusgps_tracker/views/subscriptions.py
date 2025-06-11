@@ -5,6 +5,7 @@ from authorizenet import apicontractsv1
 from django import forms
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
@@ -12,6 +13,7 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import (
+    DeleteView,
     DetailView,
     FormView,
     ListView,
@@ -19,6 +21,9 @@ from django.views.generic import (
     UpdateView,
 )
 from terminusgps.authorizenet.constants import ANET_XMLNS
+from terminusgps.authorizenet.controllers import (
+    AuthorizenetControllerExecutionError,
+)
 from terminusgps.authorizenet.profiles import SubscriptionProfile
 from terminusgps.authorizenet.utils import (
     generate_monthly_subscription_schedule,
@@ -94,28 +99,69 @@ class SubscriptionPricingView(HtmxTemplateResponseMixin, TemplateView):
     )
 
 
+class SubscriptionDeleteView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DeleteView
+):
+    content_type = "text/html"
+    context_object_name = "subscription"
+    extra_context = {"title": "Cancel Subscription"}
+    http_method_names = ["get", "post"]
+    login_url = reverse_lazy("login")
+    model = Subscription
+    partial_template_name = (
+        "terminusgps_tracker/subscriptions/partials/_delete.html"
+    )
+    permission_denied_message = "Please login to view this content."
+    queryset = Subscription.objects.none()
+    success_url = reverse_lazy("tracker:subscription detail")
+    template_name = "terminusgps_tracker/subscriptions/delete.html"
+
+    def get_object(self) -> Subscription | None:
+        try:
+            return Subscription.objects.select_related(
+                "customer", "payment", "address", "tier"
+            ).get(customer__user=self.request.user)
+        except Subscription.DoesNotExist:
+            return
+
+    def form_valid(self, form=None) -> HttpResponse | HttpResponseRedirect:
+        try:
+            subscription = self.get_object()
+            if subscription is not None:
+                subscription.authorizenet_cancel()
+            return super().form_valid(form=form)
+        except AuthorizenetControllerExecutionError as e:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! '%(e)s'"), code="invalid", params={"e": e}
+                ),
+            )
+            return self.form_invalid(form=form)
+
+
 class SubscriptionDetailView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
 ):
     content_type = "text/html"
     context_object_name = "subscription"
     extra_context = {"title": "Subscription Details"}
-    http_method_names = ["get", "delete"]
+    http_method_names = ["get"]
     login_url = reverse_lazy("login")
     model = Subscription
     partial_template_name = (
         "terminusgps_tracker/subscriptions/partials/_detail.html"
     )
     permission_denied_message = "Please login to view this content."
-    queryset = Subscription.objects.select_related(
-        "customer", "payment", "address", "tier"
-    )
     raise_exception = False
     template_name = "terminusgps_tracker/subscriptions/detail.html"
+    queryset = Subscription.objects.none()
 
     def get_object(self) -> Subscription | None:
         try:
-            return Subscription.objects.get(customer__user=self.request.user)
+            return Subscription.objects.select_related(
+                "customer", "payment", "address", "tier"
+            ).get(customer__user=self.request.user)
         except Subscription.DoesNotExist:
             return
 

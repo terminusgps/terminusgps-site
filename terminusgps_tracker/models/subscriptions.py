@@ -1,25 +1,16 @@
 import datetime
-import decimal
 
 from authorizenet import apicontractsv1
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from terminusgps.authorizenet.profiles import SubscriptionProfile
 from terminusgps.authorizenet.utils import (
+    calculate_amount_plus_tax,
     generate_monthly_subscription_schedule,
 )
 
 from .customers import CustomerPaymentMethod, CustomerShippingAddress
-
-
-def calculate_amount_plus_tax(
-    amount: decimal.Decimal, tax_rate: decimal.Decimal | None = None
-) -> decimal.Decimal:
-    if tax_rate is None:
-        tax_rate = settings.DEFAULT_TAX_RATE
-    return round(amount * (1 + tax_rate), ndigits=2)
 
 
 class SubscriptionTier(models.Model):
@@ -144,7 +135,6 @@ class Subscription(models.Model):
             id=str(self.pk),
         )
 
-    @transaction.atomic
     def authorizenet_sync(self) -> None:
         """Syncs the subscription's status, payment method and shipping address with Authorizenet."""
         self.authorizenet_sync_status()
@@ -186,53 +176,60 @@ class Subscription(models.Model):
     def authorizenet_update(self) -> None:
         """Updates the subscription with Authorizenet."""
         self.authorizenet_get_profile().update(
-            self.generate_subscription_obj()
+            self.generate_arb_subscription()
         )
 
     def authorizenet_get_transactions(self) -> list[dict[str, str]]:
         """Returns a list of subscription transactions from Authorizenet."""
         return self.authorizenet_get_profile().transactions
 
-    def get_subscription_name(self) -> str:
-        """Returns a subscription name in the format: <TIER> Subscription"""
-        return f"{self.tier} Subscription"
-
-    def generate_subscription_obj(
-        self,
-        start_date: datetime.date | None = None,
-        total_occurrences: int = 9999,
-        trial_occurrences: int = 0,
+    def generate_arb_subscription(
+        self, start_date: datetime.date | None = None
     ) -> apicontractsv1.ARBSubscriptionType:
         """
-        Generates and returns a subscription object for Authorizenet API calls.
+        Generates and returns an ARBSubscriptionType object for Authorizenet API calls.
 
-        If ``start_date`` is provided, adds a monthly payment schedule to the subscription starting on that date.
+        If ``start_date`` is provided, adds an infinite monthly payment schedule to the subscription starting on that date.
 
         :param start_date: A start date for the subscription. Default is :py:obj:`None`
         :type start_date: :py:obj:`~datetime.date` | :py:obj:`None`
-        :param total_occurrences: Total occurrences for the subscription interval. Default is :py:obj:`9999`.
-        :type total_occurrences: :py:obj:`int`
-        :param trial_occurrences: Trial occurrences for the subscription interval. Default is :py:obj:`0`.
-        :type trial_occurrences: :py:obj:`int`
         :returns: A subscription object for Authorizenet API calls.
         :rtype: :py:obj:`~authorizenet.apicontractsv1.ARBSubscriptionType`
 
         """
-        sub_obj = apicontractsv1.ARBSubscriptionType(
-            name=self.get_subscription_name(),
-            amount=str(calculate_amount_plus_tax(self.tier.amount)),
-            trialAmount=str(0.00),
-            profile=apicontractsv1.customerProfileIdType(
-                customerProfileId=str(self.customer.authorizenet_profile_id),
-                customerPaymentProfileId=str(self.payment.id),
-                customerAddressId=str(self.address.id),
-            ),
-        )
+        arb_sub = apicontractsv1.ARBSubscriptionType()
+        arb_sub.name = self._generate_arb_subscription_name()
+        arb_sub.amount = self._generate_arb_subscription_amount()
+        arb_sub.trialAmount = self._generate_arb_subscription_trial_amount()
+        arb_sub.profile = self._generate_arb_subscription_customer_profile()
+
         if start_date:
-            sub_obj.paymentSchedule = generate_monthly_subscription_schedule(
-                start_date, total_occurrences, trial_occurrences
+            arb_sub.paymentSchedule = generate_monthly_subscription_schedule(
+                start_date, total_occurrences=9999, trial_occurrences=0
             )
-        return sub_obj
+        return arb_sub
+
+    def _generate_arb_subscription_trial_amount(self) -> str:
+        return str(0.00)
+
+    def _generate_arb_subscription_amount(self, taxed: bool = True) -> str:
+        return str(
+            calculate_amount_plus_tax(self.tier.amount)
+            if taxed
+            else self.tier.amount
+        )
+
+    def _generate_arb_subscription_name(self) -> str:
+        return f"{self.tier} Subscription"
+
+    def _generate_arb_subscription_customer_profile(
+        self,
+    ) -> apicontractsv1.customerProfileIdType:
+        return apicontractsv1.customerProfileIdType(
+            customerProfileId=str(self.customer.authorizenet_profile_id),
+            customerPaymentProfileId=str(self.payment.id),
+            customerAddressId=str(self.address.id),
+        )
 
     def clean(self):
         super().clean()

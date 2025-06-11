@@ -1,0 +1,13 @@
+<form class="flex flex-col gap-4" action="{% url 'tracker:subscription cancel' %}" method="post" hx-post="{% url 'tracker:subscription cancel' %}" hx-target="#subscription">
+    {% if form.non_field_errors %}<div class="inset-shadow w-full animate-jiggle rounded border border-current bg-red-200 p-2 text-center text-red-600">{{ form.non_field_errors }}</div>{% endif %}
+    <p class="text-center">Cancel your '{{ subscription.tier }}' subscription?</p>
+    {% with subscription.customer.wialon_get_remaining_days as days %}
+    <p class="text-center">You have {{ days }} day{{ days|pluralize }} left of service.</p>
+    {% endwith %}
+    {% csrf_token %}
+    {{ form }}
+    <section id="buttons" class="flex flex-col gap-2">
+        <input class="w-full cursor-pointer rounded border border-current bg-gray-50 p-2 text-center text-red-800 transition-colors duration-300 ease-in-out hover:bg-red-50" type="submit" value="Cancel">
+        <input class="w-full cursor-pointer rounded border border-current bg-gray-300 p-2 text-center transition-colors duration-300 ease-in-out hover:bg-gray-200" type="button" value="Back" hx-get="{% url 'tracker:subscription detail' %}">
+    </section>
+</form>

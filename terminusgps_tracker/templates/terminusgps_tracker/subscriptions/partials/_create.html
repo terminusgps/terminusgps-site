@@ -1,4 +1,5 @@
 <form class="flex flex-col gap-4" action="{% url 'tracker:subscription create' %}" hx-post="{% url 'tracker:subscription create' %}" hx-include="this">
+    {% if form.non_field_errors %}<div class="inset-shadow w-full animate-jiggle rounded border border-current bg-red-200 p-2 text-center text-red-600">{{ form.non_field_errors }}</div>{% endif %}
     {% csrf_token %}
     {{ form.tier.as_field_group }}
     {{ form.payment.as_field_group }}

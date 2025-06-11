@@ -45,7 +45,9 @@ class CustomerShippingAddressListView(
         customer.authorizenet_sync_address_profiles()
         return super().get(request, *args, **kwargs)
 
-    def get_queryset(self):
+    def get_queryset(
+        self,
+    ) -> QuerySet[CustomerShippingAddress, CustomerShippingAddress]:
         return (
             CustomerShippingAddress.objects.filter(
                 customer__user=self.request.user
@@ -72,7 +74,9 @@ class CustomerShippingAddressDetailView(
     raise_exception = False
     template_name = "terminusgps_tracker/addresses/detail.html"
 
-    def get_queryset(self):
+    def get_queryset(
+        self,
+    ) -> QuerySet[CustomerShippingAddress, CustomerShippingAddress]:
         return CustomerShippingAddress.objects.filter(
             customer__user=self.request.user
         ).select_related("customer")
@@ -119,12 +123,29 @@ class CustomerShippingAddressDeleteView(
             address_profile.delete()
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Whoops! '%(e)s'"), code="invalid", params={"e": e}
-                ),
-            )
+            match e.code:
+                case "E00107":
+                    # Address associated with subscription
+                    form.add_error(
+                        None,
+                        ValidationError(
+                            _(
+                                "Whoops! This shipping address is associated with an active or suspended subscription. Nothing was deleted."
+                            ),
+                            code="invalid",
+                        ),
+                    )
+                case _:
+                    form.add_error(
+                        None,
+                        ValidationError(
+                            _(
+                                "Whoops! Something went wrong, nothing was deleted."
+                            ),
+                            code="invalid",
+                            params={"e": e},
+                        ),
+                    )
             return self.form_invalid(form=form)
 
     def form_invalid(self, form=None) -> HttpResponse:
@@ -176,7 +197,9 @@ class CustomerShippingAddressCreateView(
         return initial
 
     @transaction.atomic
-    def form_valid(self, form=None) -> HttpResponse | HttpResponseRedirect:
+    def form_valid(
+        self, form: CustomerShippingAddressCreationForm
+    ) -> HttpResponse | HttpResponseRedirect:
         try:
             customer = Customer.objects.get(user=self.request.user)
             address = generate_customer_address(form)
@@ -189,10 +212,25 @@ class CustomerShippingAddressCreateView(
             )
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Whoops! '%(e)s'"), code="invalid", params={"e": e}
-                ),
-            )
+            match e.code:
+                case "E00039":
+                    form.add_error(
+                        None,
+                        ValidationError(
+                            _(
+                                "Whoops! A duplicate shipping address already exists."
+                            ),
+                            code="invalid",
+                        ),
+                    )
+                case _:
+                    form.add_error(
+                        None,
+                        ValidationError(
+                            _(
+                                "Whoops! Something went wrong. Please try again later."
+                            ),
+                            code="invalid",
+                        ),
+                    )
             return self.form_invalid(form=form)

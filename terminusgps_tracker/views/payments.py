@@ -150,12 +150,27 @@ class CustomerPaymentMethodDeleteView(
             payment_profile.delete()
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Whoops! '%(e)s'"), code="invalid", params={"e": e}
-                ),
-            )
+            match e.code:
+                case "E00105":
+                    form.add_error(
+                        None,
+                        ValidationError(
+                            _(
+                                "Whoops! This payment method is associated with an active or suspended subscription. Nothing was deleted."
+                            ),
+                            code="invalid",
+                        ),
+                    )
+                case _:
+                    form.add_error(
+                        None,
+                        ValidationError(
+                            _(
+                                "Whoops! Something went wrong, nothing was deleted."
+                            ),
+                            code="invalid",
+                        ),
+                    )
             return self.form_invalid(form=form)
 
     def form_invalid(self, form=None) -> HttpResponse:
@@ -212,10 +227,25 @@ class CustomerPaymentMethodCreateView(
                 )
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Whoops! '%(e)s'"), code="invalid", params={"e": e}
-                ),
-            )
+            match e.code:
+                case "E00039":
+                    form.add_error(
+                        None,
+                        ValidationError(
+                            _(
+                                "Whoops! A duplicate payment method already exists."
+                            ),
+                            code="invalid",
+                        ),
+                    )
+                case _:
+                    form.add_error(
+                        None,
+                        ValidationError(
+                            _(
+                                "Whoops! Something went wrong. Please try again later."
+                            ),
+                            code="invalid",
+                        ),
+                    )
             return self.form_invalid(form=form)

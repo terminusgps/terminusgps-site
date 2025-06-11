@@ -65,6 +65,11 @@ urlpatterns = [
         name="subscription update",
     ),
     path(
+        "subscription/cancel/",
+        views.SubscriptionDeleteView.as_view(),
+        name="subscription cancel",
+    ),
+    path(
         "payments/list/",
         views.CustomerPaymentMethodListView.as_view(),
         name="payment list",

@@ -24,6 +24,7 @@ from .payments import (
 )
 from .subscriptions import (
     SubscriptionCreateView,
+    SubscriptionDeleteView,
     SubscriptionDetailView,
     SubscriptionPricingView,
     SubscriptionTierDetailView,

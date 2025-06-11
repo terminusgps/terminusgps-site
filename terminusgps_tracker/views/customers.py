@@ -149,7 +149,7 @@ class CustomerWialonUnitListView(
     http_method_names = ["get"]
     login_url = reverse_lazy("login")
     model = CustomerWialonUnit
-    order = "name"
+    ordering = "name"
     partial_template_name = "terminusgps_tracker/units/partials/_list.html"
     permission_denied_message = "Please login to view this content."
     queryset = CustomerWialonUnit.objects.none()
