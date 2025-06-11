@@ -9,7 +9,6 @@ from django.utils.translation import gettext_lazy as _
 from terminusgps.wialon.validators import validate_wialon_password
 
 
-
 class TerminusgpsEmailSupportForm(forms.Form):
     email = forms.EmailField(
         label="Your Email Address",
@@ -57,7 +56,13 @@ class TerminusgpsEmailVerificationForm(forms.Form):
 
 
 class TerminusgpsRegisterForm(UserCreationForm):
-    field_order = ["first_name", "last_name", "username", "password1", "password2"]
+    field_order = [
+        "first_name",
+        "last_name",
+        "username",
+        "password1",
+        "password2",
+    ]
     first_name = forms.CharField(
         help_text="Please enter your first name.",
         label="First Name",
@@ -134,7 +139,9 @@ class TerminusgpsRegisterForm(UserCreationForm):
             password1 = cleaned_data.get("password1")
             password2 = cleaned_data.get("password2")
             if password1 and password2 and password1 != password2:
-                raise ValidationError(_("Passwords do not match."), code="invalid")
+                raise ValidationError(
+                    _("Passwords do not match."), code="invalid"
+                )
         return cleaned_data
 
 
@@ -163,6 +170,10 @@ class TerminusgpsAuthenticationForm(AuthenticationForm):
         min_length=8,
         max_length=64,
         widget=widgets.PasswordInput(
-            attrs={"class": settings.DEFAULT_FIELD_CLASS, "enterkeyhint": "done"}
+            attrs={
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "enterkeyhint": "done",
+                "autocomplete": False,
+            }
         ),
     )

@@ -91,7 +91,7 @@ class Command(BaseCommand):
         return img
 
     def generate_qr_code_data(self, imei_number: str) -> str:
-        target_url = urllib.parse.urljoin(
-            f"{self.protocol}://{self.domain}", reverse("tracker:unit create")
+        return urllib.parse.urljoin(
+            f"{self.protocol}://{self.domain}",
+            reverse("tracker:unit create", query={"imei": imei_number}),
         )
-        return f"{target_url}?imei={imei_number}"

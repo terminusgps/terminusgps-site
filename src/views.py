@@ -63,6 +63,14 @@ class TerminusgpsContactView(HtmxTemplateResponseMixin, TemplateView):
     partial_template_name = "terminusgps/partials/_contact.html"
 
 
+class TerminusgpsHomepageView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {"title": "Home"}
+    http_method_names = ["get"]
+    template_name = "terminusgps/homepage.html"
+    partial_template_name = "terminusgps/partials/_homepage.html"
+
+
 class TerminusgpsTermsAndConditionsView(
     HtmxTemplateResponseMixin, TemplateView
 ):
