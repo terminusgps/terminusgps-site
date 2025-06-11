@@ -182,10 +182,13 @@ class InstallJobCreateView(
         :rtype: :py:obj:`~terminusgps_installer.forms.InstallJobCreationForm`
 
         """
-        form = super().get_form(form_class=form_class)
-        installer = Installer.objects.get(user=self.request.user)
-        form.fields["account"].queryset = installer.accounts.all()
-        return form
+        try:
+            form = super().get_form(form_class=form_class)
+            installer = Installer.objects.get(user=self.request.user)
+            form.fields["account"].queryset = installer.accounts.all()
+            return form
+        except Installer.DoesNotExist:
+            return form
 
     @transaction.atomic
     def form_valid(
