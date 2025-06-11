@@ -59,7 +59,7 @@ urlpatterns = [
         name="faq",
     ),
     path("contact/", views.TerminusgpsContactView.as_view(), name="contact"),
-    path("", views.TerminusgpsHomepageView.as_view(), name="home"),
+    # path("", views.TerminusgpsHomepageView.as_view(), name="home"),
     path(
         "install/",
         include("terminusgps_installer.urls", namespace="installer"),
