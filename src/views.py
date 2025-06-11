@@ -248,6 +248,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     def form_valid(
         self, form: TerminusgpsRegisterForm
     ) -> HttpResponse | HttpResponseRedirect:
+        # Create a Django user
         user = get_user_model().objects.create_user(
             username=form.cleaned_data["username"],
             password=form.cleaned_data["password1"],
@@ -255,8 +256,11 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
             last_name=form.cleaned_data["last_name"],
         )
 
+        # Create a customer
         customer = Customer.objects.create(user=user)
+        # Create a Wialon account + user
         customer = self.wialon_registration_flow(form, customer)
+        # Create an Authorizenet customer profile
         customer = self.authorizenet_registration_flow(form, customer)
         customer.save()
         return super().form_valid(form=form)
@@ -281,7 +285,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
         customer_profile = CustomerProfile(
             email=email_addr, merchant_id=str(customer.pk)
         )
-        customer.authorizenet_profile_id = customer_profile.id
+        customer.authorizenet_profile_id = customer_profile.create()
         return customer
 
     @staticmethod
