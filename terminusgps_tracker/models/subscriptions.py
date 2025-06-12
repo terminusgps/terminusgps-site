@@ -1,7 +1,6 @@
 import datetime
 
 from authorizenet import apicontractsv1
-from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from terminusgps.authorizenet.profiles import SubscriptionProfile
@@ -124,10 +123,6 @@ class Subscription(models.Model):
             else f"{self.customer}'s Subscription"
         )
 
-    def save(self, **kwargs) -> None:
-        self.full_clean()
-        super().save(**kwargs)
-
     def authorizenet_get_profile(self) -> SubscriptionProfile:
         """Returns the Authorizenet subscription profile for the subscription."""
         return SubscriptionProfile(
@@ -187,7 +182,7 @@ class Subscription(models.Model):
         self, start_date: datetime.date | None = None
     ) -> apicontractsv1.ARBSubscriptionType:
         """
-        Generates and returns an ARBSubscriptionType object for Authorizenet API calls.
+        Generates and returns an :py:obj:`~authorizenet.apicontractsv1.ARBSubscriptionType` for Authorizenet API calls.
 
         If ``start_date`` is provided, adds an infinite monthly payment schedule to the subscription starting on that date.
 
@@ -210,9 +205,19 @@ class Subscription(models.Model):
         return arb_sub
 
     def _generate_arb_subscription_trial_amount(self) -> str:
+        """Returns ``"0.00"``."""
         return str(0.00)
 
     def _generate_arb_subscription_amount(self, taxed: bool = True) -> str:
+        """
+        Generates and returns an amount string for the subscription.
+
+        :param taxed: Whether or not to add tax to the amount.
+        :type taxed: :py:obj:`bool`
+        :returns: A subscription amount string.
+        :rtype: :py:obj:`str`
+
+        """
         return str(
             calculate_amount_plus_tax(self.tier.amount)
             if taxed
@@ -220,42 +225,15 @@ class Subscription(models.Model):
         )
 
     def _generate_arb_subscription_name(self) -> str:
+        """Generates and returns a name for the subscription."""
         return f"{self.tier} Subscription"
 
     def _generate_arb_subscription_customer_profile(
         self,
     ) -> apicontractsv1.customerProfileIdType:
+        """Generates and returns a :py:obj:`~authorizenet.apicontractsv1.customerProfileIdType` for the subscription."""
         return apicontractsv1.customerProfileIdType(
             customerProfileId=str(self.customer.authorizenet_profile_id),
             customerPaymentProfileId=str(self.payment.id),
             customerAddressId=str(self.address.id),
         )
-
-    def clean(self):
-        super().clean()
-        if (
-            self.payment
-            and hasattr(self, "customer")
-            and self.customer
-            and self.payment.customer != self.customer
-        ):
-            raise ValidationError(
-                {
-                    "payment": _(
-                        "Payment method must belong to the same customer as the subscription."
-                    )
-                }
-            )
-        if (
-            self.address
-            and hasattr(self, "customer")
-            and self.customer
-            and self.address.customer != self.customer
-        ):
-            raise ValidationError(
-                {
-                    "address": _(
-                        "Shipping address must belong to the same customer as the subscription."
-                    )
-                }
-            )

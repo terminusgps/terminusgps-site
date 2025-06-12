@@ -2,12 +2,13 @@ import typing
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon import utils as wialon_utils
+from terminusgps.wialon.items import WialonUnit
 from terminusgps.wialon.session import WialonSession
 
 from terminusgps_installer.forms import (
@@ -74,50 +75,23 @@ class InstallJobCompleteView(
     template_name = "terminusgps_installer/jobs/complete.html"
     form_class = InstallJobCompletionForm
 
-    def get_success_url(self, job: InstallJob | None = None) -> str:
-        if job is not None:
-            return reverse(
-                "installer:job complete success", kwargs={"pk": job.pk}
-            )
-        return super().get_success_url()
-
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["job"] = self._get_job()
+        context["job"] = self.get_object()
         return context
 
     def form_valid(
         self, form: InstallJobCompletionForm
     ) -> HttpResponse | HttpResponseRedirect:
-        job = self._get_job()
-        if job is None:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Whoops! Couldn't find job with pk '%(pk)s'."),
-                    code="invalid",
-                    params={"pk": self.kwargs.get("pk")},
-                ),
-            )
-            return self.form_invalid(form=form)
-        job = self._complete_job(job)
-        return HttpResponseRedirect(self.get_success_url(job))
-
-    @staticmethod
-    @transaction.atomic
-    def _complete_job(job: InstallJob) -> InstallJob:
+        job = self.get_object()
         job.completed = True
         job.save()
-        return job
-
-    def _get_job(self) -> InstallJob | None:
-        return (
-            InstallJob.objects.select_related("asset").get(
-                pk=self.kwargs["pk"]
-            )
-            if self.kwargs.get("pk")
-            else None
+        return HttpResponseRedirect(
+            reverse("installer:job complete", kwargs={"job_pk": job.pk})
         )
+
+    def get_object(self) -> InstallJob:
+        return InstallJob.objects.get(pk=self.kwargs["job_pk"])
 
 
 class InstallJobCompleteSuccessView(
@@ -133,6 +107,12 @@ class InstallJobCompleteSuccessView(
     model = InstallJob
     queryset = InstallJob.objects.select_related("asset", "account")
     context_object_name = "job"
+    pk_url_kwarg = "job_pk"
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        with WialonSession() as session:
+            unit = WialonUnit(id=self.get_object().asset.pk, session=session)
+        return super().get(request, *args, **kwargs)
 
 
 class InstallJobDetailView(
@@ -144,6 +124,7 @@ class InstallJobDetailView(
     http_method_names = ["get"]
     model = InstallJob
     partial_template_name = "terminusgps_installer/jobs/partials/_detail.html"
+    pk_url_kwarg = "job_pk"
     template_name = "terminusgps_installer/jobs/detail.html"
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
@@ -152,12 +133,7 @@ class InstallJobDetailView(
         return context
 
     def get_queryset(self):
-        return (
-            super()
-            .get_queryset()
-            .select_related("asset", "account")
-            .filter(installer__user=self.request.user)
-        )
+        return super().get_queryset().select_related("asset", "account")
 
 
 class InstallJobCreateView(

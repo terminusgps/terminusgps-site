@@ -8,7 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -201,6 +201,34 @@ class SubscriptionUpdateView(
     fields = ["tier", "payment", "address"]
     success_url = reverse_lazy("tracker:subscription detail")
 
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        form = self.get_form()
+        if not form.is_valid():
+            return self.form_invalid(form=form)
+
+        if not form.cleaned_data["payment"]:
+            form.add_error(
+                "payment",
+                ValidationError(
+                    _("Whoops! Please select a payment method to subscribe."),
+                    code="invalid",
+                ),
+            )
+        if not form.cleaned_data["address"]:
+            form.add_error(
+                "address",
+                ValidationError(
+                    _("Whoops! Please select an address to subscribe."),
+                    code="invalid",
+                ),
+            )
+
+        return (
+            self.form_valid(form=form)
+            if form.is_valid()
+            else self.form_invalid(form=form)
+        )
+
     def form_valid(
         self, form: forms.ModelForm
     ) -> HttpResponse | HttpResponseRedirect:
@@ -346,7 +374,6 @@ class SubscriptionCreateView(
         address = form.cleaned_data["address"]
         payment = form.cleaned_data["payment"]
         tier = form.cleaned_data["tier"]
-
         subscription_profile = SubscriptionProfile(
             customer_profile_id=customer.user.pk, id=None
         )

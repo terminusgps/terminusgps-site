@@ -67,11 +67,11 @@ class InstallJob(models.Model):
 
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the install job's detail view."""
-        return reverse("installer:job detail", kwargs={"pk": self.pk})
+        return reverse("installer:job detail", kwargs={"job_pk": self.pk})
 
     def get_complete_url(self) -> str:
         """Returns a URL pointing to the install job's completion view."""
-        return reverse("installer:job complete", kwargs={"pk": self.pk})
+        return reverse("installer:job complete", kwargs={"job_pk": self.pk})
 
 
 class WialonAccount(models.Model):
@@ -141,11 +141,15 @@ class WialonAsset(models.Model):
 
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the asset's detail view."""
-        return reverse_lazy("installer:asset detail", kwargs={"pk": self.pk})
+        return reverse_lazy(
+            "installer:asset detail", kwargs={"asset_pk": self.pk}
+        )
 
     def get_update_url(self) -> str:
         """Returns a URL pointing to the asset's update view."""
-        return reverse_lazy("installer:asset update", kwargs={"pk": self.pk})
+        return reverse_lazy(
+            "installer:asset update", kwargs={"asset_pk": self.pk}
+        )
 
     def get_command_list_url(self) -> str:
         """Returns a URL pointing to the asset's command list view."""
@@ -316,14 +320,14 @@ class WialonAssetCommand(models.Model):
         """Returns a URL pointing to the command's detail view."""
         return reverse(
             "installer:command detail",
-            kwargs={"asset_pk": self.asset.pk, "pk": self.pk},
+            kwargs={"asset_pk": self.asset.pk, "cmd_pk": self.pk},
         )
 
     def get_execute_url(self) -> str:
         """Returns a URL pointing to the command's execution view."""
         return reverse(
             "installer:command execute",
-            kwargs={"asset_pk": self.asset.pk, "pk": self.pk},
+            kwargs={"asset_pk": self.asset.pk, "cmd_pk": self.pk},
         )
 
     def execute(

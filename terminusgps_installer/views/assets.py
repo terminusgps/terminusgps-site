@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
+from django.utils import timezone
 from django.views.generic import DetailView, FormView, ListView, UpdateView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon.items import WialonUnit
@@ -25,6 +26,7 @@ class WialonAssetDetailView(
     partial_template_name = (
         "terminusgps_installer/assets/partials/_detail.html"
     )
+    pk_url_kwarg = "asset_pk"
     template_name = "terminusgps_installer/assets/detail.html"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
@@ -47,13 +49,17 @@ class WialonAssetUpdateView(
         "title": "Update Asset",
         "subtitle": "Update Wialon asset data",
     }
-    fields = ["name"]
+    fields = ["name", "imei", "vin"]
     http_method_names = ["get", "post"]
     model = WialonAsset
     partial_template_name = (
         "terminusgps_installer/assets/partials/_update.html"
     )
+    pk_url_kwarg = "asset_pk"
     template_name = "terminusgps_installer/assets/update.html"
+
+    def get_success_url(self) -> str:
+        return self.get_object().get_absolute_url()
 
     def get_form(self, form_class=None) -> forms.ModelForm:
         form = super().get_form()
@@ -61,21 +67,19 @@ class WialonAssetUpdateView(
             form.fields[field].widget.attrs.update(
                 {"class": settings.DEFAULT_FIELD_CLASS}
             )
-        form.fields["name"].label = "Asset Name"
+        form.fields["name"].label = "Name"
+        form.fields["vin"].label = "VIN #"
+        form.fields["imei"].label = "IMEI #"
         return form
-
-    def get_success_url(self) -> str:
-        return self.get_object().get_absolute_url()
 
     def form_valid(
         self, form: forms.ModelForm
     ) -> HttpResponse | HttpResponseRedirect:
-        new_name = form.cleaned_data["name"]
-        asset = self.get_object()
-
         with WialonSession() as session:
+            new_name = form.cleaned_data["name"]
+            asset = self.get_object()
             unit = WialonUnit(id=asset.pk, session=session)
-            if asset.name != new_name or unit.name != new_name:
+            if asset.name != new_name:
                 unit.rename(new_name)
         return super().form_valid(form=form)
 
@@ -89,12 +93,13 @@ class WialonAssetPositionView(
     partial_template_name = (
         "terminusgps_installer/assets/partials/_position.html"
     )
+    pk_url_kwarg = "asset_pk"
     template_name = "terminusgps_installer/assets/position.html"
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         with WialonSession() as session:
-            unit = WialonUnit(id=self.kwargs["pk"], session=session)
+            unit = WialonUnit(id=self.kwargs["asset_pk"], session=session)
             context["pos"] = unit.get_position()
         return context
 
@@ -115,29 +120,17 @@ class WialonAssetCommandListView(
     queryset = WialonAssetCommand.objects.all()
     template_name = "terminusgps_installer/assets/command_list.html"
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not kwargs.get("asset_pk"):
-            return HttpResponse(status=404)
-        return super().get(request, *args, **kwargs)
-
-    def get_queryset(self) -> QuerySet:
-        qs = super().get_queryset()
-        asset: WialonAsset | None = self._get_asset()
-        if asset is not None:
-            return qs.filter(asset=asset)
-        return WialonAssetCommand.objects.none()
+    def get_queryset(self) -> QuerySet[WialonAssetCommand, WialonAssetCommand]:
+        return (
+            WialonAsset.objects.get(pk=self.kwargs["asset_pk"])
+            .commands.select_related("asset")
+            .order_by(self.get_ordering())
+        )
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        asset = self._get_asset()
-        if asset is not None:
-            context["title"] = f"{asset.name} Commands"
-            context["asset"] = asset
+        context["title"] = f"{self.get_queryset().first().asset.name} Commands"
         return context
-
-    def _get_asset(self) -> WialonAsset | None:
-        if self.kwargs.get("asset_pk"):
-            return WialonAsset.objects.get(pk=self.kwargs["asset_pk"])
 
 
 class WialonAssetCommandDetailView(
@@ -151,32 +144,16 @@ class WialonAssetCommandDetailView(
     partial_template_name = (
         "terminusgps_installer/assets/partials/_command_detail.html"
     )
+    pk_url_kwarg = "cmd_pk"
     queryset = WialonAssetCommand.objects.all()
     template_name = "terminusgps_installer/assets/command_detail.html"
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if not kwargs.get("asset_pk"):
-            return HttpResponse(status=404)
-        return super().get(request, *args, **kwargs)
-
-    def get_queryset(self) -> QuerySet:
-        qs = super().get_queryset()
-        asset: WialonAsset | None = self._get_asset()
-        if asset is not None:
-            return qs.filter(asset=asset)
-        return WialonAssetCommand.objects.none()
-
-    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        asset = self._get_asset()
-        if asset is not None:
-            context["title"] = f"{asset.name} | {self.get_object().name}"
-            context["asset"] = asset
-        return context
-
-    def _get_asset(self) -> WialonAsset | None:
-        if self.kwargs.get("asset_pk"):
-            return WialonAsset.objects.get(pk=self.kwargs["asset_pk"])
+    def get_object(self) -> WialonAssetCommand:
+        return (
+            WialonAsset.objects.get(pk=self.kwargs["asset_pk"])
+            .commands.select_related("asset")
+            .get(pk=self.kwargs["cmd_pk"])
+        )
 
 
 class WialonAssetCommandExecuteView(
@@ -196,12 +173,9 @@ class WialonAssetCommandExecuteView(
         self, form: WialonAssetCommandExecutionForm
     ) -> HttpResponse | HttpResponseRedirect:
         with WialonSession() as session:
-            command: WialonAssetCommand | None = self.get_object()
-            if command is not None:
-                command.execute(
-                    session, link_type=form.cleaned_data["link_type"]
-                )
-            return super().form_valid(form=form)
+            command: WialonAssetCommand = self.get_object()
+            command.execute(session, link_type=form.cleaned_data["link_type"])
+        return super().form_valid(form=form)
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
@@ -213,19 +187,16 @@ class WialonAssetCommandExecuteView(
             "installer:command execute success",
             kwargs={
                 "asset_pk": self.kwargs["asset_pk"],
-                "pk": self.kwargs["pk"],
+                "cmd_pk": self.kwargs["cmd_pk"],
             },
         )
 
-    def get_object(self) -> WialonAssetCommand | None:
-        try:
-            asset = WialonAsset.objects.get(pk=self.kwargs["asset_pk"])
-            command = asset.commands.get(pk=self.kwargs["pk"])
-            return command
-        except WialonAsset.DoesNotExist:
-            return
-        except WialonAssetCommand.DoesNotExist:
-            return
+    def get_object(self) -> WialonAssetCommand:
+        return (
+            WialonAsset.objects.get(pk=self.kwargs["asset_pk"])
+            .commands.select_related("asset")
+            .get(pk=self.kwargs["cmd_pk"])
+        )
 
 
 class WialonAssetCommandExecuteSuccessView(
@@ -239,5 +210,22 @@ class WialonAssetCommandExecuteSuccessView(
     partial_template_name = (
         "terminusgps_installer/assets/partials/_command_execute_success.html"
     )
+    pk_url_kwarg = "cmd_pk"
     queryset = WialonAssetCommand.objects.all()
     template_name = "terminusgps_installer/assets/command_execute_success.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        with WialonSession() as session:
+            unit = WialonUnit(id=self.get_object().asset.pk, session=session)
+            context["last_msg"] = unit.get_command_messages(
+                timezone.now()
+            ).get("messages")[0]
+        return context
+
+    def get_object(self) -> WialonAssetCommand:
+        return (
+            WialonAsset.objects.get(pk=self.kwargs["asset_pk"])
+            .commands.select_related("asset")
+            .get(pk=self.kwargs["cmd_pk"])
+        )

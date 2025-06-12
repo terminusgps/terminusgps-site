@@ -89,7 +89,7 @@ class CustomerShippingAddressAdmin(admin.ModelAdmin):
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ["customer", "status"]
     list_filter = ["status"]
-    readonly_fields = ["status"]
+    readonly_fields = ["status", "payment", "address"]
     actions = ["authorizenet_sync"]
 
     @admin.action(description="Sync selected subscriptions with Authorizenet")

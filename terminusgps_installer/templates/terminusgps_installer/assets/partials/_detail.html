@@ -4,11 +4,11 @@
         <h3 class="text-lg tracking-wider text-gray-400 select-none">IMEI #: <span class="select-all">{{ asset.imei }}</span></h3>
     </section>
     <section class="flex flex-col gap-4 rounded border bg-gray-100 p-4 dark:bg-gray-900">
-        <h2 class="text-lg">Commands</h2>
+        <h2 class="text-lg font-semibold">Commands</h2>
         <div id="command-list" hx-get="{{ asset.get_command_list_url }}" hx-trigger="load" hx-target="this"></div>
     </section>
     <section class="flex flex-col gap-4 rounded border bg-gray-100 p-4 dark:bg-gray-900">
-        <h2 class="text-lg">Data</h2>
+        <h2 class="text-lg font-semibold">Attributes</h2>
         <div id="asset-update" hx-get="{{ asset.get_update_url }}" hx-trigger="load" hx-target="this"></div>
     </section>
 </div>
