@@ -23,13 +23,17 @@ class InstallJobCompletionForm(forms.Form):
         help_text="Please check this box if the unit's position was properly retrieved and rendered in a map.",
         initial=False,
         label="Unit position was retrieved.",
-        widget=forms.widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
+        widget=forms.widgets.CheckboxInput(
+            attrs={"class": "accent-terminus-red-700"}
+        ),
     )
     commands_executed = forms.BooleanField(
         help_text="Please check this box if test commands were properly executed by the unit.",
         initial=False,
         label="Unit commands were executed.",
-        widget=forms.widgets.CheckboxInput(attrs={"class": "accent-terminus-red-700"}),
+        widget=forms.widgets.CheckboxInput(
+            attrs={"class": "accent-terminus-red-700"}
+        ),
     )
 
 
@@ -51,6 +55,8 @@ class InstallJobCreationForm(forms.Form):
     account = forms.ModelChoiceField(
         label="Wialon Account",
         help_text="Please select a Wialon account associated with the installation job.",
-        queryset=WialonAccount.objects.all(),
-        widget=forms.widgets.Select(attrs={"class": settings.DEFAULT_FIELD_CLASS}),
+        queryset=WialonAccount.objects.none(),
+        widget=forms.widgets.Select(
+            attrs={"class": settings.DEFAULT_FIELD_CLASS}
+        ),
     )

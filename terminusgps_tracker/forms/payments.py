@@ -1,5 +1,9 @@
+import datetime
+
 from django import forms
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from terminusgps_tracker.forms.fields import AddressField, CreditCardField
 
@@ -67,3 +71,20 @@ class CustomerPaymentMethodCreationForm(forms.Form):
             attrs={"class": "accent-terminus-red-700"}
         ),
     )
+
+    def clean_credit_card(self):
+        cc = self.cleaned_data.get("credit_card")
+
+        if cc:
+            expiry_date = datetime.datetime.strptime(
+                str(cc.expirationDate), "%Y-%m"
+            )
+            if not expiry_date >= datetime.datetime.now():
+                raise ValidationError(
+                    _(
+                        "Expiration date cannot be in the past, got '%(expiry)s'."
+                    ),
+                    code="invalid",
+                    params={"expiry": str(cc.expirationDate)},
+                )
+            return cc

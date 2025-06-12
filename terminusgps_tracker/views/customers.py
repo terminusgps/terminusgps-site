@@ -189,10 +189,9 @@ class CustomerWialonUnitCreateView(
             )
 
     def get_initial(self) -> dict[str, typing.Any]:
-        """Sets the initial imei value to the 'imei' query parameter."""
         initial: dict[str, typing.Any] = super().get_initial()
-        if self.request.GET.get("imei"):
-            initial["imei"] = self.request.GET.get("imei")
+        initial["name"] = f"{self.request.user.first_name}'s Ride"
+        initial["imei"] = self.request.GET.get("imei")
         return initial
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:

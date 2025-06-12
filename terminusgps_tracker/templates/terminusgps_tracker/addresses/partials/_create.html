@@ -1,4 +1,4 @@
-<form class="flex flex-col gap-4" action="{% url 'tracker:address create' %}" method="post" hx-post="{% url 'tracker:address create' %}" hx-include="this" hx-boost="true" hx-push-url="{% url 'tracker:account' %}">
+<form class="flex flex-col gap-4" action="" method="post" hx-boost="true">
     {% if form.non_field_errors %}<div class="inset-shadow w-full animate-jiggle rounded border border-current bg-red-200 p-2 text-center text-red-600">{{ form.non_field_errors }}</div>{% endif %}
     {% csrf_token %}
     <div class="flex items-center gap-2">

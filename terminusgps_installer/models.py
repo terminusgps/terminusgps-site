@@ -126,8 +126,10 @@ class WialonAsset(models.Model):
     """Wialon asset id."""
     name = models.CharField(max_length=128)
     """Wialon asset name."""
-    imei = models.CharField(max_length=19)
+    imei = models.CharField(max_length=19, default=None, blank=True, null=True)
     """Wialon asset IMEI #."""
+    vin = models.CharField(max_length=17, default=None, blank=True, null=True)
+    """Wialon asset VIN #."""
 
     class Meta:
         verbose_name = _("asset")
@@ -179,6 +181,7 @@ class WialonAsset(models.Model):
         """
         self.name = unit.name
         self.imei = unit.imei_number
+        self.vin = unit.pfields.get("vin")
 
     @transaction.atomic
     def _wialon_sync_commands(self, unit: WialonUnit) -> None:

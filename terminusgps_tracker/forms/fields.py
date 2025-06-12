@@ -6,9 +6,10 @@ from django import forms
 from django.conf import settings
 from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.forms import widgets as base_widgets
-from django.utils import timezone
-
-from terminusgps_tracker.validators import validate_credit_card_number
+from terminusgps.authorizenet.validators import (
+    validate_credit_card_expiry_month,
+    validate_credit_card_expiry_year,
+)
 
 
 class AddressWidget(base_widgets.MultiWidget):
@@ -170,16 +171,24 @@ class CreditCardField(forms.MultiValueField):
                 validators=[
                     MinLengthValidator(16),
                     MaxLengthValidator(19),
-                    validate_credit_card_number,
+                    # validate_credit_card_number,
                 ],
             ),
-            forms.IntegerField(
-                label="Card Expiration Month", max_value=12, min_value=1
+            forms.CharField(
+                label="Card Expiration Month",
+                validators=[
+                    MinLengthValidator(2),
+                    MaxLengthValidator(2),
+                    validate_credit_card_expiry_month,
+                ],
             ),
-            forms.IntegerField(
+            forms.CharField(
                 label="Card Expiration Year",
-                min_value=int(f"{timezone.now():%y}"),  # Current year
-                max_value=99,
+                validators=[
+                    MinLengthValidator(2),
+                    MaxLengthValidator(2),
+                    validate_credit_card_expiry_year,
+                ],
             ),
             forms.CharField(
                 label="Card CCV #",
@@ -191,6 +200,6 @@ class CreditCardField(forms.MultiValueField):
     def compress(self, data_list) -> creditCardType:
         return creditCardType(
             cardNumber=data_list[0],
-            expirationDate=f"20{data_list[2]}-{data_list[1]:02d}",
+            expirationDate=f"20{int(data_list[2])}-{int(data_list[1]):02d}",
             cardCode=data_list[3],
         )

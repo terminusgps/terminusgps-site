@@ -7,7 +7,7 @@ from terminusgps.authorizenet.profiles import (
     CustomerProfile,
     PaymentProfile,
 )
-from terminusgps.wialon.items import WialonUnit
+from terminusgps.wialon.items import WialonResource, WialonUnit
 from terminusgps.wialon.session import WialonSession
 
 
@@ -91,12 +91,13 @@ class Customer(models.Model):
             self.authorizenet_get_customer_profile().get_payment_profile_ids()
         )
 
-    def wialon_get_remaining_days(self) -> int | None:
-        if self.wialon_resource_id:
-            with WialonSession() as session:
-                return session.wialon_api.account_get_account_data(
-                    **{"itemId": self.wialon_resource_id, "type": 1}
-                ).get("daysCounter", 0)
+    def wialon_get_remaining_days(self) -> int:
+        """Returns the remaining days for the customer's Wialon account."""
+        if not self.wialon_resource_id:
+            return 0
+        with WialonSession() as session:
+            resource = WialonResource(self.wialon_resource_id, session=session)
+            return resource.get_remaining_days()
 
 
 class CustomerWialonUnit(models.Model):
@@ -106,8 +107,10 @@ class CustomerWialonUnit(models.Model):
     """Wialon unit id."""
     name = models.CharField(max_length=64, null=True, blank=True, default=None)
     """Wialon unit name."""
-    imei = models.PositiveBigIntegerField(null=True, blank=True, default=None)
+    imei = models.CharField(max_length=19, null=True, blank=True, default=None)
     """Wialon unit IMEI number."""
+    vin = models.CharField(max_length=17, null=True, blank=True, default=None)
+    """Wialon unit VIN number."""
     customer = models.ForeignKey(
         "terminusgps_tracker.Customer",
         on_delete=models.CASCADE,
@@ -131,6 +134,7 @@ class CustomerWialonUnit(models.Model):
             unit = WialonUnit(id=self.pk, session=session)
             self.name = unit.name
             self.imei = unit.imei_number
+            self.vin = unit.pfields.get("vin")
 
 
 class CustomerPaymentMethod(models.Model):

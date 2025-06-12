@@ -210,22 +210,22 @@ class CustomerPaymentMethodCreateView(
             address = generate_customer_address(form)
             payment = generate_customer_payment(form)
             payment_profile = PaymentProfile(
-                customer_profile_id=customer.authorizenet_profile_id,
-                default=form.cleaned_data["default"],
+                customer_profile_id=customer.authorizenet_profile_id
             )
             CustomerPaymentMethod.objects.create(
-                id=payment_profile.create(address=address, payment=payment),
+                id=payment_profile.create(payment=payment, address=address),
                 customer=customer,
             )
+
             if form.cleaned_data["create_shipping_address"]:
                 address_profile = AddressProfile(
-                    customer_profile_id=customer.authorizenet_profile_id,
-                    default=form.cleaned_data["default"],
+                    customer_profile_id=customer.authorizenet_profile_id
                 )
                 CustomerShippingAddress.objects.create(
-                    id=address_profile.create(address), customer=customer
+                    id=address_profile.create(address=address),
+                    customer=customer,
                 )
-            return super().form_valid(form=form)
+            return HttpResponseRedirect(self.get_success_url())
         except AuthorizenetControllerExecutionError as e:
             match e.code:
                 case "E00039":
@@ -233,7 +233,7 @@ class CustomerPaymentMethodCreateView(
                         None,
                         ValidationError(
                             _(
-                                "Whoops! A duplicate payment method already exists."
+                                "Whoops! A duplicate payment method or shipping address already exists."
                             ),
                             code="invalid",
                         ),

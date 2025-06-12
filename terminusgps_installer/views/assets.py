@@ -2,11 +2,9 @@ import typing
 
 from django import forms
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView, UpdateView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon.items import WialonUnit
@@ -75,9 +73,9 @@ class WialonAssetUpdateView(
         new_name = form.cleaned_data["name"]
         asset = self.get_object()
 
-        if asset.name != new_name:
-            with WialonSession() as session:
-                unit = WialonUnit(id=asset.pk, session=session)
+        with WialonSession() as session:
+            unit = WialonUnit(id=asset.pk, session=session)
+            if asset.name != new_name or unit.name != new_name:
                 unit.rename(new_name)
         return super().form_valid(form=form)
 
@@ -109,13 +107,13 @@ class WialonAssetCommandListView(
     extra_context = {"title": "Command"}
     http_method_names = ["get"]
     model = WialonAssetCommand
-    queryset = WialonAssetCommand.objects.all()
+    ordering = "name"
+    paginate_by = 4
     partial_template_name = (
         "terminusgps_installer/assets/partials/_command_list.html"
     )
+    queryset = WialonAssetCommand.objects.all()
     template_name = "terminusgps_installer/assets/command_list.html"
-    paginate_by = 4
-    ordering = "name"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if not kwargs.get("asset_pk"):
@@ -153,8 +151,8 @@ class WialonAssetCommandDetailView(
     partial_template_name = (
         "terminusgps_installer/assets/partials/_command_detail.html"
     )
-    template_name = "terminusgps_installer/assets/command_detail.html"
     queryset = WialonAssetCommand.objects.all()
+    template_name = "terminusgps_installer/assets/command_detail.html"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         if not kwargs.get("asset_pk"):
@@ -198,23 +196,16 @@ class WialonAssetCommandExecuteView(
         self, form: WialonAssetCommandExecutionForm
     ) -> HttpResponse | HttpResponseRedirect:
         with WialonSession() as session:
-            link_type: str = form.cleaned_data["link_type"]
-            command: WialonAssetCommand | None = self._get_command()
-            if command is None:
-                form.add_error(
-                    None,
-                    ValidationError(
-                        _("Whoops! Command not found."), code="invalid"
-                    ),
+            command: WialonAssetCommand | None = self.get_object()
+            if command is not None:
+                command.execute(
+                    session, link_type=form.cleaned_data["link_type"]
                 )
-                return self.form_invalid(form=form)
-
-            command.execute(session, link_type=link_type)
             return super().form_valid(form=form)
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["command"] = self._get_command()
+        context["command"] = self.get_object()
         return context
 
     def get_success_url(self) -> str:
@@ -226,13 +217,15 @@ class WialonAssetCommandExecuteView(
             },
         )
 
-    def _get_command(self) -> WialonAssetCommand | None:
-        if self._get_asset() and self.kwargs.get("pk"):
-            return self._get_asset().commands.get(pk=self.kwargs["pk"])
-
-    def _get_asset(self) -> WialonAsset | None:
-        if self.kwargs.get("asset_pk"):
-            return WialonAsset.objects.get(pk=self.kwargs["asset_pk"])
+    def get_object(self) -> WialonAssetCommand | None:
+        try:
+            asset = WialonAsset.objects.get(pk=self.kwargs["asset_pk"])
+            command = asset.commands.get(pk=self.kwargs["pk"])
+            return command
+        except WialonAsset.DoesNotExist:
+            return
+        except WialonAssetCommand.DoesNotExist:
+            return
 
 
 class WialonAssetCommandExecuteSuccessView(

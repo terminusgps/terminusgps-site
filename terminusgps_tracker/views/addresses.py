@@ -210,7 +210,7 @@ class CustomerShippingAddressCreateView(
             CustomerShippingAddress.objects.create(
                 id=address_profile.create(address), customer=customer
             )
-            return super().form_valid(form=form)
+            return HttpResponseRedirect(self.get_success_url())
         except AuthorizenetControllerExecutionError as e:
             match e.code:
                 case "E00039":

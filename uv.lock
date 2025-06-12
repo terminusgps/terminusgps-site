@@ -971,7 +971,7 @@ wheels = [
 
 [[package]]
 name = "python-terminusgps"
-version = "37.6.7"
+version = "37.6.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiobotocore" },
@@ -988,9 +988,9 @@ dependencies = [
     { name = "pyzbar" },
     { name = "twilio" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/bd/90/54b0a7d2fc93ab81e18e4683869965fa2b6684a1005df507d06401a79a4d/python_terminusgps-37.6.7.tar.gz", hash = "sha256:a38515a1a5c707d850a1fe4519046285305083289840eeccff26b4f93c1e5297", size = 10488365 }
+sdist = { url = "https://files.pythonhosted.org/packages/f2/68/e16137fd8646b052cf4d2706c8e370752214f1ae38f4aefb61c76fdcd486/python_terminusgps-37.6.8.tar.gz", hash = "sha256:26905591db34c1487844ab4b15453a99a4cf6d35cf776449d2ffc76e718890c9", size = 10507920 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ab/a8/15cc6db07f08962f2fb25f086bfa1e5b1034a2eed3e904ce326e24f72d94/python_terminusgps-37.6.7-py3-none-any.whl", hash = "sha256:b852efb5bd0b36248ff863aec43e10dfb9e36d02a80912ec60f0e23777d1cc1c", size = 67138 },
+    { url = "https://files.pythonhosted.org/packages/03/4c/067f705775c395da539bba40fbaac1e9990c0324f1456909a67c21b511ef/python_terminusgps-37.6.8-py3-none-any.whl", hash = "sha256:ef909cd56b1adf6c1118ec78fd4a53dd95671e308d705e55507ffc18f3da02c9", size = 68142 },
 ]
 
 [[package]]
@@ -1214,7 +1214,7 @@ requires-dist = [
     { name = "pillow", specifier = "==11.2.1" },
     { name = "psycopg", specifier = ">=3.2.6" },
     { name = "pyotp", specifier = ">=2.9.0" },
-    { name = "python-terminusgps", specifier = "==37.6.7" },
+    { name = "python-terminusgps", specifier = "==37.6.8" },
     { name = "python-wialon", specifier = "==1.2.4" },
     { name = "qrcode", extras = ["pil"], specifier = ">=8.1" },
     { name = "selenium", specifier = ">=4.33.0" },
@@ -1256,7 +1256,7 @@ wheels = [
 
 [[package]]
 name = "twilio"
-version = "9.6.2"
+version = "9.6.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -1264,9 +1264,9 @@ dependencies = [
     { name = "pyjwt" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fa/c9/441a07f6552f2b504812501d56c41bd85b02afeef6c23ab8baf41ed6c70e/twilio-9.6.2.tar.gz", hash = "sha256:5da13bb497e39ece34cb9f2b3bc911f3288928612748f7688b3bda262c2767a1", size = 1041300 }
+sdist = { url = "https://files.pythonhosted.org/packages/fb/af/1b401bc4cfd3eb41c7e2a98d0040d2bcfd2ad3217f3163401121179b3fb3/twilio-9.6.3.tar.gz", hash = "sha256:16a8c2ab9550343c25c8a195f31db9e230d9b341eca31ebdd301109910fd9730", size = 1041494 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/67/91/382e83e5d205a7ae4325b66d40cd2fa6ce85526f2ed8fc553265e19abbe4/twilio-9.6.2-py2.py3-none-any.whl", hash = "sha256:8d4af6f42850734a921857df42940f7fed84e3e4a508d0d6bef5b9fb7dc08357", size = 1909253 },
+    { url = "https://files.pythonhosted.org/packages/c9/35/d61a3581eb223e5e1fc0add1c397d7bb60014b22790e8f89aa5eb4e41e04/twilio-9.6.3-py2.py3-none-any.whl", hash = "sha256:a9b2cf11b0718394f12c43585ca25b9094f12b82ff975f1561fcec7f0f6f49b2", size = 1909549 },
 ]
 
 [[package]]
