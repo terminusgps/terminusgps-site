@@ -111,6 +111,10 @@ class CustomerWialonUnit(models.Model):
     """Wialon unit IMEI number."""
     vin = models.CharField(max_length=17, null=True, blank=True, default=None)
     """Wialon unit VIN number."""
+    tier = models.ForeignKey(
+        "terminusgps_tracker.SubscriptionTier", on_delete=models.CASCADE
+    )
+    """Subscription tier for the unit."""
     customer = models.ForeignKey(
         "terminusgps_tracker.Customer",
         on_delete=models.CASCADE,
@@ -123,18 +127,32 @@ class CustomerWialonUnit(models.Model):
         verbose_name_plural = _("customer wialon units")
 
     def __str__(self) -> str:
+        """Returns the unit name if set, otherwise 'Unit #<pk>'."""
         return self.name if self.name else f"Unit #{self.pk}"
 
+    def save(self, **kwargs) -> None:
+        """Syncs the unit's data with the Wialon API if necessary."""
+        if self.wialon_needs_sync():
+            with WialonSession() as session:
+                self.wialon_sync(session)
+        return super().save(**kwargs)
+
     def get_absolute_url(self) -> str:
+        """Returns a URL pointing to the unit's detail view."""
         return reverse("tracker:unit detail", kwargs={"pk": self.pk})
 
+    def wialon_needs_sync(self) -> bool:
+        """Whether or not the unit needs to sync data with the Wialon API."""
+        return any([not self.name, not self.imei, not self.vin])
+
     @transaction.atomic
-    def wialon_sync(self) -> None:
-        with WialonSession() as session:
-            unit = WialonUnit(id=self.pk, session=session)
-            self.name = unit.name
-            self.imei = unit.imei_number
-            self.vin = unit.pfields.get("vin")
+    def wialon_sync(self, session: WialonSession) -> WialonSession:
+        """Syncs the unit's data using the Wialon API."""
+        unit = WialonUnit(id=self.pk, session=session)
+        self.name = unit.name
+        self.imei = unit.imei_number
+        self.vin = unit.pfields.get("vin")
+        return session
 
 
 class CustomerPaymentMethod(models.Model):
@@ -162,12 +180,13 @@ class CustomerPaymentMethod(models.Model):
         """Returns a URL pointing to the payment method's detail view."""
         return reverse("tracker:payment detail", kwargs={"pk": self.pk})
 
-    def authorizenet_get_profile(self) -> dict | None:
+    def authorizenet_get_profile(self) -> dict:
         """Returns payment profile data from Authorizenet."""
-        return PaymentProfile(
+        response = PaymentProfile(
             customer_profile_id=str(self.customer.authorizenet_profile_id),
             id=str(self.pk),
         )._authorizenet_get_payment_profile(issuer_info=True)
+        return response if response is not None else {}
 
     def authorizenet_get_last_4(self) -> int | None:
         """Returns the last 4 digits of the payment method credit card."""
@@ -202,9 +221,10 @@ class CustomerShippingAddress(models.Model):
         """Returns a URL pointing to the shipping address' detail view."""
         return reverse("tracker:address detail", kwargs={"pk": self.pk})
 
-    def authorizenet_get_profile(self) -> dict | None:
+    def authorizenet_get_profile(self) -> dict:
         """Returns address profile data from Authorizenet."""
-        return AddressProfile(
+        response = AddressProfile(
             customer_profile_id=str(self.customer.authorizenet_profile_id),
             id=str(self.pk),
         )._authorizenet_get_shipping_address()
+        return response if response is not None else {}

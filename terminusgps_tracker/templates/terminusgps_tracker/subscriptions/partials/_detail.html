@@ -1,28 +1,6 @@
-{% load terminusgps_tracker_display %}
-{% if subscription != None %}
-<section id="subscription-data" class="flex flex-col gap-2">
-    <h2 class="text-xl font-bold text-terminus-red-900 dark:text-terminus-red-300">{{ subscription.tier.name }} Subscription</h2>
-    <h3>${{ subscription.tier.amount }}/mo + tax<h3>
-</section>
-{% with paymentProfile.payment.creditCard as cc %}
-<section id="payment-method" class="flex flex-col gap-2">
-    <h2 class="text-lg font-semibold text-terminus-red-800 dark:text-terminus-red-400">Payment Method</h2>
-    <div class="flex items-center gap-2">
-        {{ cc.cardType|credit_card_icon }}
-        <p>{{ cc.cardNumber|cut:'XXXX' }}</p>
-    </div>
-</section>
-{% endwith %}
-<section id="shipping-address" class="flex flex-col gap-2">
-    <h2 class="text-lg font-semibold text-terminus-red-800 dark:text-terminus-red-400">Shipping Address</h2>
-    <p>{{ addressProfile.address }}</p>
-    <p>{{ addressProfile.city }} {{ addressProfile.state }}, {{ addressProfile.zip }}</p>
-</section>
+<h2 class="text-xl font-semibold">{{ subscription.name }}</h2>
+<h3>{{ subscription.features }}</h3>
 <section id="buttons" class="flex flex-col gap-2">
-    <input class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="button" value="Update" hx-get="{% url 'tracker:subscription update' %}">
-    <input class="w-full cursor-pointer rounded border border-current bg-gray-50 p-2 text-center text-red-800 transition-colors duration-300 ease-in-out hover:bg-red-50" type="button" value="Cancel" hx-get="{% url 'tracker:subscription cancel' %}" hx-target="#subscription">
+    <input class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" hx-get="{{ subscription.get_update_url }}" hx-target="#subscription" type="button" value="Update">
+    <input class="w-full cursor-pointer rounded border border-current bg-gray-100 p-2 text-center text-red-700 transition-colors duration-300 ease-in-out hover:bg-red-100" hx-get="{{ subscription.get_delete_url }}" hx-target="#subscription" type="button" value="Cancel">
 </section>
-{% else %}
-<p class="text-center font-semibold">You aren't subscribed yet.</p>
-<button hx-get="{% url 'tracker:subscription create' %}" class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400">Subscribe</button>
-{% endif %}

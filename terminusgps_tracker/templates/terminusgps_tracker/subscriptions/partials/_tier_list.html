@@ -1,1 +1,0 @@
-{% for tier in tier_list %}<div hx-get="{% url 'tracker:tier detail' pk=tier.pk %}" hx-target="this" hx-trigger="load" id="tier-{{ tier.pk }}" hx-swap="outerHTML"></div>{% endfor %}

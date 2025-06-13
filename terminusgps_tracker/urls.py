@@ -6,7 +6,6 @@ app_name = "tracker"
 urlpatterns = [
     path("", views.CustomerDashboardView.as_view(), name="dashboard"),
     path("account/", views.CustomerAccountView.as_view(), name="account"),
-    path("pricing/", views.SubscriptionPricingView.as_view(), name="pricing"),
     path("support/", views.CustomerSupportView.as_view(), name="support"),
     path("units/", views.CustomerWialonUnitsView.as_view(), name="units"),
     path(
@@ -15,34 +14,24 @@ urlpatterns = [
         name="unit list",
     ),
     path(
+        "units/list/<int:unit_pk>/detail/",
+        views.CustomerWialonUnitListDetailView.as_view(),
+        name="unit list detail",
+    ),
+    path(
+        "units/list/<int:unit_pk>/update/",
+        views.CustomerWialonUnitListUpdateView.as_view(),
+        name="unit list update",
+    ),
+    path(
+        "units/list/<int:unit_pk>/delete/",
+        views.CustomerWialonUnitListDeleteView.as_view(),
+        name="unit list delete",
+    ),
+    path(
         "units/create/",
         views.CustomerWialonUnitCreateView.as_view(),
         name="unit create",
-    ),
-    path(
-        "units/<int:pk>/",
-        views.CustomerWialonUnitDetailView.as_view(),
-        name="unit detail",
-    ),
-    path(
-        "transactions/",
-        views.CustomerTransactionsView.as_view(),
-        name="transactions",
-    ),
-    path(
-        "transactions/list/",
-        views.CustomerTransactionListView.as_view(),
-        name="transaction list",
-    ),
-    path(
-        "tiers/list/",
-        views.SubscriptionTierListView.as_view(),
-        name="tier list",
-    ),
-    path(
-        "tiers/<int:pk>/",
-        views.SubscriptionTierDetailView.as_view(),
-        name="tier detail",
     ),
     path(
         "subscription/",
@@ -50,7 +39,7 @@ urlpatterns = [
         name="subscription",
     ),
     path(
-        "subscription/details/",
+        "subscription/<int:sub_pk>/",
         views.SubscriptionDetailView.as_view(),
         name="subscription detail",
     ),
@@ -60,14 +49,14 @@ urlpatterns = [
         name="subscription create",
     ),
     path(
-        "subscription/update/",
+        "subscription/<int:sub_pk>/update/",
         views.SubscriptionUpdateView.as_view(),
         name="subscription update",
     ),
     path(
-        "subscription/cancel/",
+        "subscription/<int:sub_pk>/cancel/",
         views.SubscriptionDeleteView.as_view(),
-        name="subscription cancel",
+        name="subscription delete",
     ),
     path(
         "payments/list/",

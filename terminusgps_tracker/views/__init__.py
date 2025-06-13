@@ -13,6 +13,9 @@ from .customers import (
     CustomerTransactionsView,
     CustomerWialonUnitCreateView,
     CustomerWialonUnitDetailView,
+    CustomerWialonUnitListDeleteView,
+    CustomerWialonUnitListDetailView,
+    CustomerWialonUnitListUpdateView,
     CustomerWialonUnitListView,
     CustomerWialonUnitsView,
 )
@@ -26,8 +29,5 @@ from .subscriptions import (
     SubscriptionCreateView,
     SubscriptionDeleteView,
     SubscriptionDetailView,
-    SubscriptionPricingView,
-    SubscriptionTierDetailView,
-    SubscriptionTierListView,
     SubscriptionUpdateView,
 )

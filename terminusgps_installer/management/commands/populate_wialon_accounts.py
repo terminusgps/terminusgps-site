@@ -1,8 +1,6 @@
 from django.core.management.base import BaseCommand
-from terminusgps.wialon import utils
+from terminusgps.wialon import flags
 from terminusgps.wialon.session import WialonSession
-
-from terminusgps_installer.models import WialonAccount
 
 
 class Command(BaseCommand):
@@ -17,13 +15,22 @@ class Command(BaseCommand):
 
         """
         with WialonSession() as session:
-            resources = utils.get_resources(session)
-            if resources:
-                accounts = [
-                    WialonAccount(id=r.id, name=r.name, uid=r.creator_id)
-                    for r in resources
-                    if r.is_account
-                ]
-                WialonAccount.objects.bulk_create(
-                    accounts, ignore_conflicts=True
-                )
+            resources = session.wialon_api.core_search_item(
+                **{
+                    "spec": {
+                        "itemsType": "avl_resource",
+                        "propName": "rel_is_account",
+                        "propValueMask": 1,
+                        "sortType": "rel_is_account",
+                        "propType": "list",
+                    },
+                    "force": 0,
+                    "flags": (
+                        flags.DataFlag.RESOURCE_BILLING_PROPERTIES
+                        | flags.DataFlag.UNIT_BASE
+                    ).value,
+                    "from": 0,
+                    "to": 0,
+                }
+            )
+            print(f"{resources = }")

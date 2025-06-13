@@ -1,5 +1,6 @@
 from django.contrib import admin, messages
 from django.utils.translation import ngettext
+from terminusgps.wialon.session import WialonSession
 
 from terminusgps_tracker.models import (
     Customer,
@@ -53,9 +54,10 @@ class CustomerWialonUnitAdmin(admin.ModelAdmin):
 
     @admin.action(description="Sync selected unit data with Wialon")
     def wialon_sync(self, request, queryset):
-        for unit in queryset:
-            unit.wialon_sync()
-            unit.save()
+        with WialonSession() as session:
+            for unit in queryset:
+                unit.wialon_sync(session)
+                unit.save()
 
         self.message_user(
             request,
@@ -87,7 +89,7 @@ class CustomerShippingAddressAdmin(admin.ModelAdmin):
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ["customer", "status"]
+    list_display = ["id", "customer", "status"]
     list_filter = ["status"]
     readonly_fields = ["status", "payment", "address"]
     actions = ["authorizenet_sync"]
@@ -117,4 +119,4 @@ class SubscriptionTierAdmin(admin.ModelAdmin):
 
 @admin.register(SubscriptionFeature)
 class SubscriptionFeatureAdmin(admin.ModelAdmin):
-    list_display = ["name", "amount", "desc"]
+    list_display = ["name", "total", "amount", "desc"]
