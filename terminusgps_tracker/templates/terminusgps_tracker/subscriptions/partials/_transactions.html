@@ -1,0 +1,50 @@
+<div class="flex flex-col gap-4">
+    <section id="transactions" class="flex flex-col gap-2">
+        <h2 class="text-lg font-semibold">{{ subscription.name }} Transactions</h2>
+        {% if transaction_list|length != 0 %}
+        <div class="relative overflow-x-auto">
+            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">
+                            ID
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            Submit Time
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            Amount
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            Message
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in transaction_list %}
+                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            {{ t.transId }}
+                        </th>
+                        <td class="px-6 py-4">
+                            {{ t.submitTimeUTC }}
+                        </td>
+                        <td class="px-6 py-4">
+                            {{ t.settleAmount }}
+                        </td>
+                        <td class="px-6 py-4">
+                            {{ t.message }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>There's nothing here...</p>
+        {% endif %}
+    </section>
+    <section id="buttons" class="flex flex-col gap-2" hx-target="#subscription">
+        <input class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-center text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200 dark:border-gray-400" hx-get="{{ subscription.get_absolute_url }}" type="button" value="Back">
+    </section>
+</div>

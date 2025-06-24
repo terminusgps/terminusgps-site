@@ -1,9 +1,9 @@
-<form class="flex flex-col gap-4" action="{% url 'tracker:address delete' address.pk %}" method="post" hx-boost="true">
+<form class="flex flex-col gap-4" action="{% url 'tracker:address delete' address.customer.pk address.pk %}" method="post" hx-boost="true">
     {% if form.non_field_errors %}<div class="inset-shadow w-full animate-jiggle rounded border border-current bg-red-200 p-2 text-center text-red-600">{{ form.non_field_errors }}</div>{% endif %}
-    <p class="text-center">Delete '{{ addressProfile.address }}'?</p>
+    <p class="text-center">Delete '{{ address.authorizenet_get_street }}'?</p>
     {% csrf_token %}
     <section id="buttons" class="flex flex-col gap-2">
-        <input class="w-full cursor-pointer rounded border border-current bg-gray-50 p-2 text-center text-red-800 transition-colors duration-300 ease-in-out hover:bg-red-50" type="submit" value="Delete" hx-post="{% url 'tracker:address delete' address.pk %}" hx-target="#address-list">
-        <input class="w-full cursor-pointer rounded border border-current bg-gray-300 p-2 text-center transition-colors duration-300 ease-in-out hover:bg-gray-200" type="button" value="Cancel" hx-get="{% url 'tracker:address detail' address.pk %}" hx-target="#address-{{ address.pk }}" hx-swap="outerHTML">
+        <input class="w-full cursor-pointer rounded border border-current bg-gray-50 p-2 text-center text-red-800 transition-colors duration-300 ease-in-out hover:bg-red-50" type="submit" value="Delete" hx-post="{% url 'tracker:address delete' address.customer.pk address.pk %}" hx-target="#address-list">
+        <input class="w-full cursor-pointer rounded border border-current bg-gray-300 p-2 text-center transition-colors duration-300 ease-in-out hover:bg-gray-200" type="button" value="Cancel" hx-get="{% url 'tracker:address detail' address.customer.pk address.pk %}" hx-target="#address-{{ address.pk }}" hx-swap="outerHTML">
     </section>
 </form>

@@ -8,7 +8,6 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView
-from terminusgps.authorizenet.constants import ANET_XMLNS
 from terminusgps.authorizenet.controllers import (
     AuthorizenetControllerExecutionError,
 )
@@ -20,15 +19,19 @@ from terminusgps.authorizenet.utils import (
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
 from terminusgps_tracker.forms import CustomerPaymentMethodCreationForm
-from terminusgps_tracker.models.customers import (
+from terminusgps_tracker.models import (
     Customer,
     CustomerPaymentMethod,
     CustomerShippingAddress,
 )
+from terminusgps_tracker.views.mixins import CustomerOrStaffRequiredMixin
 
 
 class CustomerPaymentMethodListView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, ListView
+    LoginRequiredMixin,
+    CustomerOrStaffRequiredMixin,
+    HtmxTemplateResponseMixin,
+    ListView,
 ):
     allow_empty = True
     content_type = "text/html"
@@ -37,7 +40,7 @@ class CustomerPaymentMethodListView(
     http_method_names = ["get"]
     login_url = reverse_lazy("login")
     model = CustomerPaymentMethod
-    ordering = "id"
+    ordering = "pk"
     partial_template_name = "terminusgps_tracker/payments/partials/_list.html"
     permission_denied_message = "Please login to view this content."
     queryset = CustomerPaymentMethod.objects.none()
@@ -45,24 +48,23 @@ class CustomerPaymentMethodListView(
     template_name = "terminusgps_tracker/payments/list.html"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        customer = Customer.objects.get(user=self.request.user)
+        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
         customer.authorizenet_sync_payment_profiles()
         return super().get(request, *args, **kwargs)
 
     def get_queryset(
         self,
     ) -> QuerySet[CustomerPaymentMethod, CustomerPaymentMethod]:
-        return (
-            CustomerPaymentMethod.objects.filter(
-                customer__user=self.request.user
-            )
-            .select_related("customer")
-            .order_by(self.get_ordering())
+        return CustomerPaymentMethod.objects.filter(
+            customer__pk=self.kwargs["customer_pk"]
         )
 
 
 class CustomerPaymentMethodDetailView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
+    LoginRequiredMixin,
+    CustomerOrStaffRequiredMixin,
+    HtmxTemplateResponseMixin,
+    DetailView,
 ):
     content_type = "text/html"
     context_object_name = "payment"
@@ -77,30 +79,33 @@ class CustomerPaymentMethodDetailView(
     queryset = CustomerPaymentMethod.objects.none()
     raise_exception = False
     template_name = "terminusgps_tracker/payments/detail.html"
+    pk_url_kwarg = "payment_pk"
 
     def get_queryset(
         self,
     ) -> QuerySet[CustomerPaymentMethod, CustomerPaymentMethod]:
         return CustomerPaymentMethod.objects.filter(
-            customer__user=self.request.user
+            customer__pk=self.kwargs["customer_pk"]
         ).select_related("customer")
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         try:
             context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-            context["paymentProfile"] = (
-                self.get_object()
-                .authorizenet_get_profile()
-                .find(f"{ANET_XMLNS}paymentProfile")
-            )
+            context["profile"] = self.get_object().authorizenet_get_profile()
             return context
-        except AuthorizenetControllerExecutionError:
-            context["paymentProfile"] = None
+        except (
+            AuthorizenetControllerExecutionError,
+            CustomerPaymentMethod.DoesNotExist,
+        ):
+            context["profile"] = None
             return context
 
 
 class CustomerPaymentMethodDeleteView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, DeleteView
+    LoginRequiredMixin,
+    CustomerOrStaffRequiredMixin,
+    HtmxTemplateResponseMixin,
+    DeleteView,
 ):
     content_type = "text/html"
     context_object_name = "payment"
@@ -116,33 +121,18 @@ class CustomerPaymentMethodDeleteView(
     raise_exception = False
     success_url = reverse_lazy("tracker:payment list")
     template_name = "terminusgps_tracker/payments/delete.html"
-
-    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        try:
-            context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-            context["cc_num"] = (
-                self.get_object()
-                .authorizenet_get_profile()
-                .find(f"{ANET_XMLNS}paymentProfile")
-                .find(f"{ANET_XMLNS}payment")
-                .find(f"{ANET_XMLNS}creditCard")
-                .find(f"{ANET_XMLNS}cardNumber")
-            )
-            return context
-        except AuthorizenetControllerExecutionError:
-            context["cc_num"] = None
-            return context
+    pk_url_kwarg = "payment_pk"
 
     def get_queryset(
         self,
     ) -> QuerySet[CustomerPaymentMethod, CustomerPaymentMethod]:
         return CustomerPaymentMethod.objects.filter(
-            customer__user=self.request.user
+            customer__pk=self.kwargs["customer_pk"]
         ).select_related("customer")
 
     def form_valid(self, form=None) -> HttpResponse | HttpResponseRedirect:
         try:
-            customer = Customer.objects.get(user=self.request.user)
+            customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
             payment_profile = PaymentProfile(
                 id=self.object.pk,
                 customer_profile_id=customer.authorizenet_profile_id,
@@ -180,7 +170,10 @@ class CustomerPaymentMethodDeleteView(
 
 
 class CustomerPaymentMethodCreateView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, FormView
+    LoginRequiredMixin,
+    CustomerOrStaffRequiredMixin,
+    HtmxTemplateResponseMixin,
+    FormView,
 ):
     content_type = "text/html"
     extra_context = {"title": "Create Payment Method"}
@@ -197,8 +190,9 @@ class CustomerPaymentMethodCreateView(
 
     def get_initial(self) -> dict[str, typing.Any]:
         initial: dict[str, typing.Any] = super().get_initial()
-        initial["first_name"] = self.request.user.first_name
-        initial["last_name"] = self.request.user.last_name
+        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
+        initial["first_name"] = customer.user.first_name
+        initial["last_name"] = customer.user.last_name
         return initial
 
     @transaction.atomic

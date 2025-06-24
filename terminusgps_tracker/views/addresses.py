@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView
 from terminusgps.authorizenet.constants import ANET_XMLNS
@@ -21,10 +21,14 @@ from terminusgps_tracker.models.customers import (
     Customer,
     CustomerShippingAddress,
 )
+from terminusgps_tracker.views.mixins import CustomerOrStaffRequiredMixin
 
 
 class CustomerShippingAddressListView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, ListView
+    LoginRequiredMixin,
+    CustomerOrStaffRequiredMixin,
+    HtmxTemplateResponseMixin,
+    ListView,
 ):
     allow_empty = True
     content_type = "text/html"
@@ -33,7 +37,7 @@ class CustomerShippingAddressListView(
     http_method_names = ["get"]
     login_url = reverse_lazy("login")
     model = CustomerShippingAddress
-    ordering = "id"
+    ordering = "pk"
     partial_template_name = "terminusgps_tracker/addresses/partials/_list.html"
     permission_denied_message = "Please login to view this content."
     queryset = CustomerShippingAddress.objects.none()
@@ -41,7 +45,7 @@ class CustomerShippingAddressListView(
     template_name = "terminusgps_tracker/addresses/list.html"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        customer = Customer.objects.get(user=request.user)
+        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
         customer.authorizenet_sync_address_profiles()
         return super().get(request, *args, **kwargs)
 
@@ -50,7 +54,7 @@ class CustomerShippingAddressListView(
     ) -> QuerySet[CustomerShippingAddress, CustomerShippingAddress]:
         return (
             CustomerShippingAddress.objects.filter(
-                customer__user=self.request.user
+                customer__pk=self.kwargs["customer_pk"]
             )
             .select_related("customer")
             .order_by(self.get_ordering())
@@ -73,26 +77,25 @@ class CustomerShippingAddressDetailView(
     queryset = CustomerShippingAddress.objects.none()
     raise_exception = False
     template_name = "terminusgps_tracker/addresses/detail.html"
+    pk_url_kwarg = "address_pk"
 
     def get_queryset(
         self,
     ) -> QuerySet[CustomerShippingAddress, CustomerShippingAddress]:
         return CustomerShippingAddress.objects.filter(
-            customer__user=self.request.user
+            customer__pk=self.kwargs["customer_pk"]
         ).select_related("customer")
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         try:
             context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-            context["addressProfile"] = (
-                self.get_object()
-                .authorizenet_get_profile()
-                .find(f"{ANET_XMLNS}address")
-            )
-            return context
-        except AuthorizenetControllerExecutionError:
-            context["addressProfile"] = None
-            return context
+            context["profile"] = self.get_object().authorizenet_get_profile()
+        except (
+            CustomerShippingAddress.DoesNotExist,
+            AuthorizenetControllerExecutionError,
+        ):
+            context["profile"] = None
+        return context
 
 
 class CustomerShippingAddressDeleteView(
@@ -110,8 +113,21 @@ class CustomerShippingAddressDeleteView(
     permission_denied_message = "Please login to view this content."
     queryset = CustomerShippingAddress.objects.none()
     raise_exception = False
-    success_url = reverse_lazy("tracker:address list")
     template_name = "terminusgps_tracker/addresses/delete.html"
+    pk_url_kwarg = "address_pk"
+
+    def get_queryset(
+        self,
+    ) -> QuerySet[CustomerShippingAddress, CustomerShippingAddress]:
+        return CustomerShippingAddress.objects.filter(
+            customer__pk=self.kwargs["customer_pk"]
+        ).select_related("customer")
+
+    def get_success_url(self) -> str:
+        return reverse(
+            "tracker:address list",
+            kwargs={"customer_pk": self.kwargs["customer_pk"]},
+        )
 
     def form_valid(self, form=None) -> HttpResponse | HttpResponseRedirect:
         try:
@@ -166,13 +182,6 @@ class CustomerShippingAddressDeleteView(
             context["addressProfile"] = None
             return context
 
-    def get_queryset(
-        self,
-    ) -> QuerySet[CustomerShippingAddress, CustomerShippingAddress]:
-        return CustomerShippingAddress.objects.filter(
-            customer__user=self.request.user
-        ).select_related("customer")
-
 
 class CustomerShippingAddressCreateView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, FormView
@@ -192,8 +201,9 @@ class CustomerShippingAddressCreateView(
 
     def get_initial(self) -> dict[str, typing.Any]:
         initial: dict[str, typing.Any] = super().get_initial()
-        initial["first_name"] = self.request.user.first_name
-        initial["last_name"] = self.request.user.last_name
+        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
+        initial["first_name"] = customer.user.first_name
+        initial["last_name"] = customer.user.last_name
         return initial
 
     @transaction.atomic
@@ -201,7 +211,7 @@ class CustomerShippingAddressCreateView(
         self, form: CustomerShippingAddressCreationForm
     ) -> HttpResponse | HttpResponseRedirect:
         try:
-            customer = Customer.objects.get(user=self.request.user)
+            customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
             address = generate_customer_address(form)
             address_profile = AddressProfile(
                 customer_profile_id=customer.authorizenet_profile_id,

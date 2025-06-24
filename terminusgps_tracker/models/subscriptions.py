@@ -1,8 +1,12 @@
 import decimal
 
+from authorizenet import apicontractsv1
 from django.db import models, transaction
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from terminusgps.authorizenet.controllers import (
+    AuthorizenetControllerExecutionError,
+)
 from terminusgps.authorizenet.profiles import SubscriptionProfile
 from terminusgps.authorizenet.utils import calculate_amount_plus_tax
 
@@ -77,46 +81,98 @@ class Subscription(models.Model):
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the subscription's detail view."""
         return reverse(
-            "tracker:subscription detail", kwargs={"sub_pk": self.pk}
+            "tracker:subscription detail",
+            kwargs={"customer_pk": self.customer.pk, "sub_pk": self.pk},
         )
+
+    def delete(self, *args, **kwargs):
+        """Cancels the subscription in Authorizenet before deleting the object."""
+        try:
+            sprofile = self.authorizenet_get_subscription_profile()
+            sprofile.delete()
+        except AuthorizenetControllerExecutionError:
+            print("Something went wrong with Authorizenet.")
+        finally:
+            super().delete(*args, **kwargs)
 
     def get_update_url(self) -> str:
         """Returns a URL pointing to the subscription's update view."""
         return reverse(
-            "tracker:subscription update", kwargs={"sub_pk": self.pk}
+            "tracker:subscription update",
+            kwargs={"customer_pk": self.customer.pk, "sub_pk": self.pk},
         )
 
     def get_delete_url(self) -> str:
         """Returns a URL pointing to the subscription's delete view."""
         return reverse(
-            "tracker:subscription delete", kwargs={"sub_pk": self.pk}
+            "tracker:subscription delete",
+            kwargs={"customer_pk": self.customer.pk, "sub_pk": self.pk},
         )
 
     def calculate_amount(self, add_tax: bool = True) -> decimal.Decimal:
-        amount_list = []
+        """
+        Calculates and returns the total dollar amount for the subscription.
 
-        if self.units.exists():
-            amount_list.extend(
-                self.units.values_list("tier__amount", flat=True)
-            )
-        if self.features.exists():
-            amount_list.extend(
-                [f.calculate_amount() for f in self.features.all()]
-            )
+        :param add_tax: Whether or not to add tax to the calculated amount. Default is :py:obj:`True`.
+        :type add_tax: :py:obj:`bool`
+        :returns: The total dollar amount for the subscription.
+        :rtype: :py:obj:`~decimal.Decimal`
 
-        final_amount = decimal.Decimal(sum(amount_list))
+        """
+        amounts = []
+        amounts.extend(self.get_total_unit_amounts())
+        amounts.extend(self.get_total_feature_amounts())
+
         return (
-            calculate_amount_plus_tax(final_amount)
+            calculate_amount_plus_tax(decimal.Decimal(sum(amounts)))
             if add_tax
-            else final_amount
+            else decimal.Decimal(sum(amounts))
         )
 
-    def authorizenet_sync(self) -> None:
+    def get_total_feature_amounts(self) -> list[decimal.Decimal]:
+        """Returns a list of dollar amounts for features assigned to the subscription."""
+        if not self.features.exists():
+            return []
+        return [f.calculate_amount() for f in self.features.all()]
+
+    def get_total_unit_amounts(self) -> list[decimal.Decimal]:
+        """Returns a list of dollar amounts for units assigned to the subscription."""
+        if not self.customer.units.exists():
+            return []
+        return [u.calculate_amount() for u in self.customer.units.all()]
+
+    def authorizenet_update_amount(
+        self, sprofile: SubscriptionProfile, add_tax: bool = True
+    ) -> SubscriptionProfile:
+        """Recalculates and updates the subscription amount in Authorizenet."""
+        new_amount = self.calculate_amount(add_tax=add_tax)
+        sprofile.update(apicontractsv1.ARBSubscriptionType(amount=new_amount))
+        return sprofile
+
+    def authorizenet_update_payment(
+        self, sprofile: SubscriptionProfile
+    ) -> SubscriptionProfile:
+        """Updates the payment method and shipping address for the subscription in Authorizenet."""
+        sprofile.update(
+            apicontractsv1.ARBSubscriptionType(
+                profile=apicontractsv1.customerProfileIdType(
+                    customerProfileId=str(
+                        self.customer.authorizenet_profile_id
+                    ),
+                    customerPaymentProfileId=str(self.payment.pk),
+                    customerAddressId=str(self.address.pk),
+                )
+            )
+        )
+        return sprofile
+
+    def authorizenet_sync(self) -> SubscriptionProfile:
         """Syncs the subscription payment, address and status with Authorizenet."""
         sprofile = self.authorizenet_get_subscription_profile()
         self.authorizenet_sync_status(sprofile)
         self.authorizenet_sync_payment(sprofile)
         self.authorizenet_sync_address(sprofile)
+        return sprofile
 
     @transaction.atomic
     def authorizenet_sync_payment(
@@ -147,7 +203,7 @@ class Subscription(models.Model):
         return sprofile
 
     def authorizenet_needs_sync(self) -> bool:
-        """Returns :py:obj:`True` if the subscription is missing a payment or address."""
+        """Returns :py:obj:`True` if the subscription is missing a payment or an address."""
         return not bool(self.payment or self.address)
 
     def authorizenet_get_subscription_profile(self) -> SubscriptionProfile:
@@ -157,13 +213,22 @@ class Subscription(models.Model):
             id=self.pk,
         )
 
+    @staticmethod
+    def authorizenet_get_transaction_list(
+        sprofile: SubscriptionProfile,
+    ) -> list[dict[str, str]]:
+        """Retrieves and returns a transaction list for a subscription profile."""
+        return sprofile.transactions
+
 
 class SubscriptionFeature(models.Model):
     """A subscription feature for a customer subscription."""
 
     name = models.CharField(max_length=64)
     """Subscription feature name."""
-    desc = models.TextField(max_length=1024)
+    desc = models.TextField(
+        max_length=1024, null=True, blank=True, default=None
+    )
     """Subscription feature description."""
     amount = models.DecimalField(max_digits=9, decimal_places=2, default=9.99)
     """Subscription feature $ amount."""
@@ -172,14 +237,14 @@ class SubscriptionFeature(models.Model):
 
     def __str__(self) -> str:
         """Returns the subscription feature name."""
-        if self.total != 1:
-            return f"{self.total}x {self.name}"
-        return self.name
+        return f"{self.total}x {self.name}"
 
     def get_amount_display(self) -> str:
+        """Returns the dollar amount of the feature."""
         return f"${self.amount}"
 
     def calculate_amount(self) -> decimal.Decimal:
+        """Returns the dollar amount times the total for the subscription feature."""
         return self.amount * self.total
 
 
@@ -188,7 +253,9 @@ class SubscriptionTier(models.Model):
 
     name = models.CharField(max_length=64)
     """Subscription tier name."""
-    desc = models.TextField(max_length=1024)
+    desc = models.TextField(
+        max_length=1024, null=True, blank=True, default=None
+    )
     """Subscription tier description."""
     amount = models.DecimalField(max_digits=9, decimal_places=2, default=9.99)
     """Subscription tier $ amount."""
@@ -198,4 +265,5 @@ class SubscriptionTier(models.Model):
         return self.name
 
     def get_amount_display(self) -> str:
+        """Returns the dollar amount of the subscription tier."""
         return f"${self.amount}"

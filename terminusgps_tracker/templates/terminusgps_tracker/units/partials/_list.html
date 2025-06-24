@@ -17,7 +17,13 @@
         </thead>
         <tbody>
         {% for unit in unit_list %}
-            <tr hx-get="{% url 'tracker:unit list detail' unit.pk %}" hx-trigger="load" hx-target="this" id="unit-{{ unit.pk }}" class="border-b border-gray-600 bg-gray-100 odd:bg-gray-200 dark:bg-gray-800 dark:odd:bg-gray-900"></tr>
+            <tr hx-get="{% url 'tracker:unit list detail' unit.customer.pk unit.pk %}" hx-trigger="load" hx-target="this" id="unit-{{ unit.pk }}" class="border-b border-gray-600 bg-gray-100 odd:bg-gray-200 dark:bg-gray-800 dark:odd:bg-gray-900">
+                <div class="animate-pulse">
+                <th scope="row" class="w-1/3 px-6 py-4 font-medium whitespace-nowrap text-gray-900 select-all dark:text-white"></th>
+                <td class="w-1/3 px-6 py-4 select-all"></td>
+                <td class="w-1/3 px-6 py-4"></td>
+                </div>
+            </tr>
         {% endfor %}
     </table>
 </div>

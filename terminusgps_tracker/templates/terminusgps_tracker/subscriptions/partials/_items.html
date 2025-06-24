@@ -1,0 +1,26 @@
+<div class="relative overflow-x-auto">
+    <table class="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
+        <thead class="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="px-6 py-3">
+                    Item
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Amount
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items_list %}
+            <tr class="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+                <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 dark:text-white">
+                    {{ item }}
+                </th>
+                <td class="px-6 py-4">
+                    ${{ item.calculate_amount }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

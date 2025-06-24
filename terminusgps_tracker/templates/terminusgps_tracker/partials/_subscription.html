@@ -1,6 +1,8 @@
 {% if subscription == None %}
-<p class="flex flex-col gap-4 rounded border-2 border-current bg-gray-100 p-4 text-center font-semibold dark:bg-gray-800">You aren't subscribed yet...</p>
-<a class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" hx-boost="true" href="{% url 'tracker:unit create' %}">Register New Unit</a>
+<section id="subscription" class="flex flex-col gap-4 rounded border-2 border-current bg-gray-100 p-4 text-center dark:bg-gray-800" hx-target="this">
+    <p class="font-semibold">You aren't subscribed yet...</p>
+    <input type="button" class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" hx-get="{% url 'tracker:subscription create' customer.pk %}" value="Subscribe">
+</section>
 {% else %}
 <section id="subscription" hx-get="{{ subscription.get_absolute_url }}" hx-target="this" hx-trigger="load" class="flex flex-col gap-4 rounded border-2 border-current bg-gray-100 p-4 dark:bg-gray-800"></section>
 {% endif %}

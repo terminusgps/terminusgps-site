@@ -1,4 +1,5 @@
 <form class="flex flex-col gap-4" method="post" hx-post="{{ subscription.get_update_url }}">
+    <h2 class="text-lg font-semibold">{{ subscription.name }}</h2>
     {% csrf_token %}
     {{ form.payment.as_field_group }}
     {{ form.address.as_field_group }}

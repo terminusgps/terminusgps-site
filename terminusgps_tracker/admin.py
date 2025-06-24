@@ -76,7 +76,6 @@ class CustomerPaymentMethodAdmin(admin.ModelAdmin):
     list_display = ["id", "customer"]
     list_filter = ["customer"]
     readonly_fields = ["id", "customer"]
-    view_on_site = False
 
 
 @admin.register(CustomerShippingAddress)
@@ -84,7 +83,6 @@ class CustomerShippingAddressAdmin(admin.ModelAdmin):
     list_display = ["id", "customer"]
     list_filter = ["customer"]
     readonly_fields = ["id", "customer"]
-    view_on_site = False
 
 
 @admin.register(Subscription)

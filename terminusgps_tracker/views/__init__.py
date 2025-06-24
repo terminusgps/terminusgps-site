@@ -7,16 +7,12 @@ from .addresses import (
 from .customers import (
     CustomerAccountView,
     CustomerDashboardView,
+    CustomerPaymentMethodChoicesView,
+    CustomerShippingAddressChoicesView,
     CustomerSubscriptionView,
     CustomerSupportView,
     CustomerTransactionListView,
     CustomerTransactionsView,
-    CustomerWialonUnitCreateView,
-    CustomerWialonUnitDetailView,
-    CustomerWialonUnitListDeleteView,
-    CustomerWialonUnitListDetailView,
-    CustomerWialonUnitListUpdateView,
-    CustomerWialonUnitListView,
     CustomerWialonUnitsView,
 )
 from .payments import (
@@ -29,5 +25,15 @@ from .subscriptions import (
     SubscriptionCreateView,
     SubscriptionDeleteView,
     SubscriptionDetailView,
+    SubscriptionItemListView,
+    SubscriptionTransactionsView,
     SubscriptionUpdateView,
+)
+from .units import (
+    CustomerWialonUnitCreateView,
+    CustomerWialonUnitDetailView,
+    CustomerWialonUnitListDeleteView,
+    CustomerWialonUnitListDetailView,
+    CustomerWialonUnitListUpdateView,
+    CustomerWialonUnitListView,
 )

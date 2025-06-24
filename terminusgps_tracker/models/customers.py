@@ -1,7 +1,10 @@
+import decimal
+
 from django.contrib.auth import get_user_model
 from django.db import models, transaction
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from terminusgps.authorizenet.constants import ANET_XMLNS
 from terminusgps.authorizenet.profiles import (
     AddressProfile,
     CustomerProfile,
@@ -35,8 +38,27 @@ class Customer(models.Model):
         """Returns the customer's email address/username."""
         return self.user.email if self.user.email else self.user.username
 
+    def generate_payment_method_choices(self) -> list[tuple[int, str]]:
+        """Returns a list of payment method choices for a front-end."""
+        return [
+            (
+                payment.pk,
+                f"{payment.authorizenet_get_credit_card_type()} ending in {str(payment.authorizenet_get_credit_card_number())[-4:]}",
+            )
+            for payment in CustomerPaymentMethod.objects.filter(customer=self)
+        ]
+
+    def generate_shipping_address_choices(self) -> list[tuple[int, str]]:
+        """Returns a list of shipping address choices for a front-end."""
+        return [
+            (address.pk, address.authorizenet_get_street())
+            for address in CustomerShippingAddress.objects.filter(
+                customer=self
+            )
+        ]
+
     @transaction.atomic
-    def authorizenet_sync_payment_profiles(self) -> None:
+    def authorizenet_sync_payment_profiles(self) -> list:
         """Retrieves payment profiles from Authorizenet and creates customer payment methods based on them."""
         current_payment_ids = set(
             CustomerPaymentMethod.objects.filter(customer=self).values_list(
@@ -48,13 +70,15 @@ class Customer(models.Model):
             for id in self.authorizenet_get_payment_profile_ids()
             if id not in current_payment_ids
         ]
-        if new_payment_objs:
-            CustomerPaymentMethod.objects.bulk_create(
-                new_payment_objs, ignore_conflicts=True
-            )
+
+        if not new_payment_objs:
+            return []
+        return CustomerPaymentMethod.objects.bulk_create(
+            new_payment_objs, ignore_conflicts=True
+        )
 
     @transaction.atomic
-    def authorizenet_sync_address_profiles(self) -> None:
+    def authorizenet_sync_address_profiles(self) -> list:
         """Retrieves address profiles from Authorizenet and creates customer shipping addresses based on them."""
         current_address_ids = set(
             CustomerShippingAddress.objects.filter(customer=self).values_list(
@@ -66,10 +90,12 @@ class Customer(models.Model):
             for id in self.authorizenet_get_address_profile_ids()
             if id not in current_address_ids
         ]
-        if new_address_objs:
-            CustomerShippingAddress.objects.bulk_create(
-                new_address_objs, ignore_conflicts=True
-            )
+
+        if not new_address_objs:
+            return []
+        return CustomerShippingAddress.objects.bulk_create(
+            new_address_objs, ignore_conflicts=True
+        )
 
     def authorizenet_get_customer_profile(self) -> CustomerProfile:
         """Returns the Authorizenet customer profile for the customer."""
@@ -98,6 +124,10 @@ class Customer(models.Model):
         with WialonSession() as session:
             resource = WialonResource(self.wialon_resource_id, session=session)
             return resource.get_remaining_days()
+
+    def get_unit_amounts(self) -> decimal.Decimal | None:
+        if self.units.exists():
+            return sum(self.units.values_list("tier__amount", flat=True)) * 1
 
 
 class CustomerWialonUnit(models.Model):
@@ -154,6 +184,10 @@ class CustomerWialonUnit(models.Model):
         self.vin = unit.pfields.get("vin")
         return session
 
+    def calculate_amount(self) -> decimal.Decimal:
+        """Returns the dollar amount for the unit."""
+        return self.tier.amount
+
 
 class CustomerPaymentMethod(models.Model):
     """A payment method for a customer."""
@@ -178,22 +212,46 @@ class CustomerPaymentMethod(models.Model):
 
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the payment method's detail view."""
-        return reverse("tracker:payment detail", kwargs={"pk": self.pk})
+        return reverse(
+            "tracker:payment detail",
+            kwargs={"customer_pk": self.customer.pk, "payment_pk": self.pk},
+        )
 
-    def authorizenet_get_profile(self) -> dict:
+    def authorizenet_get_profile(self):
         """Returns payment profile data from Authorizenet."""
         response = PaymentProfile(
             customer_profile_id=str(self.customer.authorizenet_profile_id),
             id=str(self.pk),
         )._authorizenet_get_payment_profile(issuer_info=True)
-        return response if response is not None else {}
+        return (
+            response.find(f"{ANET_XMLNS}paymentProfile")
+            if response is not None
+            else None
+        )
 
-    def authorizenet_get_last_4(self) -> int | None:
-        """Returns the last 4 digits of the payment method credit card."""
-        return PaymentProfile(
-            customer_profile_id=str(self.customer.authorizenet_profile_id),
-            id=str(self.pk),
-        ).last_4
+    def authorizenet_get_credit_card_number(self) -> str:
+        """Returns the (obfuscated) credit card for the payment method."""
+        pprofile = self.authorizenet_get_profile()
+
+        if pprofile is None:
+            return ""
+        return (
+            pprofile.find(f"{ANET_XMLNS}payment")
+            .find(f"{ANET_XMLNS}creditCard")
+            .find(f"{ANET_XMLNS}cardNumber")
+        )
+
+    def authorizenet_get_credit_card_type(self) -> str:
+        """Returns the credit card type for the payment method."""
+        pprofile = self.authorizenet_get_profile()
+
+        if pprofile is None:
+            return ""
+        return (
+            pprofile.find(f"{ANET_XMLNS}payment")
+            .find(f"{ANET_XMLNS}creditCard")
+            .find(f"{ANET_XMLNS}cardType")
+        )
 
 
 class CustomerShippingAddress(models.Model):
@@ -219,12 +277,26 @@ class CustomerShippingAddress(models.Model):
 
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the shipping address' detail view."""
-        return reverse("tracker:address detail", kwargs={"pk": self.pk})
+        return reverse(
+            "tracker:address detail",
+            kwargs={"customer_pk": self.customer.pk, "address_pk": self.pk},
+        )
 
-    def authorizenet_get_profile(self) -> dict:
+    def authorizenet_get_profile(self):
         """Returns address profile data from Authorizenet."""
         response = AddressProfile(
             customer_profile_id=str(self.customer.authorizenet_profile_id),
             id=str(self.pk),
         )._authorizenet_get_shipping_address()
-        return response if response is not None else {}
+        return (
+            response.find(f"{ANET_XMLNS}address")
+            if response is not None
+            else None
+        )
+
+    def authorizenet_get_street(self) -> str:
+        aprofile = self.authorizenet_get_profile()
+
+        if aprofile is None:
+            return ""
+        return aprofile.find(f"{ANET_XMLNS}address")
