@@ -44,3 +44,15 @@ class SubscriptionCreationForm(forms.Form):
             attrs={"class": settings.DEFAULT_FIELD_CLASS}
         ),
     )
+    coupon_code = forms.CharField(
+        max_length=24,
+        label="Coupon Code",
+        help_text="Optionally enter a coupon code for your new subscription.",
+        required=False,
+        widget=forms.widgets.TextInput(
+            attrs={
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "placeholder": "12345678",
+            }
+        ),
+    )

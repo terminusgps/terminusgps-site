@@ -92,7 +92,7 @@ class CustomerWialonUnitListDetailView(
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         unit = self.get_object()
-        if unit is not None:
+        if unit is not None and request.GET.get("refresh") == "on":
             with WialonSession() as session:
                 unit.wialon_sync(session)
                 unit.save()
@@ -125,6 +125,18 @@ class CustomerWialonUnitListDeleteView(
         )
 
     def form_valid(self, form: forms.Form) -> HttpResponse:
+        if (
+            Customer.objects.get(pk=self.kwargs["customer_pk"]).units.count()
+            == 1
+        ):
+            form.add_error(
+                None,
+                ValidationError(_("Whoops! You can't delete your last unit.")),
+            )
+            response = self.form_invalid(form=form)
+            response.headers["HX-Retarget"] = f"#unit-{self.kwargs['unit_pk']}"
+            return response
+
         response = super().form_valid(form=form)
         subscription = Subscription.objects.get(
             customer=Customer.objects.get(pk=self.kwargs["customer_pk"])
@@ -174,11 +186,9 @@ class CustomerWialonUnitListUpdateView(
         self, form: forms.Form
     ) -> HttpResponse | HttpResponseRedirect:
         response = super().form_valid(form=form)
-
-        subscription = Subscription.objects.get(
-            customer=Customer.objects.get(pk=self.kwargs["customer_pk"])
-        )
-        subscription.authorizenet_update_amount()
+        sub = Subscription.objects.get(customer__pk=self.kwargs["customer_pk"])
+        sprofile = sub.authorizenet_get_subscription_profile()
+        sub.authorizenet_update_amount(sprofile)
         with WialonSession() as session:
             new_name = form.cleaned_data["name"]
             unit = WialonUnit(self.get_object().pk, session)
