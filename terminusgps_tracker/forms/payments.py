@@ -48,13 +48,8 @@ class CustomerPaymentMethodCreationForm(forms.Form):
             }
         ),
     )
-    credit_card = CreditCardField(
-        label="Credit Card",
-        help_text="Please enter a valid credit card number and code.",
-    )
-    address = AddressField(
-        label="Address", help_text="Please enter a valid shipping address."
-    )
+    credit_card = CreditCardField(label="Credit Card")
+    address = AddressField(label="Address")
     default = forms.BooleanField(
         label="Set as default payment method?",
         required=False,

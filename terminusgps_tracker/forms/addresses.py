@@ -45,9 +45,7 @@ class CustomerShippingAddressCreationForm(forms.Form):
             }
         ),
     )
-    address = AddressField(
-        label="Address", help_text="Please fill out a valid shipping address."
-    )
+    address = AddressField(label="Address")
     default = forms.BooleanField(
         help_text="Check this to set the new shipping address as your default.",
         label="Set as default shipping address?",

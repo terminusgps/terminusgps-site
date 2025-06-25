@@ -61,11 +61,14 @@ class SubscriptionDetailView(
         ).select_related("customer")
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        """Adds the subscription start date to the view context."""
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["units"] = Customer.objects.get(
-            pk=self.kwargs["customer_pk"]
-        ).units.all()
-        context["payment_date"] = datetime.datetime.strptime(
+        context["start_date"] = self.get_start_date()
+        return context
+
+    def get_start_date(self) -> datetime.datetime:
+        """Retrieves the subscription start date from Authorizenet and returns it as an aware datetime."""
+        return datetime.datetime.strptime(
             str(
                 self.get_object()
                 .authorizenet_get_subscription_profile()
@@ -76,7 +79,6 @@ class SubscriptionDetailView(
             ),
             "%Y-%m-%d",
         ).replace(hour=2, tzinfo=ZoneInfo("US/Pacific"))
-        return context
 
 
 class SubscriptionCreateView(
@@ -134,10 +136,8 @@ class SubscriptionCreateView(
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         form = self.get_form()
-        if not form.is_valid():
-            return self.form_invalid(form=form)
-
         customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
+
         if customer.units.count() == 0:
             form.add_error(
                 None,
@@ -459,12 +459,10 @@ class SubscriptionTransactionDetailView(
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         if self.kwargs.get("transaction_id"):
             trans_id = self.kwargs["transaction_id"]
-            context["transaction"] = get_transaction(trans_id).find(
-                f"{ANET_XMLNS}transaction"
-            )
+            trans_obj = get_transaction(trans_id).transaction
+            context["transaction"] = trans_obj
             context["submit_time"] = datetime.datetime.strptime(
-                str(context["transaction"].submitTimeUTC),
-                "%Y-%m-%dT%H:%M:%S.%fZ",
+                str(trans_obj.submitTimeUTC), "%Y-%m-%dT%H:%M:%S.%fZ"
             )
         return context
 
