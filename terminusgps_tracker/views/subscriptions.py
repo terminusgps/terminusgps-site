@@ -21,7 +21,10 @@ from django.views.generic import (
 )
 from terminusgps.authorizenet.constants import ANET_XMLNS
 from terminusgps.authorizenet.profiles import SubscriptionProfile
-from terminusgps.authorizenet.utils import calculate_amount_plus_tax
+from terminusgps.authorizenet.utils import (
+    calculate_amount_plus_tax,
+    get_transaction,
+)
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
 from terminusgps_tracker.forms import SubscriptionCreationForm
@@ -305,6 +308,33 @@ class SubscriptionTransactionsView(
                 subscription.authorizenet_get_subscription_profile()
             )
         )
+        return context
+
+
+class SubscriptionTransactionDetailView(
+    LoginRequiredMixin,
+    CustomerOrStaffRequiredMixin,
+    HtmxTemplateResponseMixin,
+    TemplateView,
+):
+    content_type = "text/html"
+    http_method_names = ["get"]
+    template_name = "terminusgps_tracker/subscriptions/transaction_detail.html"
+    partial_template_name = (
+        "terminusgps_tracker/subscriptions/partials/_transaction_detail.html"
+    )
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        if self.kwargs.get("transaction_id"):
+            trans_id = self.kwargs["transaction_id"]
+            context["transaction"] = get_transaction(trans_id).find(
+                f"{ANET_XMLNS}transaction"
+            )
+            context["submit_time"] = datetime.datetime.strptime(
+                str(context["transaction"].submitTimeUTC),
+                "%Y-%m-%dT%H:%M:%S.%fZ",
+            )
         return context
 
 

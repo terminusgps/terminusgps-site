@@ -20,7 +20,7 @@
     </div>
     <div class="mx-2 flex flex-col items-center text-center text-pretty">
         <p><strong>Grand Total:</strong> ${{ subscription.calculate_amount }}</p>
-        <p class="font-light">(You'll be charged this amount every month on the {{ payment_date|date:'jS' }} at {{ payment_date|localtime|date:'P' }})</p>
+        <p class="font-light">(You'll be charged this amount every month at around {{ payment_date|localtime|date:'P' }} on the {{ payment_date|date:'jS' }})</p>
     </div>
 </section>
 <section id="buttons" class="flex flex-col gap-2" hx-target="#subscription">

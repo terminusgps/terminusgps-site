@@ -69,6 +69,11 @@ urlpatterns = [
         name="subscription transactions",
     ),
     path(
+        "transactions/<int:transaction_id>/",
+        views.SubscriptionTransactionDetailView.as_view(),
+        name="transaction detail",
+    ),
+    path(
         "payments/<int:customer_pk>/new/",
         views.CustomerPaymentMethodCreateView.as_view(),
         name="payment create",

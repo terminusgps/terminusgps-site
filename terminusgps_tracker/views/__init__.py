@@ -26,6 +26,7 @@ from .subscriptions import (
     SubscriptionDeleteView,
     SubscriptionDetailView,
     SubscriptionItemListView,
+    SubscriptionTransactionDetailView,
     SubscriptionTransactionsView,
     SubscriptionUpdateView,
 )
