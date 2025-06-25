@@ -185,8 +185,20 @@ class CustomerWialonUnitListUpdateView(
     def form_valid(
         self, form: forms.Form
     ) -> HttpResponse | HttpResponseRedirect:
+        try:
+            sub = Subscription.objects.get(
+                customer__pk=self.kwargs["customer_pk"]
+            )
+        except Subscription.DoesNotExist:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! You need to be subscribed to do that.")
+                ),
+            )
+            return self.form_invalid(form=form)
+
         response = super().form_valid(form=form)
-        sub = Subscription.objects.get(customer__pk=self.kwargs["customer_pk"])
         sprofile = sub.authorizenet_get_subscription_profile()
         sub.authorizenet_update_amount(sprofile)
         with WialonSession() as session:

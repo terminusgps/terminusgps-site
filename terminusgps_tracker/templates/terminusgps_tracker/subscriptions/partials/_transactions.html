@@ -1,47 +1,45 @@
 {% load tz %}
-<div class="flex flex-col gap-4">
-    <section id="transactions" class="flex flex-col gap-2">
-        <h2 class="text-lg font-semibold">{{ subscription.name }} Transactions</h2>
-        {% if transaction_list|length != 0 %}
-        <div class="relative overflow-x-auto">
-            <table class="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
-                <thead class="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
-                    <tr>
-                        <th scope="col" class="px-6 py-3">
-                            Payment
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                            Date + Time
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                            Amount
-                        </th>
-                        <th scope="col" class="px-6 py-3">
-                            Result
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for t in transaction_list %}
-                    <tr id="{{ t.transId }}" class="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800" hx-get="{% url 'tracker:transaction detail' t.transId %}" hx-target="this" hx-trigger="load">
-                        <td scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 dark:text-white">
-                        </td>
-                        <th class="px-6 py-4 font-normal">
-                        </th>
-                        <td class="px-6 py-4 text-nowrap">
-                        </td>
-                        <td class="px-6 py-4 text-nowrap">
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <p>There's nothing here...</p>
-        {% endif %}
-    </section>
-    <section id="buttons" class="flex flex-col gap-2" hx-target="#subscription">
-        <input class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-center text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200 dark:border-gray-400" hx-get="{{ subscription.get_absolute_url }}" type="button" value="Back">
-    </section>
-</div>
+<section id="transactions" class="flex flex-col gap-4">
+    <h2 class="text-lg font-semibold">{{ subscription.name }} Transactions</h2>
+    {% if transaction_list|length != 0 %}
+    <div class="relative overflow-x-auto">
+        <table class="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
+            <thead class="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Payment
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Date + Time
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Amount
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Result
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transaction_list %}
+                <tr id="{{ t.transId }}" class="group border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800" hx-get="{% url 'tracker:transaction detail' t.transId %}" hx-target="this" hx-trigger="load">
+                    <td class="animate-pulse bg-gray-600 px-6 py-4 group-odd:bg-gray-400">
+                    </td>
+                    <th class="animate-pulse bg-gray-600 px-6 py-4 group-odd:bg-gray-400">
+                    </th>
+                    <td class="animate-pulse bg-gray-600 px-6 py-4 group-odd:bg-gray-400">
+                    </td>
+                    <td class="animate-pulse bg-gray-600 px-6 py-4 group-odd:bg-gray-400">
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>There's nothing here...</p>
+    {% endif %}
+</section>
+<section id="buttons" class="flex flex-col gap-2" hx-target="#subscription">
+    <input class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-center text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200 dark:border-gray-400" hx-get="{{ subscription.get_absolute_url }}" type="button" value="Back">
+</section>

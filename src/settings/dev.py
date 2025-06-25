@@ -32,7 +32,7 @@ secret: dict[str, str | None] = {
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[#errors]:text-red-800 group-has-[#errors]:bg-red-100"
+DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[.errorlist]:text-red-800 group-has-[.errorlist]:bg-red-100"
 LOGIN_URL = "/login/"
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 BASE_DIR = Path(__file__).resolve().parent.parent

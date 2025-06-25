@@ -67,10 +67,9 @@ class CustomerSubscriptionView(
     template_name = "terminusgps_tracker/subscription.html"
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["customer"] = Customer.objects.get(user=self.request.user)
-
         try:
+            context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+            context["customer"] = Customer.objects.get(user=self.request.user)
             context["subscription"] = Subscription.objects.get(
                 customer=context["customer"]
             )
@@ -129,7 +128,9 @@ class CustomerWialonUnitsView(
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         try:
             context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-            context["customer"] = Customer.objects.get(user=self.request.user)
+            context["customer"] = Customer.objects.select_related(
+                "subscription"
+            ).get(user=self.request.user)
             return context
         except Customer.DoesNotExist:
             context["customer"] = None

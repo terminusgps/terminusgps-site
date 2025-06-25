@@ -9,7 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import (
@@ -130,8 +130,9 @@ class SubscriptionCreateView(
         if not form.is_valid():
             return self.form_invalid(form=form)
 
-        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-        if not customer.units.exists():
+        if not Customer.objects.get(
+            pk=self.kwargs["customer_pk"]
+        ).units.exists():
             form.add_error(
                 None,
                 ValidationError(
@@ -248,13 +249,13 @@ class SubscriptionUpdateView(
                 ),
             }
         )
-        form.fields["features"].label = "Additional Features"
-        form.fields[
-            "features"
-        ].help_text = "Ctrl+click to select multiple, Cmd+click on Mac"
         form.fields["features"].widget.attrs.update(
             {"class": settings.DEFAULT_FIELD_CLASS}
         )
+        form.fields["features"].label = "Additional Features"
+        form.fields[
+            "features"
+        ].help_text = "Ctrl+click to select multiple. Cmd+click on Mac."
         return form
 
 
@@ -272,6 +273,13 @@ class SubscriptionDeleteView(
     )
     pk_url_kwarg = "sub_pk"
     template_name = "terminusgps_tracker/subscriptions/delete.html"
+    success_url = reverse_lazy("tracker:subscription")
+
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        subscription = self.get_object()
+        sprofile = subscription.authorizenet_get_subscription_profile()
+        sprofile.delete()
+        return super().post(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet[Subscription, Subscription]:
         return Subscription.objects.filter(

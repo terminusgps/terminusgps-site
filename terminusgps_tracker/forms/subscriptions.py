@@ -5,7 +5,6 @@ from django.utils.safestring import mark_safe
 from terminusgps_tracker.models import (
     CustomerPaymentMethod,
     CustomerShippingAddress,
-    SubscriptionFeature,
 )
 
 
@@ -32,16 +31,6 @@ class SubscriptionCreationForm(forms.Form):
                 "hx-target": "this",
                 "hx-trigger": "load",
             }
-        ),
-    )
-    features = forms.ModelChoiceField(
-        label="Additonal Features",
-        help_text="Ctrl+click to select multiple, Cmd+click on Mac",
-        queryset=SubscriptionFeature.objects.all(),
-        empty_label=None,
-        required=False,
-        widget=forms.widgets.SelectMultiple(
-            attrs={"class": settings.DEFAULT_FIELD_CLASS}
         ),
     )
     coupon_code = forms.CharField(
