@@ -24,11 +24,6 @@ urlpatterns = [
         name="unit list update",
     ),
     path(
-        "units/<int:customer_pk>/list/<int:unit_pk>/delete/",
-        views.CustomerWialonUnitListDeleteView.as_view(),
-        name="unit list delete",
-    ),
-    path(
         "units/<int:customer_pk>/create/",
         views.CustomerWialonUnitCreateView.as_view(),
         name="unit create",

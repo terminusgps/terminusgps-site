@@ -33,7 +33,6 @@ from .subscriptions import (
 from .units import (
     CustomerWialonUnitCreateView,
     CustomerWialonUnitDetailView,
-    CustomerWialonUnitListDeleteView,
     CustomerWialonUnitListDetailView,
     CustomerWialonUnitListUpdateView,
     CustomerWialonUnitListView,

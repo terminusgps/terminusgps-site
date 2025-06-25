@@ -1,8 +1,10 @@
 import datetime
+import decimal
 import typing
 from zoneinfo import ZoneInfo
 
 from authorizenet import apicontractsv1
+from dateutil.relativedelta import relativedelta
 from django import forms
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -20,12 +22,17 @@ from django.views.generic import (
     UpdateView,
 )
 from terminusgps.authorizenet.constants import ANET_XMLNS
+from terminusgps.authorizenet.controllers import (
+    AuthorizenetControllerExecutionError,
+)
 from terminusgps.authorizenet.profiles import SubscriptionProfile
 from terminusgps.authorizenet.utils import (
     calculate_amount_plus_tax,
     get_transaction,
 )
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
+from terminusgps.wialon.items import WialonResource
+from terminusgps.wialon.session import WialonSession
 
 from terminusgps_tracker.forms import SubscriptionCreationForm
 from terminusgps_tracker.models import Customer, Subscription
@@ -130,13 +137,20 @@ class SubscriptionCreateView(
         if not form.is_valid():
             return self.form_invalid(form=form)
 
-        if not Customer.objects.get(
-            pk=self.kwargs["customer_pk"]
-        ).units.exists():
+        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
+        if customer.units.count() == 0:
             form.add_error(
                 None,
                 ValidationError(
                     _("Whoops! Please register a unit before subscribing."),
+                    code="invalid",
+                ),
+            )
+        if not customer.wialon_resource_id:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! You don't have a Wialon account assigned."),
                     code="invalid",
                 ),
             )
@@ -150,42 +164,151 @@ class SubscriptionCreateView(
     def form_valid(
         self, form: SubscriptionCreationForm
     ) -> HttpResponse | HttpResponseRedirect:
-        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-        subscription_name = f"{customer.user.first_name}'s Sub"
-        subscription_schedule = apicontractsv1.paymentScheduleType(
+        try:
+            # Generate subscription data
+            customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
+            subscription_name = self.generate_subscription_name(customer)
+            anet_subscription_obj = apicontractsv1.ARBSubscriptionType(
+                name=subscription_name,
+                amount=self.generate_subscription_amount(customer),
+                profile=self.generate_customer_profile(customer, form),
+                paymentSchedule=self.generate_subscription_schedule(),
+                trialAmount=decimal.Decimal(0.00),
+            )
+
+            # Create Authorizenet subscription
+            anet_profile = SubscriptionProfile(
+                customer_profile_id=customer.authorizenet_profile_id, id=None
+            )
+            subscription_id = anet_profile.create(anet_subscription_obj)
+
+            # Create local subscription
+            Subscription.objects.create(
+                id=subscription_id,
+                name=subscription_name,
+                payment=form.cleaned_data["payment"],
+                address=form.cleaned_data["address"],
+                customer=customer,
+            )
+            self.wialon_add_days_to_account(
+                customer, relativedelta(timezone.now(), months=1).days
+            )
+            return super().form_valid(form=form)
+        except AuthorizenetControllerExecutionError as e:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! '%(e)s'"), code="invalid", params={"e": e}
+                ),
+            )
+            return self.form_invalid(form=form)
+        except ValueError as e:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("ValueError! '%(e)s'"), code="invalid", params={"e": e}
+                ),
+            )
+            return self.form_invalid(form=form)
+
+    @staticmethod
+    def generate_customer_profile(
+        customer: Customer, form: SubscriptionCreationForm
+    ) -> apicontractsv1.customerProfileIdType:
+        """
+        Returns an Authorizenet customer profile based on the customer and form.
+
+        :param customer: A customer to generate a profile for.
+        :type customer: :py:obj:`~terminusgps_tracker.models.customers.Customer`
+        :param form: A subscription creation form.
+        :type form: :py:obj:`~terminusgps_tracker.forms.subscriptions.SubscriptionCreationForm`
+        :returns: An Authorizenet customer profile (ID type).
+        :rtype: :py:obj:`~authorizenet.apicontractsv1.customerProfileIdType`
+
+        """
+        return apicontractsv1.customerProfileIdType(
+            customerProfileId=str(customer.authorizenet_profile_id),
+            customerPaymentProfileId=str(form.cleaned_data["payment"].pk),
+            customerAddressId=str(form.cleaned_data["address"].pk),
+        )
+
+    @staticmethod
+    def generate_subscription_name(customer: Customer) -> str:
+        """
+        Returns a subscription name based the customer.
+
+        :param customer: A customer to generate a subscription name based on.
+        :type customer: :py:obj:`~terminusgps_tracker.models.customers.Customer`
+        :returns: A subscription name.
+        :rtype: :py:obj:`str`
+
+        """
+        return f"{customer.user.first_name}'s Subscription"
+
+    @staticmethod
+    def generate_subscription_schedule(
+        trial_months: int = 0,
+    ) -> apicontractsv1.paymentScheduleType:
+        """
+        Returns an Authorizenet payment schedule for a subscription.
+
+        :param trial_months: Number of free months to grant to the customer. Default is ``0``.
+        :type trial_months: :py:obj:`int`
+        :returns: A payment schedule object for Authorizenet API calls.
+        :rtype: :py:obj:`~authorizenet.apicontractsv1.paymentScheduleType`
+
+        """
+        return apicontractsv1.paymentScheduleType(
             interval=apicontractsv1.paymentScheduleTypeInterval(
                 length=1, unit=apicontractsv1.ARBSubscriptionUnitEnum.months
             ),
             startDate=timezone.now(),
             totalOccurrences=9999,
-            trialOccurrences=0,
-        )
-        subscription_amount = calculate_amount_plus_tax(
-            customer.get_unit_amounts()
+            trialOccurrences=trial_months,
         )
 
-        subscription_obj = apicontractsv1.ARBSubscriptionType(
-            name=subscription_name,
-            paymentSchedule=subscription_schedule,
-            amount=subscription_amount,
-            trialAmount=str(0.00),
-            profile=apicontractsv1.customerProfileIdType(
-                customerProfileId=str(customer.authorizenet_profile_id),
-                customerPaymentProfileId=str(form.cleaned_data["payment"].pk),
-                customerAddressId=str(form.cleaned_data["address"].pk),
-            ),
-        )
-        subscription_profile = SubscriptionProfile(
-            customer_profile_id=customer.authorizenet_profile_id, id=None
-        )
-        Subscription.objects.create(
-            id=subscription_profile.create(subscription=subscription_obj),
-            name=subscription_name,
-            payment=form.cleaned_data["payment"],
-            address=form.cleaned_data["address"],
-            customer=customer,
-        )
-        return super().form_valid(form=form)
+    @staticmethod
+    def generate_subscription_amount(
+        customer: Customer, add_tax: bool = True
+    ) -> decimal.Decimal:
+        """
+        Returns an amount to be charged for a subscription based on the customer.
+
+        :param customer: A customer to calculate a subscription amount for.
+        :type customer: :py:obj:`~terminusgps_tracker.models.customers.Customer`
+        :param add_tax: Whether or not to add tax to the subscription amount. Default is :py:obj:`True`.
+        :type add_tax: :py:obj:`bool`
+        :raises ValueError: If the customer doesn't have any units to generate an amount with.
+        :returns: An amount for a subscription.
+        :rtype: :py:obj:`~decimal.Decimal`
+
+        """
+        raw_amount = customer.get_unit_amounts()
+        if raw_amount is None:
+            raise ValueError(
+                f"Failed to retrieve unit amounts for {customer}."
+            )
+        return calculate_amount_plus_tax(raw_amount) if add_tax else raw_amount
+
+    @staticmethod
+    def wialon_add_days_to_account(
+        customer: Customer, num_days: int
+    ) -> Customer:
+        """
+        Adds ``num_days`` to the customer's Wialon account and returns the customer.
+
+        :param customer: A customer whose account will have days added.
+        :type customer: :py:obj:`~terminusgps_tracker.models.customers.Customer`
+        :param num_days: Number of days to add to the Wialon account.
+        :type num_days: :py:obj:`int`
+        :returns: The customer.
+        :rtype: :py:obj:`~terminusgps_tracker.models.customers.Customer`
+
+        """
+        with WialonSession() as session:
+            resource = WialonResource(customer.wialon_resource_id, session)
+            resource.add_days(num_days)
+        return customer
 
 
 class SubscriptionUpdateView(

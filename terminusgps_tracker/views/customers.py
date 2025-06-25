@@ -2,12 +2,12 @@ import typing
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import QuerySet
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, TemplateView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
 from terminusgps_tracker.models import Customer, Subscription
+from terminusgps_tracker.views.mixins import CustomerOrStaffRequiredMixin
 
 
 class CustomerDashboardView(
@@ -167,7 +167,10 @@ class CustomerTransactionListView(
 
 
 class CustomerPaymentMethodChoicesView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
+    LoginRequiredMixin,
+    CustomerOrStaffRequiredMixin,
+    HtmxTemplateResponseMixin,
+    DetailView,
 ):
     content_type = "text/html"
     extra_context = {"title": "Payment Method Choices"}
@@ -192,17 +195,12 @@ class CustomerPaymentMethodChoicesView(
             )
         return context
 
-    def get_object(self) -> Customer | None:
-        if (
-            not self.request.user.is_staff
-            or not super().get_object().user == self.request.user
-        ):
-            return None
-        return super().get_object()
-
 
 class CustomerShippingAddressChoicesView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
+    LoginRequiredMixin,
+    CustomerOrStaffRequiredMixin,
+    HtmxTemplateResponseMixin,
+    DetailView,
 ):
     content_type = "text/html"
     extra_context = {"title": "Shipping Address Choices"}
@@ -226,6 +224,3 @@ class CustomerShippingAddressChoicesView(
                 customer.generate_shipping_address_choices()
             )
         return context
-
-    def get_queryset(self) -> QuerySet:
-        return super().get_queryset().filter(user=self.request.user)

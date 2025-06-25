@@ -5,8 +5,7 @@
         "fields": {
             "name": "Basic",
             "amount": 15.99,
-            "desc": "An affordable plan to get your GPS-tracking setup started.",
-            "features": [1, 3, 6]
+            "desc": "An affordable plan to get your GPS-tracking setup started."
         }
     },
     {
@@ -15,8 +14,7 @@
         "fields": {
             "name": "Standard",
             "amount": 24.99,
-            "desc": "Our most popular plan with even more features.",
-            "features": [1, 4, 7]
+            "desc": "Our most popular plan with even more features."
         }
     },
     {
@@ -25,8 +23,7 @@
         "fields": {
             "name": "Premium",
             "amount": 29.99,
-            "desc": "An affordable plan to get your GPS-tracking setup started.",
-            "features": [1, 2, 5, 8]
+            "desc": "An affordable plan to get your GPS-tracking setup started."
         }
     }
 ]

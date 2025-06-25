@@ -3,72 +3,40 @@
         "model": "terminusgps_tracker.SubscriptionFeature",
         "pk": 1,
         "fields": {
-            "name": "GPS Tracking",
-            "amount": null,
-            "desc": "Access to the Terminus GPS platform; an interface that simplifies monitoring your vehicles no matter where they are on the planet."
+            "name": "Camera",
+            "amount": 9.99,
+            "desc": "Camera feature description",
+            "total": 1
         }
     },
     {
         "model": "terminusgps_tracker.SubscriptionFeature",
         "pk": 2,
         "fields": {
-            "name": "Driver Behavior Monitoring",
-            "amount": null,
-            "desc": "Using experimental AI image processing (camera install required), be informed on how your drivers are behaving behind the wheel."
+            "name": "ELD",
+            "amount": 9.99,
+            "desc": "ELD feature description",
+            "total": 1
         }
     },
     {
         "model": "terminusgps_tracker.SubscriptionFeature",
         "pk": 3,
         "fields": {
-            "name": "Geofences",
-            "amount": 5,
-            "desc": "Access to drawing custom geofence zones; areas within the Terminus GPS Hosting interface that partitions the map according to your specifications."
+            "name": "Trailer",
+            "amount": 9.99,
+            "desc": "Trailer feature description",
+            "total": 1
         }
     },
     {
         "model": "terminusgps_tracker.SubscriptionFeature",
         "pk": 4,
         "fields": {
-            "name": "Geofences",
-            "amount": 25,
-            "desc": "Access to drawing custom geofence zones; areas within the Terminus GPS Hosting interface that partitions the map according to your specifications."
-        }
-    },
-    {
-        "model": "terminusgps_tracker.SubscriptionFeature",
-        "pk": 5,
-        "fields": {
-            "name": "Geofences",
-            "amount": 999,
-            "desc": "Access to drawing custom geofence zones; areas within the Terminus GPS Hosting interface that partitions the map according to your specifications."
-        }
-    },
-    {
-        "model": "terminusgps_tracker.SubscriptionFeature",
-        "pk": 6,
-        "fields": {
-            "name": "Notifications",
-            "amount": 5,
-            "desc": "Access to live notifications sent directly to your mobile device; never be caught off-guard again by creating notifications within the Terminus GPS Hosting interface."
-        }
-    },
-    {
-        "model": "terminusgps_tracker.SubscriptionFeature",
-        "pk": 7,
-        "fields": {
-            "name": "Notifications",
-            "amount": 25,
-            "desc": "Access to live notifications sent directly to your mobile device; never be caught off-guard again by creating notifications within the Terminus GPS Hosting interface."
-        }
-    },
-    {
-        "model": "terminusgps_tracker.SubscriptionFeature",
-        "pk": 8,
-        "fields": {
-            "name": "Notifications",
-            "amount": 999,
-            "desc": "Access to live notifications sent directly to your mobile device; never be caught off-guard again by creating notifications within the Terminus GPS Hosting interface."
+            "name": "Camera",
+            "amount": 9.99,
+            "desc": "Camera feature description",
+            "total": 5
         }
     }
 ]
