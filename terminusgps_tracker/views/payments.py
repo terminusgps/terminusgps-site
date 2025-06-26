@@ -188,6 +188,12 @@ class CustomerPaymentMethodCreateView(
     success_url = reverse_lazy("tracker:account")
     template_name = "terminusgps_tracker/payments/create.html"
 
+    def form_invalid(
+        self, form: CustomerPaymentMethodCreationForm
+    ) -> HttpResponse:
+        print(f"{form.errors = }")
+        return super().form_invalid(form=form)
+
     def get_initial(self) -> dict[str, typing.Any]:
         initial: dict[str, typing.Any] = super().get_initial()
         customer = Customer.objects.get(pk=self.kwargs["customer_pk"])

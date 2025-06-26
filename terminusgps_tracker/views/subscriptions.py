@@ -4,7 +4,6 @@ import typing
 from zoneinfo import ZoneInfo
 
 from authorizenet import apicontractsv1
-from dateutil.relativedelta import relativedelta
 from django import forms
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -31,8 +30,6 @@ from terminusgps.authorizenet.utils import (
     get_transaction,
 )
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
-from terminusgps.wialon.items import WialonResource
-from terminusgps.wialon.session import WialonSession
 
 from terminusgps_tracker.forms import SubscriptionCreationForm
 from terminusgps_tracker.models import Customer, Subscription
@@ -95,11 +92,6 @@ class SubscriptionCreateView(
     )
     template_name = "terminusgps_tracker/subscriptions/create.html"
 
-    def get_success_url(self) -> str:
-        return Customer.objects.get(
-            pk=self.kwargs["customer_pk"]
-        ).subscription.get_absolute_url()
-
     def get_form(
         self, form_class: SubscriptionCreationForm | None = None
     ) -> SubscriptionCreationForm:
@@ -134,33 +126,6 @@ class SubscriptionCreateView(
         )
         return context
 
-    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        form = self.get_form()
-        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-
-        if customer.units.count() == 0:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Whoops! Please register a unit before subscribing."),
-                    code="invalid",
-                ),
-            )
-        if not customer.wialon_resource_id:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Whoops! You don't have a Wialon account assigned."),
-                    code="invalid",
-                ),
-            )
-
-        return (
-            self.form_valid(form=form)
-            if form.is_valid()
-            else self.form_invalid(form=form)
-        )
-
     def form_valid(
         self, form: SubscriptionCreationForm
     ) -> HttpResponse | HttpResponseRedirect:
@@ -177,10 +142,9 @@ class SubscriptionCreateView(
             )
 
             # Create Authorizenet subscription
-            anet_profile = SubscriptionProfile(
-                customer_profile_id=customer.authorizenet_profile_id, id=None
-            )
-            subscription_id = anet_profile.create(anet_subscription_obj)
+            subscription_id = SubscriptionProfile(
+                customer_profile_id=customer.authorizenet_profile_id
+            ).create(anet_subscription_obj)
 
             # Create local subscription
             sub = Subscription.objects.create(
@@ -190,10 +154,7 @@ class SubscriptionCreateView(
                 address=form.cleaned_data["address"],
                 customer=customer,
             )
-            self.wialon_add_days_to_account(
-                customer, relativedelta(timezone.now(), months=1).days
-            )
-            return super().form_valid(form=form)
+            return HttpResponseRedirect(sub.get_absolute_url())
         except AuthorizenetControllerExecutionError as e:
             form.add_error(
                 None,
@@ -202,11 +163,14 @@ class SubscriptionCreateView(
                 ),
             )
             return self.form_invalid(form=form)
-        except ValueError as e:
+        except ValueError:
             form.add_error(
                 None,
                 ValidationError(
-                    _("ValueError! '%(e)s'"), code="invalid", params={"e": e}
+                    _(
+                        "Whoops! You can't subscribe until you register a unit."
+                    ),
+                    code="invalid",
                 ),
             )
             return self.form_invalid(form=form)
@@ -289,26 +253,6 @@ class SubscriptionCreateView(
                 f"Failed to retrieve unit amounts for {customer}."
             )
         return calculate_amount_plus_tax(raw_amount) if add_tax else raw_amount
-
-    @staticmethod
-    def wialon_add_days_to_account(
-        customer: Customer, num_days: int
-    ) -> Customer:
-        """
-        Adds ``num_days`` to the customer's Wialon account and returns the customer.
-
-        :param customer: A customer whose account will have days added.
-        :type customer: :py:obj:`~terminusgps_tracker.models.customers.Customer`
-        :param num_days: Number of days to add to the Wialon account.
-        :type num_days: :py:obj:`int`
-        :returns: The customer.
-        :rtype: :py:obj:`~terminusgps_tracker.models.customers.Customer`
-
-        """
-        with WialonSession() as session:
-            resource = WialonResource(customer.wialon_resource_id, session)
-            resource.add_days(num_days)
-        return customer
 
 
 class SubscriptionUpdateView(
