@@ -78,38 +78,6 @@ class CustomerSubscriptionView(
         return context
 
 
-class CustomerTransactionsView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
-):
-    content_type = "text/html"
-    extra_context = {
-        "title": "Transactions",
-        "subtitle": "Inspect your subscription transactions",
-    }
-    http_method_names = ["get"]
-    login_url = reverse_lazy("login")
-    partial_template_name = "terminusgps_tracker/partials/_transactions.html"
-    permission_denied_message = "Please login to view this content."
-    raise_exception = False
-    template_name = "terminusgps_tracker/transactions.html"
-
-
-class CustomerSupportView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
-):
-    content_type = "text/html"
-    extra_context = {
-        "title": "Support",
-        "subtitle": "Drop us a line and we'll get in touch",
-    }
-    http_method_names = ["get"]
-    login_url = reverse_lazy("login")
-    partial_template_name = "terminusgps_tracker/partials/_support.html"
-    permission_denied_message = "Please login to view this content."
-    raise_exception = False
-    template_name = "terminusgps_tracker/support.html"
-
-
 class CustomerWialonUnitsView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
 ):

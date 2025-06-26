@@ -6,7 +6,6 @@ app_name = "tracker"
 urlpatterns = [
     path("", views.CustomerDashboardView.as_view(), name="dashboard"),
     path("account/", views.CustomerAccountView.as_view(), name="account"),
-    path("support/", views.CustomerSupportView.as_view(), name="support"),
     path("units/", views.CustomerWialonUnitsView.as_view(), name="units"),
     path(
         "units/<int:customer_pk>/list/",

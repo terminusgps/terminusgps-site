@@ -10,9 +10,7 @@ from .customers import (
     CustomerPaymentMethodChoicesView,
     CustomerShippingAddressChoicesView,
     CustomerSubscriptionView,
-    CustomerSupportView,
     CustomerTransactionListView,
-    CustomerTransactionsView,
     CustomerWialonUnitsView,
 )
 from .payments import (
