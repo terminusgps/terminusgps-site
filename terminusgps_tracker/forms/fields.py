@@ -9,6 +9,7 @@ from django.forms import widgets as base_widgets
 from terminusgps.authorizenet.validators import (
     validate_credit_card_expiry_month,
     validate_credit_card_expiry_year,
+    validate_credit_card_number,
 )
 
 
@@ -171,7 +172,7 @@ class CreditCardField(forms.MultiValueField):
                 validators=[
                     MinLengthValidator(16),
                     MaxLengthValidator(19),
-                    # validate_credit_card_number,
+                    validate_credit_card_number,
                 ],
             ),
             forms.CharField(
