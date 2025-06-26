@@ -8,6 +8,11 @@ urlpatterns = [
     path("account/", views.CustomerAccountView.as_view(), name="account"),
     path("units/", views.CustomerWialonUnitsView.as_view(), name="units"),
     path(
+        "subscription/",
+        views.CustomerSubscriptionView.as_view(),
+        name="subscription",
+    ),
+    path(
         "units/<int:customer_pk>/list/",
         views.CustomerWialonUnitListView.as_view(),
         name="unit list",
@@ -26,11 +31,6 @@ urlpatterns = [
         "units/<int:customer_pk>/create/",
         views.CustomerWialonUnitCreateView.as_view(),
         name="unit create",
-    ),
-    path(
-        "subscription/",
-        views.CustomerSubscriptionView.as_view(),
-        name="subscription",
     ),
     path(
         "subscription/<int:customer_pk>/<int:sub_pk>/",
