@@ -8,7 +8,6 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView
-from terminusgps.authorizenet.constants import ANET_XMLNS
 from terminusgps.authorizenet.controllers import (
     AuthorizenetControllerExecutionError,
 )
@@ -86,17 +85,6 @@ class CustomerShippingAddressDetailView(
             customer__pk=self.kwargs["customer_pk"]
         ).select_related("customer")
 
-    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        try:
-            context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-            context["profile"] = self.get_object().authorizenet_get_profile()
-        except (
-            CustomerShippingAddress.DoesNotExist,
-            AuthorizenetControllerExecutionError,
-        ):
-            context["profile"] = None
-        return context
-
 
 class CustomerShippingAddressDeleteView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, DeleteView
@@ -171,19 +159,6 @@ class CustomerShippingAddressDeleteView(
         response = self.render_to_response(self.get_context_data(form=form))
         response.headers["HX-Retarget"] = f"#address-{self.object.pk}"
         return response
-
-    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        try:
-            context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-            context["addressProfile"] = (
-                self.get_object()
-                .authorizenet_get_profile()
-                .find(f"{ANET_XMLNS}address")
-            )
-            return context
-        except AuthorizenetControllerExecutionError:
-            context["addressProfile"] = None
-            return context
 
 
 class CustomerShippingAddressCreateView(

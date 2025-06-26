@@ -163,17 +163,6 @@ class SubscriptionCreateView(
                 ),
             )
             return self.form_invalid(form=form)
-        except ValueError:
-            form.add_error(
-                None,
-                ValidationError(
-                    _(
-                        "Whoops! You can't subscribe until you register a unit."
-                    ),
-                    code="invalid",
-                ),
-            )
-            return self.form_invalid(form=form)
 
     @staticmethod
     def generate_customer_profile(

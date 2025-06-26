@@ -55,8 +55,12 @@ class CustomerPaymentMethodListView(
     def get_queryset(
         self,
     ) -> QuerySet[CustomerPaymentMethod, CustomerPaymentMethod]:
-        return CustomerPaymentMethod.objects.filter(
-            customer__pk=self.kwargs["customer_pk"]
+        return (
+            CustomerPaymentMethod.objects.filter(
+                customer__pk=self.kwargs["customer_pk"]
+            )
+            .select_related("customer")
+            .order_by(self.get_ordering())
         )
 
 
@@ -87,18 +91,6 @@ class CustomerPaymentMethodDetailView(
         return CustomerPaymentMethod.objects.filter(
             customer__pk=self.kwargs["customer_pk"]
         ).select_related("customer")
-
-    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        try:
-            context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-            context["profile"] = self.get_object().authorizenet_get_profile()
-            return context
-        except (
-            AuthorizenetControllerExecutionError,
-            CustomerPaymentMethod.DoesNotExist,
-        ):
-            context["profile"] = None
-            return context
 
 
 class CustomerPaymentMethodDeleteView(
@@ -136,6 +128,7 @@ class CustomerPaymentMethodDeleteView(
             cprofile_id = Customer.objects.get(
                 pk=self.kwargs["customer_pk"]
             ).authorizenet_profile_id
+
             pprofile = PaymentProfile(
                 id=pprofile_id, customer_profile_id=cprofile_id
             )
@@ -190,12 +183,6 @@ class CustomerPaymentMethodCreateView(
     success_url = reverse_lazy("tracker:account")
     template_name = "terminusgps_tracker/payments/create.html"
 
-    def form_invalid(
-        self, form: CustomerPaymentMethodCreationForm
-    ) -> HttpResponse:
-        print(f"{form.errors = }")
-        return super().form_invalid(form=form)
-
     def get_initial(self) -> dict[str, typing.Any]:
         initial: dict[str, typing.Any] = super().get_initial()
         customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
@@ -208,24 +195,23 @@ class CustomerPaymentMethodCreateView(
         self, form: CustomerPaymentMethodCreationForm
     ) -> HttpResponse | HttpResponseRedirect:
         try:
-            customer = Customer.objects.get(user=self.request.user)
+            customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
             address = generate_customer_address(form)
             payment = generate_customer_payment(form)
-            payment_profile = PaymentProfile(
+            pprofile = PaymentProfile(
                 customer_profile_id=customer.authorizenet_profile_id
             )
             CustomerPaymentMethod.objects.create(
-                id=payment_profile.create(payment=payment, address=address),
+                id=pprofile.create(payment=payment, address=address),
                 customer=customer,
             )
 
             if form.cleaned_data["create_shipping_address"]:
-                address_profile = AddressProfile(
+                aprofile = AddressProfile(
                     customer_profile_id=customer.authorizenet_profile_id
                 )
                 CustomerShippingAddress.objects.create(
-                    id=address_profile.create(address=address),
-                    customer=customer,
+                    id=aprofile.create(address=address), customer=customer
                 )
             return HttpResponseRedirect(self.get_success_url())
         except AuthorizenetControllerExecutionError as e:

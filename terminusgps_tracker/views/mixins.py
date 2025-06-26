@@ -7,7 +7,7 @@ from terminusgps_tracker.models import Customer
 class CustomerOrStaffRequiredMixin(UserPassesTestMixin):
     login_url = reverse_lazy("login")
     permission_denied_message = "You aren't permitted to view this content."
-    raise_exception = False
+    raise_exception = True
 
     def test_func(self) -> bool:
         if self.request.user.is_staff:
