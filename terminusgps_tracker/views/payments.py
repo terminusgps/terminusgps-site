@@ -132,12 +132,14 @@ class CustomerPaymentMethodDeleteView(
 
     def form_valid(self, form=None) -> HttpResponse | HttpResponseRedirect:
         try:
-            customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-            payment_profile = PaymentProfile(
-                id=self.object.pk,
-                customer_profile_id=customer.authorizenet_profile_id,
+            pprofile_id = self.object.pk
+            cprofile_id = Customer.objects.get(
+                pk=self.kwargs["customer_pk"]
+            ).authorizenet_profile_id
+            pprofile = PaymentProfile(
+                id=pprofile_id, customer_profile_id=cprofile_id
             )
-            payment_profile.delete()
+            pprofile.delete()
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
             match e.code:

@@ -131,12 +131,15 @@ class CustomerShippingAddressDeleteView(
 
     def form_valid(self, form=None) -> HttpResponse | HttpResponseRedirect:
         try:
-            customer = Customer.objects.get(user=self.request.user)
-            address_profile = AddressProfile(
-                id=self.object.pk,
-                customer_profile_id=customer.authorizenet_profile_id,
+            aprofile_id = self.object.pk
+            cprofile_id = Customer.objects.get(
+                pk=self.kwargs["customer_pk"]
+            ).authorizenet_profile_id
+
+            aprofile = AddressProfile(
+                id=aprofile_id, customer_profile_id=cprofile_id
             )
-            address_profile.delete()
+            aprofile.delete()
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
             match e.code:
