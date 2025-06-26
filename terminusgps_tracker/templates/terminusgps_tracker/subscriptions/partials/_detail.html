@@ -2,7 +2,30 @@
 <section id="info" class="flex flex-col gap-4">
     <h2 class="text-center text-lg font-semibold text-gray-800 dark:text-gray-400">{{ subscription.name }}</h2>
     <div class="flex flex-col gap-4">
-        <div hx-get="{% url 'tracker:subscription items' subscription.customer.pk subscription.pk %}" hx-target="this" hx-trigger="load"></div>
+        <div hx-get="{% url 'tracker:subscription items' subscription.customer.pk subscription.pk %}" hx-target="this" hx-trigger="load">
+            <div class="relative overflow-x-auto">
+                <table class="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
+                    <thead class="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">
+                                Item
+                            </th>
+                            <th scope="col" class="px-6 py-3">
+                                Amount
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="animate-pulse border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+                            <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 dark:text-white">
+                            </th>
+                            <td class="px-6 py-4">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </section>
 <section id="total">
@@ -11,7 +34,7 @@
         <p class="font-light">(You'll be charged this amount every month at around {{ start_date|localtime|date:'P' }} on the {{ start_date|date:'jS' }})</p>
     </div>
 </section>
-<section id="buttons" class="flex flex-col items-center gap-2" hx-target="#subscription">
+<section id="buttons" class="flex flex-col items-center gap-2" hx-target="#subscription" hx-indicator="#subscription-spinner">
     <button class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" hx-get="{{ subscription.get_update_url }}" type="button" value="Update">
         <p>Update</p>
     </button>

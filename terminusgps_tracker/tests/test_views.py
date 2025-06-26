@@ -1,10 +1,20 @@
+from authorizenet.constants import constants
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
+from django.test.utils import override_settings
 from terminusgps.authorizenet.profiles import CustomerProfile
 
-from terminusgps_tracker.models import Customer, Subscription
+from terminusgps_tracker.models import (
+    Customer,
+    CustomerPaymentMethod,
+    Subscription,
+)
 
 
+@override_settings(
+    MERCHANT_AUTH_ENVIRONMENT=constants.SANDBOX,
+    MERCHANT_AUTH_VALIDATION_MODE="testMode",
+)
 class ProtectedCustomerViewTestCase(TestCase):
     def setUp(self) -> None:
         self.test_user_username = "test_user@domain.com"
@@ -59,6 +69,29 @@ class ProtectedCustomerViewTestCase(TestCase):
         )
         response = client.get("/")
         self.assertEqual(response.status_code, 200)
+
+    def test_payment_method_view_protected(self) -> None:
+        test_customer_profile = CustomerProfile(
+            email=self.test_user_email, merchant_id=str(self.test_user.pk)
+        )
+        test_customer = Customer.objects.create(
+            id=test_customer_profile.create(), user=self.test_user
+        )
+        test_payment_method = CustomerPaymentMethod.objects.create(
+            id=1234, customer=test_customer
+        )
+
+        client = Client()
+        response = client.get(
+            f"/payments/{self.test_user.pk}/{test_payment_method.pk}/"
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            f"/login/?next=/payments/{self.test_user.pk}/{test_payment_method.pk}/",
+        )
+        test_customer_profile.delete()
+        test_customer.delete()
 
 
 class SubscriptionCreateViewTestCase(TestCase):
