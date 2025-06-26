@@ -1,4 +1,4 @@
-{% load tz %}
+{% load static tz %}
 <div class="flex flex-col gap-8">
     <section id="greeting" class="flex flex-col gap-4 p-4 text-center font-semibold">
         <h2 class="text-xl">Hey {{ user.first_name|default:user.username }}!</h2>

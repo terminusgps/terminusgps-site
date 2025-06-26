@@ -183,7 +183,7 @@ class SubscriptionCreateView(
             subscription_id = anet_profile.create(anet_subscription_obj)
 
             # Create local subscription
-            Subscription.objects.create(
+            sub = Subscription.objects.create(
                 id=subscription_id,
                 name=subscription_name,
                 payment=form.cleaned_data["payment"],
@@ -318,7 +318,7 @@ class SubscriptionUpdateView(
     UpdateView,
 ):
     content_type = "text/html"
-    fields = ["payment", "address", "features"]
+    fields = ["payment", "address"]
     http_method_names = ["get", "post"]
     model = Subscription
     partial_template_name = (
@@ -327,26 +327,36 @@ class SubscriptionUpdateView(
     pk_url_kwarg = "sub_pk"
     template_name = "terminusgps_tracker/subscriptions/update.html"
 
-    def form_valid(
-        self, form: forms.Form
-    ) -> HttpResponse | HttpResponseRedirect:
-        response = super().form_valid(form=form)
-        subscription = self.get_object()
-        sprofile = subscription.authorizenet_get_subscription_profile()
-        subscription.authorizenet_update_amount(sprofile)
-        subscription.authorizenet_update_payment(sprofile)
-        subscription.save()
-        return response
-
     def get_queryset(self) -> QuerySet[Subscription, Subscription]:
         return Subscription.objects.filter(
             customer__pk=self.kwargs["customer_pk"]
         )
 
+    def form_valid(
+        self, form: forms.Form
+    ) -> HttpResponse | HttpResponseRedirect:
+        """Updates the subscription's payment method and shipping address in Authorizenet."""
+        try:
+            subscription = self.get_object()
+            sprofile = subscription.authorizenet_get_subscription_profile()
+            subscription.authorizenet_update_payment(sprofile)
+            subscription.save()
+            return super().form_valid(form=form)
+        except AuthorizenetControllerExecutionError as e:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! %(e)s."),
+                    code="invalid",
+                    params={"e": e.message},
+                ),
+            )
+            return self.form_invalid(form=form)
+
     def get_form(self, form_class=None):
+        """Styles and generates customer payment/address choices for the form before returning it."""
         form = super().get_form(form_class=form_class)
         customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-
         form.fields["address"].queryset = customer.addresses.all()
         form.fields["address"].widget.attrs.update(
             {
@@ -359,7 +369,6 @@ class SubscriptionUpdateView(
                 ),
             }
         )
-
         form.fields["payment"].queryset = customer.payments.all()
         form.fields["payment"].widget.attrs.update(
             {
@@ -372,13 +381,6 @@ class SubscriptionUpdateView(
                 ),
             }
         )
-        form.fields["features"].widget.attrs.update(
-            {"class": settings.DEFAULT_FIELD_CLASS}
-        )
-        form.fields["features"].label = "Additional Features"
-        form.fields[
-            "features"
-        ].help_text = "Ctrl+click to select multiple. Cmd+click on Mac."
         return form
 
 
@@ -443,10 +445,7 @@ class SubscriptionTransactionsView(
 
 
 class SubscriptionTransactionDetailView(
-    LoginRequiredMixin,
-    CustomerOrStaffRequiredMixin,
-    HtmxTemplateResponseMixin,
-    TemplateView,
+    HtmxTemplateResponseMixin, TemplateView
 ):
     content_type = "text/html"
     http_method_names = ["get"]
@@ -456,6 +455,7 @@ class SubscriptionTransactionDetailView(
     )
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        """Adds ``transaction`` and ``submit_time`` to the view context."""
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         if self.kwargs.get("transaction_id"):
             trans_id = self.kwargs["transaction_id"]

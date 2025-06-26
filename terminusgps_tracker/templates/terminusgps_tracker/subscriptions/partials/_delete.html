@@ -1,8 +1,11 @@
 <form class="flex flex-col gap-4" method="post" hx-post="{{ subscription.get_delete_url }}" hx-target="#subscription">
+    <h2 class="text-center text-lg font-semibold">{{ subscription.name }}</h2>
     {% csrf_token %}
     {{ form }}
-    <p class="text-center font-semibold text-pretty">Are you sure you want to cancel your subscription?</p>
-    <p class="text-center font-light text-pretty">(You'll lose access to your GPS units without an active subscription)</p>
+    <div class="flex flex-col gap-2">
+        <p class="text-center font-semibold text-pretty text-gray-700">Are you sure you want to cancel your subscription?</p>
+        <p class="text-center font-light text-pretty text-gray-600">(You'll lose access to your GPS units without an active subscription)</p>
+    </div>
     <section id="buttons" class="flex flex-col gap-2">
         <input class="w-full cursor-pointer rounded border border-current bg-gray-100 p-2 text-center text-red-700 transition-colors duration-300 ease-in-out hover:bg-red-100" type="submit" value="Confirm">
         <input class="w-full cursor-pointer rounded border border-current bg-gray-300 p-2 text-center text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200" hx-get="{{ subscription.get_absolute_url }}" type="button" value="Back">
