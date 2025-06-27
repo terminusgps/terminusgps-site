@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView
 from terminusgps.authorizenet.controllers import (
@@ -111,9 +111,14 @@ class CustomerPaymentMethodDeleteView(
     permission_denied_message = "Please login to view this content."
     queryset = CustomerPaymentMethod.objects.none()
     raise_exception = False
-    success_url = reverse_lazy("tracker:payment list")
     template_name = "terminusgps_tracker/payments/delete.html"
     pk_url_kwarg = "payment_pk"
+
+    def get_success_url(self) -> str:
+        return reverse(
+            "tracker:payment list",
+            kwargs={"customer_pk": self.get_object().customer.pk},
+        )
 
     def get_queryset(
         self,

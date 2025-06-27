@@ -38,25 +38,6 @@ class Customer(models.Model):
         """Returns the customer's email address/username."""
         return self.user.email if self.user.email else self.user.username
 
-    def generate_payment_method_choices(self) -> list[tuple[int, str]]:
-        """Returns a list of payment method choices for a front-end."""
-        return [
-            (
-                payment.pk,
-                f"{payment.authorizenet_get_credit_card_type()} ending in {str(payment.authorizenet_get_credit_card_number())[-4:]}",
-            )
-            for payment in CustomerPaymentMethod.objects.filter(customer=self)
-        ]
-
-    def generate_shipping_address_choices(self) -> list[tuple[int, str]]:
-        """Returns a list of shipping address choices for a front-end."""
-        return [
-            (address.pk, address.authorizenet_get_street())
-            for address in CustomerShippingAddress.objects.filter(
-                customer=self
-            )
-        ]
-
     @transaction.atomic
     def authorizenet_sync_payment_profiles(self) -> list:
         """Retrieves payment profiles from Authorizenet and creates customer payment methods based on them."""
@@ -126,8 +107,11 @@ class Customer(models.Model):
             return resource.get_remaining_days()
 
     def get_unit_amounts(self) -> decimal.Decimal | None:
-        if self.units.exists():
-            return sum(self.units.values_list("tier__amount", flat=True)) * 1
+        if self.units.count() != 0:
+            return sum(
+                self.units.values_list("tier__amount", flat=True),
+                decimal.Decimal("0.00"),
+            )
 
 
 class CustomerWialonUnit(models.Model):
@@ -157,8 +141,7 @@ class CustomerWialonUnit(models.Model):
         verbose_name_plural = _("customer wialon units")
 
     def __str__(self) -> str:
-        """Returns the unit name if set, otherwise 'Unit #<pk>'."""
-        return self.name if self.name else f"Unit #{self.pk}"
+        return f"Unit #{self.pk}" if not self.name else self.name
 
     def save(self, **kwargs) -> None:
         """Syncs the unit's data with the Wialon API if necessary."""
@@ -175,8 +158,8 @@ class CustomerWialonUnit(models.Model):
         )
 
     def wialon_needs_sync(self) -> bool:
-        """Whether or not the unit needs to sync data with the Wialon API."""
-        return any([not self.name, not self.imei, not self.vin])
+        """Returns whether or not the unit needs to sync data with the Wialon API."""
+        return not all([self.name, self.imei])
 
     @transaction.atomic
     def wialon_sync(self, session: WialonSession) -> WialonSession:
@@ -219,7 +202,11 @@ class CustomerPaymentMethod(models.Model):
         verbose_name_plural = _("customer payment methods")
 
     def __str__(self) -> str:
-        return f"Payment Method #{self.pk}"
+        return (
+            f"Payment Method #{self.pk}"
+            if not self.cc_type or not self.cc_last_4
+            else f"{self.cc_type} ending in {self.cc_last_4}"
+        )
 
     def save(self, **kwargs) -> None:
         """Syncs payment method data with Authorizenet if necessary."""
@@ -241,11 +228,12 @@ class CustomerPaymentMethod(models.Model):
         self.cc_type = str(self.authorizenet_get_credit_card_type())
 
     def authorizenet_needs_sync(self) -> bool:
-        """Returns whether or not the payment method needs to sync data with Authorizenet."""
-        return any([not self.cc_last_4, not self.cc_type])
+        """Returns whether or not the payment method is out of sync with Authorizenet."""
+        return not all([self.cc_last_4, self.cc_type])
 
     def authorizenet_get_profile(self):
         """Returns payment profile data from Authorizenet."""
+        # TODO: Add type hints
         response = PaymentProfile(
             customer_profile_id=str(self.customer.authorizenet_profile_id),
             id=str(self.pk),
@@ -304,9 +292,12 @@ class CustomerShippingAddress(models.Model):
         verbose_name_plural = _("customer shipping addresses")
 
     def __str__(self) -> str:
-        return f"Shipping Address #{self.pk}"
+        return (
+            f"Shipping Address #{self.pk}" if not self.street else self.street
+        )
 
     def save(self, **kwargs) -> None:
+        """Syncs shipping address data with Authorizenet if necessary."""
         if self.authorizenet_needs_sync():
             self.authorizenet_sync()
         return super().save(**kwargs)
@@ -324,11 +315,12 @@ class CustomerShippingAddress(models.Model):
         self.street = self.authorizenet_get_street()
 
     def authorizenet_needs_sync(self) -> bool:
-        """Whether or not the shipping address needs to sync data with Authorizenet."""
-        return not self.street
+        """Returns whether or not the shipping address is out of sync with Authorizenet."""
+        return not all([self.street])
 
     def authorizenet_get_profile(self):
         """Returns address profile data from Authorizenet."""
+        # TODO: Add type hints
         response = AddressProfile(
             customer_profile_id=str(self.customer.authorizenet_profile_id),
             id=str(self.pk),
@@ -341,8 +333,8 @@ class CustomerShippingAddress(models.Model):
 
     def authorizenet_get_street(self) -> str:
         """Returns the street for the shipping address."""
-        aprofile = self.authorizenet_get_profile()
+        response = self.authorizenet_get_profile()
 
-        if aprofile is None:
+        if response is None:
             return ""
-        return str(aprofile.find(f"{ANET_XMLNS}address"))
+        return str(response.find(f"{ANET_XMLNS}address"))

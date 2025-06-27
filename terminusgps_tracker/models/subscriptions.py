@@ -40,23 +40,15 @@ class Subscription(models.Model):
     )
     """Authorizenet subscription status."""
     customer = models.OneToOneField(
-        "terminusgps_tracker.Customer", on_delete=models.CASCADE
+        "terminusgps_tracker.Customer", on_delete=models.PROTECT
     )
     """Associated customer."""
     payment = models.OneToOneField(
-        "terminusgps_tracker.CustomerPaymentMethod",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        default=None,
+        "terminusgps_tracker.CustomerPaymentMethod", on_delete=models.PROTECT
     )
     """Associated payment method."""
     address = models.OneToOneField(
-        "terminusgps_tracker.CustomerShippingAddress",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        default=None,
+        "terminusgps_tracker.CustomerShippingAddress", on_delete=models.PROTECT
     )
     """Associated shipping address."""
     features = models.ManyToManyField(
@@ -73,7 +65,7 @@ class Subscription(models.Model):
         return self.name
 
     def save(self, **kwargs) -> None:
-        """Checks if the subscription is out of sync with Authorizenet and syncs data if necessary."""
+        """Syncs subscription data with Authorizenet if necessary."""
         if self.authorizenet_needs_sync():
             self.authorizenet_sync()
         super().save(**kwargs)
@@ -86,12 +78,14 @@ class Subscription(models.Model):
         )
 
     def delete(self, *args, **kwargs):
-        """Cancels the subscription in Authorizenet before deleting the object."""
+        """Tries to cancel the subscription in Authorizenet before deleting the object."""
         try:
             sprofile = self.authorizenet_get_subscription_profile()
             sprofile.delete()
         except AuthorizenetControllerExecutionError:
-            print("Something went wrong with Authorizenet.")
+            print(
+                "Subscription wasn't deleted, something went wrong with Authorizenet."
+            )
         finally:
             super().delete(*args, **kwargs)
 
@@ -108,6 +102,18 @@ class Subscription(models.Model):
             "tracker:subscription delete",
             kwargs={"customer_pk": self.customer.pk, "sub_pk": self.pk},
         )
+
+    def get_total_feature_amounts(self) -> list[decimal.Decimal]:
+        """Returns a list of dollar amounts for features assigned to the subscription."""
+        if self.features.count() == 0:
+            return []
+        return [f.calculate_amount() for f in self.features.all()]
+
+    def get_total_unit_amounts(self) -> list[decimal.Decimal]:
+        """Returns a list of dollar amounts for units assigned to the subscription."""
+        if self.customer.units.count() == 0:
+            return []
+        return [u.calculate_amount() for u in self.customer.units.all()]
 
     def calculate_amount(self, add_tax: bool = True) -> decimal.Decimal:
         """
@@ -129,22 +135,20 @@ class Subscription(models.Model):
             else decimal.Decimal(sum(amounts))
         )
 
-    def get_total_feature_amounts(self) -> list[decimal.Decimal]:
-        """Returns a list of dollar amounts for features assigned to the subscription."""
-        if not self.features.exists():
-            return []
-        return [f.calculate_amount() for f in self.features.all()]
-
-    def get_total_unit_amounts(self) -> list[decimal.Decimal]:
-        """Returns a list of dollar amounts for units assigned to the subscription."""
-        if not self.customer.units.exists():
-            return []
-        return [u.calculate_amount() for u in self.customer.units.all()]
-
     def authorizenet_update_amount(
         self, sprofile: SubscriptionProfile, add_tax: bool = True
     ) -> SubscriptionProfile:
-        """Recalculates and updates the subscription amount in Authorizenet."""
+        """
+        Recalculates and updates the subscription amount in Authorizenet.
+
+        :param sprofile: An Authorizenet subscription profile.
+        :type sprofile: :py:obj:`~terminusgps.authorizenet.profiles.subscriptions.SubscriptionProfile`
+        :param add_tax: Whether or not to add tax before updating the subscription amount. Default is :py:obj:`True`.
+        :type add_tax: :py:obj:`bool`
+        :returns: The Authorizenet subscription profile.
+        :rtype: :py:obj:`~terminusgps.authorizenet.profiles.subscriptions.SubscriptionProfile`
+
+        """
         new_amount = self.calculate_amount(add_tax=add_tax)
         sprofile.update(apicontractsv1.ARBSubscriptionType(amount=new_amount))
         return sprofile
@@ -152,15 +156,25 @@ class Subscription(models.Model):
     def authorizenet_update_payment(
         self, sprofile: SubscriptionProfile
     ) -> SubscriptionProfile:
-        """Updates the payment method and shipping address for the subscription in Authorizenet."""
+        """
+        Updates the payment method and shipping address for the subscription in Authorizenet.
+
+        :param sprofile: An Authorizenet subscription profile.
+        :type sprofile: :py:obj:`~terminusgps.authorizenet.profiles.subscriptions.SubscriptionProfile`
+        :returns: The Authorizenet subscription profile.
+        :rtype: :py:obj:`~terminusgps.authorizenet.profiles.subscriptions.SubscriptionProfile`
+
+        """
+        customer_id = str(self.customer.authorizenet_profile_id)
+        payment_id = str(self.payment.pk)
+        address_id = str(self.address.pk)
+
         sprofile.update(
             apicontractsv1.ARBSubscriptionType(
                 profile=apicontractsv1.customerProfileIdType(
-                    customerProfileId=str(
-                        self.customer.authorizenet_profile_id
-                    ),
-                    customerPaymentProfileId=str(self.payment.pk),
-                    customerAddressId=str(self.address.pk),
+                    customerProfileId=customer_id,
+                    customerPaymentProfileId=payment_id,
+                    customerAddressId=address_id,
                 )
             )
         )
@@ -180,7 +194,7 @@ class Subscription(models.Model):
     ) -> SubscriptionProfile:
         """Creates/retrieves and sets the payment for the subscription from Authorizenet."""
         self.payment, _ = CustomerPaymentMethod.objects.get_or_create(
-            id=sprofile.address_id, customer=self.customer
+            id=sprofile.payment_id, customer=self.customer
         )
         return sprofile
 
@@ -203,8 +217,8 @@ class Subscription(models.Model):
         return sprofile
 
     def authorizenet_needs_sync(self) -> bool:
-        """Returns :py:obj:`True` if the subscription is missing a payment or an address."""
-        return not bool(self.payment or self.address)
+        """Returns whether or not the subscription is out of sync with Authorizenet."""
+        return all([self.payment, self.address])
 
     def authorizenet_get_subscription_profile(self) -> SubscriptionProfile:
         """Returns a :py:obj:`~terminusgps.authorizenet.profiles.subscriptions.SubscriptionProfile` for the subscription."""
@@ -240,7 +254,7 @@ class SubscriptionFeature(models.Model):
         return f"{self.total}x {self.name}"
 
     def get_amount_display(self) -> str:
-        """Returns the dollar amount of the feature."""
+        """Returns the dollar amount of the feature with a dollar sign."""
         return f"${self.amount}"
 
     def calculate_amount(self) -> decimal.Decimal:
@@ -265,5 +279,5 @@ class SubscriptionTier(models.Model):
         return self.name
 
     def get_amount_display(self) -> str:
-        """Returns the dollar amount of the subscription tier."""
+        """Returns the dollar amount of the subscription tier with a dollar sign."""
         return f"${self.amount}"

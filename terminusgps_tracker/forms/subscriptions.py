@@ -1,6 +1,5 @@
 from django import forms
 from django.conf import settings
-from django.utils.safestring import mark_safe
 
 from terminusgps_tracker.models import (
     CustomerPaymentMethod,
@@ -10,27 +9,19 @@ from terminusgps_tracker.models import (
 
 class SubscriptionCreationForm(forms.Form):
     payment = forms.ModelChoiceField(
-        empty_label=mark_safe("<p>Retrieving...</p>"),
+        empty_label=None,
         label="Payment Method",
         queryset=CustomerPaymentMethod.objects.none(),
         widget=forms.widgets.Select(
-            attrs={
-                "class": settings.DEFAULT_FIELD_CLASS,
-                "hx-target": "this",
-                "hx-trigger": "load",
-            }
+            attrs={"class": settings.DEFAULT_FIELD_CLASS}
         ),
     )
     address = forms.ModelChoiceField(
-        empty_label=mark_safe("<p>Retrieving...</p>"),
+        empty_label=None,
         label="Shipping Address",
         queryset=CustomerShippingAddress.objects.none(),
         widget=forms.widgets.Select(
-            attrs={
-                "class": settings.DEFAULT_FIELD_CLASS,
-                "hx-target": "this",
-                "hx-trigger": "load",
-            }
+            attrs={"class": settings.DEFAULT_FIELD_CLASS}
         ),
     )
     coupon_code = forms.CharField(

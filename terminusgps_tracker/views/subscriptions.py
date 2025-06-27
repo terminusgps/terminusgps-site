@@ -10,7 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import (
@@ -92,31 +92,19 @@ class SubscriptionCreateView(
     )
     template_name = "terminusgps_tracker/subscriptions/create.html"
 
-    def get_form(
-        self, form_class: SubscriptionCreationForm | None = None
-    ) -> SubscriptionCreationForm:
+    def get_initial(self) -> dict[str, typing.Any]:
+        initial: dict[str, typing.Any] = super().get_initial()
+        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
+        initial["payment"] = customer.payments.first()
+        initial["address"] = customer.addresses.first()
+        return initial
+
+    def get_form(self, form_class=None) -> SubscriptionCreationForm:
+        """Sets customer payment/address choices for the form."""
         form = super().get_form(form_class=form_class)
         customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-
-        form.fields["address"].queryset = customer.addresses.all()
-        form.fields["address"].widget.attrs.update(
-            {
-                "hx-get": reverse(
-                    "tracker:address choices",
-                    kwargs={"customer_pk": customer.pk},
-                )
-            }
-        )
-
         form.fields["payment"].queryset = customer.payments.all()
-        form.fields["payment"].widget.attrs.update(
-            {
-                "hx-get": reverse(
-                    "tracker:payment choices",
-                    kwargs={"customer_pk": customer.pk},
-                )
-            }
-        )
+        form.fields["address"].queryset = customer.addresses.all()
         return form
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
@@ -287,32 +275,18 @@ class SubscriptionUpdateView(
             return self.form_invalid(form=form)
 
     def get_form(self, form_class=None):
-        """Styles and generates customer payment/address choices for the form before returning it."""
+        """Styles and sets customer payment/address choices for the form."""
         form = super().get_form(form_class=form_class)
         customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-        form.fields["address"].queryset = customer.addresses.all()
-        form.fields["address"].widget.attrs.update(
-            {
-                "class": settings.DEFAULT_FIELD_CLASS,
-                "hx-target": "this",
-                "hx-trigger": "load",
-                "hx-get": reverse(
-                    "tracker:address choices",
-                    kwargs={"customer_pk": customer.pk},
-                ),
-            }
-        )
+        form.fields["payment"].empty_label = None
         form.fields["payment"].queryset = customer.payments.all()
         form.fields["payment"].widget.attrs.update(
-            {
-                "class": settings.DEFAULT_FIELD_CLASS,
-                "hx-target": "this",
-                "hx-trigger": "load",
-                "hx-get": reverse(
-                    "tracker:payment choices",
-                    kwargs={"customer_pk": customer.pk},
-                ),
-            }
+            {"class": settings.DEFAULT_FIELD_CLASS}
+        )
+        form.fields["address"].empty_label = None
+        form.fields["address"].queryset = customer.addresses.all()
+        form.fields["address"].widget.attrs.update(
+            {"class": settings.DEFAULT_FIELD_CLASS}
         )
         return form
 
@@ -333,16 +307,16 @@ class SubscriptionDeleteView(
     template_name = "terminusgps_tracker/subscriptions/delete.html"
     success_url = reverse_lazy("tracker:subscription")
 
+    def get_queryset(self) -> QuerySet[Subscription, Subscription]:
+        return Subscription.objects.filter(
+            customer__pk=self.kwargs["customer_pk"]
+        )
+
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         subscription = self.get_object()
         sprofile = subscription.authorizenet_get_subscription_profile()
         sprofile.delete()
         return super().post(request, *args, **kwargs)
-
-    def get_queryset(self) -> QuerySet[Subscription, Subscription]:
-        return Subscription.objects.filter(
-            customer__pk=self.kwargs["customer_pk"]
-        )
 
 
 class SubscriptionTransactionsView(
@@ -369,10 +343,9 @@ class SubscriptionTransactionsView(
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         subscription = self.get_object()
+        sprofile = subscription.authorizenet_get_subscription_profile()
         context["transaction_list"] = (
-            subscription.authorizenet_get_transaction_list(
-                subscription.authorizenet_get_subscription_profile()
-            )
+            subscription.authorizenet_get_transaction_list(sprofile)
         )
         return context
 

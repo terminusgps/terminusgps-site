@@ -1,18 +1,12 @@
 import typing
 
-import wialon.api
 from django import forms
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView, UpdateView
-from terminusgps.authorizenet.controllers import (
-    AuthorizenetControllerExecutionError,
-)
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon import constants
 from terminusgps.wialon import utils as wialon_utils
@@ -106,7 +100,12 @@ class CustomerWialonUnitListDetailView(
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         unit = self.get_object()
-        if unit is not None and request.GET.get("refresh") == "on":
+
+        if (
+            unit is not None
+            and request.GET.get("refresh") == "on"
+            or unit.wialon_needs_sync()
+        ):
             with WialonSession() as session:
                 unit.wialon_sync(session)
                 unit.save()
@@ -141,7 +140,16 @@ class CustomerWialonUnitListUpdateView(
     raise_exception = False
     template_name = "terminusgps_tracker/units/list_update.html"
 
+    def get_queryset(self) -> QuerySet[CustomerWialonUnit, CustomerWialonUnit]:
+        """Returns a queryset of units for the customer."""
+        return (
+            super()
+            .get_queryset()
+            .filter(customer__pk=self.kwargs["customer_pk"])
+        )
+
     def get_form(self, form_class=None) -> forms.Form:
+        """Returns a styled update form."""
         form = super().get_form(form_class=form_class)
         for name in form.fields:
             form.fields[name].widget.attrs.update(
@@ -150,6 +158,7 @@ class CustomerWialonUnitListUpdateView(
         return form
 
     def get_success_url(self) -> str:
+        """Returns a URL pointing to the unit's list detail view."""
         return reverse(
             "tracker:unit list detail",
             kwargs={
@@ -161,46 +170,18 @@ class CustomerWialonUnitListUpdateView(
     def form_valid(
         self, form: forms.Form
     ) -> HttpResponse | HttpResponseRedirect:
-        try:
-            new_tier = form.cleaned_data["tier"]
-            current_tier = self.get_object().tier
-            customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
+        customer_unit = self.get_object()
+        old_tier = customer_unit.tier
+        response = super().form_valid(form=form)
 
-            if new_tier != current_tier:
-                sub = Subscription.objects.get(customer=customer)
-                anet_profile = sub.authorizenet_get_subscription_profile()
-                sub.authorizenet_update_amount(anet_profile)
-            with WialonSession() as session:
-                unit = WialonUnit(self.get_object().pk, session)
-                unit.rename(form.cleaned_data["name"])
-            return super().form_valid(form=form)
-        except AuthorizenetControllerExecutionError as e:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Whoops! Authorizenet error: '%(e)s'"),
-                    code="invalid",
-                    params={"e": e},
-                ),
-            )
-            return self.form_invalid(form=form)
-        except wialon.api.WialonError as e:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Whoops! Wialon error: '%(e)s'"),
-                    code="invalid",
-                    params={"e": e},
-                ),
-            )
-            return self.form_invalid(form=form)
-
-    def get_queryset(self) -> QuerySet[CustomerWialonUnit, CustomerWialonUnit]:
-        return (
-            super()
-            .get_queryset()
-            .filter(customer__pk=self.kwargs["customer_pk"])
-        )
+        with WialonSession() as session:
+            unit = WialonUnit(customer_unit.pk, session)
+            unit.rename(form.cleaned_data["name"])
+        if form.cleaned_data["tier"] != old_tier:
+            sub = Subscription.objects.get(customer=customer_unit.customer)
+            sprofile = sub.authorizenet_get_subscription_profile()
+            sub.authorizenet_update_amount(sprofile)
+        return response
 
 
 class CustomerWialonUnitCreateView(
