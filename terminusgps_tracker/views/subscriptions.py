@@ -143,6 +143,15 @@ class SubscriptionCreateView(
                 customer=customer,
             )
             return HttpResponseRedirect(sub.get_absolute_url())
+        except ValueError:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! You can't subscribe without any units."),
+                    code="invalid",
+                ),
+            )
+            return self.form_invalid(form=form)
         except AuthorizenetControllerExecutionError as e:
             form.add_error(
                 None,

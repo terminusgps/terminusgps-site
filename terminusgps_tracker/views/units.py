@@ -3,9 +3,11 @@ import typing
 from django import forms
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView, UpdateView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon import constants
@@ -201,7 +203,10 @@ class CustomerWialonUnitCreateView(
     def wialon_get_unit(
         self, imei_number: str, session: WialonSession
     ) -> WialonUnit:
-        return wialon_utils.get_unit_by_imei(imei=imei_number, session=session)
+        unit = wialon_utils.get_unit_by_imei(imei=imei_number, session=session)
+        if unit is None:
+            raise ValueError("Couldn't find a unit with that imei number.")
+        return unit
 
     def get_initial(self) -> dict[str, typing.Any]:
         initial: dict[str, typing.Any] = super().get_initial()
@@ -218,25 +223,36 @@ class CustomerWialonUnitCreateView(
         Also grants necessary permissions to the customer to view the unit in Wialon.
 
         """
-        with WialonSession() as session:
-            customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-            unit = self.wialon_get_unit(form.cleaned_data["imei"], session)
-            resource = WialonResource(customer.wialon_resource_id, session)
-            end_user = WialonUser(customer.wialon_user_id, session)
-            super_user = WialonUser(resource.creator_id, session)
-            unit.rename(form.cleaned_data["name"])
+        try:
+            with WialonSession() as session:
+                unit = self.wialon_get_unit(form.cleaned_data["imei"], session)
 
-            super_user.grant_access(
-                unit, access_mask=constants.ACCESSMASK_UNIT_MIGRATION
-            )
-            end_user.grant_access(unit)
-            resource.migrate_unit(unit)
+                customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
+                resource = WialonResource(customer.wialon_resource_id, session)
+                end_user = WialonUser(customer.wialon_user_id, session)
+                super_user = WialonUser(resource.creator_id, session)
+                unit.rename(form.cleaned_data["name"])
 
-            CustomerWialonUnit.objects.create(
-                customer=customer,
-                id=unit.id,
-                name=form.cleaned_data["name"],
-                imei=form.cleaned_data["imei"],
-                tier=form.cleaned_data["tier"],
+                super_user.grant_access(
+                    unit, access_mask=constants.ACCESSMASK_UNIT_MIGRATION
+                )
+                end_user.grant_access(unit)
+                resource.migrate_unit(unit)
+
+                CustomerWialonUnit.objects.create(
+                    customer=customer,
+                    id=unit.id,
+                    name=form.cleaned_data["name"],
+                    imei=form.cleaned_data["imei"],
+                    tier=form.cleaned_data["tier"],
+                )
+            return super().form_valid(form=form)
+        except ValueError:
+            form.add_error(
+                "imei",
+                ValidationError(
+                    _("Couldn't find a device with this IMEI #."),
+                    code="invalid",
+                ),
             )
-        return super().form_valid(form=form)
+            return self.form_invalid(form=form)
