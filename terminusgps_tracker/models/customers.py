@@ -10,7 +10,7 @@ from terminusgps.authorizenet.profiles import (
     CustomerProfile,
     PaymentProfile,
 )
-from terminusgps.wialon.items import WialonResource, WialonUnit
+from terminusgps.wialon.items import WialonUnit
 from terminusgps.wialon.session import WialonSession
 
 
@@ -98,21 +98,6 @@ class Customer(models.Model):
             self.authorizenet_get_customer_profile().get_payment_profile_ids()
         )
 
-    def wialon_get_remaining_days(self) -> int:
-        """Returns the remaining days for the customer's Wialon account."""
-        if not self.wialon_resource_id:
-            return 0
-        with WialonSession() as session:
-            resource = WialonResource(self.wialon_resource_id, session=session)
-            return resource.get_remaining_days()
-
-    def get_unit_amounts(self) -> decimal.Decimal | None:
-        if self.units.count() != 0:
-            return sum(
-                self.units.values_list("tier__amount", flat=True),
-                decimal.Decimal("0.00"),
-            )
-
 
 class CustomerWialonUnit(models.Model):
     """A Wialon unit for a customer."""
@@ -126,7 +111,7 @@ class CustomerWialonUnit(models.Model):
     vin = models.CharField(max_length=17, null=True, blank=True, default=None)
     """Wialon unit VIN number."""
     tier = models.ForeignKey(
-        "terminusgps_tracker.SubscriptionTier", on_delete=models.CASCADE
+        "terminusgps_tracker.SubscriptionTier", on_delete=models.PROTECT
     )
     """Subscription tier for the unit."""
     customer = models.ForeignKey(

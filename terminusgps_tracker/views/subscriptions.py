@@ -224,11 +224,13 @@ class SubscriptionCreateView(
         :rtype: :py:obj:`~decimal.Decimal`
 
         """
-        raw_amount = customer.get_unit_amounts()
-        if raw_amount is None:
-            raise ValueError(
-                f"Failed to retrieve unit amounts for {customer}."
-            )
+        if customer.units.count() == 0:
+            raise ValueError("Customer doesn't have any units.")
+
+        raw_amount = sum(
+            customer.units.values_list("tier__amount", flat=True),
+            decimal.Decimal("0.00"),
+        )
         return calculate_amount_plus_tax(raw_amount) if add_tax else raw_amount
 
 
