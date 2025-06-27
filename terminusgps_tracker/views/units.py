@@ -157,6 +157,7 @@ class CustomerWialonUnitListUpdateView(
             form.fields[name].widget.attrs.update(
                 {"class": settings.DEFAULT_FIELD_CLASS}
             )
+            form.fields[name].empty_label = None
         return form
 
     def get_success_url(self) -> str:

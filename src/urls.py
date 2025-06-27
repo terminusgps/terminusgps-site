@@ -39,9 +39,6 @@ urlpatterns = [
         name="privacy",
     ),
     path(
-        "apps/", views.TerminusgpsMobileAppView.as_view(), name="mobile apps"
-    ),
-    path(
         "source/",
         views.TerminusgpsSourceCodeView.as_view(),
         name="source code",

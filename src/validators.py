@@ -9,7 +9,9 @@ def validate_username_exists(value: str) -> None:
         get_user_model().objects.get(username=value)
     except get_user_model().DoesNotExist:
         raise ValidationError(
-            _("Whoops! Couldn't find a user with email '%(value)s', they don't exist."),
+            _(
+                "Whoops! Couldn't find a user with email '%(value)s', they don't exist."
+            ),
             code="invalid",
             params={"value": value},
         )

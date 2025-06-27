@@ -1,5 +1,5 @@
 <div class="group flex w-full flex-col gap-2">
-    <div class="flex items-center gap-1 group-has-[#errors]:text-red-600">
+    <div class="flex items-center gap-1 group-has-[.errorlist]:text-red-600">
         <h2 class="select-none" for="{{ field.id_for_label }}">{{ field.label }}<h2>
         {% if field.help_text %}
         <svg hx-on:click="s=document.getElementById('{{ field.auto_id }}_helptext').getAttribute('aria-expanded')==='true'?'false':'true';document.getElementById('{{ field.auto_id }}_helptext').setAttribute('aria-expanded', s);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 hover:scale-125">
