@@ -235,10 +235,23 @@ class CustomerWialonUnitCreateView(
         Also grants necessary permissions to the customer to view the unit in Wialon.
 
         """
+        if form.cleaned_data["imei"] in CustomerWialonUnit.objects.values_list(
+            "imei", flat=True
+        ):
+            form.add_error(
+                "imei",
+                ValidationError(
+                    _(
+                        "Whoops! That device may have already been registered. Please try again later."
+                    ),
+                    code="invalid",
+                ),
+            )
+            return self.form_invalid(form=form)
+
         try:
             with WialonSession() as session:
                 unit = self.wialon_get_unit(form.cleaned_data["imei"], session)
-
                 customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
                 resource = WialonResource(customer.wialon_resource_id, session)
                 end_user = WialonUser(customer.wialon_user_id, session)
