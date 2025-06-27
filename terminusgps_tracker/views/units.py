@@ -172,10 +172,21 @@ class CustomerWialonUnitListUpdateView(
     def form_valid(
         self, form: forms.Form
     ) -> HttpResponse | HttpResponseRedirect:
-        customer_unit = self.get_object()
+        try:
+            customer_unit = self.get_object()
+            customer_unit.customer.subscription
+        except Subscription.DoesNotExist:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! You need to subscribe to do that."),
+                    code="invalid",
+                ),
+            )
+            return self.form_invalid(form=form)
+
         old_tier = customer_unit.tier
         response = super().form_valid(form=form)
-
         with WialonSession() as session:
             unit = WialonUnit(customer_unit.pk, session)
             unit.rename(form.cleaned_data["name"])
