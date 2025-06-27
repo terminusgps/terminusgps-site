@@ -168,8 +168,11 @@ class CustomerWialonUnit(models.Model):
         return super().save(**kwargs)
 
     def get_absolute_url(self) -> str:
-        """Returns a URL pointing to the unit's detail view."""
-        return reverse("tracker:unit detail", kwargs={"pk": self.pk})
+        """Returns a URL pointing to the unit's list detail view."""
+        return reverse(
+            "tracker:unit list detail",
+            kwargs={"customer_pk": self.customer.pk, "unit_pk": self.pk},
+        )
 
     def wialon_needs_sync(self) -> bool:
         """Whether or not the unit needs to sync data with the Wialon API."""
@@ -196,6 +199,14 @@ class CustomerPaymentMethod(models.Model):
     """Authorizenet customer payment profile id."""
     default = models.BooleanField(default=False)
     """Whether or not the payment method is set as default."""
+    cc_last_4 = models.CharField(
+        max_length=4, default=None, null=True, blank=True
+    )
+    """Last 4 digits of the payment method credit card."""
+    cc_type = models.CharField(
+        max_length=16, default=None, null=True, blank=True
+    )
+    """Merchant associated with the credit card."""
     customer = models.ForeignKey(
         "terminusgps_tracker.Customer",
         on_delete=models.CASCADE,
@@ -210,12 +221,28 @@ class CustomerPaymentMethod(models.Model):
     def __str__(self) -> str:
         return f"Payment Method #{self.pk}"
 
+    def save(self, **kwargs) -> None:
+        """Syncs payment method data with Authorizenet if necessary."""
+        if self.authorizenet_needs_sync():
+            self.authorizenet_sync()
+        return super().save(**kwargs)
+
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the payment method's detail view."""
         return reverse(
             "tracker:payment detail",
             kwargs={"customer_pk": self.customer.pk, "payment_pk": self.pk},
         )
+
+    @transaction.atomic
+    def authorizenet_sync(self) -> None:
+        """Sets the credit card type and last 4 digits for the payment method from Authorizenet."""
+        self.cc_last_4 = str(self.authorizenet_get_credit_card_number())[-4:]
+        self.cc_type = str(self.authorizenet_get_credit_card_type())
+
+    def authorizenet_needs_sync(self) -> bool:
+        """Returns whether or not the payment method needs to sync data with Authorizenet."""
+        return any([not self.cc_last_4, not self.cc_type])
 
     def authorizenet_get_profile(self):
         """Returns payment profile data from Authorizenet."""
@@ -230,25 +257,25 @@ class CustomerPaymentMethod(models.Model):
         )
 
     def authorizenet_get_credit_card_number(self) -> str:
-        """Returns the (obfuscated) credit card for the payment method."""
-        pprofile = self.authorizenet_get_profile()
+        """Returns the (obfuscated) credit card number for the payment method."""
+        response = self.authorizenet_get_profile()
 
-        if pprofile is None:
+        if response is None:
             return ""
         return (
-            pprofile.find(f"{ANET_XMLNS}payment")
+            response.find(f"{ANET_XMLNS}payment")
             .find(f"{ANET_XMLNS}creditCard")
             .find(f"{ANET_XMLNS}cardNumber")
         )
 
     def authorizenet_get_credit_card_type(self) -> str:
         """Returns the credit card type for the payment method."""
-        pprofile = self.authorizenet_get_profile()
+        response = self.authorizenet_get_profile()
 
-        if pprofile is None:
+        if response is None:
             return ""
         return (
-            pprofile.find(f"{ANET_XMLNS}payment")
+            response.find(f"{ANET_XMLNS}payment")
             .find(f"{ANET_XMLNS}creditCard")
             .find(f"{ANET_XMLNS}cardType")
         )
@@ -267,6 +294,10 @@ class CustomerShippingAddress(models.Model):
         related_name="addresses",
     )
     """Associated customer."""
+    street = models.CharField(
+        max_length=64, default=None, blank=True, null=True
+    )
+    """Shipping address street."""
 
     class Meta:
         verbose_name = _("customer shipping address")
@@ -275,12 +306,26 @@ class CustomerShippingAddress(models.Model):
     def __str__(self) -> str:
         return f"Shipping Address #{self.pk}"
 
+    def save(self, **kwargs) -> None:
+        if self.authorizenet_needs_sync():
+            self.authorizenet_sync()
+        return super().save(**kwargs)
+
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the shipping address' detail view."""
         return reverse(
             "tracker:address detail",
             kwargs={"customer_pk": self.customer.pk, "address_pk": self.pk},
         )
+
+    @transaction.atomic
+    def authorizenet_sync(self) -> None:
+        """Syncs shipping address data with Authorizenet."""
+        self.street = self.authorizenet_get_street()
+
+    def authorizenet_needs_sync(self) -> bool:
+        """Whether or not the shipping address needs to sync data with Authorizenet."""
+        return not self.street
 
     def authorizenet_get_profile(self):
         """Returns address profile data from Authorizenet."""
@@ -295,8 +340,9 @@ class CustomerShippingAddress(models.Model):
         )
 
     def authorizenet_get_street(self) -> str:
+        """Returns the street for the shipping address."""
         aprofile = self.authorizenet_get_profile()
 
         if aprofile is None:
             return ""
-        return aprofile.find(f"{ANET_XMLNS}address")
+        return str(aprofile.find(f"{ANET_XMLNS}address"))
