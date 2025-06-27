@@ -30,6 +30,8 @@ from terminusgps.authorizenet.utils import (
     get_transaction,
 )
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
+from terminusgps.wialon.items import WialonResource
+from terminusgps.wialon.session import WialonSession
 
 from terminusgps_tracker.forms import SubscriptionCreationForm
 from terminusgps_tracker.models import Customer, Subscription
@@ -142,6 +144,10 @@ class SubscriptionCreateView(
                 address=form.cleaned_data["address"],
                 customer=customer,
             )
+            # Enable Wialon account
+            with WialonSession() as session:
+                resource = WialonResource(customer.wialon_resource_id, session)
+                resource.enable_account()
             return HttpResponseRedirect(sub.get_absolute_url())
         except ValueError:
             form.add_error(
@@ -327,6 +333,12 @@ class SubscriptionDeleteView(
         subscription = self.get_object()
         sprofile = subscription.authorizenet_get_subscription_profile()
         sprofile.delete()
+        # Disable Wialon account
+        with WialonSession() as session:
+            resource = WialonResource(
+                subscription.customer.wialon_resource_id, session
+            )
+            resource.disable_account()
         return super().post(request, *args, **kwargs)
 
 
