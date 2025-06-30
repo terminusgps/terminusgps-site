@@ -73,10 +73,10 @@ class CustomerShippingAddressDetailView(
         "terminusgps_tracker/addresses/partials/_detail.html"
     )
     permission_denied_message = "Please login to view this content."
+    pk_url_kwarg = "address_pk"
     queryset = CustomerShippingAddress.objects.none()
     raise_exception = False
     template_name = "terminusgps_tracker/addresses/detail.html"
-    pk_url_kwarg = "address_pk"
 
     def get_queryset(
         self,
@@ -99,10 +99,10 @@ class CustomerShippingAddressDeleteView(
         "terminusgps_tracker/addresses/partials/_delete.html"
     )
     permission_denied_message = "Please login to view this content."
+    pk_url_kwarg = "address_pk"
     queryset = CustomerShippingAddress.objects.none()
     raise_exception = False
     template_name = "terminusgps_tracker/addresses/delete.html"
-    pk_url_kwarg = "address_pk"
 
     def get_queryset(
         self,
@@ -132,7 +132,6 @@ class CustomerShippingAddressDeleteView(
         except AuthorizenetControllerExecutionError as e:
             match e.code:
                 case "E00107":
-                    # Address associated with subscription
                     form.add_error(
                         None,
                         ValidationError(

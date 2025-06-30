@@ -1,6 +1,6 @@
 {% load tz %}
 <section id="info" class="flex flex-col gap-4">
-    <h2 class="text-center text-lg font-semibold text-gray-800 dark:text-gray-400">{{ subscription.name }}</h2>
+    <h2 class="text-center text-lg font-semibold">{{ subscription.name }}</h2>
     <div class="flex flex-col gap-4">
         <div hx-get="{% url 'tracker:subscription items' subscription.customer.pk subscription.pk %}" hx-target="this" hx-trigger="load">
             <div class="relative overflow-x-auto">

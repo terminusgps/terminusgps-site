@@ -188,13 +188,19 @@ class CustomerWialonUnitListUpdateView(
 
         old_tier = customer_unit.tier
         response = super().form_valid(form=form)
+
+        # Update the unit name in Wialon
         with WialonSession() as session:
             unit = WialonUnit(customer_unit.pk, session)
-            unit.rename(form.cleaned_data["name"])
+            if unit.name != form.cleaned_data["name"]:
+                unit.rename(form.cleaned_data["name"])
+
+        # Update the subscription amount
         if form.cleaned_data["tier"] != old_tier:
             sub = Subscription.objects.get(customer=customer_unit.customer)
             sprofile = sub.authorizenet_get_subscription_profile()
             sub.authorizenet_update_amount(sprofile)
+
         return response
 
 
@@ -215,12 +221,25 @@ class CustomerWialonUnitCreateView(
     def wialon_get_unit(
         self, imei_number: str, session: WialonSession
     ) -> WialonUnit:
+        """
+        Returns a Wialon unit by imei number.
+
+        :param imei_number: A Wialon unit IMEI number.
+        :type imei_number: :py:obj:`str`
+        :param session: A valid Wialon API session.
+        :type session: :py:obj:`~terminusgps.wialon.session.WialonSession`
+        :raises ValueError: If a unit wasn't found by imei number.
+        :returns: The Wialon unit.
+        :rtype: :py:obj:`~terminusgps.wialon.items.units.WialonUnit`
+
+        """
         unit = wialon_utils.get_unit_by_imei(imei=imei_number, session=session)
         if unit is None:
-            raise ValueError("Couldn't find a unit with that imei number.")
+            raise ValueError(f"Couldn't find a unit with IMEI #{imei_number}.")
         return unit
 
     def get_initial(self) -> dict[str, typing.Any]:
+        """Sets the initial name to ``<FIRST_NAME>'s Ride`` and imei to the provided path parameter of the same name."""
         initial: dict[str, typing.Any] = super().get_initial()
         initial["name"] = f"{self.request.user.first_name}'s Ride"
         initial["imei"] = self.request.GET.get("imei")

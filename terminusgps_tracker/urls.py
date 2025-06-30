@@ -88,11 +88,6 @@ urlpatterns = [
         name="payment list",
     ),
     path(
-        "payments/<int:customer_pk>/choices/",
-        views.CustomerPaymentMethodChoicesView.as_view(),
-        name="payment choices",
-    ),
-    path(
         "addresses/<int:customer_pk>/new/",
         views.CustomerShippingAddressCreateView.as_view(),
         name="address create",
@@ -111,10 +106,5 @@ urlpatterns = [
         "addresses/<int:customer_pk>/list/",
         views.CustomerShippingAddressListView.as_view(),
         name="address list",
-    ),
-    path(
-        "addresses/<int:customer_pk>/choices/",
-        views.CustomerShippingAddressChoicesView.as_view(),
-        name="address choices",
     ),
 ]

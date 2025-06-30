@@ -80,10 +80,10 @@ class CustomerPaymentMethodDetailView(
         "terminusgps_tracker/payments/partials/_detail.html"
     )
     permission_denied_message = "Please login to view this content."
+    pk_url_kwarg = "payment_pk"
     queryset = CustomerPaymentMethod.objects.none()
     raise_exception = False
     template_name = "terminusgps_tracker/payments/detail.html"
-    pk_url_kwarg = "payment_pk"
 
     def get_queryset(
         self,
@@ -109,10 +109,10 @@ class CustomerPaymentMethodDeleteView(
         "terminusgps_tracker/payments/partials/_delete.html"
     )
     permission_denied_message = "Please login to view this content."
+    pk_url_kwarg = "payment_pk"
     queryset = CustomerPaymentMethod.objects.none()
     raise_exception = False
     template_name = "terminusgps_tracker/payments/delete.html"
-    pk_url_kwarg = "payment_pk"
 
     def get_success_url(self) -> str:
         return reverse(
