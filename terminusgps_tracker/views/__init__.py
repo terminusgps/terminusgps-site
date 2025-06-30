@@ -7,8 +7,6 @@ from .addresses import (
 from .customers import (
     CustomerAccountView,
     CustomerDashboardView,
-    CustomerPaymentMethodChoicesView,
-    CustomerShippingAddressChoicesView,
     CustomerSubscriptionView,
     CustomerWialonUnitsView,
 )

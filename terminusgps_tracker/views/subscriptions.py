@@ -321,8 +321,8 @@ class SubscriptionDeleteView(
         "terminusgps_tracker/subscriptions/partials/_delete.html"
     )
     pk_url_kwarg = "sub_pk"
-    template_name = "terminusgps_tracker/subscriptions/delete.html"
     success_url = reverse_lazy("tracker:subscription")
+    template_name = "terminusgps_tracker/subscriptions/delete.html"
 
     def get_queryset(self) -> QuerySet[Subscription, Subscription]:
         return Subscription.objects.filter(
@@ -378,10 +378,10 @@ class SubscriptionTransactionDetailView(
 ):
     content_type = "text/html"
     http_method_names = ["get"]
-    template_name = "terminusgps_tracker/subscriptions/transaction_detail.html"
     partial_template_name = (
         "terminusgps_tracker/subscriptions/partials/_transaction_detail.html"
     )
+    template_name = "terminusgps_tracker/subscriptions/transaction_detail.html"
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         """Adds ``transaction`` and ``submit_time`` to the view context."""
