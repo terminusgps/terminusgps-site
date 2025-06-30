@@ -1,6 +1,6 @@
 {% load tz %}
 <section id="transactions" class="flex flex-col gap-4">
-    <h2 class="text-lg font-semibold text-center">Transaction History</h2>
+    <h2 class="text-center text-lg font-semibold">Transaction History</h2>
     {% if transaction_list|length != 0 %}
     <div class="relative overflow-x-auto">
         <table class="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
@@ -40,6 +40,12 @@
     <p class="text-center">There's nothing here...</p>
     {% endif %}
 </section>
-<section id="buttons" class="flex flex-col gap-2" hx-target="#subscription">
-    <input class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-center text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200 dark:border-gray-400" hx-get="{{ subscription.get_absolute_url }}" type="button" value="Back">
+<section id="buttons" class="flex flex-col gap-2">
+    <button
+        class="w-full cursor-pointer rounded border border-gray-600 bg-gray-300 p-2 text-center text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200 dark:border-gray-400"
+        hx-get="{{ subscription.get_absolute_url }}"
+        type="button"
+    >
+        <p>Back</p>
+    </button>
 </section>

@@ -339,7 +339,9 @@ class SubscriptionDeleteView(
                 subscription.customer.wialon_resource_id, session
             )
             resource.disable_account()
-        return super().post(request, *args, **kwargs)
+        response = super().post(request, *args, **kwargs)
+        response.headers["HX-Retarget"] = "#subscription"
+        return response
 
 
 class SubscriptionTransactionsView(
