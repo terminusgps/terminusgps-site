@@ -238,7 +238,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     def form_valid(
         self, form: TerminusgpsRegisterForm
     ) -> HttpResponse | HttpResponseRedirect:
-        # Create a Django user
+        # Create a user
         user = get_user_model().objects.create_user(
             username=form.cleaned_data["username"],
             password=form.cleaned_data["password1"],
@@ -246,7 +246,6 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
             last_name=form.cleaned_data["last_name"],
             email=form.cleaned_data["username"],
         )
-
         # Create a customer
         customer = Customer.objects.create(user=user)
         # Create a Wialon account + user

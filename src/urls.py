@@ -6,7 +6,6 @@ from django.urls import include, path
 from . import views
 
 urlpatterns = [
-    path("admin/docs/", include("django.contrib.admindocs.urls")),
     path("admin/", admin.site.urls),
     path(
         "register/", views.TerminusgpsRegisterView.as_view(), name="register"
