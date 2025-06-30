@@ -77,6 +77,7 @@ class CustomerPaymentMethodAdmin(admin.ModelAdmin):
     list_display = ["id", "customer"]
     list_filter = ["customer"]
     readonly_fields = ["id", "customer", "cc_type", "cc_last_4"]
+    actions = ["authorizenet_sync"]
 
     @admin.action(
         description="Sync selected payment methods with Authorizenet"
@@ -103,6 +104,7 @@ class CustomerShippingAddressAdmin(admin.ModelAdmin):
     list_display = ["id", "customer"]
     list_filter = ["customer"]
     readonly_fields = ["id", "customer", "street"]
+    actions = ["authorizenet_sync"]
 
     @admin.action(
         description="Sync selected shipping addresses with Authorizenet"
