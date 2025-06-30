@@ -9,8 +9,8 @@
     </section>
     <h2 id="name" class="text-center text-lg font-semibold">{{ subscription.name }}</h2>
     <section id="warning" class="flex flex-col gap-2">
-        <p class="text-center font-semibold text-pretty text-gray-700">Are you sure you want to cancel your subscription?</p>
-        <p class="text-center font-light text-pretty text-gray-600">(You'll lose access to your GPS units without an active subscription)</p>
+        <p class="text-center font-semibold text-pretty text-gray-700 dark:text-gray-200">Are you sure you want to cancel your subscription?</p>
+        <p class="text-center font-light text-pretty text-gray-600 dark:text-gray-300">(You'll lose access to your GPS units without an active subscription)</p>
     </section>
     {% csrf_token %}
     {{ form }}
