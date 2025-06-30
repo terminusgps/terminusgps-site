@@ -74,8 +74,7 @@ class CustomerSubscriptionView(
                 customer=customer
             )
             return context
-        except (Customer.DoesNotExist, Subscription.DoesNotExist):
-            context["customer"] = None
+        except Subscription.DoesNotExist:
             context["subscription"] = None
             return context
 
