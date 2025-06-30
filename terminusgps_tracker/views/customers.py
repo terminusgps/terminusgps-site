@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import DetailView, TemplateView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
-from terminusgps_tracker.models import Customer, Subscription
+from terminusgps_tracker.models import Customer
 from terminusgps_tracker.views.mixins import CustomerOrStaffRequiredMixin
 
 
@@ -67,16 +67,9 @@ class CustomerSubscriptionView(
     template_name = "terminusgps_tracker/subscription.html"
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        try:
-            context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-            context["customer"] = Customer.objects.get(user=self.request.user)
-            context["subscription"] = Subscription.objects.get(
-                customer=customer
-            )
-            return context
-        except Subscription.DoesNotExist:
-            context["subscription"] = None
-            return context
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["customer"] = Customer.objects.get(user=self.request.user)
+        return context
 
 
 class CustomerWialonUnitsView(
