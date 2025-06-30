@@ -78,12 +78,50 @@ class CustomerPaymentMethodAdmin(admin.ModelAdmin):
     list_filter = ["customer"]
     readonly_fields = ["id", "customer", "cc_type", "cc_last_4"]
 
+    @admin.action(
+        description="Sync selected payment methods with Authorizenet"
+    )
+    def authorizenet_sync(self, request, queryset):
+        for obj in queryset:
+            obj.authorizenet_sync()
+            obj.save()
+
+        self.message_user(
+            request,
+            ngettext(
+                "%(count)s payment method had its data synced with Authorizenet.",
+                "%(count)s payment methods had their data synced with Authorizenet.",
+                len(queryset),
+            )
+            % {"count": len(queryset)},
+            messages.SUCCESS,
+        )
+
 
 @admin.register(CustomerShippingAddress)
 class CustomerShippingAddressAdmin(admin.ModelAdmin):
     list_display = ["id", "customer"]
     list_filter = ["customer"]
     readonly_fields = ["id", "customer", "street"]
+
+    @admin.action(
+        description="Sync selected shipping addresses with Authorizenet"
+    )
+    def authorizenet_sync(self, request, queryset):
+        for obj in queryset:
+            obj.authorizenet_sync()
+            obj.save()
+
+        self.message_user(
+            request,
+            ngettext(
+                "%(count)s shipping address had its data synced with Authorizenet.",
+                "%(count)s shipping addresses had their data synced with Authorizenet.",
+                len(queryset),
+            )
+            % {"count": len(queryset)},
+            messages.SUCCESS,
+        )
 
 
 @admin.register(Subscription)
