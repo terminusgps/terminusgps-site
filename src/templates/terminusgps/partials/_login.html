@@ -1,15 +1,20 @@
-<form class="flex flex-col gap-4" action="{% url 'login' %}" method="post" hx-boost="true">
-    {% if form.non_field_errors %}
-    <div class="my-2 animate-jiggle rounded border border-red-800 bg-red-100 p-2 text-red-600">{{ form.non_field_errors }}</div>
-    {% endif %}
+<form class="flex flex-col gap-4" action="{% url 'login' %}" method="post" hx-indicator="#login-spinner" hx-boost="true">
+    {% if form.non_field_errors %}{{ form.non_field_errors }}{% endif %}
     {% csrf_token %}
     {{ form.username.as_field_group }}
     {{ form.password.as_field_group }}
-    <div class="mt-2 flex flex-col gap-4">
-        <input class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" value="Login" type="submit">
-        <div class="flex flex-col justify-evenly gap-2 md:flex-row">
-            <p class="text-center text-sm dark:text-gray-200">Don't have an account? <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'register' %}">Click here</a> to register.</p>
-        </div>
-        <input class="hidden" type="hidden" name="next" value="{{ next }}">
-    </div>
+    <input class="hidden" type="hidden" name="next" value="{{ next }}">
+    <section id="buttons" class="mt-2 flex flex-col gap-4">
+        <button class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit">
+            <div class="flex items-center justify-center gap-2">
+                <div id="login-spinner" class="htmx-indicator group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden size-6 animate-spin group-[.htmx-request]:flex">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                </div>
+                <p>Login</p>
+            </div>
+        </button>
+    </section>
+    <p class="text-center text-sm dark:text-gray-200">Don't have an account? <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'register' %}">Click here</a> to register.</p>
 </form>

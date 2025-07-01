@@ -64,4 +64,12 @@
             </svg>
         </a>
     </section>
+    <section id="socials" class="-mx-8 flex justify-evenly gap-4 bg-gray-300 p-4 shadow-inner">
+        {% for s in socials %}
+        <a href="{{ s.OPTIONS.profile_link }}" class="flex flex-col items-center gap-2 group">
+            {% include s.OPTIONS.icon with class="size-8 fill-terminus-red-800 group-hover:fill-terminus-red-300 duration-300 ease-in-out transition-colors" %}
+            <span class="sr-only">{{ s.NAME }}</span>
+        </a>
+        {% endfor %}
+    </section>
 </div>

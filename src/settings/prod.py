@@ -75,49 +75,6 @@ TRACKER_APP_CONFIG = {
     "MOTD": "Check out the Terminus GPS mobile app!",
     "REPOSITORY_URL": "https://github.com/terminusgps/terminusgps-site/",
     "HOSTING_URL": "https://hosting.terminusgps.com/",
-    "ADDRESSES": [
-        {
-            "NAME": "OFFICE1",
-            "OPTIONS": {
-                "street": "17240 Huffmeister Road, Suite 103",
-                "city": "Cypress",
-                "state": "Texas",
-                "zip": "77429",
-                "country": "USA",
-            },
-        },
-        {
-            "NAME": "OFFICE2",
-            "OPTIONS": {
-                "street": "17240 Huffmeister Road, Suite 103",
-                "city": "Cypress",
-                "state": "Texas",
-                "zip": "77429",
-                "country": "USA",
-            },
-        },
-    ],
-    "PHONES": [
-        {"OFFICE": "+17139045262"},
-        {"SALES": "+17139045262"},
-        {"SUPPORT": "+17139045262"},
-    ],
-    "EMAILS": [
-        {
-            "NAME": "SALES",
-            "OPTIONS": {
-                "address": "sales@terminusgps.com",
-                "link": "mailto:sales@terminusgps.com",
-            },
-        },
-        {
-            "NAME": "SUPPORT",
-            "OPTIONS": {
-                "address": "support@terminusgps.com",
-                "link": "mailto:support@terminusgps.com",
-            },
-        },
-    ],
     "SOCIALS": [
         {
             "NAME": "Facebook",
@@ -125,7 +82,7 @@ TRACKER_APP_CONFIG = {
                 "display_name": "Terminus GPS",
                 "profile_link": "https://www.facebook.com/TerminusGPSllc",
                 "username": "TerminusGPSllc",
-                "icon": "terminusgps_tracker/icons/facebook.svg",
+                "icon": "terminusgps/icons/facebook.svg",
             },
         },
         {
@@ -134,7 +91,7 @@ TRACKER_APP_CONFIG = {
                 "display_name": "TerminusGps",
                 "profile_link": "https://www.tiktok.com/@terminusgps",
                 "username": "terminusgps",
-                "icon": "terminusgps_tracker/icons/tiktok.svg",
+                "icon": "terminusgps/icons/tiktok.svg",
             },
         },
         {
@@ -143,7 +100,7 @@ TRACKER_APP_CONFIG = {
                 "display_name": "TerminusGPS",
                 "profile_link": "https://nextdoor.com/pages/terminusgps-cypress-tx/",
                 "username": "TerminusGPS",
-                "icon": "terminusgps_tracker/icons/nextdoor.svg",
+                "icon": "terminusgps/icons/nextdoor.svg",
             },
         },
         {
@@ -152,7 +109,7 @@ TRACKER_APP_CONFIG = {
                 "display_name": "TERMINUSGPS",
                 "profile_link": "https://x.com/TERMINUSGPS",
                 "username": "TERMINUSGPS",
-                "icon": "terminusgps_tracker/icons/twitter.svg",
+                "icon": "terminusgps/icons/twitter.svg",
             },
         },
     ],

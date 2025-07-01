@@ -1,12 +1,4 @@
-<form class="group flex flex-col gap-4" hx-post="{% url 'register' %}" hx-include="this">
-    <section id="spinner" class="htmx-indicator hidden justify-center rounded border bg-gray-300 p-2 text-gray-700 group-[.htmx-request]:flex">
-        <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 animate-spin">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
-            <p>Creating your account...</p>
-        </div>
-    </section>
+<form class="flex flex-col gap-4" method="post" hx-post="{% url 'register' %}" hx-indicator="#registration-spinner">
     {% csrf_token %}
     {{ form.username.as_field_group }}
     <div class="flex flex-col gap-2 md:flex-row">
@@ -17,24 +9,28 @@
         {{ form.password1.as_field_group }}
         {{ form.password2.as_field_group }}
     </div>
-    <section id="password-requirements" class="flex flex-col gap-4 rounded border bg-gray-200 p-4 md:flex-row dark:bg-gray-600">
-        <div class="flex w-full flex-col gap-2">
-            <p class="font-bold">Password Requirements:</p>
-        </div>
-        <ul class="flex w-full list-inside list-disc flex-col gap-2">
-            <li class="cursor-help" title="ABCDEFGHIJKLMNOPQRSTUVWXYZ">One uppercase letter.</li>
-            <li class="cursor-help" title="abcdefghijklmnopqrstuvwxyz">One lowercase letter.</li>
-            <li class="cursor-help" title="!@#$%^*()[]{}:;'">One special symbol.</li>
-            <li class="cursor-help" title="0123456789">Three digits.</li>
+    <section id="password-requirements" class="flex flex-col justify-between gap-2 rounded border bg-gray-300 p-4 text-nowrap text-gray-800 md:flex-row dark:bg-gray-600 dark:text-gray-100">
+        <p class="w-1/2 font-bold">Password Requirements:</p>
+        <ul class="w-1/2 list-inside list-disc">
+            <li>One uppercase letter.</li>
+            <li>One lowercase letter.</li>
+            <li>One special symbol.</li>
+            <li>Three digits.</li>
+            <li>At least 4 characters.</li>
+            <li>No more than 64 characters.</li>
         </ul>
     </section>
     <section id="buttons" class="flex flex-col gap-2">
-        <button
-            class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400"
-            type="submit"
-            hx-indicator="#spinner"
-        >
-            <p>Register</p>
+        <button class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit">
+            <div class="flex items-center justify-center gap-2">
+                <div id="registration-spinner" class="htmx-indicator group">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden size-6 animate-spin group-[.htmx-request]:flex">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                </div>
+                <p>Register</p>
+            </div>
         </button>
     </section>
+    <p class="text-center text-sm dark:text-gray-200">Already have an account? <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'login' %}">Click here</a> to login.</p>
 </form>

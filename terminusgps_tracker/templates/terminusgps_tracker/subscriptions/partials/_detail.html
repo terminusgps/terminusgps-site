@@ -1,11 +1,6 @@
 {% load tz %}
 <section id="info" class="flex flex-col gap-4">
-    <div class="flex gap-2 items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="htmx-indicator size-6 animate-spin">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-        </svg>
-        <h2 class="text-center text-lg font-semibold">{{ subscription.name }}</h2>
-    </div>
+    <h2 class="text-center text-lg font-semibold">{{ subscription.name }}</h2>
     <div class="flex flex-col gap-4">
         <div hx-get="{% url 'tracker:subscription items' subscription.customer.pk subscription.pk %}" hx-target="this" hx-trigger="load">
             <div class="relative overflow-x-auto">
@@ -37,8 +32,17 @@
     <p class="font-semibold">Grand Total: ${{ subscription.calculate_amount }}</p>
     <p class="font-light">(You'll be charged this amount every month at around {{ start_date|localtime|date:'P' }} on the {{ start_date|date:'jS' }})</p>
 </section>
-<section id="buttons" class="flex flex-col items-center gap-2" hx-indicator=".htmx-indicator">
+<section id="buttons" class="flex flex-col items-center gap-2">
     <button class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" hx-get="{{ subscription.get_update_url }}" type="button">Update</button>
     <button class="w-full cursor-pointer rounded border border-current bg-gray-100 p-2 text-center text-red-700 transition-colors duration-300 ease-in-out hover:bg-red-100" hx-get="{{ subscription.get_delete_url }}" type="button">Cancel</button>
-    <button class="decoration w-fit text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" hx-get="{% url 'tracker:subscription transactions' subscription.customer.pk subscription.pk %}" type="button"><span class="cursor-pointer">View Transaction History</span></button>
+    <button class="decoration w-fit text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" hx-get="{% url 'tracker:subscription transactions' subscription.customer.pk subscription.pk %}" type="button" hx-indicator=".htmx-indicator">
+        <div class="flex items-center justify-center gap-2">
+            <div class="htmx-indicator group">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden size-6 animate-spin group-[.htmx-request]:flex">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+            </div>
+            <p class="cursor-pointer">View Transaction History</p>
+        </div>
+    </button>
 </section>

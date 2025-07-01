@@ -24,6 +24,11 @@ class CustomerDashboardView(
     raise_exception = False
     template_name = "terminusgps_tracker/dashboard.html"
 
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["socials"] = settings.TRACKER_APP_CONFIG.get("SOCIALS")
+        return context
+
 
 class CustomerAccountView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView

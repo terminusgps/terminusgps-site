@@ -64,7 +64,6 @@ class TerminusgpsRegisterForm(UserCreationForm):
         "password2",
     ]
     first_name = forms.CharField(
-        help_text="Please enter your first name.",
         label="First Name",
         max_length=64,
         widget=widgets.TextInput(
@@ -77,7 +76,6 @@ class TerminusgpsRegisterForm(UserCreationForm):
         ),
     )
     last_name = forms.CharField(
-        help_text="Please enter your last name.",
         label="Last Name",
         max_length=64,
         widget=widgets.TextInput(
