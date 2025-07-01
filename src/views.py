@@ -48,12 +48,18 @@ class TerminusgpsContactView(HtmxTemplateResponseMixin, TemplateView):
     partial_template_name = "terminusgps/partials/_contact.html"
 
 
-class TerminusgpsHomepageView(HtmxTemplateResponseMixin, TemplateView):
+class TerminusgpsHomeView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
-    extra_context = {"title": "Home"}
+    extra_context = {
+        "title": "Terminus GPS",
+        "subtitle": settings.TRACKER_APP_CONFIG.get(
+            "MOTD", "We know where ours are... do you?"
+        ),
+        "socials": settings.TRACKER_APP_CONFIG.get("SOCIALS"),
+    }
     http_method_names = ["get"]
-    template_name = "terminusgps/homepage.html"
-    partial_template_name = "terminusgps/partials/_homepage.html"
+    template_name = "terminusgps/home.html"
+    partial_template_name = "terminusgps/partials/_home.html"
 
 
 class TerminusgpsTermsAndConditionsView(

@@ -1,0 +1,41 @@
+{% load static %}
+<h2 class="text-center text-2xl text-terminus-red-600">In God We Trust, All Others We Track</h2>
+<section id="testimonials" class="">
+    <h3 class="text-center text-2xl text-terminus-red-600 p-4">Our Customers are Obsessed</h3>
+    <div class="flex justify-evenly gap-2 p-4">
+        <div class="flex flex-col items-center gap-2">
+            <img src="{% static 'terminusgps/peterheadshot.jpg' %}" alt="Peter Speckman Headshot" class="h-full w-24 rounded-full">
+            <p class="text-sm">Peter Quote 1</p>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+            <img src="{% static 'terminusgps/peterheadshot.jpg' %}" alt="Peter Speckman Headshot" class="h-full w-24 rounded-full">
+            <p class="text-sm">Peter Quote 2</p>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+            <img src="{% static 'terminusgps/peterheadshot.jpg' %}" alt="Peter Speckman Headshot" class="h-full w-24 rounded-full">
+            <p class="text-sm">Peter Quote 3</p>
+        </div>
+    </div>
+</section>
+<section id="socials" class="flex flex-col gap-4">
+    <h3 class="text-center text-2xl text-terminus-red-600">Follow us</h3>
+    <div class="-mx-8 flex justify-evenly gap-2 bg-gray-300 p-4 shadow-inner md:gap-4">
+        {% for social in socials.values %}
+        <a href="{{ social.link }}" class="group flex flex-col items-center gap-2 text-terminus-red-800 transition-colors duration-300 ease-in-out hover:text-terminus-red-300">
+            {% include social.icon with class="size-8 fill-terminus-red-800 group-hover:fill-terminus-red-300 duration-300 ease-in-out transition-colors" %}
+            <p class="hidden text-sm md:flex">@{{ social.username }}</p>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+<section id="mobile-apps" class="flex flex-col gap-4">
+    <h3 class="text-center text-2xl text-terminus-red-600">Download the mobile app</h3>
+    <div class="-mx-8 flex items-center justify-center gap-4 p-4">
+        <a href="https://apps.apple.com/us/app/terminus-gps-mobile/id1419439009?ls=1">
+            <img class="h-full w-48" src="{% static 'terminusgps/App_Store_Badge_Black.svg' %}" alt="Download it on the App Store Badge">
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=com.terminusgps.track&hl=en">
+            <img class="h-full w-54" src="{% static 'terminusgps/Play_Store_Badge_White.png' %}" alt="Get it on the Google Play Store Badge">
+        </a>
+    </div>
+</section>
