@@ -1,34 +1,18 @@
-<form id="cancel-subscription" class="group flex flex-col gap-4" method="post" hx-post="{{ subscription.get_delete_url }}" hx-swap="outerHTML">
-    <section id="spinner" class="htmx-indicator hidden justify-center rounded border bg-gray-300 p-2 text-gray-700 group-[.htmx-request]:flex">
-        <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 animate-spin">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
-            <p>Canceling subscription...</p>
-        </div>
-    </section>
-    <h2 id="name" class="text-center text-lg font-semibold">{{ subscription.name }}</h2>
-    <section id="warning" class="flex flex-col gap-2">
-        <p class="text-center font-semibold text-pretty text-gray-700 dark:text-gray-200">Are you sure you want to cancel your subscription?</p>
-        <p class="text-center font-light text-pretty text-gray-600 dark:text-gray-300">(You'll lose access to your GPS units without an active subscription)</p>
-    </section>
+<section id="info" class="flex items-center justify-center gap-2">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="htmx-indicator size-6 animate-spin">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+    </svg>
+    <h2 class="text-center text-lg font-semibold">{{ subscription.name }}</h2>
+</section>
+<section id="warning" class="flex flex-col gap-2">
+    <p class="text-center font-semibold text-pretty text-gray-700 dark:text-gray-200">Are you sure you want to cancel your subscription?</p>
+    <p class="text-center font-light text-pretty text-gray-600 dark:text-gray-300">(You'll lose access to your GPS units without an active subscription)</p>
+</section>
+<form class="group flex flex-col gap-4" method="post" hx-post="{{ subscription.get_delete_url }}" hx-swap="outerHTML" hx-target="#subscription" hx-indicator=".htmx-indicator">
     {% csrf_token %}
     {{ form }}
     <section id="buttons" class="flex flex-col gap-2">
-        <button
-            class="w-full cursor-pointer rounded border border-current bg-gray-100 p-2 text-center text-red-700 transition-colors duration-300 ease-in-out hover:bg-red-100"
-            type="submit"
-            hx-indicator="#spinner"
-        >
-            <p>Confirm</p>
-        </button>
-        <button
-            class="w-full cursor-pointer rounded border border-current bg-gray-300 p-2 text-center text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200"
-            hx-get="{{ subscription.get_absolute_url }}"
-            type="button"
-            hx-swap="innerHTML"
-        >
-            <p>Back</p>
-        </button>
+        <button class="w-full cursor-pointer rounded border border-current bg-gray-100 p-2 text-center text-red-700 transition-colors duration-300 ease-in-out hover:bg-red-100" type="submit">Confirm</button>
+        <button class="w-full cursor-pointer rounded border border-current bg-gray-300 p-2 text-center text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-200" hx-get="{{ subscription.get_absolute_url }}" type="button" hx-swap="innerHTML" hx-indicator=".htmx-indicator">Back</button>
     </section>
 </form>

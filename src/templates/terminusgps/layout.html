@@ -49,17 +49,15 @@
             </div>
             {% endif %}
         </nav>
-        <main>
-            <div class="container mx-auto -mt-2">
-                <div class="border-lr mx-8 border-gray-600 bg-stone-100 dark:bg-terminus-gray-800">
-                    <div class="mt-2 flex flex-col gap-2 bg-gray-200 p-8 shadow-inner dark:bg-terminus-gray-700">
-                        <h2 class="text-xl font-bold md:text-2xl">{{ title }}</h2>
-                        {% if subtitle %}<h3 class="font-light md:text-lg">{{ subtitle }}</h3>{% endif %}
-                    </div>
-                    <div class="flex flex-col gap-8 p-8">
-                        {% block content %}
-                        {% endblock content %}
-                    </div>
+        <main class="container mx-auto -mt-2">
+            <div class="border-lr mx-8 border-gray-600 bg-stone-100 dark:bg-terminus-gray-800">
+                <div class="mt-2 flex flex-col gap-2 bg-gray-200 p-8 shadow-inner dark:bg-terminus-gray-700">
+                    <h2 class="text-xl font-bold md:text-2xl">{{ title }}</h2>
+                    {% if subtitle %}<h3 class="font-light md:text-lg">{{ subtitle }}</h3>{% endif %}
+                </div>
+                <div class="flex flex-col gap-8 p-8">
+                    {% block content %}
+                    {% endblock content %}
                 </div>
             </div>
         </main>
@@ -73,10 +71,5 @@
                 <li><a href="{% url 'terms' %}" class="decoration me-4 text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted md:me-6 dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">Terms</a></li>
             </ul>
         </footer>
-        <script>
-        document.body.addEventListener('htmx:configRequest', (event) => {
-            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
-        })
-        </script>
     </body>
 </html>
