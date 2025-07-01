@@ -188,9 +188,9 @@ class CustomerPaymentMethod(models.Model):
 
     def __str__(self) -> str:
         return (
-            f"Payment Method #{self.pk}"
-            if not self.cc_type or not self.cc_last_4
-            else f"{self.cc_type} ending in {self.cc_last_4}"
+            f"{self.cc_type} ending in {self.cc_last_4}"
+            if not self.authorizenet_needs_sync()
+            else f"Payment Method #{self.pk}"
         )
 
     def save(self, **kwargs) -> None:
@@ -234,7 +234,7 @@ class CustomerPaymentMethod(models.Model):
         response = self.authorizenet_get_profile()
 
         if response is None:
-            return ""
+            return "XXXXXXXX"
         return (
             response.find(f"{ANET_XMLNS}payment")
             .find(f"{ANET_XMLNS}creditCard")
@@ -246,7 +246,7 @@ class CustomerPaymentMethod(models.Model):
         response = self.authorizenet_get_profile()
 
         if response is None:
-            return ""
+            return "Unknown"
         return (
             response.find(f"{ANET_XMLNS}payment")
             .find(f"{ANET_XMLNS}creditCard")
@@ -278,7 +278,9 @@ class CustomerShippingAddress(models.Model):
 
     def __str__(self) -> str:
         return (
-            f"Shipping Address #{self.pk}" if not self.street else self.street
+            self.street
+            if not self.authorizenet_needs_sync()
+            else f"Shipping Address #{self.pk}"
         )
 
     def save(self, **kwargs) -> None:
@@ -321,5 +323,5 @@ class CustomerShippingAddress(models.Model):
         response = self.authorizenet_get_profile()
 
         if response is None:
-            return ""
+            return "Unknown"
         return str(response.find(f"{ANET_XMLNS}address"))
