@@ -30,7 +30,6 @@ dependencies = [
     "psycopg>=3.2.6",
     "docutils>=0.21.2",
     "selenium>=4.33.0",
-    "celery>=5.5.3",
     "psycopg2-binary>=2.9.10",
 ]
 
