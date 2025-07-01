@@ -8,6 +8,7 @@ requires-python = ">=3.12"
 authors = [
     { name = "Blake Nall", email = "blake@terminusgps.com" },
     { name = "Lili Noack", email = "lili@terminusgps.com" },
+    { name = "Peter Speckman", email = "peter@terminusgps.com" },
 ]
 dependencies = [
     "authorizenet==1.1.5",
@@ -30,6 +31,7 @@ dependencies = [
     "docutils>=0.21.2",
     "selenium>=4.33.0",
     "celery>=5.5.3",
+    "psycopg2-binary>=2.9.10",
 ]
 
 [tool.pyright]
