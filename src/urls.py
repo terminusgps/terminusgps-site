@@ -13,26 +13,6 @@ urlpatterns = [
     path("login/", views.TerminusgpsLoginView.as_view(), name="login"),
     path("logout/", views.TerminusgpsLogoutView.as_view(), name="logout"),
     path(
-        "reset-password/",
-        views.TerminusgpsPasswordResetView.as_view(),
-        name="password reset",
-    ),
-    path(
-        "reset-password/done/",
-        views.TerminusgpsPasswordResetDoneView.as_view(),
-        name="password reset done",
-    ),
-    path(
-        "reset-password/<str:uidb64>/<str:token>/confirm/",
-        views.TerminusgpsPasswordResetConfirmView.as_view(),
-        name="password reset confirm",
-    ),
-    path(
-        "reset-password/complete/",
-        views.TerminusgpsPasswordResetCompleteView.as_view(),
-        name="password reset complete",
-    ),
-    path(
         "privacy/",
         views.TerminusgpsPrivacyPolicyView.as_view(),
         name="privacy",

@@ -8,7 +8,6 @@
     <div class="mt-2 flex flex-col gap-4">
         <input class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" value="Login" type="submit">
         <div class="flex flex-col justify-evenly gap-2 md:flex-row">
-            <p class="text-center text-sm dark:text-gray-200">Forgot your password? <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'password reset' %}">Click here</a> to reset it.</p>
             <p class="text-center text-sm dark:text-gray-200">Don't have an account? <a class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200" href="{% url 'register' %}">Click here</a> to register.</p>
         </div>
         <input class="hidden" type="hidden" name="next" value="{{ next }}">

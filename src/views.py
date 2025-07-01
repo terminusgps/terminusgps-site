@@ -1,16 +1,7 @@
-from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.views import (
-    LoginView,
-    LogoutView,
-    PasswordResetCompleteView,
-    PasswordResetConfirmView,
-    PasswordResetDoneView,
-    PasswordResetView,
-)
+from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import ImproperlyConfigured
-from django.core.validators import validate_email
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
@@ -24,7 +15,6 @@ from terminusgps.wialon.session import WialonSession
 from terminusgps_tracker.models import Customer
 
 from .forms import TerminusgpsAuthenticationForm, TerminusgpsRegisterForm
-from .validators import validate_username_exists
 
 if settings.configured and not hasattr(settings, "TRACKER_APP_CONFIG"):
     raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
@@ -101,100 +91,6 @@ class TerminusgpsPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
     http_method_names = ["get"]
     partial_template_name = "terminusgps/partials/_privacy.html"
     template_name = "terminusgps/privacy.html"
-
-
-class TerminusgpsPasswordResetView(
-    HtmxTemplateResponseMixin, PasswordResetView
-):
-    content_type = "text/html"
-    email_template_name = "terminusgps/emails/password_reset.txt"
-    extra_context = {
-        "title": "Password Reset",
-        "subtitle": "Forgot your password?",
-    }
-    http_method_names = ["get", "post"]
-    template_name = "terminusgps/password_reset.html"
-    partial_template_name = "terminusgps/partials/_password_reset.html"
-    success_url = reverse_lazy("password reset done")
-    subject_template_name = "terminusgps/emails/password_reset_subject.html"
-
-    def get_form(self, form_class: forms.Form | None = None) -> forms.Form:
-        """
-        Adds styling to form fields.
-
-        :param form_class: A base form class.
-        :type form_class: :py:obj:`~django.forms.Form` | :py:obj:`None`
-        :returns: A styled form.
-        :rtype: :py:obj:`~django.forms.Form`
-
-        """
-        help_text = "Please enter the email address associated with your Terminus GPS account."
-        form = super().get_form(form_class)
-        form.fields["email"].label = "Email Address"
-        form.fields["email"].help_text = help_text
-        form.fields["email"].validators = [
-            validate_email,
-            validate_username_exists,
-        ]
-        form.fields["email"].widget.attrs.update(
-            {
-                "class": settings.DEFAULT_FIELD_CLASS,
-                "placeholder": "email@domain.com",
-            }
-        )
-        return form
-
-
-class TerminusgpsPasswordResetDoneView(
-    HtmxTemplateResponseMixin, PasswordResetDoneView
-):
-    content_type = "text/html"
-    extra_context = {"title": "Done Password Reset"}
-    http_method_names = ["get"]
-    template_name = "terminusgps/password_reset_done.html"
-    partial_template_name = "terminusgps/partials/_password_reset_done.html"
-
-
-class TerminusgpsPasswordResetConfirmView(
-    HtmxTemplateResponseMixin, PasswordResetConfirmView
-):
-    content_type = "text/html"
-    extra_context = {"title": "Confirm Password Reset"}
-    http_method_names = ["get", "post"]
-    template_name = "terminusgps/password_reset_confirm.html"
-    partial_template_name = "terminusgps/partials/_password_reset_confirm.html"
-    success_url = reverse_lazy("password reset complete")
-
-    def get_form(self, form_class: forms.Form | None = None) -> forms.Form:
-        """
-        Adds styling to form fields.
-
-        :param form_class: A base form class.
-        :type form_class: :py:obj:`~django.forms.Form` | :py:obj:`None`
-        :returns: A styled form.
-        :rtype: :py:obj:`~django.forms.Form`
-
-        """
-        form = super().get_form(form_class)
-        form.fields["new_password1"].label = "New Password"
-        form.fields["new_password2"].label = "Confirm New Password"
-        for name in form.fields:
-            form.fields[name].widget.attrs.update(
-                {"class": settings.DEFAULT_FIELD_CLASS}
-            )
-        return form
-
-
-class TerminusgpsPasswordResetCompleteView(
-    HtmxTemplateResponseMixin, PasswordResetCompleteView
-):
-    content_type = "text/html"
-    extra_context = {"title": "Completed Password Reset"}
-    http_method_names = ["get"]
-    template_name = "terminusgps/password_reset_complete.html"
-    partial_template_name = (
-        "terminusgps/partials/_password_reset_complete.html"
-    )
 
 
 class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
