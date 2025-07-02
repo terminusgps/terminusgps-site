@@ -6,12 +6,26 @@ from django.urls import include, path
 from . import views
 
 urlpatterns = [
+    path("", views.TerminusgpsHomeView.as_view(), name="home"),
     path("admin/", admin.site.urls),
+    path("hosting/", views.TerminusgpsHostingView.as_view(), name="hosting"),
+    path("about/", views.TerminusgpsAboutView.as_view(), name="about"),
+    path("contact/", views.TerminusgpsContactView.as_view(), name="contact"),
+    path("login/", views.TerminusgpsLoginView.as_view(), name="login"),
+    path("logout/", views.TerminusgpsLogoutView.as_view(), name="logout"),
     path(
         "register/", views.TerminusgpsRegisterView.as_view(), name="register"
     ),
-    path("login/", views.TerminusgpsLoginView.as_view(), name="login"),
-    path("logout/", views.TerminusgpsLogoutView.as_view(), name="logout"),
+    path(
+        "safety/teens/",
+        views.TerminusgpsTeenSafetyView.as_view(),
+        name="teen safety",
+    ),
+    path(
+        "safety/seniors/",
+        views.TerminusgpsSeniorSafetyView.as_view(),
+        name="senior safety",
+    ),
     path(
         "privacy/",
         views.TerminusgpsPrivacyPolicyView.as_view(),
@@ -22,8 +36,6 @@ urlpatterns = [
         views.TerminusgpsSourceCodeView.as_view(),
         name="source code",
     ),
-    path("hosting/", views.TerminusgpsHostingView.as_view(), name="hosting"),
-    path("about/", views.TerminusgpsAboutView.as_view(), name="about"),
     path(
         "terms/",
         views.TerminusgpsTermsAndConditionsView.as_view(),
@@ -34,8 +46,6 @@ urlpatterns = [
         views.TerminusgpsFrequentlyAskedQuestionsView.as_view(),
         name="faq",
     ),
-    path("contact/", views.TerminusgpsContactView.as_view(), name="contact"),
-    path("", views.TerminusgpsHomeView.as_view(), name="home"),
     path(
         "install/",
         include("terminusgps_installer.urls", namespace="installer"),
