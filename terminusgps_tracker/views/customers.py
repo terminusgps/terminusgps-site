@@ -16,6 +16,7 @@ class CustomerDashboardView(
     extra_context = {
         "title": "Dashboard",
         "subtitle": settings.TRACKER_APP_CONFIG["MOTD"],
+        "socials": settings.TRACKER_APP_CONFIG["SOCIALS"],
     }
     http_method_names = ["get"]
     login_url = reverse_lazy("login")
@@ -23,11 +24,6 @@ class CustomerDashboardView(
     permission_denied_message = "Please login to view this content."
     raise_exception = False
     template_name = "terminusgps_tracker/dashboard.html"
-
-    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["socials"] = settings.TRACKER_APP_CONFIG.get("SOCIALS")
-        return context
 
 
 class CustomerAccountView(

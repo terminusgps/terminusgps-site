@@ -10,6 +10,7 @@ from terminusgps.authorizenet.profiles import (
     CustomerProfile,
     PaymentProfile,
 )
+from terminusgps.wialon import flags
 from terminusgps.wialon.items import WialonUnit
 from terminusgps.wialon.session import WialonSession
 
@@ -38,18 +39,83 @@ class Customer(models.Model):
         """Returns the customer's email address/username."""
         return self.user.email if self.user.email else self.user.username
 
+    def authorizenet_get_customer_profile(self) -> CustomerProfile:
+        """Returns the Authorizenet customer profile for the customer."""
+        return CustomerProfile(
+            id=str(self.authorizenet_profile_id),
+            merchant_id=str(self.user.pk),
+            email=self.user.email if self.user.email else self.user.username,
+        )
+
+    def authorizenet_get_current_address_ids(self) -> list[int]:
+        """Returns a list of address profile ids for the customer profile from Authorizenet."""
+        cprofile: CustomerProfile = self.authorizenet_get_customer_profile()
+        return cprofile.get_address_profile_ids()
+
+    def authorizenet_get_current_payment_ids(self) -> list[int]:
+        """Returns a list of payment profile ids for the customer profile from Authorizenet."""
+        cprofile: CustomerProfile = self.authorizenet_get_customer_profile()
+        return cprofile.get_payment_profile_ids()
+
+    def wialon_get_current_unit_ids(self, session: WialonSession) -> list[int]:
+        """Returns a list of current customer unit ids from Wialon."""
+        response = session.wialon_api.core_search_items(
+            **{
+                "spec": {
+                    "itemsType": "avl_unit",
+                    "propName": "sys_billing_account_guid,sys_id",
+                    "propValueMask": f"={self.wialon_resource_id},*",
+                    "sortType": "sys_id",
+                    "propType": "property,property",
+                    "or_logic": int(False),
+                },
+                "force": 0,
+                "flags": flags.DataFlag.UNIT_BASE,
+                "from": 0,
+                "to": 0,
+            }
+        )
+
+        if not response:
+            return []
+        return [int(unit.get("id")) for unit in response.get("items", {})]
+
     @transaction.atomic
-    def authorizenet_sync_payment_profiles(self) -> list:
+    def wialon_sync_units(
+        self, session: WialonSession
+    ) -> list["CustomerWialonUnit"]:
+        """Retrieves unit ids from Wialon and creates customer units based on them."""
+        remote_unit_ids = set(self.wialon_get_current_unit_ids(session))
+        local_unit_ids = set(
+            CustomerWialonUnit.objects.filter(customer=self).values_list(
+                "id", flat=True
+            )
+        )
+        new_unit_objs = [
+            CustomerWialonUnit(id=id, customer=self)
+            for id in remote_unit_ids - local_unit_ids
+        ]
+
+        if not new_unit_objs:
+            return []
+        return CustomerWialonUnit.objects.bulk_create(
+            new_unit_objs, ignore_conflicts=True
+        )
+
+    @transaction.atomic
+    def authorizenet_sync_payment_profiles(
+        self,
+    ) -> list["CustomerPaymentMethod"]:
         """Retrieves payment profiles from Authorizenet and creates customer payment methods based on them."""
-        current_payment_ids = set(
+        remote_payment_ids = set(self.authorizenet_get_current_payment_ids())
+        local_payment_ids = set(
             CustomerPaymentMethod.objects.filter(customer=self).values_list(
                 "id", flat=True
             )
         )
         new_payment_objs = [
             CustomerPaymentMethod(id=id, customer=self)
-            for id in self.authorizenet_get_payment_profile_ids()
-            if id not in current_payment_ids
+            for id in remote_payment_ids - local_payment_ids
         ]
 
         if not new_payment_objs:
@@ -59,43 +125,25 @@ class Customer(models.Model):
         )
 
     @transaction.atomic
-    def authorizenet_sync_address_profiles(self) -> list:
+    def authorizenet_sync_address_profiles(
+        self,
+    ) -> list["CustomerShippingAddress"]:
         """Retrieves address profiles from Authorizenet and creates customer shipping addresses based on them."""
-        current_address_ids = set(
+        remote_address_ids = set(self.authorizenet_get_current_address_ids())
+        local_address_ids = set(
             CustomerShippingAddress.objects.filter(customer=self).values_list(
                 "id", flat=True
             )
         )
         new_address_objs = [
             CustomerShippingAddress(id=id, customer=self)
-            for id in self.authorizenet_get_address_profile_ids()
-            if id not in current_address_ids
+            for id in remote_address_ids - local_address_ids
         ]
 
         if not new_address_objs:
             return []
         return CustomerShippingAddress.objects.bulk_create(
             new_address_objs, ignore_conflicts=True
-        )
-
-    def authorizenet_get_customer_profile(self) -> CustomerProfile:
-        """Returns the Authorizenet customer profile for the customer."""
-        return CustomerProfile(
-            id=str(self.authorizenet_profile_id),
-            merchant_id=str(self.user.pk),
-            email=self.user.email if self.user.email else self.user.username,
-        )
-
-    def authorizenet_get_address_profile_ids(self) -> list[int]:
-        """Returns a list of address profile ids for the customer profile from Authorizenet."""
-        return (
-            self.authorizenet_get_customer_profile().get_address_profile_ids()
-        )
-
-    def authorizenet_get_payment_profile_ids(self) -> list[int]:
-        """Returns a list of payment profile ids for the customer profile from Authorizenet."""
-        return (
-            self.authorizenet_get_customer_profile().get_payment_profile_ids()
         )
 
 
