@@ -8,11 +8,22 @@ from . import views
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("docs/", include("docs.urls")),
+    path("", views.TerminusgpsHomeView.as_view(), name="home"),
     path(
         "register/", views.TerminusgpsRegisterView.as_view(), name="register"
     ),
     path("login/", views.TerminusgpsLoginView.as_view(), name="login"),
     path("logout/", views.TerminusgpsLogoutView.as_view(), name="logout"),
+    path(
+        "safety/teens/",
+        views.TerminusgpsTeenSafetyView.as_view(),
+        name="teen safety",
+    ),
+    path(
+        "safety/seniors/",
+        views.TerminusgpsSeniorSafetyView.as_view(),
+        name="senior safety",
+    ),
     path(
         "privacy/",
         views.TerminusgpsPrivacyPolicyView.as_view(),
@@ -36,7 +47,6 @@ urlpatterns = [
         name="faq",
     ),
     path("contact/", views.TerminusgpsContactView.as_view(), name="contact"),
-    # path("", views.TerminusgpsHomepageView.as_view(), name="home"),
     path(
         "install/",
         include("terminusgps_installer.urls", namespace="installer"),
