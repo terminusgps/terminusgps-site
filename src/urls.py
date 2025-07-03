@@ -24,8 +24,19 @@ urlpatterns = [
         views.TerminusgpsSeniorSafetyView.as_view(),
         name="senior safety",
     ),
+    path("", views.TerminusgpsHomeView.as_view(), name="home"),
     path(
         "register/", views.TerminusgpsRegisterView.as_view(), name="register"
+    ),
+    path(
+        "safety/teens/",
+        views.TerminusgpsTeenSafetyView.as_view(),
+        name="teen safety",
+    ),
+    path(
+        "safety/seniors/",
+        views.TerminusgpsSeniorSafetyView.as_view(),
+        name="senior safety",
     ),
     path(
         "privacy/",

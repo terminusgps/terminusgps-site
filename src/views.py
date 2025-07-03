@@ -52,7 +52,7 @@ class TerminusgpsHomeView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {
         "title": "Home",
-        "subtitle": "We know where ours are... do you?",
+        "subtitle": settings.TRACKER_APP_CONFIG["MOTD"],
         "socials": settings.TRACKER_APP_CONFIG["SOCIALS"],
     }
     http_method_names = ["get"]
@@ -62,7 +62,10 @@ class TerminusgpsHomeView(HtmxTemplateResponseMixin, TemplateView):
 
 class TerminusgpsTeenSafetyView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
-    extra_context = {"title": "Teen Safety", "subtitle": ""}
+    extra_context = {
+        "title": "Teen Safety",
+        "subtitle": "Tips and Tricks for Teen Drivers",
+    }
     http_method_names = ["get"]
     template_name = "terminusgps/safety/teen.html"
     partial_template_name = "terminusgps/safety/partials/_teen.html"
@@ -70,7 +73,10 @@ class TerminusgpsTeenSafetyView(HtmxTemplateResponseMixin, TemplateView):
 
 class TerminusgpsSeniorSafetyView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
-    extra_context = {"title": "Senior Safety", "subtitle": ""}
+    extra_context = {
+        "title": "Senior Safety",
+        "subtitle": "Tips and Tricks for Senior Drivers",
+    }
     http_method_names = ["get"]
     template_name = "terminusgps/safety/senior.html"
     partial_template_name = "terminusgps/safety/partials/_senior.html"

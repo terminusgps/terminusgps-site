@@ -74,7 +74,7 @@ WIALON_UNACTIVATED_GROUP = secret.get("WIALON_UNACTIVATED_GROUP")
 TRACKER_APP_CONFIG = {
     "DISPLAY_NAME": "Terminus GPS",
     "LEGAL_NAME": "Terminus GPS, LLC",
-    "MOTD": "Check out the Terminus GPS mobile app!",
+    "MOTD": "We know where ours are... do you?",
     "REPOSITORY_URL": "https://github.com/terminusgps/terminusgps-site/",
     "HOSTING_URL": "https://hosting.terminusgps.com/",
     "SOCIALS": {

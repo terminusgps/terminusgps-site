@@ -91,7 +91,7 @@ WSGI_APPLICATION = "src.wsgi.application"
 TRACKER_APP_CONFIG = {
     "DISPLAY_NAME": "Terminus GPS",
     "LEGAL_NAME": "Terminus GPS, LLC",
-    "MOTD": "Download the Terminus GPS mobile app today!",
+    "MOTD": "We know where ours are... do you?",
     "REPOSITORY_URL": "https://github.com/terminusgps/terminusgps-site/",
     "HOSTING_URL": "https://hosting.terminusgps.com/",
     "SOCIALS": {
