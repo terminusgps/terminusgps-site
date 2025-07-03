@@ -1,20 +1,18 @@
 {% load static %}
 <section class="-mx-8 flex flex-col gap-8 bg-no-repeat text-center text-pretty" style="background-image: url({% static 'terminusgps/traffic.avif' %})">
     <h2 class="bg-[#d1d1e0]/80 p-4 text-2xl font-bold tracking-wider text-terminus-red-600 md:text-3xl dark:text-terminus-red-200">In God We Trust, All Others We Track</h2>
-    <h3 class="bg-[#d1d1e0]/80 p-4 text-lg font-semibold tracking-wide text-terminus-red-500 md:text-xl dark:text-terminus-red-300">Affordable GPS Tracking and Real-Time Alerts</h3>
-    <h3 class="bg-[#d1d1e0]/80 p-4 text-lg font-semibold tracking-wide text-terminus-red-500 md:text-xl dark:text-terminus-red-300">More Text</h3>
-    <h3 class="bg-[#d1d1e0]/80 p-4 text-lg font-semibold tracking-wide text-terminus-red-500 md:text-xl dark:text-terminus-red-300">Even More Text</h3>
+    <p class="invisible h-48">Text</p>
 </section>
 <section class="flex flex-col gap-4">
     <details id="individual" class="flex flex-col gap-4" open>
             <summary class="w-fit cursor-pointer text-xl text-terminus-red-700 transition-colors duration-300 ease-in-out select-none hover:text-terminus-red-300 dark:text-terminus-red-200 dark:hover:text-terminus-red-700">For Individual Use</summary>
             <div class="mx-4 flex flex-col gap-2">
-                <p>Whether you're monitoring a <a href="{% url 'teen safety' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">teen driver</a> or an <a href="{% url 'senior safety' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">elderly driver</a>, promoting safety and reducing driving risk is our <span class="font-semibold">first</span> priority, the very idea Terminus GPS was founded on.</p>
+                <p>Whether you're monitoring a <a href="{% url 'teen safety' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">teen driver</a> or an <a href="{% url 'senior safety' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">elderly driver</a>, promoting safety and reducing driving risk is our <span class="italic">first</span> priority; it's the very idea Terminus GPS was founded on.</p>
                 <p>We've taken the industry standard GPS tracking software and hardware, mainly used in commerical fleet tracking, and simplified it for individual users.</p>
                 <p>Alerts you create and configure in <a href="{% url 'hosting' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">the platform</a> are sent via SMS directly to your smartphone.</p>
                 <p>Don't want text messages? You can access the exact same notification data by logging into <a href="{% url 'hosting' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">the platform</a> from any Internet connected device.</p>
                 <p>Here's what our individual users cite as their most used capabilities:</p>
-                <ul class="mx-4 list-inside list-disc">
+                <ul class="mx-4 list-inside list-disc marker:text-terminus-red-400">
                     <li>Geographic location</li>
                     <li>Accelerated speed</li>
                     <li>Time and distance traveled</li>
@@ -28,9 +26,9 @@
         <div class="mx-4 flex flex-col gap-2">
             <p>Today's fleet managers need a reliable and efficient way to keep up with today's demands on their fleet.</p>
             <p>Whether you're keeping up with just a few service vehicles, or a large scale fleet operation with thousands of vehicles, we have the tools you need to properly manage your scaling fleet.</p>
-            <p>All vehicles in the fleet are accessible in <a href="{% url 'hosting' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">one place</a>, but utilized in different ways by department, job or any other organizational structure your fleet has.</p>
+            <p>All vehicles in the fleet are accessible in <a href="{% url 'hosting' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">one place</a> but utilized in different ways by department, job or any other organizational structure your fleet has.</p>
             <p>Here's what our commercial fleet managers cite as their most used capabilities:</p>
-            <ul class="mx-4 list-inside list-disc">
+            <ul class="mx-4 list-inside list-disc marker:text-terminus-red-400">
                 <li>Geographic location</li>
                 <li>Enter/exit of geofence areas</li>
                 <li>Time and distance traveled</li>
@@ -38,7 +36,7 @@
                 <li>Driver behavior</li>
             </ul>
             <p>In addition to the above capabilities, fleet managers can generate a slew of different reports based on their fleet's status, such as:</p>
-            <ul class="mx-4 list-inside list-disc">
+            <ul class="mx-4 list-inside list-disc marker:text-terminus-red-400">
                 <li>Daily activity</li>
                 <li>After hours usage</li>
                 <li>Maintenance due</li>
