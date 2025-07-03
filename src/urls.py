@@ -7,6 +7,7 @@ from . import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("docs/", include("docs.urls")),
     path(
         "register/", views.TerminusgpsRegisterView.as_view(), name="register"
     ),
