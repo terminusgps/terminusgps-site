@@ -23,14 +23,12 @@ dependencies = [
     "pillow==11.3.0",
     "python-terminusgps==37.7.1",
     "python-wialon==1.2.4",
-    "django-otp>=1.6.0",
-    "pyotp>=2.9.0",
-    "qrcode[pil]>=8.1",
-    "opencv-python>=4.11.0.86",
     "psycopg>=3.2.6",
-    "docutils>=0.21.2",
-    "selenium>=4.33.0",
     "psycopg2-binary>=2.9.10",
+    "sphinx>=8.2.3",
+    "sphinxawesome-theme>=5.3.2",
+    "autoclasstoc>=1.7.0",
+    "django-docs>=0.3.3",
 ]
 
 [tool.pyright]

@@ -1,7 +1,6 @@
 import datetime
 import decimal
 import typing
-from zoneinfo import ZoneInfo
 
 from authorizenet import apicontractsv1
 from django import forms
@@ -20,7 +19,6 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
-from terminusgps.authorizenet.constants import ANET_XMLNS
 from terminusgps.authorizenet.controllers import (
     AuthorizenetControllerExecutionError,
 )
@@ -34,7 +32,11 @@ from terminusgps.wialon.items import WialonResource
 from terminusgps.wialon.session import WialonSession
 
 from terminusgps_tracker.forms import SubscriptionCreationForm
-from terminusgps_tracker.models import Customer, Subscription
+from terminusgps_tracker.models import (
+    Customer,
+    CustomerWialonUnit,
+    Subscription,
+)
 from terminusgps_tracker.views.mixins import CustomerOrStaffRequiredMixin
 
 
@@ -54,30 +56,24 @@ class SubscriptionDetailView(
     pk_url_kwarg = "sub_pk"
     template_name = "terminusgps_tracker/subscriptions/detail.html"
 
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        """Adds ``grand_total`` to the view context."""
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["grand_total"] = self.get_object().calculate_amount()
+        return context
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        """Syncs the subscription's data with Authorizenet if necessary."""
+        subscription = self.get_object()
+        if subscription.authorizenet_needs_sync():
+            subscription.authorizenet_sync()
+            subscription.save()
+        return super().get(request, *args, **kwargs)
+
     def get_queryset(self) -> QuerySet[Subscription, Subscription]:
         return Subscription.objects.filter(
             customer__pk=self.kwargs["customer_pk"]
         ).select_related("customer")
-
-    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        """Adds the subscription start date to the view context."""
-        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["start_date"] = self.get_start_date()
-        return context
-
-    def get_start_date(self) -> datetime.datetime:
-        """Retrieves the subscription start date from Authorizenet and returns it as an aware datetime."""
-        return datetime.datetime.strptime(
-            str(
-                self.get_object()
-                .authorizenet_get_subscription_profile()
-                ._authorizenet_get_subscription()
-                .find(f"{ANET_XMLNS}subscription")
-                .find(f"{ANET_XMLNS}paymentSchedule")
-                .find(f"{ANET_XMLNS}startDate")
-            ),
-            "%Y-%m-%d",
-        ).replace(hour=2, tzinfo=ZoneInfo("US/Pacific"))
 
 
 class SubscriptionCreateView(
@@ -234,16 +230,17 @@ class SubscriptionCreateView(
         :type customer: :py:obj:`~terminusgps_tracker.models.customers.Customer`
         :param add_tax: Whether or not to add tax to the subscription amount. Default is :py:obj:`True`.
         :type add_tax: :py:obj:`bool`
-        :raises ValueError: If the customer doesn't have any units to generate an amount with.
+        :raises ValueError: If the customer didn't have any units.
         :returns: An amount for a subscription.
         :rtype: :py:obj:`~decimal.Decimal`
 
         """
-        if customer.units.count() == 0:
+        unit_qs = CustomerWialonUnit.objects.filter(customer=customer)
+        if unit_qs.count() == 0:
             raise ValueError("Customer doesn't have any units.")
 
         raw_amount = sum(
-            customer.units.values_list("tier__amount", flat=True),
+            unit_qs.values_list("tier__amount", flat=True),
             decimal.Decimal("0.00"),
         )
         return calculate_amount_plus_tax(raw_amount) if add_tax else raw_amount
@@ -276,7 +273,7 @@ class SubscriptionUpdateView(
         """Updates the subscription's payment method and shipping address in Authorizenet."""
         try:
             subscription = self.get_object()
-            sprofile = subscription.authorizenet_get_subscription_profile()
+            sprofile = subscription._authorizenet_get_profile()
             subscription.authorizenet_update_payment(sprofile)
             subscription.save()
             return super().form_valid(form=form)
@@ -331,8 +328,9 @@ class SubscriptionDeleteView(
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         subscription = self.get_object()
-        sprofile = subscription.authorizenet_get_subscription_profile()
+        sprofile = subscription._authorizenet_get_profile()
         sprofile.delete()
+
         # Disable Wialon account
         with WialonSession() as session:
             resource = WialonResource(
@@ -367,10 +365,8 @@ class SubscriptionTransactionsView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        subscription = self.get_object()
-        sprofile = subscription.authorizenet_get_subscription_profile()
         context["transaction_list"] = (
-            subscription.authorizenet_get_transaction_list(sprofile)
+            self.get_object().authorizenet_get_transaction_list()
         )
         return context
 
@@ -398,24 +394,27 @@ class SubscriptionTransactionDetailView(
         return context
 
 
-class SubscriptionItemListView(
-    LoginRequiredMixin,
-    CustomerOrStaffRequiredMixin,
-    HtmxTemplateResponseMixin,
-    TemplateView,
-):
+class SubscriptionItemListView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     http_method_names = ["get"]
     partial_template_name = (
-        "terminusgps_tracker/subscriptions/partials/_items.html"
+        "terminusgps_tracker/subscriptions/partials/_item_list.html"
     )
-    template_name = "terminusgps_tracker/subscriptions/items.html"
+    template_name = "terminusgps_tracker/subscriptions/item_list.html"
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        try:
+            Subscription.objects.filter(
+                customer__pk=self.kwargs.get("customer_pk")
+            ).get(pk=self.kwargs.get("sub_pk"))
+            return super().get(request, *args, **kwargs)
+        except (Customer.DoesNotExist, Subscription.DoesNotExist):
+            return HttpResponse(status=404)
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        subscription = Subscription.objects.filter(
-            customer__pk=self.kwargs["customer_pk"]
-        ).get(pk=self.kwargs["sub_pk"])
-        context["items_list"] = list(subscription.customer.units.all())
-        context["items_list"].extend(list(subscription.features.all()))
+        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
+        context["items_list"] = CustomerWialonUnit.objects.filter(
+            customer=customer
+        )
         return context

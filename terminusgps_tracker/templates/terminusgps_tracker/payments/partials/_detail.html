@@ -1,5 +1,4 @@
 {% load terminusgps_tracker_display %}
-{% with payment.authorizenet_get_profile as profile %}
 <section id="payment-{{ payment.pk }}" class="flex flex-col gap-4 rounded border-2 border-current bg-white p-4 dark:bg-gray-800" hx-target="this">
     <div class="flex items-center justify-between">
         <h2 class="font-semibold tracking-wide">BILL TO:</h2>
@@ -15,4 +14,3 @@
     </div>
     <input class="w-full cursor-pointer rounded border border-current bg-gray-50 p-2 text-center text-red-800 transition-colors duration-300 ease-in-out hover:bg-red-50" type="button" value="Delete" hx-get="{% url 'tracker:payment delete' payment.customer.pk payment.pk %}">
 </section>
-{% endwith %}

@@ -16,7 +16,7 @@ class CustomerDashboardView(
     extra_context = {
         "title": "Dashboard",
         "subtitle": settings.TRACKER_APP_CONFIG["MOTD"],
-        "socials": settings.TRACKER_APP_CONFIG.get("SOCIALS"),
+        "socials": settings.TRACKER_APP_CONFIG["SOCIALS"],
     }
     http_method_names = ["get"]
     login_url = reverse_lazy("login")

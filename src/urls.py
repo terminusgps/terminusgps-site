@@ -8,11 +8,7 @@ from . import views
 urlpatterns = [
     path("", views.TerminusgpsHomeView.as_view(), name="home"),
     path("admin/", admin.site.urls),
-    path("hosting/", views.TerminusgpsHostingView.as_view(), name="hosting"),
-    path("about/", views.TerminusgpsAboutView.as_view(), name="about"),
-    path("contact/", views.TerminusgpsContactView.as_view(), name="contact"),
-    path("login/", views.TerminusgpsLoginView.as_view(), name="login"),
-    path("logout/", views.TerminusgpsLogoutView.as_view(), name="logout"),
+    path("docs/", include("docs.urls")),
     path(
         "register/", views.TerminusgpsRegisterView.as_view(), name="register"
     ),

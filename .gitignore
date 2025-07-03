@@ -3,6 +3,7 @@ __pycache__/
 output/
 db.*
 build/
+docs/build/
 media/
 
 .*
