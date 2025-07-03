@@ -40,6 +40,28 @@ class TerminusgpsAboutView(HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps/about.html"
 
 
+class TerminusgpsSeniorSafetyView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Senior Drivers",
+        "subtitle": "Tips and Tricks for Senior Drivers",
+    }
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps/safety/partials/_seniors.html"
+    template_name = "terminusgps/safety/seniors.html"
+
+
+class TerminusgpsTeenSafetyView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Teen Drivers",
+        "subtitle": "Tips and Tricks for Parents of Teen Drivers",
+    }
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps/safety/partials/_teens.html"
+    template_name = "terminusgps/safety/teens.html"
+
+
 class TerminusgpsContactView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "Contact", "subtitle": "Get in touch with us"}
@@ -48,12 +70,18 @@ class TerminusgpsContactView(HtmxTemplateResponseMixin, TemplateView):
     partial_template_name = "terminusgps/partials/_contact.html"
 
 
-class TerminusgpsHomepageView(HtmxTemplateResponseMixin, TemplateView):
+class TerminusgpsHomeView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
-    extra_context = {"title": "Home"}
+    extra_context = {
+        "title": "Home",
+        "subtitle": settings.TRACKER_APP_CONFIG.get(
+            "MOTD", "We know where ours are... do you?"
+        ),
+        "socials": settings.TRACKER_APP_CONFIG.get("SOCIALS"),
+    }
     http_method_names = ["get"]
-    template_name = "terminusgps/homepage.html"
-    partial_template_name = "terminusgps/partials/_homepage.html"
+    template_name = "terminusgps/home.html"
+    partial_template_name = "terminusgps/partials/_home.html"
 
 
 class TerminusgpsTermsAndConditionsView(

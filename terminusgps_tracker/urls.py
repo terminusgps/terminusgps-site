@@ -4,14 +4,16 @@ from . import views
 
 app_name = "tracker"
 urlpatterns = [
-    path("", views.CustomerDashboardView.as_view(), name="dashboard"),
-    path("account/", views.CustomerAccountView.as_view(), name="account"),
-    path("units/", views.CustomerWialonUnitsView.as_view(), name="units"),
+    path(
+        "dashboard/", views.CustomerDashboardView.as_view(), name="dashboard"
+    ),
     path(
         "subscription/",
         views.CustomerSubscriptionView.as_view(),
         name="subscription",
     ),
+    path("account/", views.CustomerAccountView.as_view(), name="account"),
+    path("units/", views.CustomerWialonUnitsView.as_view(), name="units"),
     path(
         "units/<int:customer_pk>/list/",
         views.CustomerWialonUnitListView.as_view(),
