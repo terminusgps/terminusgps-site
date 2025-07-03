@@ -198,7 +198,7 @@ class CustomerWialonUnitListUpdateView(
         # Update the subscription amount
         if form.cleaned_data["tier"] != old_tier:
             sub = Subscription.objects.get(customer=customer_unit.customer)
-            sprofile = sub.authorizenet_get_subscription_profile()
+            sprofile = sub._authorizenet_get_profile()
             sub.authorizenet_update_amount(sprofile)
 
         return response
