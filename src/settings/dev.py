@@ -94,44 +94,32 @@ TRACKER_APP_CONFIG = {
     "MOTD": "Download the Terminus GPS mobile app today!",
     "REPOSITORY_URL": "https://github.com/terminusgps/terminusgps-site/",
     "HOSTING_URL": "https://hosting.terminusgps.com/",
-    "SOCIALS": [
-        {
-            "NAME": "Facebook",
-            "OPTIONS": {
-                "display_name": "Terminus GPS",
-                "profile_link": "https://www.facebook.com/TerminusGPSllc",
-                "username": "TerminusGPSllc",
-                "icon": "terminusgps/icons/facebook.svg",
-            },
+    "SOCIALS": {
+        "FACEBOOK": {
+            "display_name": "Terminus GPS",
+            "link": "https://www.facebook.com/TerminusGPSllc",
+            "username": "TerminusGPSllc",
+            "icon": "terminusgps/icons/facebook.svg",
         },
-        {
-            "NAME": "TikTok",
-            "OPTIONS": {
-                "display_name": "TerminusGps",
-                "profile_link": "https://www.tiktok.com/@terminusgps",
-                "username": "terminusgps",
-                "icon": "terminusgps/icons/tiktok.svg",
-            },
+        "TIKTOK": {
+            "display_name": "TerminusGps",
+            "link": "https://www.tiktok.com/@terminusgps",
+            "username": "terminusgps",
+            "icon": "terminusgps/icons/tiktok.svg",
         },
-        {
-            "NAME": "Nextdoor",
-            "OPTIONS": {
-                "display_name": "TerminusGPS",
-                "profile_link": "https://nextdoor.com/pages/terminusgps-cypress-tx/",
-                "username": "TerminusGPS",
-                "icon": "terminusgps/icons/nextdoor.svg",
-            },
+        "NEXTDOOR": {
+            "display_name": "TerminusGPS",
+            "link": "https://nextdoor.com/pages/terminusgps-cypress-tx/",
+            "username": "TerminusGPS",
+            "icon": "terminusgps/icons/nextdoor.svg",
         },
-        {
-            "NAME": "Twitter",
-            "OPTIONS": {
-                "display_name": "TERMINUSGPS",
-                "profile_link": "https://x.com/TERMINUSGPS",
-                "username": "TERMINUSGPS",
-                "icon": "terminusgps/icons/twitter.svg",
-            },
+        "TWITTER": {
+            "display_name": "TERMINUSGPS",
+            "link": "https://x.com/TERMINUSGPS",
+            "username": "TERMINUSGPS",
+            "icon": "terminusgps/icons/twitter.svg",
         },
-    ],
+    },
 }
 
 
