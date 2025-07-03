@@ -38,11 +38,6 @@ urlpatterns = [
         name="subscription detail",
     ),
     path(
-        "subscription/<int:customer_pk>/<int:sub_pk>/items/",
-        views.SubscriptionItemListView.as_view(),
-        name="subscription items",
-    ),
-    path(
         "subscription/<int:customer_pk>/new/",
         views.SubscriptionCreateView.as_view(),
         name="subscription create",
@@ -61,6 +56,11 @@ urlpatterns = [
         "subscription/<int:customer_pk>/<int:sub_pk>/transactions/",
         views.SubscriptionTransactionsView.as_view(),
         name="subscription transactions",
+    ),
+    path(
+        "subscription/<int:customer_pk>/<int:sub_pk>/items/",
+        views.SubscriptionItemListView.as_view(),
+        name="subscription items",
     ),
     path(
         "transactions/<int:transaction_id>/",

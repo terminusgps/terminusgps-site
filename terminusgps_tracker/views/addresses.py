@@ -45,7 +45,7 @@ class CustomerShippingAddressListView(
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-        customer.authorizenet_sync_address_profiles()
+        customer.authorizenet_sync()
         return super().get(request, *args, **kwargs)
 
     def get_queryset(
@@ -77,6 +77,18 @@ class CustomerShippingAddressDetailView(
     queryset = CustomerShippingAddress.objects.none()
     raise_exception = False
     template_name = "terminusgps_tracker/addresses/detail.html"
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        address = self.get_object()
+        if address.authorizenet_needs_sync():
+            address.authorizenet_sync()
+            address.save()
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["profile"] = self.get_object()._authorizenet_get_profile()
+        return context
 
     def get_queryset(
         self,
@@ -117,17 +129,21 @@ class CustomerShippingAddressDeleteView(
             kwargs={"customer_pk": self.kwargs["customer_pk"]},
         )
 
+    def form_invalid(self, form=None) -> HttpResponse:
+        response = self.render_to_response(self.get_context_data(form=form))
+        response.headers["HX-Retarget"] = f"#address-{self.object.pk}"
+        return response
+
     def form_valid(self, form=None) -> HttpResponse | HttpResponseRedirect:
         try:
-            aprofile_id = self.object.pk
-            cprofile_id = Customer.objects.get(
-                pk=self.kwargs["customer_pk"]
-            ).authorizenet_profile_id
-
-            aprofile = AddressProfile(
-                id=aprofile_id, customer_profile_id=cprofile_id
+            customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
+            address_id = self.object.pk
+            customer_id = customer.authorizenet_profile_id
+            anet_profile = AddressProfile(
+                id=address_id, customer_profile_id=customer_id
             )
-            aprofile.delete()
+
+            anet_profile.delete()
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
             match e.code:
@@ -153,11 +169,6 @@ class CustomerShippingAddressDeleteView(
                         ),
                     )
             return self.form_invalid(form=form)
-
-    def form_invalid(self, form=None) -> HttpResponse:
-        response = self.render_to_response(self.get_context_data(form=form))
-        response.headers["HX-Retarget"] = f"#address-{self.object.pk}"
-        return response
 
 
 class CustomerShippingAddressCreateView(

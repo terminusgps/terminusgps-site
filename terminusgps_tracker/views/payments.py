@@ -49,7 +49,7 @@ class CustomerPaymentMethodListView(
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-        customer.authorizenet_sync_payment_profiles()
+        customer.authorizenet_sync()
         return super().get(request, *args, **kwargs)
 
     def get_queryset(
@@ -84,6 +84,19 @@ class CustomerPaymentMethodDetailView(
     queryset = CustomerPaymentMethod.objects.none()
     raise_exception = False
     template_name = "terminusgps_tracker/payments/detail.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["profile"] = self.get_object()._authorizenet_get_profile()
+        return context
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        """Syncs the payment method's data with Authorizenet before returning a response."""
+        payment = self.get_object()
+        if payment.authorizenet_needs_sync():
+            payment.authorizenet_sync()
+            payment.save()
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(
         self,

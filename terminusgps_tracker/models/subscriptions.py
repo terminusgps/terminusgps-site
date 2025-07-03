@@ -1,12 +1,12 @@
+import datetime
 import decimal
+from zoneinfo import ZoneInfo
 
 from authorizenet import apicontractsv1
 from django.db import models, transaction
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from terminusgps.authorizenet.controllers import (
-    AuthorizenetControllerExecutionError,
-)
+from terminusgps.authorizenet.constants import ANET_XMLNS
 from terminusgps.authorizenet.profiles import SubscriptionProfile
 from terminusgps.authorizenet.utils import calculate_amount_plus_tax
 
@@ -59,16 +59,12 @@ class Subscription(models.Model):
         "terminusgps_tracker.CustomerWialonUnit", blank=True, default=None
     )
     """Associated customer wialon units."""
+    start_date = models.DateTimeField(null=True, blank=True, default=None)
+    """Start date/time for the subscription."""
 
     def __str__(self) -> str:
         """Returns the subscription name."""
         return self.name
-
-    def save(self, **kwargs) -> None:
-        """Syncs subscription data with Authorizenet if necessary."""
-        if self.authorizenet_needs_sync():
-            self.authorizenet_sync()
-        super().save(**kwargs)
 
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the subscription's detail view."""
@@ -76,18 +72,6 @@ class Subscription(models.Model):
             "tracker:subscription detail",
             kwargs={"customer_pk": self.customer.pk, "sub_pk": self.pk},
         )
-
-    def delete(self, *args, **kwargs):
-        """Tries to cancel the subscription in Authorizenet before deleting the object."""
-        try:
-            sprofile = self.authorizenet_get_subscription_profile()
-            sprofile.delete()
-        except AuthorizenetControllerExecutionError:
-            print(
-                "Subscription wasn't deleted, something went wrong with Authorizenet."
-            )
-        finally:
-            super().delete(*args, **kwargs)
 
     def get_update_url(self) -> str:
         """Returns a URL pointing to the subscription's update view."""
@@ -103,18 +87,6 @@ class Subscription(models.Model):
             kwargs={"customer_pk": self.customer.pk, "sub_pk": self.pk},
         )
 
-    def get_total_feature_amounts(self) -> list[decimal.Decimal]:
-        """Returns a list of dollar amounts for features assigned to the subscription."""
-        if self.features.count() == 0:
-            return []
-        return [f.calculate_amount() for f in self.features.all()]
-
-    def get_total_unit_amounts(self) -> list[decimal.Decimal]:
-        """Returns a list of dollar amounts for units assigned to the subscription."""
-        if self.customer.units.count() == 0:
-            return []
-        return [u.calculate_amount() for u in self.customer.units.all()]
-
     def calculate_amount(self, add_tax: bool = True) -> decimal.Decimal:
         """
         Calculates and returns the total dollar amount for the subscription.
@@ -126,8 +98,8 @@ class Subscription(models.Model):
 
         """
         amounts = []
-        amounts.extend(self.get_total_unit_amounts())
-        amounts.extend(self.get_total_feature_amounts())
+        amounts.extend(self._get_total_unit_amounts())
+        amounts.extend(self._get_total_feature_amounts())
 
         return (
             calculate_amount_plus_tax(decimal.Decimal(sum(amounts)))
@@ -182,14 +154,35 @@ class Subscription(models.Model):
 
     def authorizenet_sync(self) -> SubscriptionProfile:
         """Syncs the subscription payment, address and status with Authorizenet."""
-        sprofile = self.authorizenet_get_subscription_profile()
-        self.authorizenet_sync_status(sprofile)
-        self.authorizenet_sync_payment(sprofile)
-        self.authorizenet_sync_address(sprofile)
+        anet_profile: SubscriptionProfile = self._authorizenet_get_profile()
+        self._authorizenet_sync_start_date(anet_profile)
+        self._authorizenet_sync_status(anet_profile)
+        self._authorizenet_sync_payment(anet_profile)
+        self._authorizenet_sync_address(anet_profile)
+        return anet_profile
+
+    def authorizenet_needs_sync(self) -> bool:
+        """Returns whether or not the subscription is out of sync with Authorizenet."""
+        return not all([self.payment, self.address, self.start_date])
+
+    @transaction.atomic
+    def _authorizenet_sync_start_date(
+        self, sprofile: SubscriptionProfile
+    ) -> SubscriptionProfile:
+        self.start_date = datetime.datetime.strptime(
+            str(
+                self._authorizenet_get_profile()
+                ._authorizenet_get_subscription()
+                .find(f"{ANET_XMLNS}subscription")
+                .find(f"{ANET_XMLNS}paymentSchedule")
+                .find(f"{ANET_XMLNS}startDate")
+            ),
+            "%Y-%m-%d",
+        ).replace(hour=2, tzinfo=ZoneInfo("US/Pacific"))
         return sprofile
 
     @transaction.atomic
-    def authorizenet_sync_payment(
+    def _authorizenet_sync_payment(
         self, sprofile: SubscriptionProfile
     ) -> SubscriptionProfile:
         """Creates/retrieves and sets the payment for the subscription from Authorizenet."""
@@ -199,7 +192,7 @@ class Subscription(models.Model):
         return sprofile
 
     @transaction.atomic
-    def authorizenet_sync_address(
+    def _authorizenet_sync_address(
         self, sprofile: SubscriptionProfile
     ) -> SubscriptionProfile:
         """Creates/retrieves and sets the address for the subscription from Authorizenet."""
@@ -209,30 +202,36 @@ class Subscription(models.Model):
         return sprofile
 
     @transaction.atomic
-    def authorizenet_sync_status(
+    def _authorizenet_sync_status(
         self, sprofile: SubscriptionProfile
     ) -> SubscriptionProfile:
         """Retrieves and sets the status for the subscription from Authorizenet."""
         self.status = sprofile.status
         return sprofile
 
-    def authorizenet_needs_sync(self) -> bool:
-        """Returns whether or not the subscription is out of sync with Authorizenet."""
-        return all([self.payment, self.address])
+    def authorizenet_get_transaction_list(self) -> list[dict[str, str]]:
+        """Retrieves and returns a transaction list for a subscription profile."""
+        sprofile = self._authorizenet_get_profile()
+        return sprofile.transactions
 
-    def authorizenet_get_subscription_profile(self) -> SubscriptionProfile:
+    def _authorizenet_get_profile(self) -> SubscriptionProfile:
         """Returns a :py:obj:`~terminusgps.authorizenet.profiles.subscriptions.SubscriptionProfile` for the subscription."""
         return SubscriptionProfile(
             customer_profile_id=self.customer.authorizenet_profile_id,
             id=self.pk,
         )
 
-    @staticmethod
-    def authorizenet_get_transaction_list(
-        sprofile: SubscriptionProfile,
-    ) -> list[dict[str, str]]:
-        """Retrieves and returns a transaction list for a subscription profile."""
-        return sprofile.transactions
+    def _get_total_feature_amounts(self) -> list[decimal.Decimal]:
+        """Returns a list of dollar amounts for features assigned to the subscription."""
+        if self.features.count() == 0:
+            return []
+        return [f.calculate_amount() for f in self.features.all()]
+
+    def _get_total_unit_amounts(self) -> list[decimal.Decimal]:
+        """Returns a list of dollar amounts for units assigned to the subscription."""
+        if self.customer.units.count() == 0:
+            return []
+        return [u.calculate_amount() for u in self.customer.units.all()]
 
 
 class SubscriptionFeature(models.Model):
