@@ -5,6 +5,7 @@
     {{ form.tier }}
 </td>
 <td class="w-1/3 px-6 py-4 group-has-[.errorlist]:bg-red-200">
+    {% csrf_token %}
     {% if form.non_field_errors %}<div class="animate-jiggle text-center text-sm text-red-700">{{ form.non_field_errors }}</div>{% endif %}
     <div class="flex items-center justify-evenly">
         <div id="unit-{{ unit.pk }}-spinner" class="htmx-indicator p-2">
