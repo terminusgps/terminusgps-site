@@ -1,51 +1,71 @@
 {% load static %}
-<section class="-mx-8 -mt-8 flex flex-col gap-8 bg-no-repeat text-center text-pretty" style="background-image: url({% static 'terminusgps/traffic.avif' %})">
-    <h2 class="bg-[#d1d1e0]/80 p-4 text-2xl font-bold tracking-wider text-terminus-red-600 md:text-3xl dark:text-terminus-red-200">In God We Trust, All Others We Track</h2>
-    <p class="invisible h-48">Text</p>
+<section id="header" class="relative -mx-8 -mt-8">
+    <img class="h-auto w-full" src="{% static 'terminusgps/traffic.avif' %}" alt="">
+    <h2 class="absolute top-0 w-full bg-[#d1d1e0]/80 p-4 text-center text-2xl font-bold tracking-wider text-terminus-red-600 md:text-3xl dark:text-terminus-red-200">In God We Trust, All Others We Track</h2>
 </section>
-<section class="flex flex-col gap-4">
-    <details id="individual" class="flex flex-col gap-4" open>
-            <summary class="w-fit cursor-pointer text-xl text-terminus-red-700 transition-colors duration-300 ease-in-out select-none hover:text-terminus-red-300 dark:text-terminus-red-200 dark:hover:text-terminus-red-700">For Individual Use</summary>
-            <div class="mx-4 flex flex-col gap-2">
-                <p>Whether you're monitoring a <a href="{% url 'teen safety' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">teen driver</a> or an <a href="{% url 'senior safety' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">elderly driver</a>, promoting safety and reducing driving risk is our <span class="italic">first</span> priority; it's the very idea Terminus GPS was founded on.</p>
-                <p>We've taken the industry standard GPS tracking software and hardware, mainly used in commerical fleet tracking, and simplified it for individual users.</p>
-                <p>Alerts you create and configure in <a href="{% url 'hosting' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">the platform</a> are sent via SMS directly to your smartphone.</p>
-                <p>Don't want text messages? You can access the exact same notification data by logging into <a href="{% url 'hosting' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">the platform</a> from any Internet connected device.</p>
-                <p>Here's what our individual users cite as their most used capabilities:</p>
-                <ul class="mx-4 list-inside list-disc marker:text-terminus-red-400">
-                    <li>Geographic location</li>
-                    <li>Accelerated speed</li>
-                    <li>Time and distance traveled</li>
-                    <li>Stop and start times</li>
-                    <li>Driver behavior monitoring</li>
-                </ul>
+<section id="floater" class="flex flex-col gap-4 text-center font-semibold text-gray-50">
+    <div class="flex items-center gap-2 rounded border border-current bg-terminus-red-600 p-4 drop-shadow odd:bg-terminus-red-400">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden size-6 md:flex">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+        </svg>
+        <p>Promoting Safety Through Technology</p>
+    </div>
+    <div class="flex items-center gap-2 rounded border border-current bg-terminus-red-600 p-4 drop-shadow odd:bg-terminus-red-400">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden size-6 md:flex">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+        </svg>
+        <p>Reliable, Scalable and Efficient Fleet Monitoring</p>
+    </div>
+    <div class="flex items-center gap-2 rounded border border-current bg-terminus-red-600 p-4 drop-shadow odd:bg-terminus-red-400">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden size-6 md:flex">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+        </svg>
+        <p>Commerical-Grade GPS Monitoring for Individuals</p>
+    </div>
+</section>
+<section id="customers" class="flex flex-col gap-4">
+    <section id="commercial" class="mx-4 flex flex-col gap-2">
+        <h2 class="text-lg font-semibold text-terminus-red-600 dark:text-terminus-red-200">For Commerical Use</h2>
+        <p>Today's fleet managers need a reliable and efficient way to keep up with today's demands on their fleet.</p>
+        <p>Whether you're keeping up with just a few service vehicles, or a large scale fleet operation with thousands of vehicles, we have the tools you need to properly manage your scaling fleet.</p>
+        <p>All vehicles in the fleet are accessible in <a href="{% url 'hosting' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">one place</a> but utilized in different ways by department, job or any other organizational structure your fleet has.</p>
+        <p>Here's what our commercial fleet managers cite as their most used capabilities:</p>
+        <ul class="mx-2 list-inside list-disc marker:text-terminus-red-600">
+            <li>Geographic location</li>
+            <li>Enter/exit of geofence areas</li>
+            <li>Time and distance traveled</li>
+            <li>Daily start and stop times</li>
+            <li>Driver behavior</li>
+        </ul>
+    </section>
+    <section id="individuals" class="mx-4 flex flex-col gap-2">
+        <h2 class="text-lg font-semibold text-terminus-red-600 dark:text-terminus-red-200">For Individual Use</h2>
+        <p>Whether you're monitoring a <a href="{% url 'teen safety' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">teen driver</a> or an <a href="{% url 'senior safety' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">elderly driver</a>, promoting safety and reducing driving risk is our <span class="italic">first</span> priority; it's the very idea Terminus GPS was founded on.</p>
+        <p>We've taken the industry standard GPS tracking software and hardware, mainly used in commerical fleet tracking, and simplified it for individual users.</p>
+        <p>Alerts you create and configure in <a href="{% url 'hosting' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">the platform</a> are sent via SMS directly to your smartphone.</p>
+        <p>Here's what our individual users cite as their most used capabilities:</p>
+        <ul class="mx-2 list-inside list-disc marker:text-terminus-red-600">
+            <li>Geographic location</li>
+            <li>Accelerated speed</li>
+            <li>Time and distance traveled</li>
+            <li>Stop and start times</li>
+            <li>Driver behavior monitoring</li>
+        </ul>
+        <div class="mt-4 flex flex-col gap-4 rounded border border-current bg-yellow-50 p-4 text-yellow-700 drop-shadow">
+            <div class="flex gap-2">
+                <div class="flex">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+                    </svg>
+                </div>
+                <p class="font-semibold">Don't want text messages?</p>
             </div>
-    </details>
-    <details id="commercial" class="flex flex-col gap-4" open>
-        <summary class="w-fit cursor-pointer text-xl text-terminus-red-700 transition-colors duration-300 ease-in-out select-none hover:text-terminus-red-300 dark:text-terminus-red-200 dark:hover:text-terminus-red-700">For Commercial Use</summary>
-        <div class="mx-4 flex flex-col gap-2">
-            <p>Today's fleet managers need a reliable and efficient way to keep up with today's demands on their fleet.</p>
-            <p>Whether you're keeping up with just a few service vehicles, or a large scale fleet operation with thousands of vehicles, we have the tools you need to properly manage your scaling fleet.</p>
-            <p>All vehicles in the fleet are accessible in <a href="{% url 'hosting' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">one place</a> but utilized in different ways by department, job or any other organizational structure your fleet has.</p>
-            <p>Here's what our commercial fleet managers cite as their most used capabilities:</p>
-            <ul class="mx-4 list-inside list-disc marker:text-terminus-red-400">
-                <li>Geographic location</li>
-                <li>Enter/exit of geofence areas</li>
-                <li>Time and distance traveled</li>
-                <li>Daily start and stop times</li>
-                <li>Driver behavior</li>
-            </ul>
-            <p>In addition to the above capabilities, fleet managers can generate a slew of different reports based on their fleet's status, such as:</p>
-            <ul class="mx-4 list-inside list-disc marker:text-terminus-red-400">
-                <li>Daily activity</li>
-                <li>After hours usage</li>
-                <li>Maintenance due</li>
-                <li>International fuel tax agreement</li>
-                <li>Hours of service</li>
-                <li>Driver report card</li>
-            </ul>
+            <p class="mx-4">You can access the exact same notification data by logging into <a href="{% url 'hosting' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">the platform</a> from any Internet connected device.</p>
         </div>
-    </details>
+    </section>
 </section>
 <section id="socials" class="flex flex-col gap-4">
     <h3 class="text-xl text-terminus-red-700 dark:text-terminus-red-700">Follow us</h3>
@@ -62,10 +82,10 @@
     <h3 class="text-xl text-terminus-red-700 dark:text-terminus-red-300">Download the mobile app</h3>
     <div class="-mx-8 flex items-center justify-center gap-4 bg-gray-300 p-4 shadow-inner">
         <a href="https://apps.apple.com/us/app/terminus-gps-mobile/id1419439009?ls=1">
-            <img class="h-full w-48" src="{% static 'terminusgps/App_Store_Badge_Black.svg' %}" alt="Download it on the App Store Badge">
+            <img class="h-auto w-48" src="{% static 'terminusgps/App_Store_Badge_Black.svg' %}" alt="Download it on the App Store Badge">
         </a>
         <a href="https://play.google.com/store/apps/details?id=com.terminusgps.track&hl=en">
-            <img class="h-full w-54" src="{% static 'terminusgps/Play_Store_Badge_White.png' %}" alt="Get it on the Google Play Store Badge">
+            <img class="h-auto w-54" src="{% static 'terminusgps/Play_Store_Badge_White.png' %}" alt="Get it on the Google Play Store Badge">
         </a>
     </div>
 </section>

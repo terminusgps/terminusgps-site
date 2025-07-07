@@ -68,7 +68,6 @@ class CustomerAdmin(admin.ModelAdmin):
 class CustomerWialonUnitAdmin(admin.ModelAdmin):
     actions = ["sync_with_wialon"]
     list_display = ["name", "customer", "imei", "id"]
-    list_filter = ["customer"]
     view_on_site = False
 
     @admin.action(description="Sync selected unit data with Wialon")
@@ -94,8 +93,7 @@ class CustomerWialonUnitAdmin(admin.ModelAdmin):
 class CustomerPaymentMethodAdmin(admin.ModelAdmin):
     actions = ["sync_with_authorizenet"]
     list_display = ["id", "customer"]
-    list_filter = ["customer"]
-    readonly_fields = ["id", "customer", "cc_type", "cc_last_4"]
+    readonly_fields = ["id", "cc_type", "cc_last_4"]
 
     @admin.action(
         description="Sync selected payment methods with Authorizenet"
@@ -119,10 +117,9 @@ class CustomerPaymentMethodAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerShippingAddress)
 class CustomerShippingAddressAdmin(admin.ModelAdmin):
-    list_display = ["id", "customer"]
-    list_filter = ["customer"]
-    readonly_fields = ["id", "customer", "street"]
     actions = ["sync_with_authorizenet"]
+    list_display = ["id", "customer"]
+    readonly_fields = ["id", "street"]
 
     @admin.action(
         description="Sync selected shipping addresses with Authorizenet"
