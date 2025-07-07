@@ -127,6 +127,7 @@ STORAGES = {
             "location": "static/",
             "region_name": "us-east-1",
             "verify": "/home/ubuntu/terminusgps-site/.venv/lib/python3.12/site-packages/certifi/cacert.pem",
+            "session_profile": "terminusgps-site-role",
         },
     },
 }

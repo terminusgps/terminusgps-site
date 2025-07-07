@@ -7,35 +7,24 @@ from . import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("", views.TerminusgpsHomeView.as_view(), name="home"),
     path("about/", views.TerminusgpsAboutView.as_view(), name="about"),
     path("contact/", views.TerminusgpsContactView.as_view(), name="contact"),
     path("hosting/", views.TerminusgpsHostingView.as_view(), name="hosting"),
     path("login/", views.TerminusgpsLoginView.as_view(), name="login"),
     path("logout/", views.TerminusgpsLogoutView.as_view(), name="logout"),
-    path("", views.TerminusgpsHomeView.as_view(), name="home"),
     path(
-        "safety/teens/",
+        "teen-safety/",
         views.TerminusgpsTeenSafetyView.as_view(),
         name="teen safety",
     ),
     path(
-        "safety/seniors/",
+        "senior-safety/",
         views.TerminusgpsSeniorSafetyView.as_view(),
         name="senior safety",
     ),
-    path("", views.TerminusgpsHomeView.as_view(), name="home"),
     path(
         "register/", views.TerminusgpsRegisterView.as_view(), name="register"
-    ),
-    path(
-        "safety/teens/",
-        views.TerminusgpsTeenSafetyView.as_view(),
-        name="teen safety",
-    ),
-    path(
-        "safety/seniors/",
-        views.TerminusgpsSeniorSafetyView.as_view(),
-        name="senior safety",
     ),
     path(
         "privacy/",
