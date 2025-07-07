@@ -69,7 +69,6 @@ class CustomerWialonUnitAdmin(admin.ModelAdmin):
     actions = ["sync_with_wialon"]
     list_display = ["name", "customer", "imei", "id"]
     list_filter = ["customer"]
-    readonly_fields = ["customer"]
     view_on_site = False
 
     @admin.action(description="Sync selected unit data with Wialon")
