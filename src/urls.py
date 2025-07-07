@@ -7,7 +7,6 @@ from . import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("docs/", include("docs.urls")),
     path("about/", views.TerminusgpsAboutView.as_view(), name="about"),
     path("contact/", views.TerminusgpsContactView.as_view(), name="contact"),
     path("hosting/", views.TerminusgpsHostingView.as_view(), name="hosting"),
