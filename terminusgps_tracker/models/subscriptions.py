@@ -3,8 +3,10 @@ import decimal
 from zoneinfo import ZoneInfo
 
 from authorizenet import apicontractsv1
+from dateutil.relativedelta import relativedelta
 from django.db import models, transaction
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from terminusgps.authorizenet.constants import ANET_XMLNS
 from terminusgps.authorizenet.profiles import SubscriptionProfile
@@ -105,6 +107,21 @@ class Subscription(models.Model):
             calculate_amount_plus_tax(decimal.Decimal(sum(amounts)))
             if add_tax
             else decimal.Decimal(sum(amounts))
+        )
+
+    def get_next_payment_date(self) -> datetime.datetime:
+        """Returns the next expected payment date for the subscription."""
+        if not self.authorizenet_get_transaction_list():
+            return self.start_date
+
+        now = timezone.now()
+        next_month = self.start_date.replace(
+            month=now.month, year=now.year
+        ) + relativedelta(months=1)
+        return (
+            next_month
+            if now.day >= next_month.day
+            else next_month.replace(month=now.month)
         )
 
     def authorizenet_update_amount(
