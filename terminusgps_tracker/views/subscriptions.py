@@ -331,12 +331,12 @@ class SubscriptionDeleteView(
         sprofile = subscription._authorizenet_get_profile()
         sprofile.delete()
 
-        # Disable Wialon account
+        # Add remaining days to Wialon account
         with WialonSession() as session:
             resource = WialonResource(
                 subscription.customer.wialon_resource_id, session
             )
-            resource.disable_account()
+            resource.add_days(subscription.get_remaining_days())
         response = super().post(request, *args, **kwargs)
         response.headers["HX-Retarget"] = "#subscription"
         return response
