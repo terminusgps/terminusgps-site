@@ -3,7 +3,7 @@
 </section>
 <section id="warning" class="flex flex-col gap-2">
     <p class="text-center font-semibold text-pretty text-gray-700 dark:text-gray-200">Are you sure you want to cancel your subscription?</p>
-    <p class="text-center font-light text-pretty text-gray-600 dark:text-gray-300">(You'll lose access to your GPS units without an active subscription)</p>
+    <p class="text-center font-light text-pretty text-gray-600 dark:text-gray-300">(You'll lose access to <a href="{% url 'hosting' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">the platform</a> in {{ remaining_days }} day{{ remaining_days|pluralize }})</p>
 </section>
 <form class="group flex flex-col gap-4" method="post" hx-post="{{ subscription.get_delete_url }}" hx-swap="outerHTML" hx-target="#subscription">
     {% csrf_token %}

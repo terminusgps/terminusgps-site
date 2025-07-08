@@ -330,6 +330,12 @@ class SubscriptionDeleteView(
             customer__pk=self.kwargs["customer_pk"]
         )
 
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        """Adds ``remaining_days`` to the view context."""
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["remaining_days"] = self.get_object().get_remaining_days()
+        return context
+
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         # Delete Authorizenet subscription profile
         subscription = self.get_object()
