@@ -3,8 +3,10 @@ import decimal
 from zoneinfo import ZoneInfo
 
 from authorizenet import apicontractsv1
+from dateutil.relativedelta import relativedelta
 from django.db import models, transaction
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from terminusgps.authorizenet.constants import ANET_XMLNS
 from terminusgps.authorizenet.profiles import SubscriptionProfile
@@ -86,6 +88,24 @@ class Subscription(models.Model):
             "tracker:subscription delete",
             kwargs={"customer_pk": self.customer.pk, "sub_pk": self.pk},
         )
+
+    def get_remaining_days(self) -> int:
+        """Returns the number of days remaining before the next subscription payment is required."""
+        next_payment = self.get_next_payment_date()
+        if next_payment == self.start_date:
+            return 0
+        return (next_payment - timezone.now()).days
+
+    def get_next_payment_date(self) -> datetime.datetime:
+        """Returns the next expected payment date for the subscription."""
+        if not self.authorizenet_get_transaction_list():
+            return self.start_date
+
+        now = timezone.now()
+        next = self.start_date.replace(
+            month=now.month, year=now.year
+        ) + relativedelta(months=1)
+        return next if now.day >= next.day else next.replace(month=now.month)
 
     def calculate_amount(self, add_tax: bool = True) -> decimal.Decimal:
         """

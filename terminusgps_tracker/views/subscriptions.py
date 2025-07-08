@@ -28,7 +28,6 @@ from terminusgps.authorizenet.utils import (
     get_transaction,
 )
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
-from terminusgps.wialon.items import WialonResource
 from terminusgps.wialon.session import WialonSession
 
 from terminusgps_tracker.forms import SubscriptionCreationForm
@@ -142,8 +141,13 @@ class SubscriptionCreateView(
             )
             # Enable Wialon account
             with WialonSession() as session:
-                resource = WialonResource(customer.wialon_resource_id, session)
-                resource.enable_account()
+                account_id = customer.wialon_resource_id
+                session.wialon_api.account_update_flags(
+                    **{"itemId": account_id, "flags": -0x20}
+                )
+                session.wialon_api.account_enable_account(
+                    **{"itemId": account_id, "enable": int(True)}
+                )
             return HttpResponseRedirect(sub.get_absolute_url())
         except ValueError:
             form.add_error(
@@ -327,16 +331,28 @@ class SubscriptionDeleteView(
         )
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        # Delete Authorizenet subscription profile
         subscription = self.get_object()
         sprofile = subscription._authorizenet_get_profile()
         sprofile.delete()
 
-        # Disable Wialon account
+        # Add remaining days to Wialon account
         with WialonSession() as session:
-            resource = WialonResource(
-                subscription.customer.wialon_resource_id, session
+            account_id = subscription.customer.wialon_resource_id
+            remaining_days = subscription.get_remaining_days()
+
+            session.wialon_api.account_update_flags(
+                **{"itemId": account_id, "flags": 0x20}
             )
-            resource.disable_account()
+            session.wialon_api.account_do_payment(
+                **{
+                    "itemId": account_id,
+                    "daysUpdate": remaining_days,
+                    "balanceUpdate": "0.00",
+                    "description": f"Canceled {subscription}.",
+                }
+            )
+
         response = super().post(request, *args, **kwargs)
         response.headers["HX-Retarget"] = "#subscription"
         return response
