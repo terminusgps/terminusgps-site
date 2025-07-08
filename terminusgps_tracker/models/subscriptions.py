@@ -89,6 +89,24 @@ class Subscription(models.Model):
             kwargs={"customer_pk": self.customer.pk, "sub_pk": self.pk},
         )
 
+    def get_remaining_days(self) -> int:
+        """Returns the number of days remaining before the next subscription payment is required."""
+        next_payment = self.get_next_payment_date()
+        if next_payment == self.start_date:
+            return 0
+        return (next_payment - timezone.now()).days
+
+    def get_next_payment_date(self) -> datetime.datetime:
+        """Returns the next expected payment date for the subscription."""
+        if not self.authorizenet_get_transaction_list():
+            return self.start_date
+
+        now = timezone.now()
+        next = self.start_date.replace(
+            month=now.month, year=now.year
+        ) + relativedelta(months=1)
+        return next if now.day >= next.day else next.replace(month=now.month)
+
     def calculate_amount(self, add_tax: bool = True) -> decimal.Decimal:
         """
         Calculates and returns the total dollar amount for the subscription.
@@ -107,21 +125,6 @@ class Subscription(models.Model):
             calculate_amount_plus_tax(decimal.Decimal(sum(amounts)))
             if add_tax
             else decimal.Decimal(sum(amounts))
-        )
-
-    def get_next_payment_date(self) -> datetime.datetime:
-        """Returns the next expected payment date for the subscription."""
-        if not self.authorizenet_get_transaction_list():
-            return self.start_date
-
-        now = timezone.now()
-        next_month = self.start_date.replace(
-            month=now.month, year=now.year
-        ) + relativedelta(months=1)
-        return (
-            next_month
-            if now.day >= next_month.day
-            else next_month.replace(month=now.month)
         )
 
     def authorizenet_update_amount(
