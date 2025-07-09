@@ -337,12 +337,11 @@ class SubscriptionDeleteView(
         return context
 
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        # Delete Authorizenet subscription profile
+        """Deletes the Authorizenet subscription and adds remaining days to the customer's Wialon account."""
         subscription = self.get_object()
         sprofile = subscription._authorizenet_get_profile()
         sprofile.delete()
 
-        # Add remaining days to Wialon account
         with WialonSession() as session:
             account_id = subscription.customer.wialon_resource_id
             remaining_days = subscription.get_remaining_days()
@@ -359,6 +358,7 @@ class SubscriptionDeleteView(
                 }
             )
 
+        # Retarget required otherwise the response is nested for some reason
         response = super().post(request, *args, **kwargs)
         response.headers["HX-Retarget"] = "#subscription"
         return response
