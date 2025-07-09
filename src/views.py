@@ -160,7 +160,6 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     def form_valid(
         self, form: TerminusgpsRegisterForm
     ) -> HttpResponse | HttpResponseRedirect:
-        # Create a user
         user = get_user_model().objects.create_user(
             username=form.cleaned_data["username"],
             password=form.cleaned_data["password1"],
@@ -168,18 +167,15 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
             last_name=form.cleaned_data["last_name"],
             email=form.cleaned_data["username"],
         )
-        # Create a customer
         customer = Customer.objects.create(user=user)
-        # Create a Wialon account + user
-        customer = self.wialon_registration_flow(form, customer)
-        # Create an Authorizenet customer profile
-        customer = self.authorizenet_registration_flow(form, customer)
+        customer = self.wialon_create_customer_objects(form, customer)
+        customer = self.authorizenet_create_customer_profile(form, customer)
         customer.save()
         return super().form_valid(form=form)
 
     @staticmethod
     @transaction.atomic
-    def authorizenet_registration_flow(
+    def authorizenet_create_customer_profile(
         form: TerminusgpsRegisterForm, customer: Customer
     ) -> Customer:
         """
@@ -202,7 +198,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
 
     @staticmethod
     @transaction.atomic
-    def wialon_registration_flow(
+    def wialon_create_customer_objects(
         form: TerminusgpsRegisterForm, customer: Customer
     ) -> Customer:
         """
