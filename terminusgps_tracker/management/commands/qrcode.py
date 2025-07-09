@@ -93,5 +93,5 @@ class Command(BaseCommand):
     def generate_qr_code_data(self, imei_number: str) -> str:
         return urllib.parse.urljoin(
             f"{self.protocol}://{self.domain}",
-            reverse("tracker:unit create", query={"imei": imei_number}),
+            reverse("tracker:units", query={"imei": imei_number}),
         )
