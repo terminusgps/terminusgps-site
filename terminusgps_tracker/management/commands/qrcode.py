@@ -10,28 +10,6 @@ from PIL import Image, ImageDraw, ImageFont
 class Command(BaseCommand):
     help = "Creates QR code images for Wialon units by IMEI #."
 
-    @property
-    def domain(self) -> str:
-        """
-        The domain for the QR code URL data.
-
-        :type: :py:obj:`str`
-        :value: :py:obj:`"app.terminusgps.com"`
-
-        """
-        return "app.terminusgps.com"
-
-    @property
-    def protocol(self) -> str:
-        """
-        The protocol for the QR code URL data.
-
-        :type: :py:obj:`str`
-        :value: :py:obj:`"https"`
-
-        """
-        return "https"
-
     def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         """
         Adds arguments to the command.
@@ -92,6 +70,6 @@ class Command(BaseCommand):
 
     def generate_qr_code_data(self, imei_number: str) -> str:
         return urllib.parse.urljoin(
-            f"{self.protocol}://{self.domain}",
+            "https://app.terminusgps.com",
             reverse("tracker:units", query={"imei": imei_number}),
         )
