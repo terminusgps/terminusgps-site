@@ -8,7 +8,7 @@ requires-python = ">=3.12"
 authors = [
     { name = "Blake Nall", email = "blake@terminusgps.com" },
     { name = "Lili Noack", email = "lili@terminusgps.com" },
-    { name = "Peter Speckman", email = "peter@terminusgps.com" },
+    { name = "Peter Speckman", email = "pspeckman@terminusgps.com" },
 ]
 dependencies = [
     "authorizenet==1.1.5",
