@@ -206,6 +206,7 @@ class CustomerPaymentMethodCreateView(
         customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
         initial["first_name"] = customer.user.first_name
         initial["last_name"] = customer.user.last_name
+        initial["create_shipping_address"] = customer.addresses.count() == 0
         return initial
 
     @transaction.atomic
