@@ -38,6 +38,8 @@ from terminusgps_tracker.models import (
 )
 from terminusgps_tracker.views.mixins import CustomerOrStaffRequiredMixin
 
+from .. import emails
+
 
 class SubscriptionDetailView(
     LoginRequiredMixin,
@@ -148,6 +150,7 @@ class SubscriptionCreateView(
                 session.wialon_api.account_enable_account(
                     **{"itemId": account_id, "enable": int(True)}
                 )
+            emails.send_subscription_created_email(customer, timezone.now())
             return HttpResponseRedirect(sub.get_absolute_url())
         except ValueError:
             form.add_error(
@@ -358,6 +361,9 @@ class SubscriptionDeleteView(
                 }
             )
 
+        emails.send_subscription_canceled_email(
+            self.get_object().customer, timezone.now()
+        )
         # Retarget required otherwise the response is nested for some reason
         response = super().post(request, *args, **kwargs)
         response.headers["HX-Retarget"] = "#subscription"
