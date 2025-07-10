@@ -14,6 +14,7 @@ from terminusgps.wialon.session import WialonSession
 
 from terminusgps_tracker.models import Customer
 
+from . import emails
 from .forms import TerminusgpsAuthenticationForm, TerminusgpsRegisterForm
 
 if settings.configured and not hasattr(settings, "TRACKER_APP_CONFIG"):
@@ -171,6 +172,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
         customer = self.wialon_create_customer_objects(form, customer)
         customer = self.authorizenet_create_customer_profile(form, customer)
         customer.save()
+        emails.send_registration_email(customer)
         return super().form_valid(form=form)
 
     @staticmethod
