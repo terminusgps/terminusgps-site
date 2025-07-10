@@ -10,7 +10,7 @@ Here's what you should do next to get the most out of your new Terminus GPS acco
 
 We're looking forward to working with you!
 
-{{ login_link }}
+Login here: {{ login_link }}
 
 Best,
 

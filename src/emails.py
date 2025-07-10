@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
@@ -9,7 +11,7 @@ def send_registration_email(customer: Customer) -> Customer:
         "terminusgps/emails/registration_complete.txt",
         context={
             "first_name": customer.user.first_name,
-            "login_link": "https://app.terminusgps.com/login/",
+            "login_link": f"https://app.terminusgps.com/login?{urlencode({'username': customer.user.email})}",
         },
     )
     msg = EmailMultiAlternatives(

@@ -1,3 +1,5 @@
+import typing
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LoginView, LogoutView
@@ -133,6 +135,12 @@ class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
     redirect_authenticated_user = True
     success_url = reverse_lazy("tracker:dashboard")
     template_name = "terminusgps/login.html"
+
+    def get_initial(self, **kwargs) -> dict[str, typing.Any]:
+        initial: dict[str, typing.Any] = super().get_initial()
+        if self.request.GET.get("username"):
+            initial["username"] = self.request.GET.get("username")
+        return initial
 
 
 class TerminusgpsLogoutView(HtmxTemplateResponseMixin, LogoutView):
