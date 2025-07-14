@@ -14,6 +14,16 @@ urlpatterns = [
     path("login/", views.TerminusgpsLoginView.as_view(), name="login"),
     path("logout/", views.TerminusgpsLogoutView.as_view(), name="logout"),
     path(
+        "commercial-use/",
+        views.TerminusgpsCommercialUseView.as_view(),
+        name="commercial use",
+    ),
+    path(
+        "individual-use/",
+        views.TerminusgpsIndividualUseView.as_view(),
+        name="individual use",
+    ),
+    path(
         "teen-safety/",
         views.TerminusgpsTeenSafetyView.as_view(),
         name="teen safety",

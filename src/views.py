@@ -35,6 +35,22 @@ class TerminusgpsHostingView(RedirectView):
     url = settings.TRACKER_APP_CONFIG.get("HOSTING_URL")
 
 
+class TerminusgpsCommercialUseView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {"title": "Commercial Use", "subtitle": ""}
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps/partials/_commercial_use.html"
+    template_name = "terminusgps/commercial_use.html"
+
+
+class TerminusgpsIndividualUseView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {"title": "Individual Use", "subtitle": ""}
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps/partials/_individual_use.html"
+    template_name = "terminusgps/individual_use.html"
+
+
 class TerminusgpsAboutView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "About", "subtitle": "Why we do what we do"}
