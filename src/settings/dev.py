@@ -28,6 +28,7 @@ secret: dict[str, str | None] = {
     "MERCHANT_AUTH_TRANSACTION_KEY": os.getenv(
         "MERCHANT_AUTH_TRANSACTION_KEY"
     ),
+    "AWS_WAF_CAPTCHA_KEY": os.getenv("AWS_WAF_CAPTCHA_KEY"),
 }
 
 
@@ -37,6 +38,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[.errorlist]:text-red-800 group-has-[.errorlist]:bg-red-100"
 LOGIN_URL = "/login/"
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+AWS_WAF_CAPTCHA_KEY = secret.get("AWS_WAF_CAPTCHA_KEY")
 CONNECT_SECRET = secret.get("CONNECT_SECRET")
 CORS_ORIGIN_ALLOW_ALL = True
 DEBUG = True

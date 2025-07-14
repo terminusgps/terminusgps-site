@@ -15,7 +15,10 @@ db_secret: dict[str, str] = get_secret(
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
-ALLOWED_HOSTS = [".terminusgps.com"]
+ALLOWED_HOSTS = [
+    ".terminusgps.com",
+    "terminusgps-load-balancer-1141418706.us-east-1.elb.amazonaws.com",
+]
 CSRF_COOKIE_SECURE = True
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -53,6 +56,7 @@ decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 DEFAULT_TAX_RATE = (
     decimal.Decimal(secret.get("DEFAULT_TAX_RATE", "0.0825")) * 1
 )
+AWS_WAF_CAPTCHA_KEY = secret.get("AWS_WAF_CAPTCHA_KEY")
 EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")
 EMAIL_HOST_USER = secret.get("EMAIL_HOST_USER")
 MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
