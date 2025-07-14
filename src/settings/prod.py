@@ -15,7 +15,7 @@ db_secret: dict[str, str] = get_secret(
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
-ALLOWED_HOSTS = [".terminusgps.com"]
+ALLOWED_HOSTS = [".terminusgps.com", ".terminusgpsapps.com"]
 CSRF_COOKIE_SECURE = True
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
