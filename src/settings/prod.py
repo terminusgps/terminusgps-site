@@ -19,8 +19,6 @@ ALLOWED_HOSTS = [
     ".terminusgps.com",
     "terminusgpsapp.com",
     ".terminusgpsapp.com",
-    "127.0.0.1",
-    "localhost",
 ]
 CSRF_COOKIE_SECURE = True
 DEBUG = False
