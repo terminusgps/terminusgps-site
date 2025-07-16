@@ -51,6 +51,45 @@ class TerminusgpsIndividualUseView(HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps/individual_use.html"
 
 
+class TerminusgpsMobileAppsView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Mobile Apps",
+        "subtitle": "Download the Terminus GPS mobile app on your smartphone today",
+    }
+    http_method_names = ["get"]
+    template_name = "terminusgps/mobile_apps/mobile_apps.html"
+    partial_template_name = (
+        "terminusgps/mobile_apps/partials/_mobile_apps.html"
+    )
+
+
+class TerminusgpsDownloadMobileAppView(
+    HtmxTemplateResponseMixin, TemplateView
+):
+    content_type = "text/html"
+    extra_context = {"title": "Download Mobile App", "subtitle": ""}
+    http_method_names = ["get"]
+    template_name = "terminusgps/mobile_apps/download_app.html"
+    partial_template_name = (
+        "terminusgps/mobile_apps/partials/_download_app.html"
+    )
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        appstore = self.kwargs["appstore"].upper()
+        if appstore in settings.TRACKER_APP_CONFIG["MOBILE_APPS"].keys():
+            appdata = settings.TRACKER_APP_CONFIG["MOBILE_APPS"].get(appstore)
+
+            if appdata:
+                context["url"] = appdata.get("url")
+                context["badge"] = appdata.get("badge")
+                context["class"] = (
+                    "h-full w-52" if appstore == "ANDROID" else "h-full w-48"
+                )
+        return context
+
+
 class TerminusgpsAboutView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "About", "subtitle": "Why we do what we do"}

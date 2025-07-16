@@ -94,6 +94,16 @@ TRACKER_APP_CONFIG = {
     "MOTD": "We know where ours are... do you?",
     "REPOSITORY_URL": "https://github.com/terminusgps/terminusgps-site/",
     "HOSTING_URL": "https://hosting.terminusgps.com/",
+    "MOBILE_APPS": {
+        "IOS": {
+            "url": "https://apps.apple.com/us/app/terminus-gps-mobile/id1419439009?ls=1",
+            "badge": "terminusgps/App_Store_Badge_Black.svg",
+        },
+        "ANDROID": {
+            "url": "https://play.google.com/store/apps/details?id=com.terminusgps.track&hl=en",
+            "badge": "terminusgps/Play_Store_Badge_White.png",
+        },
+    },
     "SOCIALS": {
         "FACEBOOK": {
             "display_name": "Terminus GPS",

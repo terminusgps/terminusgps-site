@@ -1,24 +1,74 @@
-<section class="mx-4 flex flex-col gap-2 text-pretty">
-    <h2 class="-mx-4 text-lg font-semibold text-terminus-red-600 dark:text-terminus-red-200">Terminus GPS For Fleet Management</h2>
-    <p>Today's fleet managers need a reliable and efficient way to keep  up with today's demands on their fleet.</p>
-    <p>Whether you're keeping up with just a few service vehicles to a large scale fleet operation, we have the tools ready to aid in your fleet management.</p>
-    <p>All assets can be on one platform and utilized several different ways for each needed department.</p>
-    <p>Your reports can be customized then sent to you automatically daily or as needed.</p>
-    <p>Most commonly used capabilities:</p>
-    <ul class="list-inside list-disc">
-        <li>Geographic Location</li>
-        <li>Enter/Exit of Geofences</li>
-        <li>Time/Distance Traveled</li>
-        <li>Daily Start/Stop Times</li>
-        <li>Driver Behavior Monitoring</li>
-    </ul>
-    <p>Most commonly used reports:</p>
-    <ul class="list-inside list-disc">
-        <li>Daily Activity</li>
-        <li>After Hours Usage</li>
-        <li>Maintenance Due</li>
-        <li>International Fuel Tax Agreement</li>
-        <li>Hours of Service</li>
-        <li>Driver Report Card</li>
+{% load static %}
+<img class="h-full rounded" src="{% static 'terminusgps/18wheeler-blue.jpg' %}" alt="Blue 18-wheeler in front of blue trailers by Freepik">
+<section class="mx-4 flex flex-col gap-4 text-pretty">
+    <h2 class="-mx-4 text-lg font-semibold text-terminus-red-500 dark:text-terminus-red-100">A Reliable, Robust Tracking Platform Accessible Anytime, Anywhere</h2>
+    <p>Easy, breezy fleet management with our ever-reliable <a href="{% url 'hosting' %}" class="decoration w-fit text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">tracking platform</a>.</p>
+    <section class="flex flex-col gap-4 rounded-lg bg-gray-300/40 p-4 text-center shadow-inner md:text-left dark:bg-gray-500/40" hx-boost="false">
+        <a href="https://status.wialon.com" class="flex flex-col items-center gap-2 rounded-full p-2 transition-colors duration-300 ease-in-out hover:bg-gray-100 md:flex-row">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 0 1 7.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 0 1 1.06 0Z" />
+            </svg>
+            <p>99.9% uptime</p>
+        </a>
+        <a href="{% url 'hosting' %}" class="flex flex-col items-center gap-2 rounded-full p-2 transition-colors duration-300 ease-in-out hover:bg-gray-100 md:flex-row">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
+            </svg>
+            <p>Fully-featured web application</p>
+        </a>
+        <a href="{% url 'mobile apps' %}" class="flex flex-col items-center gap-2 rounded-full p-2 transition-colors duration-300 ease-in-out hover:bg-gray-100 md:flex-row" hx-boost="true">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+            </svg>
+            <p>Native iOS and Android mobile apps</p>
+        </a>
+    </section>
+</section>
+<section class="mx-4 flex flex-col gap-4 text-pretty">
+    <h2 class="-mx-4 text-lg font-semibold text-terminus-red-500 dark:text-terminus-red-100">One Platform To Rule Them All</h2>
+    <p>View and manage your <span class="italic">entire</span> fleet from <a href="{% url 'hosting' %}" class="decoration w-fit text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">the platform</a>.</p>
+    <section class="flex flex-col gap-4 rounded-lg bg-gray-300/40 p-4 text-center shadow-inner md:text-left dark:bg-gray-500/40">
+        <a href="https://help.wialon.com/en/wialon-hosting/user-guide/monitoring-system/interface/map" class="flex flex-col items-center gap-2 rounded-full p-2 transition-colors duration-300 ease-in-out hover:bg-gray-100 md:flex-row">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
+            </svg>
+            <p>Interactive map</p>
+        </a>
+        <a href="https://help.wialon.com/en/wialon-hosting/user-guide/monitoring-system/drivers" class="flex flex-col items-center gap-2 rounded-full p-2 transition-colors duration-300 ease-in-out hover:bg-gray-100 md:flex-row">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z" />
+            </svg>
+            <p>Driver assignments</p>
+        </a>
+        <a href="https://help.wialon.com/en/wialon-hosting/user-guide/monitoring-system/reports" class="flex flex-col items-center gap-2 rounded-full p-2 transition-colors duration-300 ease-in-out hover:bg-gray-100 md:flex-row">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z" />
+            </svg>
+            <p>Custom report generation</p>
+        </a>
+    </section>
+</section>
+<section class="mx-4 flex flex-col gap-4 text-pretty">
+    <h2 class="-mx-4 text-lg font-semibold text-terminus-red-500 dark:text-terminus-red-100">From Terminus GPS To Your Fleet, Specifically</h2>
+    <p>We'll make <a href="{% url 'hosting' %}" class="decoration w-fit text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">the platform</a> work for you no matter what you're cooking.</p>
+    <ul class="flex flex-col gap-4 rounded-lg bg-gray-300/40 p-4 text-center shadow-inner md:text-left dark:bg-gray-500/40">
+        <a href="#" class="flex flex-col items-center gap-2 rounded-full p-2 transition-colors duration-300 ease-in-out hover:bg-gray-100 md:flex-row">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+            </svg>
+            <p>Security compliance</p>
+        </a>
+        <a href="#" class="flex flex-col items-center gap-2 rounded-full p-2 transition-colors duration-300 ease-in-out hover:bg-gray-100 md:flex-row">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
+            </svg>
+            <p>Programatic actions</p>
+        </a>
+        <a href="#" class="flex flex-col items-center gap-2 rounded-full p-2 transition-colors duration-300 ease-in-out hover:bg-gray-100 md:flex-row">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
+            </svg>
+            <p>Voice notifications</p>
+        </a>
     </ul>
 </section>

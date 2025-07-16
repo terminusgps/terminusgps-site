@@ -14,6 +14,16 @@ urlpatterns = [
     path("login/", views.TerminusgpsLoginView.as_view(), name="login"),
     path("logout/", views.TerminusgpsLogoutView.as_view(), name="logout"),
     path(
+        "mobile-apps/",
+        views.TerminusgpsMobileAppsView.as_view(),
+        name="mobile apps",
+    ),
+    path(
+        "mobile-apps/<str:appstore>/download/",
+        views.TerminusgpsDownloadMobileAppView.as_view(),
+        name="download app",
+    ),
+    path(
         "commercial-use/",
         views.TerminusgpsCommercialUseView.as_view(),
         name="commercial use",
