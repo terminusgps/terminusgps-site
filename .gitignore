@@ -8,6 +8,7 @@ media/
 
 .*
 !.gitignore
+!.dockerignore
 
 *.mp4
 *.csv

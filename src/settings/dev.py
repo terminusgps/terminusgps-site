@@ -7,61 +7,61 @@ from authorizenet.constants import constants
 
 os.umask(0)
 
-secret: dict[str, str | None] = {
-    "SECRET_KEY": os.getenv("SECRET_KEY"),
+secrets = {
+    "AWS_WAF_CAPTCHA_KEY": os.getenv("AWS_WAF_CAPTCHA_KEY"),
     "CONNECT_SECRET": os.getenv("CONNECT_SECRET"),
     "DEFAULT_TAX_RATE": os.getenv("DEFAULT_TAX_RATE", "0.085"),
-    "TWILIO_TOKEN": os.getenv("TWILIO_TOKEN"),
-    "TWILIO_SID": os.getenv("TWILIO_SID"),
-    "TWILIO_MESSAGING_SID": os.getenv("TWILIO_MESSAGING_SID"),
-    "TWILIO_FROM_NUMBER": os.getenv("TWILIO_FROM_NUMBER"),
-    "WIALON_TOKEN": os.getenv("WIALON_TOKEN"),
-    "WIALON_HOST": os.getenv("WIALON_HOST"),
-    "WIALON_ADMIN_ID": os.getenv("WIALON_ADMIN_ID"),
-    "WIALON_UNACTIVATED_GROUP": os.getenv("WIALON_UNACTIVATED_GROUP"),
-    "WIALON_DEFAULT_PLAN": os.getenv("WIALON_DEFAULT_PLAN"),
-    "TRACKER_ENCRYPTION_KEY": os.getenv("TRACKER_ENCRYPTION_KEY"),
-    "EMAIL_HOST_USER": os.getenv("EMAIL_HOST_USER"),
     "EMAIL_HOST_PASSWORD": os.getenv("EMAIL_HOST_PASSWORD"),
-    "WIALON_ADMIN_ACCOUNT": os.getenv("WIALON_ADMIN_ACCOUNT"),
+    "EMAIL_HOST_USER": os.getenv("EMAIL_HOST_USER"),
     "MERCHANT_AUTH_LOGIN_ID": os.getenv("MERCHANT_AUTH_LOGIN_ID"),
     "MERCHANT_AUTH_TRANSACTION_KEY": os.getenv(
         "MERCHANT_AUTH_TRANSACTION_KEY"
     ),
-    "AWS_WAF_CAPTCHA_KEY": os.getenv("AWS_WAF_CAPTCHA_KEY"),
+    "SECRET_KEY": os.getenv("SECRET_KEY"),
+    "TRACKER_ENCRYPTION_KEY": os.getenv("TRACKER_ENCRYPTION_KEY"),
+    "TWILIO_FROM_NUMBER": os.getenv("TWILIO_FROM_NUMBER"),
+    "TWILIO_MESSAGING_SID": os.getenv("TWILIO_MESSAGING_SID"),
+    "TWILIO_SID": os.getenv("TWILIO_SID"),
+    "TWILIO_TOKEN": os.getenv("TWILIO_TOKEN"),
+    "WIALON_ADMIN_ACCOUNT": os.getenv("WIALON_ADMIN_ACCOUNT"),
+    "WIALON_ADMIN_ID": os.getenv("WIALON_ADMIN_ID"),
+    "WIALON_DEFAULT_PLAN": os.getenv("WIALON_DEFAULT_PLAN"),
+    "WIALON_HOST": os.getenv("WIALON_HOST"),
+    "WIALON_TOKEN": os.getenv("WIALON_TOKEN"),
+    "WIALON_UNACTIVATED_GROUP": os.getenv("WIALON_UNACTIVATED_GROUP"),
 }
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[.errorlist]:text-red-800 group-has-[.errorlist]:bg-red-100"
-LOGIN_URL = "/login/"
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
-AWS_WAF_CAPTCHA_KEY = secret.get("AWS_WAF_CAPTCHA_KEY")
-CONNECT_SECRET = secret.get("CONNECT_SECRET")
+AWS_WAF_CAPTCHA_KEY = secrets.get("AWS_WAF_CAPTCHA_KEY")
+CONNECT_SECRET = secrets.get("CONNECT_SECRET")
 CORS_ORIGIN_ALLOW_ALL = True
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[.errorlist]:text-red-800 group-has-[.errorlist]:bg-red-100"
 DEFAULT_FROM_EMAIL = "support@terminusgps.com"
-FORM_RENDERER = "terminusgps.django.forms.renderer.TerminusgpsFormRenderer"
 DEFAULT_TAX_RATE = decimal.Decimal(
-    secret.get("DEFAULT_TAX_RATE", "0.085"),
+    secrets.get("DEFAULT_TAX_RATE", "0.085"),
     context=decimal.Context(prec=4, rounding=decimal.ROUND_HALF_UP),
 )
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
-EMAIL_HOST_PASSWORD = secret.get("EMAIL_HOST_PASSWORD")
-EMAIL_HOST_USER = secret.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = secrets.get("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_USER = secrets.get("EMAIL_HOST_USER")
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+FORM_RENDERER = "terminusgps.django.forms.renderer.TerminusgpsFormRenderer"
 INTERNAL_IPS = ["127.0.0.1", "0.0.0.0"]
 LANGUAGE_CODE = "en-us"
+LOGIN_URL = "/login/"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
-MERCHANT_AUTH_LOGIN_ID = secret.get("MERCHANT_AUTH_LOGIN_ID")
-MERCHANT_AUTH_TRANSACTION_KEY = secret.get("MERCHANT_AUTH_TRANSACTION_KEY")
 MERCHANT_AUTH_ENVIRONMENT = constants.SANDBOX
+MERCHANT_AUTH_LOGIN_ID = secrets.get("MERCHANT_AUTH_LOGIN_ID")
+MERCHANT_AUTH_TRANSACTION_KEY = secrets.get("MERCHANT_AUTH_TRANSACTION_KEY")
 MERCHANT_AUTH_VALIDATION_MODE = "testMode"
 MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
 ROOT_URLCONF = "src.urls"
@@ -71,20 +71,20 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "static/"
 TIME_ZONE = "US/Central"
-TRACKER_ENCRYPTION_KEY = secret.get("TRACKER_ENCRYPTION_KEY")
-TWILIO_FROM_NUMBER = secret.get("TWILIO_FROM_NUMBER")
-TWILIO_MESSAGING_SID = secret.get("TWILIO_MESSAGING_SID")
-TWILIO_SID = secret.get("TWILIO_SID")
-TWILIO_TOKEN = secret.get("TWILIO_TOKEN")
+TRACKER_ENCRYPTION_KEY = secrets.get("TRACKER_ENCRYPTION_KEY")
+TWILIO_FROM_NUMBER = secrets.get("TWILIO_FROM_NUMBER")
+TWILIO_MESSAGING_SID = secrets.get("TWILIO_MESSAGING_SID")
+TWILIO_SID = secrets.get("TWILIO_SID")
+TWILIO_TOKEN = secrets.get("TWILIO_TOKEN")
 USE_I18N = True
 USE_TZ = True
-WIALON_ADMIN_ID = secret.get("WIALON_ADMIN_ID")
-WIALON_DEFAULT_PLAN = secret.get("WIALON_DEFAULT_PLAN")
-WIALON_HOST = secret.get("WIALON_HOST")
+WIALON_ADMIN_ACCOUNT = secrets.get("WIALON_ADMIN_ACCOUNT")
+WIALON_ADMIN_ID = secrets.get("WIALON_ADMIN_ID")
+WIALON_DEFAULT_PLAN = secrets.get("WIALON_DEFAULT_PLAN")
+WIALON_HOST = secrets.get("WIALON_HOST")
 WIALON_SESSION_LOGLEVEL = logging.DEBUG
-WIALON_TOKEN = secret.get("WIALON_TOKEN")
-WIALON_UNACTIVATED_GROUP = secret.get("WIALON_UNACTIVATED_GROUP")
-WIALON_ADMIN_ACCOUNT = secret.get("WIALON_ADMIN_ACCOUNT")
+WIALON_TOKEN = secrets.get("WIALON_TOKEN")
+WIALON_UNACTIVATED_GROUP = secrets.get("WIALON_UNACTIVATED_GROUP")
 WSGI_APPLICATION = "src.wsgi.application"
 
 

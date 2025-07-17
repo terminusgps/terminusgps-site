@@ -925,7 +925,7 @@ wheels = [
 
 [[package]]
 name = "python-terminusgps"
-version = "37.7.4"
+version = "37.7.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiobotocore" },
@@ -942,9 +942,9 @@ dependencies = [
     { name = "pyzbar" },
     { name = "twilio" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6c/41/365587c319796978c3f68617720ef6c473e22537a9568eccc7bcb4ea4641/python_terminusgps-37.7.4.tar.gz", hash = "sha256:fa4b9400ad97386f718221475a15a9d4068497045fbceafff5603597c73e1a37", size = 10521344 }
+sdist = { url = "https://files.pythonhosted.org/packages/db/aa/b340327228ad00002b6eb4caf1c2ea12361d865906b5ece92844505f320a/python_terminusgps-37.7.5.tar.gz", hash = "sha256:04e40a13171f78788db13bfed23bf509128ec6391af9710ad3cea2f6e0c5a990", size = 10527707 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bf/50/aeb118daa990893742d95af078a3458f3553c22deb102302a7cca479cf0d/python_terminusgps-37.7.4-py3-none-any.whl", hash = "sha256:dbe9e600fd42b6c9cf591088129c96203ef1321f4f81ca6eaae331a72e6abaea", size = 68301 },
+    { url = "https://files.pythonhosted.org/packages/aa/a7/3f2c418b301b7a1c7902ba38dc1264a240bcab359647248b9945c45e6716/python_terminusgps-37.7.5-py3-none-any.whl", hash = "sha256:d8ea1dcaa64ec931acbfd17ea6456632035741436797bd9659a96f96db4a9d29", size = 68311 },
 ]
 
 [[package]]
@@ -1108,7 +1108,7 @@ requires-dist = [
     { name = "pillow", specifier = "==11.3.0" },
     { name = "psycopg", specifier = ">=3.2.6" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
-    { name = "python-terminusgps", specifier = "==37.7.4" },
+    { name = "python-terminusgps", specifier = "==37.7.5" },
     { name = "python-wialon", specifier = "==1.2.4" },
 ]
 

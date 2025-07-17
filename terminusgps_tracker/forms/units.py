@@ -5,8 +5,6 @@ from terminusgps.wialon.validators import (
     validate_vin_number,
 )
 
-from terminusgps_tracker.models import SubscriptionTier
-
 
 class CustomerWialonUnitCreationForm(forms.Form):
     name = forms.CharField(
@@ -50,17 +48,6 @@ class CustomerWialonUnitCreationForm(forms.Form):
                 "placeholder": "1HGCP2F40BA049468",
                 "inputmode": "text",
                 "enterkeyhint": "next",
-            }
-        ),
-    )
-    tier = forms.ModelChoiceField(
-        initial=SubscriptionTier.objects.order_by("amount").first(),
-        label="Subscription Tier",
-        queryset=SubscriptionTier.objects.order_by("amount"),
-        widget=forms.widgets.Select(
-            attrs={
-                "class": settings.DEFAULT_FIELD_CLASS,
-                "enterkeyhint": "done",
             }
         ),
     )

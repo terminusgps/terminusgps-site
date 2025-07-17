@@ -20,6 +20,7 @@ from terminusgps_tracker.models import (
     Customer,
     CustomerWialonUnit,
     Subscription,
+    SubscriptionTier,
 )
 from terminusgps_tracker.views.mixins import CustomerOrStaffRequiredMixin
 
@@ -217,6 +218,21 @@ class CustomerWialonUnitCreateView(
     raise_exception = False
     success_url = reverse_lazy("tracker:units")
     template_name = "terminusgps_tracker/units/create.html"
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=form_class)
+        form.fields["tier"] = forms.ModelChoiceField(
+            initial=SubscriptionTier.objects.order_by("amount").first(),
+            label="Subscription Tier",
+            queryset=SubscriptionTier.objects.order_by("amount"),
+            widget=forms.widgets.Select(
+                attrs={
+                    "class": settings.DEFAULT_FIELD_CLASS,
+                    "enterkeyhint": "done",
+                }
+            ),
+        )
+        return form
 
     def wialon_get_unit(
         self, imei_number: str, session: WialonSession
