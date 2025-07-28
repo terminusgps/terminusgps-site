@@ -40,7 +40,11 @@ decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
-ALLOWED_HOSTS = [".terminusgps.com", ".terminusgpsapp.com"]
+ALLOWED_HOSTS = [
+    ".terminusgps.com",
+    ".terminusgpsapp.com",
+    "terminusgpsapp.com",
+]
 AWS_WAF_CAPTCHA_KEY = secrets.get("AWS_WAF_CAPTCHA_KEY")
 CSRF_COOKIE_SECURE = True
 DEBUG = False
@@ -69,7 +73,6 @@ MERCHANT_AUTH_VALIDATION_MODE = "liveMode"
 ROOT_URLCONF = "src.urls"
 SECRET_KEY = secrets.get("SECRET_KEY")
 SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]
@@ -83,6 +86,7 @@ TWILIO_SID = secrets.get("TWILIO_SID")
 TWILIO_TOKEN = secrets.get("TWILIO_TOKEN")
 USE_I18N = True
 USE_TZ = True
+USE_X_FORWARDED_HOST = True
 WIALON_ADMIN_ID = secrets.get("WIALON_ADMIN_ID")
 WIALON_DEFAULT_PLAN = secrets.get("WIALON_DEFAULT_PLAN")
 WIALON_HOST = secrets.get("WIALON_HOST")
