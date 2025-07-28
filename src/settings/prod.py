@@ -44,7 +44,9 @@ ALLOWED_HOSTS = [
     ".terminusgps.com",
     ".terminusgpsapp.com",
     "terminusgpsapp.com",
+    "terminusgps-site-load-balancer-2026822659.us-east-1.elb.amazonaws.com",
 ]
+
 AWS_WAF_CAPTCHA_KEY = secrets.get("AWS_WAF_CAPTCHA_KEY")
 CSRF_COOKIE_SECURE = True
 DEBUG = False
@@ -72,7 +74,9 @@ MERCHANT_AUTH_TRANSACTION_KEY = secrets.get("MERCHANT_AUTH_TRANSACTION_KEY")
 MERCHANT_AUTH_VALIDATION_MODE = "liveMode"
 ROOT_URLCONF = "src.urls"
 SECRET_KEY = secrets.get("SECRET_KEY")
-SECURE_SSL_REDIRECT = False
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]
