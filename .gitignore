@@ -15,7 +15,6 @@ media/
 *.xlsx
 
 
-package-lock.json
 *.p12
 *.log
 *.*.log
