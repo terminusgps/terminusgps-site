@@ -18,7 +18,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 ENV PATH="/usr/local/terminusgps-site/.venv/bin:$PATH"
 
-ENTRYPOINT = []
+ENTRYPOINT []
 
 CMD ["uv", "run", "gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "src.wsgi"]
 
