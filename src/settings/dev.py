@@ -1,5 +1,4 @@
 import decimal
-import logging
 import os
 from pathlib import Path
 
@@ -81,8 +80,6 @@ USE_TZ = True
 WIALON_ADMIN_ACCOUNT = secrets.get("WIALON_ADMIN_ACCOUNT")
 WIALON_ADMIN_ID = secrets.get("WIALON_ADMIN_ID")
 WIALON_DEFAULT_PLAN = secrets.get("WIALON_DEFAULT_PLAN")
-WIALON_HOST = secrets.get("WIALON_HOST")
-WIALON_SESSION_LOGLEVEL = logging.DEBUG
 WIALON_TOKEN = secrets.get("WIALON_TOKEN")
 WIALON_UNACTIVATED_GROUP = secrets.get("WIALON_UNACTIVATED_GROUP")
 WSGI_APPLICATION = "src.wsgi.application"

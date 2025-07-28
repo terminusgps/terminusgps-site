@@ -1,5 +1,4 @@
 import decimal
-import logging
 import os
 import pathlib
 
@@ -69,7 +68,7 @@ MERCHANT_AUTH_TRANSACTION_KEY = secrets.get("MERCHANT_AUTH_TRANSACTION_KEY")
 MERCHANT_AUTH_VALIDATION_MODE = "liveMode"
 ROOT_URLCONF = "src.urls"
 SECRET_KEY = secrets.get("SECRET_KEY")
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
@@ -87,7 +86,6 @@ USE_TZ = True
 WIALON_ADMIN_ID = secrets.get("WIALON_ADMIN_ID")
 WIALON_DEFAULT_PLAN = secrets.get("WIALON_DEFAULT_PLAN")
 WIALON_HOST = secrets.get("WIALON_HOST")
-WIALON_SESSION_LOGLEVEL = logging.WARNING
 WIALON_TOKEN = secrets.get("WIALON_TOKEN")
 WIALON_UNACTIVATED_GROUP = secrets.get("WIALON_UNACTIVATED_GROUP")
 WSGI_APPLICATION = "src.wsgi.application"
