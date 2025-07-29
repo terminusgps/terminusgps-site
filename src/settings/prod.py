@@ -98,13 +98,25 @@ TRACKER_APP_CONFIG = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {
-        "console": {"level": "DEBUG", "class": "logging.StreamHandler"}
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        }
     },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+            "stream": "ext://sys.stdout",
+        }
+    },
+    "root": {"handlers": ["console"], "level": "INFO"},
     "loggers": {
         "django": {
             "handlers": ["console"],
-            "level": "WARNING",
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
             "propagate": True,
         }
     },
