@@ -118,7 +118,10 @@ STORAGES = {
             "bucket_name": "terminusgps-site-bucket",
             "location": "static/",
             "region_name": "us-east-1",
-            "verify": False,
+            "verify": os.getenv(
+                "AWS_S3_CERT_PATH",
+                ".venv/lib/python3.12/site-packages/certifi/cacert.pem",
+            ),
         },
     },
 }
