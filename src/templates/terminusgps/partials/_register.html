@@ -9,7 +9,6 @@
         {{ form.password1.as_field_group }}
         {{ form.password2.as_field_group }}
     </div>
-    {{ form.captcha }}
     <section id="password-requirements" class="flex flex-col justify-between gap-2 rounded border bg-gray-300 p-4 text-nowrap text-gray-800 md:flex-row dark:bg-gray-600 dark:text-gray-100">
         <p class="w-1/2 font-bold">Password Requirements:</p>
         <ul class="w-1/2 list-inside list-disc">
@@ -21,7 +20,6 @@
             <li>No more than 64 characters.</li>
         </ul>
     </section>
-    {{ form.captcha_verified }}
     <section id="buttons" class="flex flex-col gap-2">
         <button class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit">
             <div class="flex items-center justify-center gap-2">
