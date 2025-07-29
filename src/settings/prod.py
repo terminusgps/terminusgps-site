@@ -115,9 +115,11 @@ STORAGES = {
     "staticfiles": {
         "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {
-            "bucket_name": "terminusgps-site-bucket",
-            "location": "static/",
-            "region_name": "us-east-1",
+            "bucket_name": os.getenv(
+                "AWS_S3_BUCKET_NAME", "terminusgps-site-bucket"
+            ),
+            "location": os.getenv("AWS_S3_BUCKET_LOCATION", "static/"),
+            "region_name": os.getenv("AWS_S3_BUCKET_REGION", "us-east-1"),
             "verify": os.getenv(
                 "AWS_S3_CERT_PATH",
                 ".venv/lib/python3.12/site-packages/certifi/cacert.pem",
