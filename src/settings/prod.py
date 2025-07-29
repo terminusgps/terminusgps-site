@@ -1,6 +1,7 @@
 import decimal
 import os
 import pathlib
+import sys
 
 from authorizenet.constants import constants
 
@@ -98,18 +99,11 @@ TRACKER_APP_CONFIG = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
-            "style": "{",
-        }
-    },
     "handlers": {
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
-            "formatter": "verbose",
-            "stream": "ext://sys.stdout",
+            "stream": sys.stdout,
         }
     },
     "root": {"handlers": ["console"], "level": "INFO"},

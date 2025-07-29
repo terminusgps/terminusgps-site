@@ -5,7 +5,6 @@ ENV DJANGO_SETTINGS_MODULE="src.settings.prod"
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 ENV UV_NO_SYNC=1
-ENV HTTPS=on
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
