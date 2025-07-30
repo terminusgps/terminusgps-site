@@ -12,10 +12,13 @@ decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    ".terminusgpsapp.com",
+    ".terminusgps-site-alb-1625343725.us-east-1.elb.amazonaws.com",
+]
 
 CSRF_COOKIE_SECURE = True
-CSRF_TRUSTED_ORIGINS = ["*"]
+CSRF_TRUSTED_ORIGINS = [".terminusgpsapp.com"]
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_CHARSET = "utf-8"
