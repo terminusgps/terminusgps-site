@@ -2,6 +2,7 @@ import decimal
 import os
 import pathlib
 import sys
+from socket import gethostbyname, gethostname
 
 from authorizenet.constants import constants
 
@@ -16,6 +17,7 @@ ALLOWED_HOSTS = [
     ".terminusgpsapp.com",
     ".terminusgps-site-alb-1625343725.us-east-1.elb.amazonaws.com",
 ]
+ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 
 CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = [".terminusgpsapp.com"]
@@ -63,8 +65,16 @@ TRACKER_APP_CONFIG = {
     "MOTD": "We know where ours are... do you?",
     "REPOSITORY_URL": "https://github.com/terminusgps/terminusgps-site/",
     "HOSTING_URL": "https://hosting.terminusgps.com/",
-    "IOS_APPSTORE_URL": "https://apps.apple.com/us/app/terminus-gps-mobile/id1419439009?ls=1",
-    "ANDROID_APPSTORE_URL": "https://play.google.com/store/apps/details?id=com.terminusgps.track&hl=en",
+    "MOBILE_APPS": {
+        "IOS": {
+            "url": "https://apps.apple.com/us/app/terminus-gps-mobile/id1419439009?ls=1",
+            "badge": "terminusgps/App_Store_Badge_Black.svg",
+        },
+        "ANDROID": {
+            "url": "https://play.google.com/store/apps/details?id=com.terminusgps.track&hl=en",
+            "badge": "terminusgps/Play_Store_Badge_White.png",
+        },
+    },
     "SOCIALS": {
         "FACEBOOK": {
             "display_name": "Terminus GPS",
