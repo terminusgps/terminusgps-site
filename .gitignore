@@ -9,6 +9,7 @@ media/
 .*
 !.gitignore
 !.dockerignore
+!.github/
 
 *.mp4
 *.csv
@@ -18,3 +19,4 @@ media/
 *.p12
 *.log
 *.*.log
+docker-build.sh

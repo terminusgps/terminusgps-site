@@ -12,16 +12,13 @@ decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
-ALLOWED_HOSTS = [
-    ".terminusgps.com",
-    ".terminusgpsapp.com",
-    "terminusgpsapp.com",
-    "terminusgps-site-load-balancer-2026822659.us-east-1.elb.amazonaws.com",
-]
+ALLOWED_HOSTS = ["*"]
 
 CSRF_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS = ["*"]
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_CHARSET = "utf-8"
 DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[.errorlist]:text-red-800 group-has-[.errorlist]:bg-red-100"
 DEFAULT_FROM_EMAIL = "support@terminusgps.com"
 DEFAULT_TAX_RATE = decimal.Decimal(os.getenv("DEFAULT_TAX_RATE", "0.0825")) * 1
@@ -31,6 +28,7 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+FILE_CHARSET = "utf-8"
 FORM_RENDERER = "terminusgps.django.forms.renderer.TerminusgpsFormRenderer"
 LANGUAGE_CODE = "en-us"
 LOGIN_URL = "login/"
@@ -44,7 +42,12 @@ ROOT_URLCONF = "src.urls"
 SECRET_KEY = os.getenv("SECRET_KEY")
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_CROSS_ORIGIN_OPENER_POLICY = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_HSTS_SECONDS = 3600
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_REFERRER_POLICY = "same-origin"
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"

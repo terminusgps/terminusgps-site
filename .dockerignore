@@ -3,3 +3,5 @@ src/db.sqlite3
 
 .venv
 __pycache__
+docker-build.sh
+node_modules/
