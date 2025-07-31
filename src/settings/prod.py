@@ -20,6 +20,11 @@ ALLOWED_HOSTS = [
 ]
 ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 
+ADMINS = [
+    ("Peter", "pspeckman@terminusgps.com"),
+    ("Blake", "blake@terminusgps.com"),
+    ("Lili", "lili@terminusgps.com"),
+]
 CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = [".terminusgpsapp.com", ".terminusgps.com"]
 DEBUG = False

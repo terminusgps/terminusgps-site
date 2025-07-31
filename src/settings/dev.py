@@ -32,6 +32,11 @@ LOGGING = {
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ADMINS = [
+    ("Peter", "pspeckman@terminusgps.com"),
+    ("Blake", "blake@terminusgps.com"),
+    ("Lili", "lili@terminusgps.com"),
+]
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

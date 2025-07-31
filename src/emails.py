@@ -1,5 +1,6 @@
 from urllib.parse import urlencode
 
+from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
@@ -18,6 +19,6 @@ def send_registration_email(customer: Customer) -> None:
         subject="Terminus GPS - Account Registered",
         body=text_content,
         to=[customer.user.email],
-        bcc=["pspeckman@terminusgps.com", "blake@terminusgps.com"],
+        bcc=[admin[1] for admin in settings.ADMINS],
     )
     msg.send(fail_silently=True)
