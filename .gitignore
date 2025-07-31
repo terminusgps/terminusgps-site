@@ -6,10 +6,9 @@ build/
 docs/build/
 media/
 
-.*
-!.gitignore
-!.dockerignore
-!.github/
+.env
+.venv
+venv
 
 *.mp4
 *.csv
