@@ -14,16 +14,18 @@ decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = [
+    ".terminusgps.com",
     ".terminusgpsapp.com",
     ".terminusgps-site-alb-1625343725.us-east-1.elb.amazonaws.com",
 ]
 ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 
 CSRF_COOKIE_SECURE = True
-CSRF_TRUSTED_ORIGINS = [".terminusgpsapp.com"]
+CSRF_TRUSTED_ORIGINS = [".terminusgpsapp.com", ".terminusgps.com"]
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_CHARSET = "utf-8"
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[.errorlist]:text-red-800 group-has-[.errorlist]:bg-red-100"
 DEFAULT_FROM_EMAIL = "support@terminusgps.com"
 DEFAULT_TAX_RATE = decimal.Decimal(os.getenv("DEFAULT_TAX_RATE", "0.0825")) * 1
