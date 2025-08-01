@@ -83,11 +83,11 @@ TRACKER_APP_CONFIG = {
     "MOBILE_APPS": {
         "IOS": {
             "url": "https://apps.apple.com/us/app/terminus-gps-mobile/id1419439009?ls=1",
-            "badge": "terminusgps/App_Store_Badge_Black.svg",
+            "badge": "terminusgps/img/App_Store_Badge_Black.svg",
         },
         "ANDROID": {
             "url": "https://play.google.com/store/apps/details?id=com.terminusgps.track&hl=en",
-            "badge": "terminusgps/Play_Store_Badge_White.png",
+            "badge": "terminusgps/img/Play_Store_Badge_White.png",
         },
     },
     "SOCIALS": {
@@ -95,25 +95,25 @@ TRACKER_APP_CONFIG = {
             "display_name": "Terminus GPS",
             "link": "https://www.facebook.com/TerminusGPSllc",
             "username": "TerminusGPSllc",
-            "icon": "terminusgps/icons/facebook.svg",
+            "icon": "terminusgps/icon/facebook.svg",
         },
         "TIKTOK": {
             "display_name": "TerminusGps",
             "link": "https://www.tiktok.com/@terminusgps",
             "username": "terminusgps",
-            "icon": "terminusgps/icons/tiktok.svg",
+            "icon": "terminusgps/icon/tiktok.svg",
         },
         "NEXTDOOR": {
             "display_name": "TerminusGPS",
             "link": "https://nextdoor.com/pages/terminusgps-cypress-tx/",
             "username": "TerminusGPS",
-            "icon": "terminusgps/icons/nextdoor.svg",
+            "icon": "terminusgps/icon/nextdoor.svg",
         },
         "TWITTER": {
             "display_name": "TERMINUSGPS",
             "link": "https://x.com/TERMINUSGPS",
             "username": "TERMINUSGPS",
-            "icon": "terminusgps/icons/twitter.svg",
+            "icon": "terminusgps/icon/twitter.svg",
         },
     },
 }

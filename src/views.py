@@ -39,55 +39,16 @@ class TerminusgpsCommercialUseView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "Commercial Use", "subtitle": ""}
     http_method_names = ["get"]
-    partial_template_name = "terminusgps/partials/_commercial_use.html"
-    template_name = "terminusgps/commercial_use.html"
+    partial_template_name = "terminusgps/usage/partials/_commercial.html"
+    template_name = "terminusgps/usage/commercial.html"
 
 
 class TerminusgpsIndividualUseView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "Individual Use", "subtitle": ""}
     http_method_names = ["get"]
-    partial_template_name = "terminusgps/partials/_individual_use.html"
-    template_name = "terminusgps/individual_use.html"
-
-
-class TerminusgpsMobileAppsView(HtmxTemplateResponseMixin, TemplateView):
-    content_type = "text/html"
-    extra_context = {
-        "title": "Mobile Apps",
-        "subtitle": "Download the Terminus GPS mobile app on your smartphone today",
-    }
-    http_method_names = ["get"]
-    template_name = "terminusgps/mobile_apps/mobile_apps.html"
-    partial_template_name = (
-        "terminusgps/mobile_apps/partials/_mobile_apps.html"
-    )
-
-
-class TerminusgpsDownloadMobileAppView(
-    HtmxTemplateResponseMixin, TemplateView
-):
-    content_type = "text/html"
-    extra_context = {"title": "Download Mobile App", "subtitle": ""}
-    http_method_names = ["get"]
-    template_name = "terminusgps/mobile_apps/download_app.html"
-    partial_template_name = (
-        "terminusgps/mobile_apps/partials/_download_app.html"
-    )
-
-    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        appstore = self.kwargs["appstore"].upper()
-        if appstore in settings.TRACKER_APP_CONFIG["MOBILE_APPS"].keys():
-            appdata = settings.TRACKER_APP_CONFIG["MOBILE_APPS"].get(appstore)
-
-            if appdata:
-                context["url"] = appdata.get("url")
-                context["badge"] = appdata.get("badge")
-                context["class"] = (
-                    "h-full w-52" if appstore == "ANDROID" else "h-full w-48"
-                )
-        return context
+    partial_template_name = "terminusgps/usage/partials/_individual.html"
+    template_name = "terminusgps/usage/individual.html"
 
 
 class TerminusgpsAboutView(HtmxTemplateResponseMixin, TemplateView):
@@ -186,10 +147,10 @@ class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
     }
     http_method_names = ["get", "post"]
     next_page = reverse_lazy("tracker:dashboard")
-    partial_template_name = "terminusgps/partials/_login.html"
+    partial_template_name = "terminusgps/auth/partials/_login.html"
     redirect_authenticated_user = True
     success_url = reverse_lazy("tracker:dashboard")
-    template_name = "terminusgps/login.html"
+    template_name = "terminusgps/auth/login.html"
 
     def get_initial(self, **kwargs) -> dict[str, typing.Any]:
         initial: dict[str, typing.Any] = super().get_initial()
@@ -203,9 +164,9 @@ class TerminusgpsLogoutView(HtmxTemplateResponseMixin, LogoutView):
     extra_context = {"title": "Logout"}
     http_method_names = ["get", "post", "options"]
     next_page = reverse_lazy("login")
-    partial_template_name = "terminusgps/partials/_logout.html"
+    partial_template_name = "terminusgps/auth/partials/_logout.html"
     success_url_allowed_hosts = settings.ALLOWED_HOSTS
-    template_name = "terminusgps/logout.html"
+    template_name = "terminusgps/auth/logout.html"
 
 
 class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
@@ -216,8 +177,8 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     }
     form_class = TerminusgpsRegisterForm
     http_method_names = ["get", "post"]
-    template_name = "terminusgps/register.html"
-    partial_template_name = "terminusgps/partials/_register.html"
+    template_name = "terminusgps/auth/register.html"
+    partial_template_name = "terminusgps/auth/partials/_register.html"
     success_url = reverse_lazy("tracker:dashboard")
 
     @transaction.atomic
