@@ -1,6 +1,6 @@
 {% load static %}
 <section id="header" class="relative -mx-8 -mt-8">
-    <img class="h-auto w-full" src="{% static 'terminusgps/img/traffic.avif' %}" alt="">
+    <img class="h-auto w-full" src="{% static 'terminusgps/img/traffic.avif' %}" alt="Traffic Hero Image" loading="lazy">
     <h2 class="absolute top-0 w-full bg-[#d1d1e0]/80 p-4 text-center text-2xl font-bold tracking-wider text-terminus-red-600 md:text-3xl dark:text-terminus-red-200">In God We Trust, All Others We Track</h2>
 </section>
 <section id="customers" class="flex flex-col items-center gap-8">
@@ -92,7 +92,7 @@
     <div class="-mx-8 flex justify-evenly gap-2 bg-gray-300 p-4 shadow-inner md:gap-4 dark:bg-gray-700">
         {% for social in socials.values %}
         <a href="{{ social.link }}" class="group flex flex-col items-center gap-2 text-terminus-red-800 transition-colors duration-300 ease-in-out hover:text-terminus-red-300 dark:text-terminus-red-100 dark:hover:text-terminus-red-500">
-            <img src="{% static social.icon  %}" class="size-8">
+            <img src="{% static social.icon  %}" class="size-8" loading="lazy">
             <p class="hidden text-sm md:flex">@{{ social.username }}</p>
         </a>
         {% endfor %}
