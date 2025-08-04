@@ -39,6 +39,7 @@ ADMINS = [
 ]
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 DEBUG = True
+DEBUG_TOOLBAR_CONFIG = {"ROOT_TAG_EXTRA_ATTRS": "hx-preserve"}
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[.errorlist]:text-red-800 group-has-[.errorlist]:bg-red-100"
 DEFAULT_FROM_EMAIL = "support@terminusgps.com"
@@ -48,6 +49,7 @@ EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_PORT = 587
+INTERNAL_IPS = ["127.0.0.1"]
 EMAIL_USE_TLS = True
 FORM_RENDERER = "terminusgps.django.forms.renderer.TerminusgpsFormRenderer"
 LANGUAGE_CODE = "en-us"
@@ -135,6 +137,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
+    "debug_toolbar",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
     "terminusgps_installer.apps.TerminusgpsInstallerConfig",
 ]
@@ -145,6 +148,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]

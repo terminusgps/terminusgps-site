@@ -2,7 +2,6 @@ import decimal
 import os
 import pathlib
 import sys
-from socket import gethostbyname, gethostname
 
 from authorizenet.constants import constants
 
@@ -15,10 +14,8 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = [
     ".terminusgps.com",
-    ".terminusgpsapp.com",
     ".terminusgps-site-alb-1625343725.us-east-1.elb.amazonaws.com",
 ]
-ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 
 ADMINS = [
     ("Peter", "pspeckman@terminusgps.com"),
@@ -202,6 +199,7 @@ DATABASES = {
         "PASSWORD": os.getenv("DB_PASSWORD"),
         "PORT": os.getenv("DB_PORT", 5432),
         "OPTIONS": {"client_encoding": "UTF8"},
+        "CONN_MAX_AGE": None,
     }
 }
 
