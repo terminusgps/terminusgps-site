@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import ImproperlyConfigured
+from django.core.validators import validate_email
 from django.db import transaction
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
@@ -17,7 +18,7 @@ from terminusgps.wialon.session import WialonSession
 from terminusgps_tracker.models import Customer
 
 from . import emails
-from .forms import TerminusgpsAuthenticationForm, TerminusgpsRegisterForm
+from .forms import TerminusgpsRegisterForm
 
 if settings.configured and not hasattr(settings, "TRACKER_APP_CONFIG"):
     raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
@@ -139,7 +140,6 @@ class TerminusgpsPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
 
 
 class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
-    authentication_form = TerminusgpsAuthenticationForm
     content_type = "text/html"
     extra_context = {
         "title": "Login",
@@ -151,6 +151,27 @@ class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
     redirect_authenticated_user = True
     success_url = reverse_lazy("tracker:dashboard")
     template_name = "terminusgps/auth/login.html"
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=form_class)
+        form.fields["username"].validators.append(validate_email)
+        form.fields["username"].widget.attrs.update(
+            **{
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "placeholder": "email@terminusgps.com",
+                "autofocus": True,
+                "inputmode": "email",
+                "enterkeyhint": "next",
+            }
+        )
+        form.fields["password"].widget.attrs.update(
+            **{
+                "class": settings.DEFAULT_FIELD_CLASS,
+                "enterkeyhint": "done",
+                "autocomplete": False,
+            }
+        )
+        return form
 
     def get_initial(self, **kwargs) -> dict[str, typing.Any]:
         initial: dict[str, typing.Any] = super().get_initial()
