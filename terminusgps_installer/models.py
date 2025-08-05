@@ -1,14 +1,9 @@
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models, transaction
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from loguru import logger
 from terminusgps.wialon.items import WialonResource, WialonUnit
 from terminusgps.wialon.session import WialonSession
-
-logger.enable("terminusgps.wialon.session")
-logger.level("DEBUG") if settings.DEBUG else logger.level("WARNING")
 
 
 class Installer(models.Model):
