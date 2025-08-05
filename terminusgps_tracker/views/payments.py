@@ -87,7 +87,7 @@ class CustomerPaymentMethodDetailView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["profile"] = self.get_object()._authorizenet_get_profile()
+        context["profile"] = self.get_object().authorizenet_get_profile()
         return context
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
