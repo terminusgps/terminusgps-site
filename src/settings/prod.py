@@ -2,6 +2,7 @@ import decimal
 import os
 import pathlib
 import sys
+from socket import gethostbyname, gethostname
 
 from authorizenet.constants import constants
 
@@ -16,6 +17,7 @@ ALLOWED_HOSTS = [
     ".terminusgps.com",
     ".terminusgps-site-alb-1625343725.us-east-1.elb.amazonaws.com",
 ]
+ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 
 ADMINS = [
     ("Peter", "pspeckman@terminusgps.com"),
@@ -49,7 +51,7 @@ MERCHANT_AUTH_VALIDATION_MODE = "liveMode"
 ROOT_URLCONF = "src.urls"
 SECRET_KEY = os.getenv("SECRET_KEY")
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_SSL_REDIRECT = False
+SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]

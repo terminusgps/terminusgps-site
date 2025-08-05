@@ -1,9 +1,14 @@
 import datetime
 
+from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 from terminusgps_tracker.models import Customer
+
+
+def get_admin_email_list() -> list[str]:
+    return [admin[1] for admin in settings.ADMINS]
 
 
 def send_subscription_created_email(
@@ -17,7 +22,7 @@ def send_subscription_created_email(
         subject="Terminus GPS - Subscription Created",
         body=text_content,
         to=[customer.user.email],
-        bcc=["pspeckman@terminusgps.com", "blake@terminusgps.com"],
+        bcc=get_admin_email_list(),
     )
     msg.send(fail_silently=True)
 
@@ -37,6 +42,6 @@ def send_subscription_canceled_email(
         subject="Terminus GPS - Subscription Canceled",
         body=text_content,
         to=[customer.user.email],
-        bcc=["pspeckman@terminusgps.com", "blake@terminusgps.com"],
+        bcc=get_admin_email_list(),
     )
     msg.send(fail_silently=True)
