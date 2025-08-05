@@ -12,7 +12,7 @@ authors = [
 ]
 dependencies = [
     "authorizenet==1.1.5",
-    "django-storages>=1.14.4",
+    "django-storages[s3]>=1.14.4",
     "django-stubs-ext==5.0.2",
     "django-stubs==5.0.2",
     "django==5.2.2",
@@ -21,7 +21,7 @@ dependencies = [
     "numpy==2.0.1",
     "pandas==2.2.3",
     "pillow==11.3.0",
-    "python-terminusgps==37.7.5",
+    "python-terminusgps==39.0.0",
     "python-wialon==1.2.4",
     "psycopg>=3.2.6",
     "psycopg2-binary>=2.9.10",
