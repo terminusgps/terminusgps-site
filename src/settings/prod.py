@@ -25,7 +25,7 @@ ADMINS = [
     ("Lili", "lili@terminusgps.com"),
 ]
 CSRF_COOKIE_SECURE = True
-CSRF_TRUSTED_ORIGINS = [".terminusgps.com"]
+CSRF_TRUSTED_ORIGINS = ["https://*.terminusgps.com"]
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_CHARSET = "utf-8"
