@@ -16,10 +16,7 @@ from terminusgps.authorizenet.utils import generate_customer_address
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
 from terminusgps_tracker.forms import CustomerShippingAddressCreationForm
-from terminusgps_tracker.models.customers import (
-    Customer,
-    CustomerShippingAddress,
-)
+from terminusgps_tracker.models import Customer, CustomerShippingAddress
 from terminusgps_tracker.views.mixins import CustomerOrStaffRequiredMixin
 
 

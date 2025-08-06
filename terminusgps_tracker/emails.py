@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
-from terminusgps_tracker.models import Customer
+from .models import Customer
 
 
 def get_admin_email_list() -> list[str]:
