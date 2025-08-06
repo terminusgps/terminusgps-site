@@ -4,6 +4,7 @@ import pathlib
 import sys
 from socket import gethostbyname, gethostname
 
+import requests
 from authorizenet.constants import constants
 
 os.umask(0)
@@ -18,6 +19,14 @@ ALLOWED_HOSTS = [
     ".terminusgps-site-alb-1625343725.us-east-1.elb.amazonaws.com",
 ]
 ALLOWED_HOSTS.append(gethostbyname(gethostname()))
+
+try:
+    public_ip = requests.get(
+        "http://checkip.amazonaws.com/", timeout=2
+    ).text.strip()
+    ALLOWED_HOSTS.append(public_ip)
+except Exception:
+    pass
 
 ADMINS = [
     ("Peter", "pspeckman@terminusgps.com"),
