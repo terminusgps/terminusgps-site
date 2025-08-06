@@ -9,7 +9,7 @@ from django.db import transaction
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.views.generic import FormView, RedirectView, TemplateView
-from terminusgps.authorizenet.profiles import CustomerProfile
+from terminusgps.authorizenet import profiles as anet_profiles
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon import constants, utils
 from terminusgps.wialon.items import WialonResource, WialonUser
@@ -236,11 +236,18 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
         :rtype: :py:obj:`~terminusgps_tracker.models.customers.Customer`
 
         """
-        email_addr = str(form.cleaned_data["username"])
-        customer_profile = CustomerProfile(
-            email=email_addr, merchant_id=str(customer.pk)
+        email, first_name, last_name = (
+            str(form.cleaned_data["username"]),
+            str(form.cleaned_data["first_name"]),
+            str(form.cleaned_data["last_name"]),
         )
-        customer.authorizenet_profile_id = customer_profile.create()
+
+        response = anet_profiles.create_customer_profile(
+            merchant_id=customer.pk,
+            email=email,
+            description=f"{first_name} {last_name}",
+        )
+        customer.authorizenet_profile_id = int(response.customerProfileId)
         return customer
 
     @staticmethod

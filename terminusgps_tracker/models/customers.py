@@ -1,18 +1,13 @@
+import datetime
 import decimal
 import logging
+from zoneinfo import ZoneInfo
 
 from django.contrib.auth import get_user_model
 from django.db import models, transaction
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from terminusgps.authorizenet.controllers import (
-    AuthorizenetControllerExecutionError,
-)
-from terminusgps.authorizenet.profiles import (
-    AddressProfile,
-    CustomerProfile,
-    PaymentProfile,
-)
+from terminusgps.authorizenet import profiles
 from terminusgps.wialon import flags
 from terminusgps.wialon.items import WialonUnit
 from terminusgps.wialon.session import WialonSession
@@ -44,38 +39,125 @@ class Customer(models.Model):
         """Returns the customer's email address/username."""
         return self.user.email if self.user.email else self.user.username
 
+    def calculate_subscription_amount(self) -> decimal.Decimal:
+        unit_list = CustomerWialonUnit.objects.filter(
+            customer=self
+        ).select_related("tier")
+        if unit_list.count() == 0:
+            return decimal.Decimal("0.00")
+        return decimal.Decimal(
+            sum(unit_list.values_list("tier__amount", flat=True))
+        )
+
+    def get_subscription_start_date(self) -> datetime.datetime | None:
+        if self.subscription:
+            return self.subscription.start_date.replace(
+                hour=16, minute=0, tzinfo=ZoneInfo("US/Pacific")
+            )
+
+    def authorizenet_get_profile(self):
+        """Returns the Authorizenet customer profile for the customer."""
+        return profiles.get_customer_profile(
+            self.authorizenet_profile_id, include_issuer_info=True
+        )
+
     def authorizenet_sync(self) -> None:
         """Syncs customer payment methods and shipping addresses with Authorizenet."""
-        self._authorizenet_sync_payment_methods()
-        self._authorizenet_sync_shipping_addresses()
+        self.authorizenet_sync_payment_methods()
+        self.authorizenet_sync_shipping_addresses()
 
-    def wialon_sync(self, session: WialonSession) -> None:
+    def wialon_sync(self, session: WialonSession) -> WialonSession:
         """Syncs customer units with Wialon."""
-        self._wialon_sync_units(session)
+        self.wialon_sync_units(session)
+        return session
 
-    def _authorizenet_get_customer_profile(self) -> CustomerProfile:
-        """Returns the Authorizenet customer profile for the customer."""
-        return CustomerProfile(
-            id=str(self.authorizenet_profile_id),
-            merchant_id=str(self.user.pk),
-            email=self.user.email if self.user.email else self.user.username,
-        )
+    @transaction.atomic
+    def wialon_sync_units(self, session: WialonSession) -> None:
+        local_objs = CustomerWialonUnit.objects.filter(customer=self)
+        local_ids = local_objs.values_list("id", flat=True)
+        remote_ids = self._wialon_get_remote_unit_ids(session)
+        ids_to_create = set(remote_ids) - set(local_ids) if remote_ids else []
+        ids_to_delete = set(local_ids) - set(remote_ids) if local_ids else []
+
+        if ids_to_create:
+            CustomerWialonUnit.objects.bulk_create(
+                [
+                    CustomerWialonUnit(id=id, customer=self)
+                    for id in ids_to_create
+                ],
+                ignore_conflicts=True,
+            )
+
+        if ids_to_delete:
+            CustomerWialonUnit.objects.filter(
+                id__in=ids_to_delete, customer=self
+            ).delete()
+
+    @transaction.atomic
+    def authorizenet_sync_payment_methods(self) -> None:
+        local_objs = CustomerPaymentMethod.objects.filter(customer=self)
+        local_ids = local_objs.values_list("id", flat=True)
+        remote_ids = self._authorizenet_get_remote_payment_profile_ids()
+        ids_to_create = set(remote_ids) - set(local_ids) if remote_ids else []
+        ids_to_delete = set(local_ids) - set(remote_ids) if local_ids else []
+
+        if ids_to_create:
+            CustomerPaymentMethod.objects.bulk_create(
+                [
+                    CustomerPaymentMethod(id=id, customer=self)
+                    for id in ids_to_create
+                ],
+                ignore_conflicts=True,
+            )
+
+        if ids_to_delete:
+            CustomerPaymentMethod.objects.filter(
+                id__in=ids_to_delete, customer=self
+            ).delete()
+
+    @transaction.atomic
+    def authorizenet_sync_shipping_addresses(self) -> None:
+        local_objs = CustomerShippingAddress.objects.filter(customer=self)
+        local_ids = local_objs.values_list("id", flat=True)
+        remote_ids = self._authorizenet_get_remote_address_profile_ids()
+        ids_to_create = set(remote_ids) - set(local_ids) if remote_ids else []
+        ids_to_delete = set(local_ids) - set(remote_ids) if local_ids else []
+
+        if ids_to_create:
+            CustomerShippingAddress.objects.bulk_create(
+                [
+                    CustomerShippingAddress(id=id, customer=self)
+                    for id in ids_to_create
+                ],
+                ignore_conflicts=True,
+            )
+
+        if ids_to_delete:
+            CustomerShippingAddress.objects.filter(
+                id__in=ids_to_delete, customer=self
+            ).delete()
 
     def _authorizenet_get_remote_address_profile_ids(self) -> list[int]:
         """Returns a list of address profile ids for the customer profile from Authorizenet."""
-        try:
-            return self._authorizenet_get_customer_profile().get_address_profile_ids()
-        except AuthorizenetControllerExecutionError as e:
-            logger.critical(e)
+        cprofile = self.authorizenet_get_profile()
+        if cprofile is None or not hasattr(cprofile.profile, "shipToList"):
             return []
+        return [
+            int(aprofile.customerAddressId)
+            for aprofile in cprofile.profile.shipToList
+        ]
 
     def _authorizenet_get_remote_payment_profile_ids(self) -> list[int]:
         """Returns a list of payment profile ids for the customer profile from Authorizenet."""
-        try:
-            return self._authorizenet_get_customer_profile().get_payment_profile_ids()
-        except AuthorizenetControllerExecutionError as e:
-            logger.critical(e)
+        cprofile = self.authorizenet_get_profile()
+        if cprofile is None or not hasattr(
+            cprofile.profile, "paymentProfiles"
+        ):
             return []
+        return [
+            int(pprofile.customerPaymentProfileId)
+            for pprofile in cprofile.profile.paymentProfiles
+        ]
 
     def _wialon_get_remote_unit_ids(self, session: WialonSession) -> list[int]:
         """Returns a list of current customer unit ids from Wialon."""
@@ -99,90 +181,6 @@ class Customer(models.Model):
         if not response:
             return []
         return [int(unit.get("id")) for unit in response.get("items", {})]
-
-    @transaction.atomic
-    def _wialon_sync_units(self, session: WialonSession) -> None:
-        remote_ids = self._wialon_get_remote_unit_ids(session)
-        local_ids = CustomerWialonUnit.objects.filter(
-            customer=self
-        ).values_list("id", flat=True)
-
-        ids_to_create = (
-            set(remote_ids).difference(set(local_ids)) if remote_ids else []
-        )
-        ids_to_delete = (
-            set(local_ids).difference(set(remote_ids)) if local_ids else []
-        )
-
-        if ids_to_create:
-            CustomerWialonUnit.objects.bulk_create(
-                [
-                    CustomerWialonUnit(id=id, customer=self)
-                    for id in ids_to_create
-                ],
-                ignore_conflicts=True,
-            )
-
-        if ids_to_delete:
-            CustomerWialonUnit.objects.filter(
-                id__in=ids_to_delete, customer=self
-            ).delete()
-
-    @transaction.atomic
-    def _authorizenet_sync_payment_methods(self) -> None:
-        remote_ids = self._authorizenet_get_remote_payment_profile_ids()
-        local_ids = CustomerPaymentMethod.objects.filter(
-            customer=self
-        ).values_list("id", flat=True)
-
-        ids_to_create = (
-            set(remote_ids).difference(set(local_ids)) if remote_ids else []
-        )
-        ids_to_delete = (
-            set(local_ids).difference(set(remote_ids)) if local_ids else []
-        )
-
-        if ids_to_create:
-            CustomerPaymentMethod.objects.bulk_create(
-                [
-                    CustomerPaymentMethod(id=id, customer=self)
-                    for id in ids_to_create
-                ],
-                ignore_conflicts=True,
-            )
-
-        if ids_to_delete:
-            CustomerPaymentMethod.objects.filter(
-                id__in=ids_to_delete, customer=self
-            ).delete()
-
-    @transaction.atomic
-    def _authorizenet_sync_shipping_addresses(self) -> None:
-        remote_ids = self._authorizenet_get_remote_address_profile_ids()
-        local_ids = CustomerShippingAddress.objects.filter(
-            customer=self
-        ).values_list("id", flat=True)
-
-        ids_to_create = (
-            set(remote_ids).difference(set(local_ids)) if remote_ids else []
-        )
-        ids_to_delete = (
-            set(local_ids).difference(set(remote_ids)) if local_ids else []
-        )
-
-        if ids_to_create:
-            CustomerPaymentMethod.objects.bulk_create(
-                [
-                    CustomerPaymentMethod(id=id, customer=self)
-                    for id in ids_to_create
-                ],
-                ignore_conflicts=True,
-            )
-
-        if ids_to_delete:
-            CustomerShippingAddress.objects.filter(
-                id__in=ids_to_delete, customer=self
-            ).delete()
 
 
 class CustomerWialonUnit(models.Model):
@@ -281,39 +279,50 @@ class CustomerPaymentMethod(models.Model):
             kwargs={"customer_pk": self.customer.pk, "payment_pk": self.pk},
         )
 
+    def authorizenet_get_profile(self, include_issuer_info: bool = False):
+        return profiles.get_customer_payment_profile(
+            customer_profile_id=self.customer.authorizenet_profile_id,
+            customer_payment_profile_id=self.pk,
+            include_issuer_info=include_issuer_info,
+        )
+
+    def authorizenet_needs_sync(self) -> bool:
+        """Returns whether or not the payment method is out of sync with Authorizenet."""
+        return not all([self.cc_last_4, self.cc_type])
+
     @transaction.atomic
     def authorizenet_sync(self) -> None:
         """Sets the credit card type and last 4 digits for the payment method from Authorizenet."""
         self.cc_last_4 = self._authorizenet_get_credit_card_number()[-4:]
         self.cc_type = self._authorizenet_get_credit_card_type()
 
-    def authorizenet_needs_sync(self) -> bool:
-        """Returns whether or not the payment method is out of sync with Authorizenet."""
-        return not all([self.cc_last_4, self.cc_type])
-
-    def authorizenet_get_profile(self):
-        return PaymentProfile(
-            customer_profile_id=str(self.customer.authorizenet_profile_id),
-            id=str(self.pk),
-        )._authorizenet_get_payment_profile(issuer_info=True)
-
     def _authorizenet_get_credit_card_number(self) -> str:
         """Returns the (obfuscated) credit card number for the payment method, or 'XXXXXXXX' if not found."""
-        try:
-            cc_num = self.authorizenet_get_profile().paymentProfile.payment.creditCard.cardNumber
-            return str(cc_num)
-        except AuthorizenetControllerExecutionError as e:
-            logger.warning(e)
+        pprofile = self.authorizenet_get_profile().paymentProfile
+        if any(
+            [
+                pprofile is None,
+                not hasattr(pprofile, "payment"),
+                not hasattr(pprofile.payment, "creditCard"),
+                not hasattr(pprofile.payment.creditCard, "cardNumber"),
+            ]
+        ):
             return "XXXXXXXX"
+        return str(pprofile.payment.creditCard.cardNumber)
 
     def _authorizenet_get_credit_card_type(self) -> str:
         """Returns the credit card type for the payment method, or 'Unknown' if not found."""
-        try:
-            cc_type = self.authorizenet_get_profile().paymentProfile.payment.creditCard.cardType
-            return str(cc_type)
-        except AuthorizenetControllerExecutionError as e:
-            logger.warning(e)
+        pprofile = self.authorizenet_get_profile().paymentProfile
+        if any(
+            [
+                pprofile is None,
+                not hasattr(pprofile, "payment"),
+                not hasattr(pprofile.payment, "creditCard"),
+                not hasattr(pprofile.payment.creditCard, "cardType"),
+            ]
+        ):
             return "Unknown"
+        return str(pprofile.payment.creditCard.cardType)
 
 
 class CustomerShippingAddress(models.Model):
@@ -352,27 +361,24 @@ class CustomerShippingAddress(models.Model):
             kwargs={"customer_pk": self.customer.pk, "address_pk": self.pk},
         )
 
-    @transaction.atomic
-    def authorizenet_sync(self) -> None:
-        """Syncs shipping address data with Authorizenet."""
-        self.street = self._authorizenet_get_street()
+    def authorizenet_get_profile(self):
+        return profiles.get_customer_shipping_address(
+            customer_profile_id=self.customer.authorizenet_profile_id,
+            customer_address_profile_id=self.pk,
+        )
 
     def authorizenet_needs_sync(self) -> bool:
         """Returns whether or not the shipping address is out of sync with Authorizenet."""
         return not all([self.street])
 
-    def authorizenet_get_profile(self):
-        return AddressProfile(
-            customer_profile_id=self.customer.authorizenet_profile_id,
-            id=self.pk,
-            default=self.default,
-        )._authorizenet_get_shipping_address()
+    @transaction.atomic
+    def authorizenet_sync(self) -> None:
+        """Syncs shipping address data with Authorizenet."""
+        self.street = self._authorizenet_get_street()
 
     def _authorizenet_get_street(self) -> str:
         """Returns the street for the shipping address, or 'Unknown' if not found."""
-        try:
-            street = self.authorizenet_get_profile().address.address
-            return str(street)
-        except AuthorizenetControllerExecutionError as e:
-            logger.warning(e)
+        aprofile = self.authorizenet_get_profile()
+        if aprofile is None or not hasattr(aprofile.address, "address"):
             return "Unknown"
+        return str(aprofile.address.address)

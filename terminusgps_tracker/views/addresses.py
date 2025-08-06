@@ -8,10 +8,10 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView
+from terminusgps.authorizenet import profiles
 from terminusgps.authorizenet.controllers import (
     AuthorizenetControllerExecutionError,
 )
-from terminusgps.authorizenet.profiles import AddressProfile
 from terminusgps.authorizenet.utils import generate_customer_address
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
@@ -45,7 +45,7 @@ class CustomerShippingAddressListView(
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-        customer.authorizenet_sync()
+        customer.authorizenet_sync_shipping_addresses()
         return super().get(request, *args, **kwargs)
 
     def get_queryset(
@@ -137,13 +137,9 @@ class CustomerShippingAddressDeleteView(
     def form_valid(self, form=None) -> HttpResponse | HttpResponseRedirect:
         try:
             customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-            address_id = self.object.pk
-            customer_id = customer.authorizenet_profile_id
-            anet_profile = AddressProfile(
-                id=address_id, customer_profile_id=customer_id
+            profiles.delete_customer_shipping_address(
+                customer.authorizenet_profile_id, self.object.pk
             )
-
-            anet_profile.delete()
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
             match e.code:
@@ -201,12 +197,13 @@ class CustomerShippingAddressCreateView(
         try:
             customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
             address = generate_customer_address(form)
-            address_profile = AddressProfile(
+            response = profiles.create_customer_shipping_address(
                 customer_profile_id=customer.authorizenet_profile_id,
+                new_address=address,
                 default=form.cleaned_data["default"],
             )
             CustomerShippingAddress.objects.create(
-                id=address_profile.create(address), customer=customer
+                id=int(response.customerAddressId), customer=customer
             )
             return HttpResponseRedirect(self.get_success_url())
         except AuthorizenetControllerExecutionError as e:

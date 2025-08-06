@@ -13,6 +13,9 @@ class CustomerOrStaffRequiredMixin(UserPassesTestMixin):
         if self.request.user.is_staff:
             return True
 
+        if not self.request.user.is_authenticated:
+            return False
+
         customer_pk = self.kwargs.get("customer_pk")
         if not customer_pk:
             return False

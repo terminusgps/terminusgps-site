@@ -4,4 +4,4 @@ from .customers import (
     CustomerShippingAddress,
     CustomerWialonUnit,
 )
-from .subscriptions import Subscription, SubscriptionFeature, SubscriptionTier
+from .subscriptions import Subscription, SubscriptionTier

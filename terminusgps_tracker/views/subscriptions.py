@@ -19,10 +19,10 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
+from terminusgps.authorizenet import subscriptions
 from terminusgps.authorizenet.controllers import (
     AuthorizenetControllerExecutionError,
 )
-from terminusgps.authorizenet.profiles import SubscriptionProfile
 from terminusgps.authorizenet.utils import (
     calculate_amount_plus_tax,
     get_transaction,
@@ -59,17 +59,14 @@ class SubscriptionDetailView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         """Adds ``grand_total`` to the view context."""
-        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["grand_total"] = self.get_object().calculate_amount()
-        return context
+        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
+        sub_total = customer.calculate_subscription_amount()
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        """Syncs the subscription's data with Authorizenet if necessary."""
-        subscription = self.get_object()
-        if subscription.authorizenet_needs_sync():
-            subscription.authorizenet_sync()
-            subscription.save()
-        return super().get(request, *args, **kwargs)
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["sub_total"] = sub_total
+        context["grand_total"] = calculate_amount_plus_tax(sub_total)
+        context["start_date"] = customer.get_subscription_start_date()
+        return context
 
     def get_queryset(self) -> QuerySet[Subscription, Subscription]:
         return Subscription.objects.filter(
@@ -117,30 +114,51 @@ class SubscriptionCreateView(
         self, form: SubscriptionCreationForm
     ) -> HttpResponse | HttpResponseRedirect:
         try:
-            # Generate subscription data
+            time_created = timezone.now()
+            # Retrieve customer from db
             customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-            subscription_name = self.generate_subscription_name(customer)
-            anet_subscription_obj = apicontractsv1.ARBSubscriptionType(
-                name=subscription_name,
-                amount=self.generate_subscription_amount(customer),
-                profile=self.generate_customer_profile(customer, form),
-                paymentSchedule=self.generate_subscription_schedule(),
-                trialAmount=decimal.Decimal(0.00),
+
+            # Generate subscription data
+            subscription_name = f"{customer.user.first_name}'s Subscription"
+            subscription_schedule = apicontractsv1.paymentScheduleType(
+                interval=apicontractsv1.paymentScheduleTypeInterval(
+                    length=1,
+                    unit=apicontractsv1.ARBSubscriptionUnitEnum.months,
+                ),
+                startDate=time_created,
+                totalOccurrences=9999,
+                trialOccurrences=0,
+            )
+            subscription_profile = apicontractsv1.customerProfileIdType(
+                customerProfileId=str(customer.authorizenet_profile_id),
+                customerPaymentProfileId=str(form.cleaned_data["payment"].pk),
+                customerAddressId=str(form.cleaned_data["address"].pk),
+            )
+            subscription_amount = calculate_amount_plus_tax(
+                customer.calculate_subscription_amount()
             )
 
             # Create Authorizenet subscription
-            subscription_id = SubscriptionProfile(
-                customer_profile_id=customer.authorizenet_profile_id
-            ).create(anet_subscription_obj)
+            response = subscriptions.create_subscription(
+                apicontractsv1.ARBSubscriptionType(
+                    name=subscription_name,
+                    amount=subscription_amount,
+                    profile=subscription_profile,
+                    paymentSchedule=subscription_schedule,
+                    trialAmount=decimal.Decimal("0.00"),
+                )
+            )
 
             # Create local subscription
-            sub = Subscription.objects.create(
-                id=subscription_id,
+            local_sub = Subscription.objects.create(
+                id=int(response.subscriptionId),
                 name=subscription_name,
                 payment=form.cleaned_data["payment"],
                 address=form.cleaned_data["address"],
                 customer=customer,
+                start_date=time_created,
             )
+
             # Enable Wialon account
             with WialonSession() as session:
                 account_id = customer.wialon_resource_id
@@ -150,8 +168,10 @@ class SubscriptionCreateView(
                 session.wialon_api.account_enable_account(
                     **{"itemId": account_id, "enable": int(True)}
                 )
-            emails.send_subscription_created_email(customer, timezone.now())
-            return HttpResponseRedirect(sub.get_absolute_url())
+
+            # Send subscription confirmation email
+            emails.send_subscription_created_email(customer, time_created)
+            return HttpResponseRedirect(local_sub.get_absolute_url())
         except ValueError:
             form.add_error(
                 None,
@@ -169,88 +189,6 @@ class SubscriptionCreateView(
                 ),
             )
             return self.form_invalid(form=form)
-
-    @staticmethod
-    def generate_customer_profile(
-        customer: Customer, form: SubscriptionCreationForm
-    ) -> apicontractsv1.customerProfileIdType:
-        """
-        Returns an Authorizenet customer profile based on the customer and form.
-
-        :param customer: A customer to generate a profile for.
-        :type customer: :py:obj:`~terminusgps_tracker.models.customers.Customer`
-        :param form: A subscription creation form.
-        :type form: :py:obj:`~terminusgps_tracker.forms.subscriptions.SubscriptionCreationForm`
-        :returns: An Authorizenet customer profile (ID type).
-        :rtype: :py:obj:`~authorizenet.apicontractsv1.customerProfileIdType`
-
-        """
-        return apicontractsv1.customerProfileIdType(
-            customerProfileId=str(customer.authorizenet_profile_id),
-            customerPaymentProfileId=str(form.cleaned_data["payment"].pk),
-            customerAddressId=str(form.cleaned_data["address"].pk),
-        )
-
-    @staticmethod
-    def generate_subscription_name(customer: Customer) -> str:
-        """
-        Returns a subscription name based the customer.
-
-        :param customer: A customer to generate a subscription name based on.
-        :type customer: :py:obj:`~terminusgps_tracker.models.customers.Customer`
-        :returns: A subscription name.
-        :rtype: :py:obj:`str`
-
-        """
-        return f"{customer.user.first_name}'s Subscription"
-
-    @staticmethod
-    def generate_subscription_schedule(
-        trial_months: int = 0,
-    ) -> apicontractsv1.paymentScheduleType:
-        """
-        Returns an Authorizenet payment schedule for a subscription.
-
-        :param trial_months: Number of free months to grant to the customer. Default is ``0``.
-        :type trial_months: :py:obj:`int`
-        :returns: A payment schedule object for Authorizenet API calls.
-        :rtype: :py:obj:`~authorizenet.apicontractsv1.paymentScheduleType`
-
-        """
-        return apicontractsv1.paymentScheduleType(
-            interval=apicontractsv1.paymentScheduleTypeInterval(
-                length=1, unit=apicontractsv1.ARBSubscriptionUnitEnum.months
-            ),
-            startDate=timezone.now(),
-            totalOccurrences=9999,
-            trialOccurrences=trial_months,
-        )
-
-    @staticmethod
-    def generate_subscription_amount(
-        customer: Customer, add_tax: bool = True
-    ) -> decimal.Decimal:
-        """
-        Returns an amount to be charged for a subscription based on the customer.
-
-        :param customer: A customer to calculate a subscription amount for.
-        :type customer: :py:obj:`~terminusgps_tracker.models.customers.Customer`
-        :param add_tax: Whether or not to add tax to the subscription amount. Default is :py:obj:`True`.
-        :type add_tax: :py:obj:`bool`
-        :raises ValueError: If the customer didn't have any units.
-        :returns: An amount for a subscription.
-        :rtype: :py:obj:`~decimal.Decimal`
-
-        """
-        unit_qs = CustomerWialonUnit.objects.filter(customer=customer)
-        if unit_qs.count() == 0:
-            raise ValueError("Customer doesn't have any units.")
-
-        raw_amount = sum(
-            unit_qs.values_list("tier__amount", flat=True),
-            decimal.Decimal("0.00"),
-        )
-        return calculate_amount_plus_tax(raw_amount) if add_tax else raw_amount
 
 
 class SubscriptionUpdateView(
@@ -279,9 +217,28 @@ class SubscriptionUpdateView(
     ) -> HttpResponse | HttpResponseRedirect:
         """Updates the subscription's payment method and shipping address in Authorizenet."""
         try:
+            # Retrieve subscription from db
             subscription = self.get_object()
-            sprofile = subscription._authorizenet_get_profile()
-            subscription.authorizenet_update_payment(sprofile)
+
+            # Update Authorizenet subscription
+            subscriptions.update_subscription(
+                subscription_id=subscription.pk,
+                subscription_obj=apicontractsv1.ARBSubscriptionType(
+                    profile=apicontractsv1.customerProfileIdType(
+                        customerProfileId=str(
+                            subscription.customer.authorizenet_profile_id
+                        ),
+                        customerPaymentProfileId=str(
+                            form.cleaned_data["payment"].pk
+                        ),
+                        customerAddressId=str(form.cleaned_data["address"].pk),
+                    )
+                ),
+            )
+
+            # Update local subscription
+            subscription.payment = form.cleaned_data["payment"]
+            subscription.address = form.cleaned_data["address"]
             subscription.save()
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
@@ -342,8 +299,9 @@ class SubscriptionDeleteView(
     def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Deletes the Authorizenet subscription and adds remaining days to the customer's Wialon account."""
         subscription = self.get_object()
-        sprofile = subscription._authorizenet_get_profile()
-        sprofile.delete()
+        customer = subscription.customer
+        cancel_date = timezone.now()
+        subscriptions.cancel_subscription(subscription.pk)
 
         with WialonSession() as session:
             account_id = subscription.customer.wialon_resource_id
@@ -361,9 +319,8 @@ class SubscriptionDeleteView(
                 }
             )
 
-        emails.send_subscription_canceled_email(
-            self.get_object().customer, timezone.now()
-        )
+        emails.send_subscription_canceled_email(customer, cancel_date)
+
         # Retarget required otherwise the response is nested for some reason
         response = super().post(request, *args, **kwargs)
         response.headers["HX-Retarget"] = "#subscription"

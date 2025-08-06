@@ -8,7 +8,6 @@ from terminusgps_tracker.models import (
     CustomerShippingAddress,
     CustomerWialonUnit,
     Subscription,
-    SubscriptionFeature,
     SubscriptionTier,
 )
 
@@ -170,8 +169,3 @@ class SubscriptionAdmin(admin.ModelAdmin):
 @admin.register(SubscriptionTier)
 class SubscriptionTierAdmin(admin.ModelAdmin):
     list_display = ["name", "amount", "desc"]
-
-
-@admin.register(SubscriptionFeature)
-class SubscriptionFeatureAdmin(admin.ModelAdmin):
-    list_display = ["name", "total", "amount", "desc"]

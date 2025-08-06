@@ -1,5 +1,6 @@
 import typing
 
+from authorizenet import apicontractsv1
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -8,10 +9,10 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView
+from terminusgps.authorizenet import profiles
 from terminusgps.authorizenet.controllers import (
     AuthorizenetControllerExecutionError,
 )
-from terminusgps.authorizenet.profiles import AddressProfile, PaymentProfile
 from terminusgps.authorizenet.utils import (
     generate_customer_address,
     generate_customer_payment,
@@ -49,7 +50,7 @@ class CustomerPaymentMethodListView(
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-        customer.authorizenet_sync()
+        customer.authorizenet_sync_payment_methods()
         return super().get(request, *args, **kwargs)
 
     def get_queryset(
@@ -142,15 +143,10 @@ class CustomerPaymentMethodDeleteView(
 
     def form_valid(self, form=None) -> HttpResponse | HttpResponseRedirect:
         try:
-            pprofile_id = self.object.pk
-            cprofile_id = Customer.objects.get(
-                pk=self.kwargs["customer_pk"]
-            ).authorizenet_profile_id
-
-            pprofile = PaymentProfile(
-                id=pprofile_id, customer_profile_id=cprofile_id
+            customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
+            profiles.delete_customer_payment_profile(
+                customer.authorizenet_profile_id, self.object.pk
             )
-            pprofile.delete()
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
             match e.code:
@@ -217,20 +213,25 @@ class CustomerPaymentMethodCreateView(
             customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
             address = generate_customer_address(form)
             payment = generate_customer_payment(form)
-            pprofile = PaymentProfile(
-                customer_profile_id=customer.authorizenet_profile_id
+
+            response = profiles.create_customer_payment_profile(
+                customer.authorizenet_profile_id,
+                apicontractsv1.customerPaymentProfileType(
+                    billTo=address,
+                    payment=payment,
+                    defaultPaymentProfile=form.cleaned_data["default"],
+                ),
             )
             CustomerPaymentMethod.objects.create(
-                id=pprofile.create(payment=payment, address=address),
-                customer=customer,
+                id=int(response.customerPaymentProfileId), customer=customer
             )
 
             if form.cleaned_data["create_shipping_address"]:
-                aprofile = AddressProfile(
-                    customer_profile_id=customer.authorizenet_profile_id
+                response = profiles.create_customer_shipping_address(
+                    customer.authorizenet_profile_id, address
                 )
                 CustomerShippingAddress.objects.create(
-                    id=aprofile.create(address=address), customer=customer
+                    id=int(response.customerAddressId), customer=customer
                 )
             return HttpResponseRedirect(self.get_success_url())
         except AuthorizenetControllerExecutionError as e:
