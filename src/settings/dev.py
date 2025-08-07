@@ -1,6 +1,5 @@
 import decimal
 import os
-import sys
 from pathlib import Path
 
 from authorizenet.constants import constants
@@ -9,35 +8,8 @@ os.umask(0)
 decimal.getcontext().prec = 4
 decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-            "stream": sys.stdout,
-        }
-    },
-    "root": {"handlers": ["console"], "level": "INFO"},
-    "loggers": {
-        "django": {
-            "handlers": ["console"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
-            "propagate": True,
-        }
-    },
-}
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-ADMINS = [
-    ("Peter", "pspeckman@terminusgps.com"),
-    ("Blake", "blake@terminusgps.com"),
-    ("Lili", "lili@terminusgps.com"),
-]
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = True
 DEBUG_TOOLBAR_CONFIG = {"ROOT_TAG_EXTRA_ATTRS": "hx-preserve"}
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -49,9 +21,9 @@ EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_PORT = 587
-INTERNAL_IPS = ["127.0.0.1"]
 EMAIL_USE_TLS = True
 FORM_RENDERER = "terminusgps.django.forms.renderer.TerminusgpsFormRenderer"
+INTERNAL_IPS = ["127.0.0.1"]
 LANGUAGE_CODE = "en-us"
 LOGIN_URL = "login/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -74,6 +46,12 @@ WIALON_ADMIN_ACCOUNT = os.getenv("WIALON_ADMIN_ACCOUNT")
 WIALON_DEFAULT_PLAN = os.getenv("WIALON_DEFAULT_PLAN")
 WIALON_TOKEN = os.getenv("WIALON_TOKEN")
 WSGI_APPLICATION = "src.wsgi.application"
+
+ADMINS = [
+    ("Peter", "pspeckman@terminusgps.com"),
+    ("Blake", "blake@terminusgps.com"),
+    ("Lili", "lili@terminusgps.com"),
+]
 
 
 TRACKER_APP_CONFIG = {

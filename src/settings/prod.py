@@ -10,16 +10,8 @@ os.umask(0)
 decimal.getcontext().prec = 4
 decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
-
-ADMINS = [
-    ("Peter", "pspeckman@terminusgps.com"),
-    ("Blake", "blake@terminusgps.com"),
-    ("Lili", "lili@terminusgps.com"),
-]
-
 ALLOWED_HOSTS = [".terminusgps.com", gethostbyname(gethostname())]
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = ["https://*.terminusgps.com", "https://terminusgps.com"]
 DEBUG = False
@@ -55,12 +47,16 @@ STATIC_URL = "static/"
 TIME_ZONE = "US/Central"
 USE_I18N = True
 USE_TZ = True
-USE_X_FORWARDED_HOST = False
 WIALON_ADMIN_ACCOUNT = os.getenv("WIALON_ADMIN_ACCOUNT")
 WIALON_DEFAULT_PLAN = os.getenv("WIALON_DEFAULT_PLAN", "terminusgps_ext_hist")
 WIALON_TOKEN = os.getenv("WIALON_TOKEN")
 WSGI_APPLICATION = "src.wsgi.application"
 
+ADMINS = [
+    ("Peter", "pspeckman@terminusgps.com"),
+    ("Blake", "blake@terminusgps.com"),
+    ("Lili", "lili@terminusgps.com"),
+]
 
 TRACKER_APP_CONFIG = {
     "DISPLAY_NAME": "Terminus GPS",
