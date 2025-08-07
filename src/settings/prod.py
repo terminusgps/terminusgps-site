@@ -10,23 +10,18 @@ os.umask(0)
 decimal.getcontext().prec = 4
 decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
-
-ALLOWED_HOSTS = [
-    ".terminusgps.com",
-    ".terminusgps-site-alb-1625343725.us-east-1.elb.amazonaws.com",
-]
-ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 
 ADMINS = [
     ("Peter", "pspeckman@terminusgps.com"),
     ("Blake", "blake@terminusgps.com"),
     ("Lili", "lili@terminusgps.com"),
 ]
+
+ALLOWED_HOSTS = [".terminusgps.com", gethostbyname(gethostname())]
 CSRF_COOKIE_SECURE = True
-CSRF_TRUSTED_ORIGINS = ["https://*.terminusgps.com"]
+CSRF_TRUSTED_ORIGINS = ["https://*.terminusgps.com", "https://terminusgps.com"]
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_CHARSET = "utf-8"
@@ -51,11 +46,8 @@ MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
 MERCHANT_AUTH_VALIDATION_MODE = "liveMode"
 ROOT_URLCONF = "src.urls"
 SECRET_KEY = os.getenv("SECRET_KEY")
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
-SECURE_HSTS_SECONDS = 31_536_000
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]
@@ -63,7 +55,7 @@ STATIC_URL = "static/"
 TIME_ZONE = "US/Central"
 USE_I18N = True
 USE_TZ = True
-USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_HOST = False
 WIALON_ADMIN_ACCOUNT = os.getenv("WIALON_ADMIN_ACCOUNT")
 WIALON_DEFAULT_PLAN = os.getenv("WIALON_DEFAULT_PLAN", "terminusgps_ext_hist")
 WIALON_TOKEN = os.getenv("WIALON_TOKEN")
