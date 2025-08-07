@@ -143,21 +143,34 @@ class Customer(models.Model):
 
     def _authorizenet_get_remote_address_profile_ids(self) -> list[int]:
         """Returns a list of address profile ids for the customer profile from Authorizenet."""
-        cprofile = self.authorizenet_get_profile().profile
-        if cprofile is None or not hasattr(cprofile, "shipToList"):
+        profile_response = self.authorizenet_get_profile()
+        if any(
+            [
+                profile_response is None,
+                not hasattr(profile_response, "profile"),
+                not hasattr(profile_response.profile, "shipToList"),
+            ]
+        ):
             return []
         return [
-            int(aprofile.customerAddressId) for aprofile in cprofile.shipToList
+            int(aprofile.customerAddressId)
+            for aprofile in profile_response.profile.shipToList
         ]
 
     def _authorizenet_get_remote_payment_profile_ids(self) -> list[int]:
         """Returns a list of payment profile ids for the customer profile from Authorizenet."""
-        cprofile = self.authorizenet_get_profile().profile
-        if cprofile is None or not hasattr(cprofile, "paymentProfiles"):
+        profile_response = self.authorizenet_get_profile()
+        if any(
+            [
+                profile_response is None,
+                not hasattr(profile_response, "profile"),
+                not hasattr(profile_response.profile, "paymentProfiles"),
+            ]
+        ):
             return []
         return [
             int(pprofile.customerPaymentProfileId)
-            for pprofile in cprofile.paymentProfiles
+            for pprofile in profile_response.profile.paymentProfiles
         ]
 
     def _wialon_get_remote_unit_ids(self, session: WialonSession) -> list[int]:
@@ -299,31 +312,45 @@ class CustomerPaymentMethod(models.Model):
 
     def _authorizenet_get_credit_card_number(self) -> str:
         """Returns the (obfuscated) credit card number for the payment method, or 'XXXXXXXX' if not found."""
-        pprofile = self.authorizenet_get_profile().paymentProfile
+        profile_response = self.authorizenet_get_profile()
         if any(
             [
-                pprofile is None,
-                not hasattr(pprofile, "payment"),
-                not hasattr(pprofile.payment, "creditCard"),
-                not hasattr(pprofile.payment.creditCard, "cardNumber"),
+                profile_response is None,
+                not hasattr(profile_response, "paymentProfile"),
+                not hasattr(profile_response.paymentProfile, "payment"),
+                not hasattr(
+                    profile_response.paymentProfile.payment, "creditCard"
+                ),
+                not hasattr(
+                    profile_response.paymentProfile.payment.creditCard,
+                    "cardNumber",
+                ),
             ]
         ):
             return "XXXXXXXX"
-        return str(pprofile.payment.creditCard.cardNumber)
+        return str(
+            profile_response.paymentProfile.payment.creditCard.cardNumber
+        )
 
     def _authorizenet_get_credit_card_type(self) -> str:
         """Returns the credit card type for the payment method, or 'Unknown' if not found."""
-        pprofile = self.authorizenet_get_profile().paymentProfile
+        profile_response = self.authorizenet_get_profile()
         if any(
             [
-                pprofile is None,
-                not hasattr(pprofile, "payment"),
-                not hasattr(pprofile.payment, "creditCard"),
-                not hasattr(pprofile.payment.creditCard, "cardType"),
+                profile_response is None,
+                not hasattr(profile_response, "paymentProfile"),
+                not hasattr(profile_response.paymentProfile, "payment"),
+                not hasattr(
+                    profile_response.paymentProfile.payment, "creditCard"
+                ),
+                not hasattr(
+                    profile_response.paymentProfile.payment.creditCard,
+                    "cardType",
+                ),
             ]
         ):
             return "Unknown"
-        return str(pprofile.payment.creditCard.cardType)
+        return str(profile_response.paymentProfile.payment.creditCard.cardType)
 
 
 class CustomerShippingAddress(models.Model):
@@ -379,10 +406,16 @@ class CustomerShippingAddress(models.Model):
 
     def _authorizenet_get_street(self) -> str:
         """Returns the street for the shipping address, or 'Unknown' if not found."""
-        aprofile = self.authorizenet_get_profile().address
-        if aprofile is None or not hasattr(aprofile, "address"):
+        profile_response = self.authorizenet_get_profile()
+        if any(
+            [
+                profile_response is None,
+                not hasattr(profile_response, "address"),
+                not hasattr(profile_response.address, "address"),
+            ]
+        ):
             return "Unknown"
-        return str(aprofile.address)
+        return str(profile_response.address.address)
 
 
 class Subscription(models.Model):
