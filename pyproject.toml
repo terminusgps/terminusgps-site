@@ -13,8 +13,6 @@ authors = [
 dependencies = [
     "authorizenet==1.1.5",
     "django-storages[s3]>=1.14.4",
-    "django-stubs-ext==5.0.2",
-    "django-stubs==5.0.2",
     "django==5.2.2",
     "gunicorn>=23.0.0",
     "lxml==4.9.4",
@@ -74,4 +72,6 @@ skip-magic-trailing-comma = true
 dev = [
     "certifi>=2025.1.31",
     "django-debug-toolbar>=6.0.0",
+    "django-stubs>=5.2.2",
+    "django-stubs-ext>=5.2.2",
 ]
