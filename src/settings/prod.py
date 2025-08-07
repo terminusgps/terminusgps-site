@@ -4,12 +4,12 @@ import pathlib
 import sys
 from socket import gethostbyname, gethostname
 
-import requests
 from authorizenet.constants import constants
 
 os.umask(0)
 decimal.getcontext().prec = 4
 decimal.getcontext().rounding = decimal.ROUND_HALF_UP
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
@@ -19,14 +19,6 @@ ALLOWED_HOSTS = [
     ".terminusgps-site-alb-1625343725.us-east-1.elb.amazonaws.com",
 ]
 ALLOWED_HOSTS.append(gethostbyname(gethostname()))
-
-try:
-    public_ip = requests.get(
-        "http://checkip.amazonaws.com/", timeout=2
-    ).text.strip()
-    ALLOWED_HOSTS.append(public_ip)
-except Exception:
-    pass
 
 ADMINS = [
     ("Peter", "pspeckman@terminusgps.com"),
@@ -73,7 +65,7 @@ USE_I18N = True
 USE_TZ = True
 USE_X_FORWARDED_HOST = True
 WIALON_ADMIN_ACCOUNT = os.getenv("WIALON_ADMIN_ACCOUNT")
-WIALON_DEFAULT_PLAN = os.getenv("WIALON_DEFAULT_PLAN")
+WIALON_DEFAULT_PLAN = os.getenv("WIALON_DEFAULT_PLAN", "terminusgps_ext_hist")
 WIALON_TOKEN = os.getenv("WIALON_TOKEN")
 WSGI_APPLICATION = "src.wsgi.application"
 
