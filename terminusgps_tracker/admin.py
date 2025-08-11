@@ -14,7 +14,7 @@ from terminusgps_tracker.models import (
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    actions = ["sync_with_authorizenet"]
+    actions = ["sync_with_authorizenet", "sync_with_wialon"]
     list_display = [
         "id",
         "user",
