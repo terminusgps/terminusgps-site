@@ -78,8 +78,7 @@ class Customer(models.Model):
     def wialon_sync_units(self, session: WialonSession) -> None:
         """Syncs the customer's units with Wialon."""
         remote_ids = self._wialon_get_remote_unit_ids(session)
-        local_objs = CustomerWialonUnit.objects.filter(customer=self)
-        local_ids = local_objs.values_list("id", flat=True)
+        local_ids = self._wialon_get_local_unit_ids()
         ids_to_create = set(remote_ids) - set(local_ids) if remote_ids else []
         ids_to_delete = set(local_ids) - set(remote_ids) if local_ids else []
 
