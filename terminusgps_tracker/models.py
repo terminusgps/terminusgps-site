@@ -536,36 +536,52 @@ class Subscription(models.Model):
         )
 
     def authorizenet_get_transaction_list(self) -> list:
-        anet_sub = self.authorizenet_get_subscription(
+        sub_response = self.authorizenet_get_subscription(
             include_transactions=True
         )
-        if anet_sub is None or not hasattr(anet_sub, "arbTransactions"):
+
+        if any(
+            [
+                sub_response is None,
+                not hasattr(sub_response, "arbTransactions"),
+            ]
+        ):
             return []
-        return [t for t in anet_sub.arbTransactions]
+        return [t for t in sub_response.arbTransactions]
 
     def _authorizenet_get_remote_payment_id(self) -> int | None:
-        anet_sub = self.authorizenet_get_subscription().subscription
+        sub_response = self.authorizenet_get_subscription()
         if any(
             [
-                anet_sub is None,
-                not hasattr(anet_sub, "profile"),
-                not hasattr(anet_sub.profile, "paymentProfile"),
+                sub_response is None,
+                not hasattr(sub_response, "subscription"),
+                not hasattr(sub_response.subscription, "profile"),
+                not hasattr(
+                    sub_response.subscription.profile, "paymentProfile"
+                ),
             ]
         ):
             return
-        return int(anet_sub.profile.paymentProfile.customerPaymentProfileId)
+        return int(
+            sub_response.subscription.profile.paymentProfile.customerPaymentProfileId
+        )
 
     def _authorizenet_get_remote_address_id(self) -> int | None:
-        anet_sub = self.authorizenet_get_subscription().subscription
+        sub_response = self.authorizenet_get_subscription()
         if any(
             [
-                anet_sub is None,
-                not hasattr(anet_sub, "profile"),
-                not hasattr(anet_sub.profile, "shippingProfile"),
+                sub_response is None,
+                not hasattr(sub_response, "subscription"),
+                not hasattr(sub_response.subscription, "profile"),
+                not hasattr(
+                    sub_response.subscription.profile, "shippingProfile"
+                ),
             ]
         ):
             return
-        return int(anet_sub.profile.shippingProfile.customerAddressId)
+        return int(
+            sub_response.subscription.profile.shippingProfile.customerAddressId
+        )
 
     def _authorizenet_get_remote_status(self) -> str | None:
         anet_sub = self.authorizenet_get_subscription().subscription

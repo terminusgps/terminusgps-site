@@ -19,7 +19,7 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
-from terminusgps.authorizenet import subscriptions
+from terminusgps.authorizenet import subscriptions as anet_subscriptions
 from terminusgps.authorizenet.controllers import (
     AuthorizenetControllerExecutionError,
 )
@@ -139,7 +139,7 @@ class SubscriptionCreateView(
             )
 
             # Create Authorizenet subscription
-            response = subscriptions.create_subscription(
+            response = anet_subscriptions.create_subscription(
                 apicontractsv1.ARBSubscriptionType(
                     name=subscription_name,
                     amount=subscription_amount,
@@ -221,7 +221,7 @@ class SubscriptionUpdateView(
             subscription = self.get_object()
 
             # Update Authorizenet subscription
-            subscriptions.update_subscription(
+            anet_subscriptions.update_subscription(
                 subscription_id=subscription.pk,
                 subscription_obj=apicontractsv1.ARBSubscriptionType(
                     profile=apicontractsv1.customerProfileIdType(
@@ -301,10 +301,10 @@ class SubscriptionDeleteView(
         subscription = self.get_object()
         customer = subscription.customer
         cancel_date = timezone.now()
-        subscriptions.cancel_subscription(subscription.pk)
+        anet_subscriptions.cancel_subscription(subscription.pk)
 
         with WialonSession() as session:
-            account_id = subscription.customer.wialon_resource_id
+            account_id = customer.wialon_resource_id
             remaining_days = subscription.get_remaining_days()
 
             session.wialon_api.account_update_flags(
