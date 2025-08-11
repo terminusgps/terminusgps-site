@@ -8,7 +8,8 @@ from django.db import models, transaction
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from terminusgps.authorizenet import profiles, subscriptions
+from terminusgps.authorizenet import profiles as anet_profiles
+from terminusgps.authorizenet import subscriptions as anet_subscriptions
 from terminusgps.wialon import flags
 from terminusgps.wialon.items import WialonUnit
 from terminusgps.wialon.session import WialonSession
@@ -43,10 +44,11 @@ class Customer(models.Model):
         unit_list = CustomerWialonUnit.objects.filter(
             customer=self
         ).select_related("tier")
+
         if unit_list.count() == 0:
             return decimal.Decimal("0.00")
         return decimal.Decimal(
-            sum(unit_list.values_list("tier__amount", flat=True))
+            sum(list(unit_list.values_list("tier__amount", flat=True)))
         )
 
     def get_subscription_start_date(self) -> datetime.datetime | None:
@@ -58,7 +60,7 @@ class Customer(models.Model):
 
     def authorizenet_get_profile(self):
         """Returns the Authorizenet customer profile for the customer."""
-        return profiles.get_customer_profile(
+        return anet_profiles.get_customer_profile(
             self.authorizenet_profile_id, include_issuer_info=True
         )
 
@@ -100,34 +102,10 @@ class Customer(models.Model):
             ).delete()
 
     @transaction.atomic
-    def authorizenet_sync_payment_methods(self) -> None:
-        """Syncs the customer's payment methods with Authorizenet."""
-        remote_ids = self._authorizenet_get_remote_payment_profile_ids()
-        local_objs = CustomerPaymentMethod.objects.filter(customer=self)
-        local_ids = local_objs.values_list("id", flat=True)
-        ids_to_create = set(remote_ids) - set(local_ids) if remote_ids else []
-        ids_to_delete = set(local_ids) - set(remote_ids) if local_ids else []
-
-        if ids_to_create:
-            CustomerPaymentMethod.objects.bulk_create(
-                [
-                    CustomerPaymentMethod(id=id, customer=self)
-                    for id in ids_to_create
-                ],
-                ignore_conflicts=True,
-            )
-
-        if ids_to_delete:
-            CustomerPaymentMethod.objects.filter(
-                id__in=ids_to_delete, customer=self
-            ).delete()
-
-    @transaction.atomic
     def authorizenet_sync_shipping_addresses(self) -> None:
         """Syncs the customer's shipping addresses with Authorizenet."""
         remote_ids = self._authorizenet_get_remote_address_profile_ids()
-        local_objs = CustomerShippingAddress.objects.filter(customer=self)
-        local_ids = local_objs.values_list("id", flat=True)
+        local_ids = self._authorizenet_get_local_address_profile_ids()
         ids_to_create = set(remote_ids) - set(local_ids) if remote_ids else []
         ids_to_delete = set(local_ids) - set(remote_ids) if local_ids else []
 
@@ -145,6 +123,35 @@ class Customer(models.Model):
                 id__in=ids_to_delete, customer=self
             ).delete()
 
+    @transaction.atomic
+    def authorizenet_sync_payment_methods(self) -> None:
+        """Syncs the customer's payment methods with Authorizenet."""
+        remote_ids = self._authorizenet_get_remote_payment_profile_ids()
+        local_ids = self._authorizenet_get_local_payment_profile_ids()
+        ids_to_create = set(remote_ids) - set(local_ids) if remote_ids else []
+        ids_to_delete = set(local_ids) - set(remote_ids) if local_ids else []
+
+        if ids_to_create:
+            CustomerPaymentMethod.objects.bulk_create(
+                [
+                    CustomerPaymentMethod(id=id, customer=self)
+                    for id in ids_to_create
+                ],
+                ignore_conflicts=True,
+            )
+
+        if ids_to_delete:
+            CustomerPaymentMethod.objects.filter(
+                id__in=ids_to_delete, customer=self
+            ).delete()
+
+    def _authorizenet_get_local_address_profile_ids(self) -> list[int]:
+        return list(
+            CustomerShippingAddress.objects.filter(customer=self).values_list(
+                "id", flat=True
+            )
+        )
+
     def _authorizenet_get_remote_address_profile_ids(self) -> list[int]:
         """Returns a list of address profile ids for the customer profile from Authorizenet."""
         profile_response = self.authorizenet_get_profile()
@@ -161,6 +168,13 @@ class Customer(models.Model):
             for aprofile in profile_response.profile.shipToList
         ]
 
+    def _authorizenet_get_local_payment_profile_ids(self) -> list[int]:
+        return list(
+            CustomerPaymentMethod.objects.filter(customer=self).values_list(
+                "id", flat=True
+            )
+        )
+
     def _authorizenet_get_remote_payment_profile_ids(self) -> list[int]:
         """Returns a list of payment profile ids for the customer profile from Authorizenet."""
         profile_response = self.authorizenet_get_profile()
@@ -176,6 +190,13 @@ class Customer(models.Model):
             int(pprofile.customerPaymentProfileId)
             for pprofile in profile_response.profile.paymentProfiles
         ]
+
+    def _wialon_get_local_unit_ids(self) -> list[int]:
+        return list(
+            CustomerWialonUnit.objects.filter(customer=self).values_list(
+                "id", flat=True
+            )
+        )
 
     def _wialon_get_remote_unit_ids(self, session: WialonSession) -> list[int]:
         """Returns a list of current customer unit ids from Wialon."""
@@ -298,7 +319,7 @@ class CustomerPaymentMethod(models.Model):
         )
 
     def authorizenet_get_profile(self, include_issuer_info: bool = False):
-        return profiles.get_customer_payment_profile(
+        return anet_profiles.get_customer_payment_profile(
             customer_profile_id=self.customer.authorizenet_profile_id,
             customer_payment_profile_id=self.pk,
             include_issuer_info=include_issuer_info,
@@ -394,7 +415,7 @@ class CustomerShippingAddress(models.Model):
         )
 
     def authorizenet_get_profile(self):
-        return profiles.get_customer_shipping_address(
+        return anet_profiles.get_customer_shipping_address(
             customer_profile_id=self.customer.authorizenet_profile_id,
             customer_address_profile_id=self.pk,
         )
@@ -511,7 +532,7 @@ class Subscription(models.Model):
     def authorizenet_get_subscription(
         self, include_transactions: bool = False
     ):
-        return subscriptions.get_subscription(
+        return anet_subscriptions.get_subscription(
             subscription_id=self.pk, include_transactions=include_transactions
         )
 
