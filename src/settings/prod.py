@@ -1,7 +1,7 @@
 import decimal
+import logging.config
 import os
 import pathlib
-import sys
 from socket import gethostbyname, gethostname
 
 from authorizenet.constants import constants
@@ -10,7 +10,11 @@ os.umask(0)
 decimal.getcontext().prec = 4
 decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 
-ALLOWED_HOSTS = [".terminusgps.com", gethostbyname(gethostname())]
+ALLOWED_HOSTS = [
+    ".terminusgps.com",
+    ".amazonaws.com",
+    gethostbyname(gethostname()),
+]
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = ["https://*.terminusgps.com", "https://terminusgps.com"]
@@ -47,6 +51,7 @@ STATIC_URL = "static/"
 TIME_ZONE = "US/Central"
 USE_I18N = True
 USE_TZ = True
+USE_X_FORWARDED_HOST = True
 WIALON_ADMIN_ACCOUNT = os.getenv("WIALON_ADMIN_ACCOUNT")
 WIALON_DEFAULT_PLAN = os.getenv("WIALON_DEFAULT_PLAN", "terminusgps_ext_hist")
 WIALON_TOKEN = os.getenv("WIALON_TOKEN")
@@ -102,25 +107,44 @@ TRACKER_APP_CONFIG = {
     },
 }
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-            "stream": sys.stdout,
-        }
-    },
-    "root": {"handlers": ["console"], "level": "INFO"},
-    "loggers": {
-        "django": {
-            "handlers": ["console"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
-            "propagate": True,
-        }
-    },
-}
+LOGGING_CONFIG = None
+logging.config.dictConfig(
+    {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "generic": {
+                "format": "%(asctime)s [%(process)d] [%(levelname)s] %(message)s",
+                "datefmt": "[%Y-%m-%d %H:%M:%S %z]",
+                "class": "logging.Formatter",
+            }
+        },
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "formatter": "generic",
+            }
+        },
+        "root": {"handlers": ["console"], "level": "INFO"},
+        "loggers": {
+            "django": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": True,
+            },
+            "authorizenet.sdk": {
+                "handlers": ["console"],
+                "level": "WARNING",
+                "propagate": True,
+            },
+            "gunicorn": {
+                "level": "INFO",
+                "handlers": ["console"],
+                "propagate": True,
+            },
+        },
+    }
+)
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},

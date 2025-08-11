@@ -86,11 +86,6 @@ class CustomerPaymentMethodDetailView(
     raise_exception = False
     template_name = "terminusgps_tracker/payments/detail.html"
 
-    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["profile"] = self.get_object().authorizenet_get_profile()
-        return context
-
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         """Syncs the payment method's data with Authorizenet before returning a response."""
         payment = self.get_object()
@@ -98,6 +93,11 @@ class CustomerPaymentMethodDetailView(
             payment.authorizenet_sync()
             payment.save()
         return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["profile"] = self.get_object().authorizenet_get_profile()
+        return context
 
     def get_queryset(
         self,
