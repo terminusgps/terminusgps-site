@@ -84,7 +84,11 @@ class Customer(models.Model):
         if ids_to_create:
             CustomerWialonUnit.objects.bulk_create(
                 [
-                    CustomerWialonUnit(id=id, customer=self)
+                    CustomerWialonUnit(
+                        id=id,
+                        customer=self,
+                        tier=SubscriptionTier.objects.first(),
+                    )
                     for id in ids_to_create
                 ],
                 ignore_conflicts=True,
