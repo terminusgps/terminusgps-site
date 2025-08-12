@@ -1,8 +1,11 @@
 from django.urls import path
+from django.views.decorators.cache import cache_page
 
 from . import views
 
+cached = lambda view_func: cache_page(timeout=60 * 15)(view_func)
 app_name = "tracker"
+
 urlpatterns = [
     path(
         "dashboard/", views.CustomerDashboardView.as_view(), name="dashboard"
@@ -21,7 +24,7 @@ urlpatterns = [
     ),
     path(
         "units/<int:customer_pk>/list/<int:unit_pk>/detail/",
-        views.CustomerWialonUnitListDetailView.as_view(),
+        cached(views.CustomerWialonUnitListDetailView.as_view()),
         name="unit list detail",
     ),
     path(
@@ -31,7 +34,7 @@ urlpatterns = [
     ),
     path(
         "units/<int:customer_pk>/create/",
-        views.CustomerWialonUnitCreateView.as_view(),
+        cached(views.CustomerWialonUnitCreateView.as_view()),
         name="unit create",
     ),
     path(
@@ -51,7 +54,7 @@ urlpatterns = [
     ),
     path(
         "subscription/<int:customer_pk>/<int:sub_pk>/cancel/",
-        views.SubscriptionDeleteView.as_view(),
+        cached(views.SubscriptionDeleteView.as_view()),
         name="subscription delete",
     ),
     path(
@@ -66,22 +69,22 @@ urlpatterns = [
     ),
     path(
         "transactions/<int:transaction_id>/",
-        views.SubscriptionTransactionDetailView.as_view(),
+        cached(views.SubscriptionTransactionDetailView.as_view()),
         name="transaction detail",
     ),
     path(
         "payments/<int:customer_pk>/new/",
-        views.CustomerPaymentMethodCreateView.as_view(),
+        cached(views.CustomerPaymentMethodCreateView.as_view()),
         name="payment create",
     ),
     path(
         "payments/<int:customer_pk>/<int:payment_pk>/",
-        views.CustomerPaymentMethodDetailView.as_view(),
+        cached(views.CustomerPaymentMethodDetailView.as_view()),
         name="payment detail",
     ),
     path(
         "payments/<int:customer_pk>/<int:payment_pk>/delete/",
-        views.CustomerPaymentMethodDeleteView.as_view(),
+        cached(views.CustomerPaymentMethodDeleteView.as_view()),
         name="payment delete",
     ),
     path(
@@ -91,17 +94,17 @@ urlpatterns = [
     ),
     path(
         "addresses/<int:customer_pk>/new/",
-        views.CustomerShippingAddressCreateView.as_view(),
+        cached(views.CustomerShippingAddressCreateView.as_view()),
         name="address create",
     ),
     path(
         "addresses/<int:customer_pk>/<int:address_pk>/",
-        views.CustomerShippingAddressDetailView.as_view(),
+        cached(views.CustomerShippingAddressDetailView.as_view()),
         name="address detail",
     ),
     path(
         "addresses/<int:customer_pk>/<int:address_pk>/delete/",
-        views.CustomerShippingAddressDeleteView.as_view(),
+        cached(views.CustomerShippingAddressDeleteView.as_view()),
         name="address delete",
     ),
     path(

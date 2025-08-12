@@ -23,6 +23,7 @@ dependencies = [
     "python-wialon==1.2.4",
     "psycopg>=3.2.6",
     "psycopg2-binary>=2.9.10",
+    "redis[hiredis]>=6.4.0",
 ]
 
 [tool.pyright]

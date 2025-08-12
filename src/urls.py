@@ -2,58 +2,69 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from django.views.decorators.cache import cache_page
 
 from . import views
 
+cached = lambda view_func: cache_page(timeout=60 * 15)(view_func)
+
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", views.TerminusgpsHomeView.as_view(), name="home"),
-    path("about/", views.TerminusgpsAboutView.as_view(), name="about"),
-    path("contact/", views.TerminusgpsContactView.as_view(), name="contact"),
-    path("hosting/", views.TerminusgpsHostingView.as_view(), name="hosting"),
     path("login/", views.TerminusgpsLoginView.as_view(), name="login"),
-    path("logout/", views.TerminusgpsLogoutView.as_view(), name="logout"),
-    path(
-        "commercial-use/",
-        views.TerminusgpsCommercialUseView.as_view(),
-        name="commercial use",
-    ),
-    path(
-        "individual-use/",
-        views.TerminusgpsIndividualUseView.as_view(),
-        name="individual use",
-    ),
-    path(
-        "teen-safety/",
-        views.TerminusgpsTeenSafetyView.as_view(),
-        name="teen safety",
-    ),
-    path(
-        "senior-safety/",
-        views.TerminusgpsSeniorSafetyView.as_view(),
-        name="senior safety",
-    ),
-    path(
-        "register/", views.TerminusgpsRegisterView.as_view(), name="register"
-    ),
-    path(
-        "privacy/",
-        views.TerminusgpsPrivacyPolicyView.as_view(),
-        name="privacy",
-    ),
+    path("hosting/", views.TerminusgpsHostingView.as_view(), name="hosting"),
     path(
         "source/",
         views.TerminusgpsSourceCodeView.as_view(),
         name="source code",
     ),
+    path("", cached(views.TerminusgpsHomeView.as_view()), name="home"),
+    path(
+        "logout/", cached(views.TerminusgpsLogoutView.as_view()), name="logout"
+    ),
+    path("about/", cached(views.TerminusgpsAboutView.as_view()), name="about"),
+    path(
+        "contact/",
+        cached(views.TerminusgpsContactView.as_view()),
+        name="contact",
+    ),
+    path(
+        "commercial-use/",
+        cached(views.TerminusgpsCommercialUseView.as_view()),
+        name="commercial use",
+    ),
+    path(
+        "individual-use/",
+        cached(views.TerminusgpsIndividualUseView.as_view()),
+        name="individual use",
+    ),
+    path(
+        "teen-safety/",
+        cached(views.TerminusgpsTeenSafetyView.as_view()),
+        name="teen safety",
+    ),
+    path(
+        "senior-safety/",
+        cached(views.TerminusgpsSeniorSafetyView.as_view()),
+        name="senior safety",
+    ),
+    path(
+        "register/",
+        cached(views.TerminusgpsRegisterView.as_view()),
+        name="register",
+    ),
+    path(
+        "privacy/",
+        cached(views.TerminusgpsPrivacyPolicyView.as_view()),
+        name="privacy",
+    ),
     path(
         "terms/",
-        views.TerminusgpsTermsAndConditionsView.as_view(),
+        cached(views.TerminusgpsTermsAndConditionsView.as_view()),
         name="terms",
     ),
     path(
         "faq/",
-        views.TerminusgpsFrequentlyAskedQuestionsView.as_view(),
+        cached(views.TerminusgpsFrequentlyAskedQuestionsView.as_view()),
         name="faq",
     ),
     path(
