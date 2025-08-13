@@ -144,6 +144,10 @@ class Customer(models.Model):
                 id__in=ids_to_delete, customer=self
             ).delete()
 
+    def _wialon_get_local_unit_ids(self) -> list[int]:
+        qs = CustomerWialonUnit.objects.filter(customer=self)
+        return list(qs.values_list("id", flat=True))
+
     def _authorizenet_get_local_address_profile_ids(self) -> list[int]:
         return list(
             CustomerShippingAddress.objects.filter(customer=self).values_list(
@@ -151,48 +155,9 @@ class Customer(models.Model):
             )
         )
 
-    def _authorizenet_get_remote_address_profile_ids(self) -> list[int]:
-        """Returns a list of address profile ids for the customer profile from Authorizenet."""
-        profile_response = self.authorizenet_get_profile()
-        if any(
-            [
-                profile_response is None,
-                not hasattr(profile_response, "profile"),
-                not hasattr(profile_response.profile, "shipToList"),
-            ]
-        ):
-            return []
-        return [
-            int(aprofile.customerAddressId)
-            for aprofile in profile_response.profile.shipToList
-        ]
-
     def _authorizenet_get_local_payment_profile_ids(self) -> list[int]:
         return list(
             CustomerPaymentMethod.objects.filter(customer=self).values_list(
-                "id", flat=True
-            )
-        )
-
-    def _authorizenet_get_remote_payment_profile_ids(self) -> list[int]:
-        """Returns a list of payment profile ids for the customer profile from Authorizenet."""
-        profile_response = self.authorizenet_get_profile()
-        if any(
-            [
-                profile_response is None,
-                not hasattr(profile_response, "profile"),
-                not hasattr(profile_response.profile, "paymentProfiles"),
-            ]
-        ):
-            return []
-        return [
-            int(pprofile.customerPaymentProfileId)
-            for pprofile in profile_response.profile.paymentProfiles
-        ]
-
-    def _wialon_get_local_unit_ids(self) -> list[int]:
-        return list(
-            CustomerWialonUnit.objects.filter(customer=self).values_list(
                 "id", flat=True
             )
         )
@@ -219,6 +184,38 @@ class Customer(models.Model):
         if not response:
             return []
         return [int(unit.get("id")) for unit in response.get("items", {})]
+
+    def _authorizenet_get_remote_address_profile_ids(self) -> list[int]:
+        """Returns a list of address profile ids for the customer profile from Authorizenet."""
+        profile_response = self.authorizenet_get_profile()
+        if any(
+            [
+                profile_response is None,
+                not hasattr(profile_response, "profile"),
+                not hasattr(profile_response.profile, "shipToList"),
+            ]
+        ):
+            return []
+        return [
+            int(aprofile.customerAddressId)
+            for aprofile in profile_response.profile.shipToList
+        ]
+
+    def _authorizenet_get_remote_payment_profile_ids(self) -> list[int]:
+        """Returns a list of payment profile ids for the customer profile from Authorizenet."""
+        profile_response = self.authorizenet_get_profile()
+        if any(
+            [
+                profile_response is None,
+                not hasattr(profile_response, "profile"),
+                not hasattr(profile_response.profile, "paymentProfiles"),
+            ]
+        ):
+            return []
+        return [
+            int(pprofile.customerPaymentProfileId)
+            for pprofile in profile_response.profile.paymentProfiles
+        ]
 
 
 class CustomerWialonUnit(models.Model):
