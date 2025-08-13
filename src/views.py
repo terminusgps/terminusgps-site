@@ -282,6 +282,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
                 session=session,
                 creator_id=super_user.id,
                 name=f"account_{username}",  # account_email@domain.com
+                skip_creator_check=True,
             )
             end_user = WialonUser(
                 id=None,
