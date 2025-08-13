@@ -103,15 +103,13 @@ class CustomerWialonUnitListDetailView(
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         unit = self.get_object()
+        refresh_requested = request.GET.get("refresh", "off").lower() == "on"
 
-        if (
-            unit is not None
-            and request.GET.get("refresh") == "on"
-            or unit.wialon_needs_sync()
-        ):
-            with WialonSession() as session:
-                unit.wialon_sync(session)
-                unit.save()
+        if unit is not None:
+            if refresh_requested or unit.wialon_needs_sync():
+                with WialonSession() as session:
+                    unit.wialon_sync(session)
+                    unit.save()
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self) -> QuerySet[CustomerWialonUnit, CustomerWialonUnit]:
