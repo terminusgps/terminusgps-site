@@ -128,7 +128,6 @@ class TerminusgpsRegisterForm(UserCreationForm):
         ),
         validators=[validate_wialon_password],
     )
-    captcha = forms.BooleanField()
 
     def clean(self) -> dict[str, Any] | None:
         """Raises :py:exec:`~django.core.execeptions.ValidationError` if the passwords don't match."""
