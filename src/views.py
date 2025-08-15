@@ -273,7 +273,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
             super_user = WialonUser(
                 id=None,
                 session=session,
-                creator_id=settings.WIALON_ADMIN_ID,
+                creator_id=settings.WIALON_ADMIN_ACCOUNT,
                 name=f"super_{username}",  # super_email@domain.com
                 password=utils.generate_wialon_password(),
             )
