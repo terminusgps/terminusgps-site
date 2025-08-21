@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import DetailView, FormView, ListView, UpdateView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
-from terminusgps.wialon.items import WialonUnit
+from terminusgps.wialon.items.unit import WialonUnit
 from terminusgps.wialon.session import WialonSession
 
 from terminusgps_installer.forms import WialonAssetCommandExecutionForm

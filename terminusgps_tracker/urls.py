@@ -8,108 +8,83 @@ app_name = "tracker"
 
 urlpatterns = [
     path(
-        "dashboard/", views.CustomerDashboardView.as_view(), name="dashboard"
+        "subscriptions/<int:customer_pk>/<int:subcription_pk>/",
+        views.CustomerSubscriptionDetailView.as_view(),
+        name="detail subscription",
     ),
     path(
-        "subscription/",
-        views.CustomerSubscriptionView.as_view(),
-        name="subscription",
-    ),
-    path("account/", views.CustomerAccountView.as_view(), name="account"),
-    path("units/", views.CustomerWialonUnitsView.as_view(), name="units"),
-    path(
-        "units/<int:customer_pk>/list/",
-        views.CustomerWialonUnitListView.as_view(),
-        name="unit list",
+        "subscriptions/<int:customer_pk>/<int:subcription_pk>/delete/",
+        views.CustomerSubscriptionDeleteView.as_view(),
+        name="delete subscription",
     ),
     path(
-        "units/<int:customer_pk>/list/<int:unit_pk>/detail/",
-        cached(views.CustomerWialonUnitListDetailView.as_view()),
-        name="unit list detail",
+        "subscriptions/<int:customer_pk>/<int:subcription_pk>/update/",
+        views.CustomerSubscriptionUpdateView.as_view(),
+        name="update subscription",
     ),
     path(
-        "units/<int:customer_pk>/list/<int:unit_pk>/update/",
-        views.CustomerWialonUnitListUpdateView.as_view(),
-        name="unit list update",
+        "subscriptions/<int:customer_pk>/create/",
+        views.CustomerSubscriptionCreateView.as_view(),
+        name="create subscription",
     ),
     path(
-        "units/<int:customer_pk>/create/",
-        cached(views.CustomerWialonUnitCreateView.as_view()),
-        name="unit create",
-    ),
-    path(
-        "subscription/<int:customer_pk>/<int:sub_pk>/",
-        views.SubscriptionDetailView.as_view(),
-        name="subscription detail",
-    ),
-    path(
-        "subscription/<int:customer_pk>/new/",
-        views.SubscriptionCreateView.as_view(),
-        name="subscription create",
-    ),
-    path(
-        "subscription/<int:customer_pk>/<int:sub_pk>/update/",
-        views.SubscriptionUpdateView.as_view(),
-        name="subscription update",
-    ),
-    path(
-        "subscription/<int:customer_pk>/<int:sub_pk>/cancel/",
-        cached(views.SubscriptionDeleteView.as_view()),
-        name="subscription delete",
-    ),
-    path(
-        "subscription/<int:customer_pk>/<int:sub_pk>/transactions/",
-        views.SubscriptionTransactionsView.as_view(),
-        name="subscription transactions",
-    ),
-    path(
-        "subscription/<int:customer_pk>/<int:sub_pk>/items/",
-        views.SubscriptionItemListView.as_view(),
-        name="subscription items",
-    ),
-    path(
-        "transactions/<int:transaction_id>/",
-        cached(views.SubscriptionTransactionDetailView.as_view()),
-        name="transaction detail",
-    ),
-    path(
-        "payments/<int:customer_pk>/new/",
-        cached(views.CustomerPaymentMethodCreateView.as_view()),
-        name="payment create",
+        "payments/<int:customer_pk>/",
+        views.CustomerPaymentMethodCreateView.as_view(),
+        name="create payment",
     ),
     path(
         "payments/<int:customer_pk>/<int:payment_pk>/",
-        cached(views.CustomerPaymentMethodDetailView.as_view()),
-        name="payment detail",
-    ),
-    path(
-        "payments/<int:customer_pk>/<int:payment_pk>/delete/",
-        cached(views.CustomerPaymentMethodDeleteView.as_view()),
-        name="payment delete",
+        views.CustomerPaymentMethodDetailView.as_view(),
+        name="detail payment",
     ),
     path(
         "payments/<int:customer_pk>/list/",
         views.CustomerPaymentMethodListView.as_view(),
-        name="payment list",
+        name="list payment",
     ),
     path(
-        "addresses/<int:customer_pk>/new/",
-        cached(views.CustomerShippingAddressCreateView.as_view()),
-        name="address create",
+        "payments/<int:customer_pk>/<int:payment_pk>/delete/",
+        views.CustomerPaymentMethodDeleteView.as_view(),
+        name="delete payment",
+    ),
+    path(
+        "addresses/<int:customer_pk>/",
+        views.CustomerShippingAddressCreateView.as_view(),
+        name="create address",
     ),
     path(
         "addresses/<int:customer_pk>/<int:address_pk>/",
-        cached(views.CustomerShippingAddressDetailView.as_view()),
-        name="address detail",
-    ),
-    path(
-        "addresses/<int:customer_pk>/<int:address_pk>/delete/",
-        cached(views.CustomerShippingAddressDeleteView.as_view()),
-        name="address delete",
+        views.CustomerShippingAddressDetailView.as_view(),
+        name="detail address",
     ),
     path(
         "addresses/<int:customer_pk>/list/",
         views.CustomerShippingAddressListView.as_view(),
-        name="address list",
+        name="list address",
+    ),
+    path(
+        "addresses/<int:customer_pk>/<int:address_pk>/delete/",
+        views.CustomerShippingAddressDeleteView.as_view(),
+        name="delete address",
+    ),
+    path(
+        "units/<int:customer_pk>/create/",
+        views.CustomerWialonUnitCreateView.as_view(),
+        name="create unit",
+    ),
+    path(
+        "units/<int:customer_pk>/<int:unit_pk>/",
+        views.CustomerWialonUnitDetailView.as_view(),
+        name="detail unit",
+    ),
+    path(
+        "units/<int:customer_pk>/list/",
+        views.CustomerWialonUnitListView.as_view(),
+        name="list unit",
+    ),
+    path(
+        "units/<int:customer_pk>/<int:unit_pk>/update/",
+        views.CustomerWialonUnitUpdateView.as_view(),
+        name="update unit",
     ),
 ]

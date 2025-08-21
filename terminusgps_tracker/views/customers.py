@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
-from terminusgps_tracker.models import Customer, Subscription
+from terminusgps_tracker.models import Customer, CustomerSubscription
 
 
 class CustomerDashboardView(
@@ -46,12 +46,12 @@ class CustomerAccountView(
         return context
 
 
-class CustomerSubscriptionView(
+class CustomerCustomerSubscriptionView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
 ):
     content_type = "text/html"
     extra_context = {
-        "title": "Your Subscription",
+        "title": "Your CustomerSubscription",
         "subtitle": "Update your subscription plan",
     }
     http_method_names = ["get"]
@@ -65,11 +65,11 @@ class CustomerSubscriptionView(
         try:
             context: dict[str, typing.Any] = super().get_context_data(**kwargs)
             context["customer"] = Customer.objects.get(user=self.request.user)
-            context["subscription"] = Subscription.objects.get(
+            context["subscription"] = CustomerSubscription.objects.get(
                 customer=context["customer"]
             )
             return context
-        except Subscription.DoesNotExist:
+        except CustomerSubscription.DoesNotExist:
             context["subscription"] = None
             return context
 
@@ -93,10 +93,10 @@ class CustomerWialonUnitsView(
         try:
             context: dict[str, typing.Any] = super().get_context_data(**kwargs)
             context["customer"] = Customer.objects.get(user=self.request.user)
-            context["subscription"] = Subscription.objects.get(
+            context["subscription"] = CustomerSubscription.objects.get(
                 customer=context["customer"]
             )
             return context
-        except Subscription.DoesNotExist:
+        except CustomerSubscription.DoesNotExist:
             context["subscription"] = None
             return context

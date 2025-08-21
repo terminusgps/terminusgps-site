@@ -19,7 +19,7 @@ dependencies = [
     "numpy==2.0.1",
     "pandas==2.2.3",
     "pillow==11.3.0",
-    "python-terminusgps==40.1.4",
+    "python-terminusgps==42.2.1",
     "python-wialon==1.2.4",
     "psycopg>=3.2.6",
     "psycopg2-binary>=2.9.10",

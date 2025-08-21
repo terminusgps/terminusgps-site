@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon import utils as wialon_utils
-from terminusgps.wialon.items import WialonUnit
+from terminusgps.wialon.items.unit import WialonUnit
 from terminusgps.wialon.session import WialonSession
 
 from terminusgps_installer.forms import (

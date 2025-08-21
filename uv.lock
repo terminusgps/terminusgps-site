@@ -2,15 +2,6 @@ version = 1
 requires-python = ">=3.12"
 
 [[package]]
-name = "argparse"
-version = "1.4.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/18/dd/e617cfc3f6210ae183374cd9f6a26b20514bbb5a792af97949c5aacddf0f/argparse-1.4.0.tar.gz", hash = "sha256:62b089a55be1d8949cd2bc7e0df0bddb9e028faefc8c32038cc84862aefdd6e4", size = 70508 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f2/94/3af39d34be01a24a6e65433d19e107099374224905f1e0cc6bbe1fd22a2f/argparse-1.4.0-py2.py3-none-any.whl", hash = "sha256:c31647edb69fd3d465a847ea3157d37bed1f95f19760b11a47aa91c04b666314", size = 23000 },
-]
-
-[[package]]
 name = "asgiref"
 version = "3.9.1"
 source = { registry = "https://pypi.org/simple" }
@@ -32,30 +23,30 @@ sdist = { url = "https://files.pythonhosted.org/packages/2d/9a/61c151f508a9b3201
 
 [[package]]
 name = "boto3"
-version = "1.40.10"
+version = "1.40.14"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c7/97/59e7471900947560a47c6ceb18ae555e2f13a6c07af2713fb04646e0f5d6/boto3-1.40.10.tar.gz", hash = "sha256:ed64d63cb24721ff603547caf099f3abf82783472910a3650ce8764c78396e7a", size = 112010 }
+sdist = { url = "https://files.pythonhosted.org/packages/03/2e/606fa848f0b6fb0acdcfaefed5b6c663bdb9bcf611760be3f273848d149c/boto3-1.40.14.tar.gz", hash = "sha256:d1d9998fc2b9619fc796c859d263ac81793d783e79331be62931b353dd1b68b9", size = 112001 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/19/18/33047424f098d5b832362c23404800f607b601a0ad08d7ccb0ddc285efba/boto3-1.40.10-py3-none-any.whl", hash = "sha256:222b44ee4d6e4e8a9a2a4bada4c683c38f37481e545f7997aee7bc40a7fb4489", size = 140073 },
+    { url = "https://files.pythonhosted.org/packages/7d/d7/83ddd51e8304bea0c24117de9724506a1c407ba995f07c5dc5069f6ad6eb/boto3-1.40.14-py3-none-any.whl", hash = "sha256:ab5798a03582d09c0de132d080c9aee53d5647b6461261a5b7621170ec80d92b", size = 140072 },
 ]
 
 [[package]]
 name = "botocore"
-version = "1.40.10"
+version = "1.40.14"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jmespath" },
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8e/c6/ea11cf400084a36dff8960a64ebbfec5c28ef740d72cd3465b693fdda58e/botocore-1.40.10.tar.gz", hash = "sha256:db3b14043bc90fe4220edbc2e89e8f5af1d2d4aacc16bab3c30dacd98b0073e3", size = 14339500 }
+sdist = { url = "https://files.pythonhosted.org/packages/b2/1d/21d139fb01e760b7d9a527dffcd20513ab989b75837ac12b010ef11078a2/botocore-1.40.14.tar.gz", hash = "sha256:1810494c8c4190f20f9e17f2da4f7ee91eda863f429c6d690ea17ec41a8f83c4", size = 14358681 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a4/f5/2f30a927a30c1d04763bfe8a8ec5f9ad635047078ca630233b1888a7f39f/botocore-1.40.10-py3-none-any.whl", hash = "sha256:22aff400250a0125be92e0d43011eb42414a64f999d5215827af91d8584b4476", size = 14004351 },
+    { url = "https://files.pythonhosted.org/packages/cd/c3/47a5ee306a52c99b1ca5e6712c27666ddc7b9c102296d86ff90eda598331/botocore-1.40.14-py3-none-any.whl", hash = "sha256:06c852be83543c8d45e18a530abcad31659db8b16bcb66fd371c930d38017e7c", size = 14025263 },
 ]
 
 [[package]]
@@ -458,18 +449,16 @@ wheels = [
 
 [[package]]
 name = "python-terminusgps"
-version = "40.1.4"
+version = "42.2.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "argparse" },
     { name = "authorizenet" },
     { name = "django" },
-    { name = "pandas" },
     { name = "python-wialon" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c5/4d/1d90d887a7478c62bde97bcb71ddcdd575e829d0c578b4d8c724fb168fd2/python_terminusgps-40.1.4.tar.gz", hash = "sha256:3b80d85ad33f88503b7058d87305ff4ddd32373aeef697aa1afcee3697c8d280", size = 9269609 }
+sdist = { url = "https://files.pythonhosted.org/packages/5e/91/99b1448cec8d3c014a7be32ab37dea966a3b16521ecdc682d495697f4b8f/python_terminusgps-42.2.1.tar.gz", hash = "sha256:b2567bdb8bdbf234d84e7a8d3ed42914dd0860d04ff2dde293c909a6679ff2cf", size = 61745 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6c/6b/635a9102a8a7c233975758c446657eb1157fb618ff07b20600c99063efb2/python_terminusgps-40.1.4-py3-none-any.whl", hash = "sha256:fd728403d1ecf57ba47c734deba35c638f9ebe46b809e501c0d737b5db1061af", size = 54828 },
+    { url = "https://files.pythonhosted.org/packages/4d/72/37d84810bf782952383d3c00325db19cfc6f0df6e784df436088a95918bd/python_terminusgps-42.2.1-py3-none-any.whl", hash = "sha256:9933ba53558d3ceeb62d4d829635a554d6614f77579ea807e6162bd5050304d0", size = 51156 },
 ]
 
 [[package]]
@@ -519,7 +508,7 @@ hiredis = [
 
 [[package]]
 name = "requests"
-version = "2.32.4"
+version = "2.32.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
@@ -527,9 +516,9 @@ dependencies = [
     { name = "idna" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e1/0a/929373653770d8a0d7ea76c37de6e41f11eb07559b103b1c02cafb3f7cf8/requests-2.32.4.tar.gz", hash = "sha256:27d0316682c8a29834d3264820024b62a36942083d52caf2f14c0591336d3422", size = 135258 }
+sdist = { url = "https://files.pythonhosted.org/packages/c9/74/b3ff8e6c8446842c3f5c837e9c3dfcfe2018ea6ecef224c710c85ef728f4/requests-2.32.5.tar.gz", hash = "sha256:dbba0bac56e100853db0ea71b82b4dfd5fe2bf6d3754a8893c3af500cec7d7cf", size = 134517 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7c/e4/56027c4a6b4ae70ca9de302488c5ca95ad4a39e190093d6c1a8ace08341b/requests-2.32.4-py3-none-any.whl", hash = "sha256:27babd3cda2a6d50b30443204ee89830707d396671944c998b5975b031ac2b2c", size = 64847 },
+    { url = "https://files.pythonhosted.org/packages/1e/db/4254e3eabe8020b458f1a747140d32277ec7a271daf1d235b70dc0b4e6e3/requests-2.32.5-py3-none-any.whl", hash = "sha256:2462f94637a34fd532264295e186976db0f5d453d1cdd31473c85a6a161affb6", size = 64738 },
 ]
 
 [[package]]
@@ -637,7 +626,7 @@ requires-dist = [
     { name = "pillow", specifier = "==11.3.0" },
     { name = "psycopg", specifier = ">=3.2.6" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
-    { name = "python-terminusgps", specifier = "==40.1.4" },
+    { name = "python-terminusgps", specifier = "==42.2.1" },
     { name = "python-wialon", specifier = "==1.2.4" },
     { name = "redis", extras = ["hiredis"], specifier = ">=6.4.0" },
 ]

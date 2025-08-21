@@ -7,7 +7,7 @@ from terminusgps_tracker.models import (
 )
 
 
-class SubscriptionCreationForm(forms.Form):
+class CustomerSubscriptionCreationForm(forms.Form):
     payment = forms.ModelChoiceField(
         empty_label=None,
         label="Payment Method",
@@ -24,15 +24,22 @@ class SubscriptionCreationForm(forms.Form):
             attrs={"class": settings.DEFAULT_FIELD_CLASS}
         ),
     )
-    coupon_code = forms.CharField(
-        max_length=24,
-        label="Coupon Code",
-        help_text="Optionally enter a coupon code for your new subscription.",
-        required=False,
-        widget=forms.widgets.TextInput(
-            attrs={
-                "class": settings.DEFAULT_FIELD_CLASS,
-                "placeholder": "12345678",
-            }
+
+
+class CustomerSubscriptionUpdateForm(forms.Form):
+    payment = forms.ModelChoiceField(
+        empty_label=None,
+        label="Payment Method",
+        queryset=CustomerPaymentMethod.objects.none(),
+        widget=forms.widgets.Select(
+            attrs={"class": settings.DEFAULT_FIELD_CLASS}
+        ),
+    )
+    address = forms.ModelChoiceField(
+        empty_label=None,
+        label="Shipping Address",
+        queryset=CustomerShippingAddress.objects.none(),
+        widget=forms.widgets.Select(
+            attrs={"class": settings.DEFAULT_FIELD_CLASS}
         ),
     )
