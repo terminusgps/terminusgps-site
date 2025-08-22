@@ -4,7 +4,7 @@
         <p>{{ profile.address.address }}</p>
         <p>{{ profile.address.city }}, {{ profile.address.state }}, {{ profile.address.country }}, {{ profile.address.zip }}</p>
     </div>
-    <button class="max-h-fit cursor-pointer rounded border border-current bg-gray-50 p-2 text-center text-red-800 transition-colors duration-300 ease-in-out hover:bg-red-50" type="button" hx-get="{% url 'tracker:address delete' address.customer.pk address.pk %}">
+    <button class="max-h-fit cursor-pointer rounded border border-current bg-gray-50 p-2 text-center text-red-800 transition-colors duration-300 ease-in-out hover:bg-red-50" type="button" hx-get="{% url 'tracker:delete address' address.customer.pk address.pk %}">
         <p>Delete</p>
     </button>
 </section>

@@ -4,6 +4,13 @@ from .addresses import (
     CustomerShippingAddressDetailView,
     CustomerShippingAddressListView,
 )
+from .customers import (
+    CustomerAccountView,
+    CustomerDashboardView,
+    CustomerSubscriptionView,
+    CustomerTodoView,
+    CustomerUnitsView,
+)
 from .payments import (
     CustomerPaymentMethodCreateView,
     CustomerPaymentMethodDeleteView,

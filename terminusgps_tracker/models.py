@@ -35,12 +35,14 @@ class Customer(models.Model):
         """Returns the customer's email address/username."""
         return self.user.email if self.user.email else self.user.username
 
-    def get_unit_prices(self) -> dict[str, decimal.Decimal]:
-        return (
+    def get_unit_price_sum(self) -> decimal.Decimal:
+        """Returns the sum of all customer unit subscription tiers as a :py:obj:`~decimal.Decimal`."""
+        aggregate = (
             CustomerWialonUnit.objects.filter(customer=self)
-            .prefetch_related("tier")
-            .aggregate("tier__price")
+            .select_related("tier")
+            .aggregate(models.Sum("tier__price"))
         )
+        return round(aggregate["tier__price__sum"], 2)
 
 
 class CustomerWialonUnit(models.Model):
@@ -180,11 +182,7 @@ class CustomerSubscriptionTier(models.Model):
 
     name = models.CharField(max_length=64)
     """Subscription tier name."""
-    desc = models.TextField(
-        max_length=1024, null=True, blank=True, default=None
-    )
-    """Subscription tier description."""
-    price = models.DecimalField(max_digits=9, decimal_places=2, default=9.99)
+    price = models.DecimalField(max_digits=9, decimal_places=2, default=24.99)
     """Subscription tier dollar amount."""
 
     def __str__(self) -> str:

@@ -1,0 +1,5 @@
+{% if customer.subscription != None %}
+<section id="subscription" hx-get="{% url 'tracker:detail subscription' customer.pk %}" hx-trigger="load" class="flex flex-col gap-4 rounded border-2 border-current bg-gray-100 p-4 dark:bg-gray-800" hx-target="this"></section>
+{% else %}
+<section id="subscription" hx-get="{% url 'tracker:create subscription' %}" hx-trigger="load" class="flex flex-col gap-4 rounded border-2 border-current bg-gray-100 p-4 dark:bg-gray-800" hx-target="this"></section>
+{% endif %}

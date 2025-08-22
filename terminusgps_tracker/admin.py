@@ -12,7 +12,6 @@ from terminusgps_tracker.models import (
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    actions = ["sync_with_authorizenet", "sync_with_wialon"]
     list_display = [
         "id",
         "user",
@@ -24,7 +23,8 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerWialonUnit)
 class CustomerWialonUnitAdmin(admin.ModelAdmin):
-    list_display = ["id", "customer"]
+    list_display = ["id", "name", "tier", "customer"]
+    list_filter = ["tier"]
 
 
 @admin.register(CustomerPaymentMethod)
@@ -45,4 +45,4 @@ class CustomerSubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerSubscriptionTier)
 class CustomerSubscriptionTierAdmin(admin.ModelAdmin):
-    list_display = ["name", "price", "desc"]
+    list_display = ["name", "price"]

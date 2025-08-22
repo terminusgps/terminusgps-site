@@ -3,12 +3,18 @@ import typing
 
 from authorizenet import apicontractsv1
 from django import forms
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView
 from terminusgps.authorizenet import subscriptions as anet_subscriptions
+from terminusgps.authorizenet.controllers import (
+    AuthorizenetControllerExecutionError,
+)
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
 from terminusgps_tracker.forms import (
@@ -16,27 +22,49 @@ from terminusgps_tracker.forms import (
     CustomerSubscriptionUpdateForm,
 )
 from terminusgps_tracker.models import Customer, CustomerSubscription
+from terminusgps_tracker.utils import (
+    calculate_grand_total,
+    calculate_sub_total,
+    calculate_tax,
+)
 from terminusgps_tracker.views.mixins import (
     CustomerAuthenticationRequiredMixin,
 )
 
 
 class CustomerSubscriptionCreateView(
-    CustomerAuthenticationRequiredMixin, HtmxTemplateResponseMixin, FormView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, FormView
 ):
     content_type = "text/html"
     form_class = CustomerSubscriptionCreationForm
     http_method_names = ["get", "post"]
+    login_url = reverse_lazy("login")
     partial_template_name = (
         "terminusgps_tracker/subscriptions/partials/_create.html"
     )
+    permission_denied_message = "Please login to view this content."
+    raise_exception = False
     template_name = "terminusgps_tracker/subscriptions/create.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        customer: Customer = Customer.objects.get(user=self.request.user)
+        sub_total = calculate_sub_total(customer)
+        tax = calculate_tax(sub_total)
+        grand_total = calculate_grand_total(sub_total, tax)
+
+        context["customer"] = customer
+        context["unit_list"] = customer.units.all()
+        context["sub_total"] = sub_total
+        context["tax"] = tax
+        context["grand_total"] = grand_total
+        return context
 
     def get_success_url(self, subscription: CustomerSubscription) -> str:
         return reverse(
             "tracker:detail subscription",
             kwargs={
-                "customer_pk": self.kwargs["customer_pk"],
+                "customer_pk": subscription.customer.pk,
                 "subscription_pk": subscription.pk,
             },
         )
@@ -44,37 +72,56 @@ class CustomerSubscriptionCreateView(
     def form_valid(
         self, form: CustomerSubscriptionCreationForm
     ) -> HttpResponse:
-        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-        payment = form.cleaned_data["payment"]
-        address = form.cleaned_data["address"]
-        response = anet_subscriptions.create_subscription(
-            apicontractsv1.ARBSubscriptionType(
-                name=f"{customer.user.first_name}'s Subscription",
-                paymentSchedule=apicontractsv1.paymentScheduleType(
-                    interval=apicontractsv1.paymentScheduleTypeInterval(
-                        length=1,
-                        unit=apicontractsv1.ARBSubscriptionUnitEnum.months,
+        try:
+            customer = Customer.objects.get(user=self.request.user)
+            payment = form.cleaned_data["payment"]
+            address = form.cleaned_data["address"]
+            sub_total = calculate_sub_total(customer)
+            tax = calculate_tax(sub_total)
+            grand_total = calculate_grand_total(sub_total, tax)
+
+            response = anet_subscriptions.create_subscription(
+                apicontractsv1.ARBSubscriptionType(
+                    name=f"{customer.user.first_name}'s Subscription",
+                    paymentSchedule=apicontractsv1.paymentScheduleType(
+                        interval=apicontractsv1.paymentScheduleTypeInterval(
+                            length=1,
+                            unit=apicontractsv1.ARBSubscriptionUnitEnum.months,
+                        ),
+                        startDate=timezone.now(),
+                        totalOccurrences=9999,
+                        trialOccurrences=0,
                     ),
-                    startDate=timezone.now(),
-                    totalOccurrences=9999,
-                    trialOccurrences=0,
-                ),
-                amount=...,  # Aggregate unit amounts
-                trailAmount=decimal.Decimal("0.00"),
-                profile=apicontractsv1.customerProfileIdType(
-                    customerProfileId=str(customer.authorizenet_profile_id),
-                    customerPaymentProfileId=str(payment.pk),
-                    customerAddressId=str(address.pk),
-                ),
+                    amount=grand_total,
+                    trailAmount=decimal.Decimal("0.00"),
+                    profile=apicontractsv1.customerProfileIdType(
+                        customerProfileId=str(
+                            customer.authorizenet_profile_id
+                        ),
+                        customerPaymentProfileId=str(payment.pk),
+                        customerAddressId=str(address.pk),
+                    ),
+                )
             )
-        )
-        subscription = CustomerSubscription.objects.create(
-            id=int(response.subscriptionId),
-            customer=customer,
-            payment=payment,
-            address=address,
-        )
-        return HttpResponseRedirect(self.get_success_url(subscription))
+            subscription = CustomerSubscription.objects.create(
+                id=int(response.subscriptionId),
+                customer=customer,
+                payment=payment,
+                address=address,
+            )
+            return HttpResponseRedirect(self.get_success_url(subscription))
+        except AuthorizenetControllerExecutionError as e:
+            match e.code:
+                case _:
+                    form.add_error(
+                        None,
+                        ValidationError(
+                            _(
+                                "Whoops! Something went wrong, please try again later."
+                            )
+                        ),
+                    )
+            return self.form_invalid(form=form)
 
 
 class CustomerSubscriptionUpdateView(
@@ -88,22 +135,12 @@ class CustomerSubscriptionUpdateView(
     )
     template_name = "terminusgps_tracker/subscriptions/update.html"
 
-    def get_initial(self) -> dict[str, typing.Any]:
-        customer: Customer = Customer.objects.get(
-            pk=self.kwargs["customer_pk"]
-        )
-
-        initial: dict[str, typing.Any] = super().get_initial()
-        initial["address"] = customer.addresses.first()
-        initial["payment"] = customer.payments.first()
-        return initial
-
     def get_queryset(
         self,
     ) -> QuerySet[CustomerSubscription, CustomerSubscription]:
         return CustomerSubscription.objects.filter(
             customer__pk=self.kwargs["customer_pk"]
-        )
+        ).select_related("address", "customer", "payment")
 
     def get_success_url(self) -> str:
         return reverse(
@@ -115,20 +152,35 @@ class CustomerSubscriptionUpdateView(
         )
 
     def form_valid(self, form: CustomerSubscriptionUpdateForm) -> HttpResponse:
-        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-        payment = form.cleaned_data["payment"]
-        address = form.cleaned_data["address"]
-        response = anet_subscriptions.update_subscription(
-            subscription_id=int(self.kwargs["subscription_pk"]),
-            subscription_obj=apicontractsv1.ARBSubscriptionType(
-                profile=apicontractsv1.customerProfileIdType(
-                    customerProfileId=str(customer.authorizenet_profile_id),
-                    customerPaymentProfileId=str(payment.pk),
-                    customerAddressId=str(address.pk),
-                )
-            ),
-        )
-        return HttpResponseRedirect(self.get_success_url())
+        try:
+            customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
+            payment = form.cleaned_data["payment"]
+            address = form.cleaned_data["address"]
+            anet_subscriptions.update_subscription(
+                subscription_id=int(self.kwargs["subscription_pk"]),
+                subscription_obj=apicontractsv1.ARBSubscriptionType(
+                    profile=apicontractsv1.customerProfileIdType(
+                        customerProfileId=str(
+                            customer.authorizenet_profile_id
+                        ),
+                        customerPaymentProfileId=str(payment.pk),
+                        customerAddressId=str(address.pk),
+                    )
+                ),
+            )
+            return HttpResponseRedirect(self.get_success_url())
+        except AuthorizenetControllerExecutionError as e:
+            match e.code:
+                case _:
+                    form.add_error(
+                        None,
+                        ValidationError(
+                            _(
+                                "Whoops! Something went wrong, please try again later."
+                            )
+                        ),
+                    )
+            return self.form_invalid(form=form)
 
 
 class CustomerSubscriptionDetailView(
@@ -147,9 +199,9 @@ class CustomerSubscriptionDetailView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        subscription: CustomerSubscription = kwargs["object"]
         context["profile"] = anet_subscriptions.get_subscription(
-            subscription_id=int(self.kwargs["subscription_pk"]),
-            include_transactions=True,
+            subscription_id=subscription.pk, include_transactions=True
         )
         return context
 
@@ -158,7 +210,7 @@ class CustomerSubscriptionDetailView(
     ) -> QuerySet[CustomerSubscription, CustomerSubscription]:
         return CustomerSubscription.objects.filter(
             customer__pk=self.kwargs["customer_pk"]
-        )
+        ).select_related("address", "customer", "payment")
 
 
 class CustomerSubscriptionDeleteView(
@@ -176,11 +228,31 @@ class CustomerSubscriptionDeleteView(
     queryset = CustomerSubscription.objects.none()
     template_name = "terminusgps_tracker/subscriptions/delete.html"
 
+    def get_queryset(
+        self,
+    ) -> QuerySet[CustomerSubscription, CustomerSubscription]:
+        return CustomerSubscription.objects.filter(
+            customer__pk=self.kwargs["customer_pk"]
+        ).select_related("address", "customer", "payment")
+
     def form_valid(self, form: forms.Form) -> HttpResponse:
-        anet_subscriptions.cancel_subscription(
-            subscription_id=int(self.kwargs["subscription_pk"])
-        )
-        return super().form_valid(form=form)
+        try:
+            anet_subscriptions.cancel_subscription(
+                subscription_id=self.get_object().pk
+            )
+            return super().form_valid(form=form)
+        except AuthorizenetControllerExecutionError as e:
+            match e.code:
+                case _:
+                    form.add_error(
+                        None,
+                        ValidationError(
+                            _(
+                                "Whoops! Something went wrong, please try again later."
+                            )
+                        ),
+                    )
+            return self.form_invalid(form=form)
 
     def get_success_url(self) -> str:
         return reverse(

@@ -1,13 +1,20 @@
+import decimal
+import typing
+
+from authorizenet import apicontractsv1
 from django import forms
 from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
-from django.http import HttpRequest, HttpResponse
-from django.urls import reverse
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView, UpdateView
+from terminusgps.authorizenet import subscriptions as anet_subscriptions
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon.items import WialonObjectFactory
+from terminusgps.wialon.items.unit import WialonUnit
 from terminusgps.wialon.session import WialonSession
 from terminusgps.wialon.utils import get_unit_by_imei
 
@@ -23,28 +30,38 @@ from terminusgps_tracker.views.mixins import (
 
 
 class CustomerWialonUnitCreateView(
-    CustomerAuthenticationRequiredMixin, HtmxTemplateResponseMixin, FormView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, FormView
 ):
     content_type = "text/html"
-    extra_context = {"title": "Create Wialon Unit"}
+    extra_context = {
+        "title": "Register New Unit",
+        "subtitle": "Enter a name and IMEI # for your new unit",
+    }
     form_class = CustomerWialonUnitCreationForm
     http_method_names = ["get", "post"]
+    login_url = reverse_lazy("login")
     partial_template_name = "terminusgps_tracker/units/partials/_create.html"
+    permission_denied_message = "Please login to view this content."
+    raise_exception = False
     template_name = "terminusgps_tracker/units/create.html"
 
-    def get_success_url(self) -> str:
-        return reverse(
-            "tracker:list unit",
-            kwargs={"customer_pk": self.kwargs.get("customer_pk")},
-        )
+    def get_initial(self) -> dict[str, typing.Any]:
+        initial: dict[str, typing.Any] = super().get_initial()
+        initial["name"] = f"{self.request.user.first_name}'s Ride"
+        return initial
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["customer"] = Customer.objects.get(user=self.request.user)
+        return context
 
     def form_valid(self, form: CustomerWialonUnitCreationForm) -> HttpResponse:
-        with WialonSession(token=settings.WIALON_TOKEN) as session:
-            imei = form.cleaned_data["imei"]
-            name = form.cleaned_data["name"]
-            customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-            unit = get_unit_by_imei(imei, session)
+        imei: str = form.cleaned_data["imei"]
+        name: str = form.cleaned_data["name"]
+        customer: Customer = Customer.objects.get(user=self.request.user)
 
+        with WialonSession(token=settings.WIALON_TOKEN) as session:
+            unit: WialonUnit | None = get_unit_by_imei(imei, session)
             if unit is None or not hasattr(unit, "id"):
                 form.add_error(
                     "imei",
@@ -66,7 +83,11 @@ class CustomerWialonUnitCreateView(
                 name=name,
                 tier=CustomerSubscriptionTier.objects.first(),
             )
-            return super().form_valid(form=form)
+            return HttpResponseRedirect(
+                reverse(
+                    "tracker:list unit", kwargs={"customer_pk": customer.pk}
+                )
+            )
 
 
 class CustomerWialonUnitDetailView(
@@ -82,21 +103,20 @@ class CustomerWialonUnitDetailView(
     queryset = CustomerWialonUnit.objects.none()
     template_name = "terminusgps_tracker/units/detail.html"
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        obj: CustomerWialonUnit = self.get_object()
-
-        if not obj.name:
-            with WialonSession(token=settings.WIALON_TOKEN) as session:
-                factory = WialonObjectFactory(session)
-                unit = factory.get(obj.wialon_type, obj.pk)
-                obj.name = unit.get_name()
-                obj.save()
-        return super().get(request, *args, **kwargs)
-
     def get_queryset(self) -> QuerySet[CustomerWialonUnit, CustomerWialonUnit]:
         return CustomerWialonUnit.objects.filter(
             customer__pk=self.kwargs["customer_pk"]
-        )
+        ).select_related("customer")
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        obj: CustomerWialonUnit = self.get_object()
+        if not obj.name:
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                factory = WialonObjectFactory(session)
+                unit = factory.get("avl_unit", obj.pk)
+                obj.name = unit.get_name()
+                obj.save()
+        return super().get(request, *args, **kwargs)
 
 
 class CustomerWialonUnitUpdateView(
@@ -104,27 +124,56 @@ class CustomerWialonUnitUpdateView(
 ):
     content_type = "text/html"
     context_object_name = "unit"
-    fields = ["name"]
+    fields = ["name", "tier"]
     http_method_names = ["get", "post"]
     model = CustomerWialonUnit
     partial_template_name = "terminusgps_tracker/units/partials/_update.html"
     queryset = CustomerWialonUnit.objects.none()
     template_name = "terminusgps_tracker/units/update.html"
+    pk_url_kwarg = "unit_pk"
+
+    def get_form(self, form_class=None) -> forms.ModelForm:
+        form = super().get_form(form_class=form_class)
+        form.fields["name"].widget.attrs.update(
+            {"class": settings.DEFAULT_FIELD_CLASS}
+        )
+        form.fields["tier"].widget.attrs.update(
+            {"class": settings.DEFAULT_FIELD_CLASS}
+        )
+        return form
+
+    def get_success_url(self) -> str:
+        return reverse(
+            "tracker:detail unit",
+            kwargs={
+                "customer_pk": self.kwargs["customer_pk"],
+                "unit_pk": self.kwargs["unit_pk"],
+            },
+        )
 
     def get_queryset(self) -> QuerySet[CustomerWialonUnit, CustomerWialonUnit]:
         return CustomerWialonUnit.objects.filter(
             customer__pk=self.kwargs["customer_pk"]
-        )
+        ).select_related("customer")
 
     def form_valid(self, form: forms.ModelForm) -> HttpResponse:
         obj: CustomerWialonUnit = self.get_object()
-        new_name: str = form.cleaned_data["new_name"]
+        response = super().form_valid(form=form)
 
-        with WialonSession(token=settings.WIALON_TOKEN) as session:
-            factory = WialonObjectFactory(session)
-            unit = factory.get(obj.wialon_type, obj.pk)
-            unit.set_name(new_name)
-        return super().form_valid(form=form)
+        if "name" in form.changed_data:
+            new_name: str = form.cleaned_data["name"]
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                factory = WialonObjectFactory(session)
+                unit = factory.get("avl_unit", obj.pk)
+                unit.set_name(new_name)
+
+        if "tier" in form.changed_data:
+            new_amount: decimal.Decimal = obj.customer.get_unit_price_sum()
+            anet_subscriptions.update_subscription(
+                obj.pk, apicontractsv1.ARBSubscriptionType(amount=new_amount)
+            )
+
+        return response
 
 
 class CustomerWialonUnitListView(
@@ -142,6 +191,10 @@ class CustomerWialonUnitListView(
     template_name = "terminusgps_tracker/units/list.html"
 
     def get_queryset(self) -> QuerySet[CustomerWialonUnit, CustomerWialonUnit]:
-        return CustomerWialonUnit.objects.filter(
-            customer__pk=self.kwargs["customer_pk"]
-        ).order_by(self.get_ordering())
+        return (
+            CustomerWialonUnit.objects.filter(
+                customer__pk=self.kwargs["customer_pk"]
+            )
+            .select_related("customer")
+            .order_by(self.get_ordering())
+        )

@@ -1,12 +1,11 @@
 import typing
 
-from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
-from terminusgps_tracker.models import Customer, CustomerSubscription
+from terminusgps_tracker.models import Customer
 
 
 class CustomerDashboardView(
@@ -15,30 +14,16 @@ class CustomerDashboardView(
     content_type = "text/html"
     extra_context = {
         "title": "Dashboard",
-        "subtitle": settings.TRACKER_APP_CONFIG["MOTD"],
+        "subtitle": "We know where ours are... do you?",
     }
     http_method_names = ["get"]
     login_url = reverse_lazy("login")
-    partial_template_name = "terminusgps_tracker/partials/_dashboard.html"
+    partial_template_name = (
+        "terminusgps_tracker/customers/partials/_dashboard.html"
+    )
     permission_denied_message = "Please login to view this content."
     raise_exception = False
-    template_name = "terminusgps_tracker/dashboard.html"
-
-
-class CustomerAccountView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
-):
-    content_type = "text/html"
-    extra_context = {
-        "title": "Account",
-        "subtitle": "Update your payment information",
-    }
-    http_method_names = ["get"]
-    login_url = reverse_lazy("login")
-    partial_template_name = "terminusgps_tracker/partials/_account.html"
-    permission_denied_message = "Please login to view this content."
-    raise_exception = False
-    template_name = "terminusgps_tracker/account.html"
+    template_name = "terminusgps_tracker/customers/dashboard.html"
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
@@ -46,57 +31,118 @@ class CustomerAccountView(
         return context
 
 
-class CustomerCustomerSubscriptionView(
+class CustomerAccountView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+):
+    content_type = "text/html"
+    extra_context = {"title": "Account"}
+    http_method_names = ["get"]
+    login_url = reverse_lazy("login")
+    partial_template_name = (
+        "terminusgps_tracker/customers/partials/_account.html"
+    )
+    permission_denied_message = "Please login to view this content."
+    raise_exception = False
+    template_name = "terminusgps_tracker/customers/account.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["customer"] = Customer.objects.get(user=self.request.user)
+        context["subtitle"] = (
+            f"{self.request.user.first_name}'s account at a glance"
+        )
+        return context
+
+
+class CustomerSubscriptionView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
 ):
     content_type = "text/html"
     extra_context = {
-        "title": "Your CustomerSubscription",
-        "subtitle": "Update your subscription plan",
+        "title": "Subscription",
+        "subtitle": "Modify your subscription",
     }
     http_method_names = ["get"]
     login_url = reverse_lazy("login")
-    partial_template_name = "terminusgps_tracker/partials/_subscription.html"
+    partial_template_name = (
+        "terminusgps_tracker/customers/partials/_subscription.html"
+    )
     permission_denied_message = "Please login to view this content."
     raise_exception = False
-    template_name = "terminusgps_tracker/subscription.html"
+    template_name = "terminusgps_tracker/customers/subscription.html"
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        try:
-            context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-            context["customer"] = Customer.objects.get(user=self.request.user)
-            context["subscription"] = CustomerSubscription.objects.get(
-                customer=context["customer"]
-            )
-            return context
-        except CustomerSubscription.DoesNotExist:
-            context["subscription"] = None
-            return context
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["customer"] = Customer.objects.get(user=self.request.user)
+        return context
 
 
-class CustomerWialonUnitsView(
+class CustomerUnitsView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
 ):
     content_type = "text/html"
-    extra_context = {
-        "title": "Units",
-        "subtitle": "Your currently active units",
-    }
+    extra_context = {"title": "Units", "subtitle": "Modify your units"}
     http_method_names = ["get"]
     login_url = reverse_lazy("login")
-    partial_template_name = "terminusgps_tracker/partials/_units.html"
+    partial_template_name = (
+        "terminusgps_tracker/customers/partials/_units.html"
+    )
     permission_denied_message = "Please login to view this content."
     raise_exception = False
-    template_name = "terminusgps_tracker/units.html"
+    template_name = "terminusgps_tracker/customers/units.html"
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        try:
-            context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-            context["customer"] = Customer.objects.get(user=self.request.user)
-            context["subscription"] = CustomerSubscription.objects.get(
-                customer=context["customer"]
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["customer"] = Customer.objects.get(user=self.request.user)
+        return context
+
+
+class CustomerTodoView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+):
+    content_type = "text/html"
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps_tracker/customers/partials/_todo.html"
+    template_name = "terminusgps_tracker/customers/todo.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        customer: Customer = Customer.objects.select_related(
+            "addresses", "payments", "units"
+        ).get(user=self.request.user)
+        context["todo_list"] = self.generate_customer_todo_list(customer)
+        return context
+
+    def generate_customer_todo_list(
+        self, customer: Customer
+    ) -> list[dict[str, str]]:
+        todo_list: list[dict[str, str]] = []
+        if customer.units.count() == 0:
+            todo_list.append(
+                {
+                    "message": "Register your first unit",
+                    "link": reverse("tracker:create unit"),
+                }
             )
-            return context
-        except CustomerSubscription.DoesNotExist:
-            context["subscription"] = None
-            return context
+        if customer.addresses.count() == 0:
+            todo_list.append(
+                {
+                    "message": "Add a shipping address",
+                    "link": reverse("tracker:create address"),
+                }
+            )
+        if customer.payments.count() == 0:
+            todo_list.append(
+                {
+                    "message": "Add a payment method",
+                    "link": reverse("tracker:create payment"),
+                }
+            )
+        if not customer.subscription.exists():
+            todo_list.append(
+                {
+                    "message": "Subscribe!",
+                    "link": reverse("tracker:subscription"),
+                }
+            )
+        return todo_list

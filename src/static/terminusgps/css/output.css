@@ -839,6 +839,9 @@
   .bg-stone-100 {
     background-color: var(--color-stone-100);
   }
+  .bg-terminus-red-300 {
+    background-color: var(--color-terminus-red-300);
+  }
   .bg-terminus-red-600 {
     background-color: var(--color-terminus-red-600);
   }
@@ -1138,11 +1141,6 @@
       background-color: var(--color-red-100);
     }
   }
-  .group-has-\[\.errorlist\]\:bg-red-200 {
-    &:is(:where(.group):has(*:is(.errorlist)) *) {
-      background-color: var(--color-red-200);
-    }
-  }
   .group-has-\[\.errorlist\]\:text-red-600 {
     &:is(:where(.group):has(*:is(.errorlist)) *) {
       color: var(--color-red-600);
@@ -1156,11 +1154,6 @@
   .group-\[\.htmx-request\]\:flex {
     &:is(:where(.group):is(.htmx-request) *) {
       display: flex;
-    }
-  }
-  .peer-has-\[\.errorlist\]\:bg-red-300 {
-    &:is(:where(.peer):has(*:is(.errorlist)) ~ *) {
-      background-color: var(--color-red-300);
     }
   }
   .odd\:bg-gray-200 {

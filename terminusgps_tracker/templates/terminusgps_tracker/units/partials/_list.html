@@ -17,10 +17,10 @@
         </thead>
         <tbody>
         {% for unit in unit_list %}
-            <tr hx-get="{% url 'tracker:unit list detail' unit.customer.pk unit.pk %}" hx-trigger="load" hx-target="this" id="unit-{{ unit.pk }}" class="border-b border-gray-600 bg-gray-100 odd:bg-gray-200 dark:bg-gray-800 dark:odd:bg-gray-900 peer group">
-                <th class="animate-pulse bg-gray-600 px-6 py-4 group-odd:bg-gray-400"></th>
-                <td class="animate-pulse bg-gray-600 px-6 py-4 group-odd:bg-gray-400"></td>
-                <td class="animate-pulse bg-gray-600 px-6 py-4 group-odd:bg-gray-400"></td>
+            <tr hx-get="{% url 'tracker:detail unit' unit.customer.pk unit.pk %}" hx-trigger="load" hx-target="this" id="unit-{{ unit.pk }}" hx-swap="outerHTML" class="peer group border-b border-gray-600 bg-gray-100 odd:bg-gray-200 dark:bg-gray-800 dark:odd:bg-gray-900">
+                <th class="w-1/3 animate-pulse bg-gray-600 px-6 py-4 group-odd:bg-gray-400"></th>
+                <td class="w-1/3 animate-pulse bg-gray-600 px-6 py-4 group-odd:bg-gray-400"></td>
+                <td class="w-1/3 animate-pulse bg-gray-600 px-6 py-4 group-odd:bg-gray-400"></td>
             </tr>
         {% endfor %}
         </tbody>

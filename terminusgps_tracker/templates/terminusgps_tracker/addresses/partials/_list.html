@@ -1,5 +1,5 @@
 {% for address in address_list %}
-<div id="address-{{ address.pk }}" hx-get="{{ address.get_absolute_url }}" hx-target="this" hx-trigger="load" hx-swap="outerHTML" class="h-16 w-full animate-pulse rounded border-2 bg-gray-600 dark:bg-gray-300"></div>
+<div id="address-{{ address.pk }}" hx-get="{% url 'tracker:detail address' address.customer.pk address.pk %}" hx-target="this" hx-trigger="load" hx-swap="outerHTML" class="h-16 w-full animate-pulse rounded border-2 bg-gray-600 dark:bg-gray-300"></div>
 {% empty %}
 <p>There's nothing here...</p>
 {% endfor %}
