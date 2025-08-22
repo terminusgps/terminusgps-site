@@ -45,4 +45,4 @@ class CustomerSubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(CustomerSubscriptionTier)
 class CustomerSubscriptionTierAdmin(admin.ModelAdmin):
-    list_display = ["name", "amount", "desc"]
+    list_display = ["name", "price", "desc"]

@@ -10,6 +10,12 @@ from .payments import (
     CustomerPaymentMethodDetailView,
     CustomerPaymentMethodListView,
 )
+from .subscriptions import (
+    CustomerSubscriptionCreateView,
+    CustomerSubscriptionDeleteView,
+    CustomerSubscriptionDetailView,
+    CustomerSubscriptionUpdateView,
+)
 from .units import (
     CustomerWialonUnitCreateView,
     CustomerWialonUnitDetailView,

@@ -1,6 +1,5 @@
 import datetime
 import decimal
-from typing import Literal
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
@@ -36,21 +35,11 @@ class Customer(models.Model):
         """Returns the customer's email address/username."""
         return self.user.email if self.user.email else self.user.username
 
-    def calculate_subscription_amount(
-        self, tax_rate: decimal.Decimal | None = None
-    ) -> decimal.Decimal:
-        unit_qs = CustomerWialonUnit.objects.filter(
-            customer=self
-        ).prefetch_related("tier")
-        sum = decimal.Decimal(
-            unit_qs.aggregate(
-                models.Sum("tier__amount"), default=decimal.Decimal("24.99")
-            )
-        )
+    def get_unit_prices(self) -> dict[str, decimal.Decimal]:
         return (
-            decimal.Decimal(sum * (1 + tax_rate))
-            if tax_rate is not None
-            else decimal.Decimal(sum)
+            CustomerWialonUnit.objects.filter(customer=self)
+            .prefetch_related("tier")
+            .aggregate("tier__price")
         )
 
 
@@ -61,9 +50,9 @@ class CustomerWialonUnit(models.Model):
     """Wialon unit id."""
     name = models.CharField(max_length=64, null=True, blank=True, default=None)
     """Wialon unit name."""
-
     tier = models.ForeignKey(
-        "terminusgps_tracker.SubscriptionTier", on_delete=models.PROTECT
+        "terminusgps_tracker.CustomerSubscriptionTier",
+        on_delete=models.RESTRICT,
     )
     """Subscription tier for the unit."""
     customer = models.ForeignKey(
@@ -80,15 +69,10 @@ class CustomerWialonUnit(models.Model):
     def __str__(self) -> str:
         return self.name if self.name else f"Wialon Unit #{self.pk}"
 
-    @property
-    def wialon_type(self) -> Literal["avl_unit"]:
-        """Returns 'avl_unit'."""
-        return "avl_unit"
-
     def get_wialon_unit(self, session: WialonSession) -> WialonUnit:
         """Returns the customer Wialon unit as an instance of :py:obj:`~terminusgps.wialon.items.unit.WialonUnit`."""
         factory = WialonObjectFactory(session)
-        return factory.get(self.wialon_type, self.pk)
+        return factory.get("avl_unit", self.pk)
 
 
 class CustomerPaymentMethod(models.Model):
@@ -155,15 +139,16 @@ class CustomerSubscription(models.Model):
     )
     """Authorizenet subscription status."""
     customer = models.OneToOneField(
-        "terminusgps_tracker.Customer", on_delete=models.PROTECT
+        "terminusgps_tracker.Customer", on_delete=models.RESTRICT
     )
     """Associated customer."""
     payment = models.OneToOneField(
-        "terminusgps_tracker.CustomerPaymentMethod", on_delete=models.PROTECT
+        "terminusgps_tracker.CustomerPaymentMethod", on_delete=models.RESTRICT
     )
     """Associated payment method."""
     address = models.OneToOneField(
-        "terminusgps_tracker.CustomerShippingAddress", on_delete=models.PROTECT
+        "terminusgps_tracker.CustomerShippingAddress",
+        on_delete=models.RESTRICT,
     )
     """Associated shipping address."""
     start_date = models.DateTimeField(null=True, blank=True, default=None)
