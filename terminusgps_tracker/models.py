@@ -3,6 +3,7 @@ import decimal
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.db import models, transaction
 from django.urls import reverse
 from django.utils import timezone
@@ -43,10 +44,16 @@ class Customer(models.Model):
         assert self.authorizenet_profile_id is not None, (
             "Customer authorizenet profile id wasn't set."
         )
-        return anet_profiles.get_customer_profile(
+
+        cache_key: str = f"Customer:{self.pk}:get_authorizenet_profile:include_issuer_info_{include_issuer_info}"
+        if cached_response := cache.get(cache_key):
+            return cached_response
+        response = anet_profiles.get_customer_profile(
             customer_profile_id=self.authorizenet_profile_id,
             include_issuer_info=include_issuer_info,
         )
+        cache.set(cache_key, response, timeout=60 * 2)
+        return response
 
     def get_unit_price_sum(self) -> decimal.Decimal:
         """Returns the sum of all customer unit subscription tiers as a :py:obj:`~decimal.Decimal`."""
@@ -66,6 +73,10 @@ class Customer(models.Model):
             return status == active
         except CustomerSubscription.DoesNotExist:
             return False
+
+    @property
+    def num_units(self) -> int:
+        return CustomerWialonUnit.objects.filter(customer=self).count()
 
 
 class CustomerWialonUnit(models.Model):
@@ -146,11 +157,17 @@ class CustomerPaymentMethod(models.Model):
         assert self.customer.authorizenet_profile_id is not None, (
             "Customer authorizenet profile id wasn't set."
         )
-        return anet_profiles.get_customer_payment_profile(
+
+        cache_key: str = f"CustomerPaymentMethod:{self.pk}:get_authorizenet_profile:include_issuer_info_{include_issuer_info}"
+        if cached_response := cache.get(cache_key):
+            return cached_response
+        response = anet_profiles.get_customer_payment_profile(
             customer_profile_id=self.customer.authorizenet_profile_id,
             customer_payment_profile_id=self.pk,
             include_issuer_info=include_issuer_info,
         )
+        cache.set(cache_key, response, timeout=60 * 15)
+        return response
 
 
 class CustomerShippingAddress(models.Model):
@@ -198,10 +215,18 @@ class CustomerShippingAddress(models.Model):
         assert self.customer.authorizenet_profile_id, (
             "Customer authorizenet profile id wasn't set."
         )
-        return anet_profiles.get_customer_shipping_address(
+
+        cache_key: str = (
+            f"CustomerShippingAddress:{self.pk}:get_authorizenet_profile"
+        )
+        if cached_response := cache.get(cache_key):
+            return cached_response
+        response = anet_profiles.get_customer_shipping_address(
             customer_profile_id=self.customer.authorizenet_profile_id,
             customer_address_profile_id=self.pk,
         )
+        cache.set(cache_key, response, timeout=60 * 15)
+        return response
 
 
 class CustomerSubscription(models.Model):
@@ -248,15 +273,30 @@ class CustomerSubscription(models.Model):
         return self.name
 
     def get_authorizenet_profile(self, include_transactions: bool = False):
-        return anet_subscriptions.get_subscription(
+        cache_key: str = f"CustomerSubscription:{self.pk}:get_authorizenet_status:include_transactions_{include_transactions}"
+        if cached_response := cache.get(cache_key):
+            return cached_response
+        response = anet_subscriptions.get_subscription(
             subscription_id=self.pk, include_transactions=include_transactions
         )
+        cache.set(cache_key, response, timeout=60 * 3)
+        return response
 
     def get_authorizenet_status(self) -> str | None:
         """Returns the current subscription status from the Authorizenet API."""
+        cache_key: str = (
+            f"CustomerSubscription:{self.pk}:get_authorizenet_status"
+        )
+        if cached_response := cache.get(cache_key):
+            if cached_response is not None and hasattr(
+                cached_response, "status"
+            ):
+                return str(cached_response.status)
+
         response = anet_subscriptions.get_subscription_status(
             subscription_id=self.pk
         )
+        cache.set(cache_key, response, timeout=60 * 3)
         if response is not None and hasattr(response, "status"):
             return str(response.status)
 

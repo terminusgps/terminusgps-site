@@ -2,7 +2,6 @@ import typing
 
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
@@ -25,13 +24,10 @@ from terminusgps_tracker.views.mixins import (
 
 
 class CustomerShippingAddressCreateView(
-    LoginRequiredMixin,
-    SuccessMessageMixin,
-    HtmxTemplateResponseMixin,
-    FormView,
+    LoginRequiredMixin, HtmxTemplateResponseMixin, FormView
 ):
     content_type = "text/html"
-    extra_context = {"title": "Create Shipping Address"}
+    extra_context = {"title": "Add Shipping Address"}
     form_class = CustomerShippingAddressCreationForm
     http_method_names = ["get", "post"]
     login_url = reverse_lazy("login")
@@ -42,7 +38,11 @@ class CustomerShippingAddressCreateView(
     raise_exception = False
     success_url = reverse_lazy("tracker:account")
     template_name = "terminusgps_tracker/addresses/create.html"
-    success_message = "Shipping address was created successfully."
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=form_class)
+        print(f"{form.fields["address"] = }")
+        return form
 
     def get_initial(self, **kwargs) -> dict[str, typing.Any]:
         initial: dict[str, typing.Any] = super().get_initial(**kwargs)

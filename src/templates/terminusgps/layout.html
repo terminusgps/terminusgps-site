@@ -19,7 +19,7 @@
                 </section>
                 {% if messages %}
                 <section id="messages">
-                    <ul id="messages-list" class="mx-8 mt-4 animate-jiggle">
+                    <ul id="messages-list" class="mx-8 mt-4 animate-jiggle flex flex-col gap-2">
                         {% for message in messages %}
                         <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message.level|message_icon }} {{ message|safe }}</li>
                         {% endfor %}

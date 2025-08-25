@@ -35,7 +35,7 @@ class CustomerPaymentMethodCreateView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, FormView
 ):
     content_type = "text/html"
-    extra_context = {"title": "Create Payment Method"}
+    extra_context = {"title": "Add Payment Method"}
     form_class = CustomerPaymentMethodCreationForm
     http_method_names = ["get", "post"]
     login_url = reverse_lazy("login")

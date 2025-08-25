@@ -1,6 +1,6 @@
 from django import forms
 
-from terminusgps_tracker.forms.fields import AddressField
+from terminusgps_tracker.forms.fields import AddressField, AddressWidget
 
 
 class CustomerShippingAddressCreationForm(forms.Form):
@@ -41,10 +41,32 @@ class CustomerShippingAddressCreationForm(forms.Form):
             }
         ),
     )
-    address = AddressField(label="Address")
+    address = AddressField(
+        fields=(
+            forms.CharField(label="First Name"),
+            forms.CharField(label="Last Name"),
+            forms.CharField(label="Phone #"),
+            forms.CharField(label="Street"),
+            forms.CharField(label="City"),
+            forms.CharField(label="State"),
+            forms.CharField(label="Zip"),
+            forms.CharField(label="Country"),
+        ),
+        widget=AddressWidget(
+            widgets={
+                "first_name": forms.widgets.TextInput,
+                "last_name": forms.widgets.TextInput,
+                "phone_number": forms.widgets.TextInput,
+                "street": forms.widgets.TextInput,
+                "city": forms.widgets.TextInput,
+                "state": forms.widgets.TextInput,
+                "zip": forms.widgets.TextInput,
+                "country": forms.widgets.TextInput,
+            }
+        ),
+    )
     default = forms.BooleanField(
-        help_text="Check this to set the new shipping address as your default.",
-        label="Set as default shipping address?",
+        label="Set as your default shipping address?",
         required=False,
         initial=True,
     )

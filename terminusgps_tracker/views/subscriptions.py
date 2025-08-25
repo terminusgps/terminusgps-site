@@ -46,6 +46,12 @@ class CustomerSubscriptionCreateView(
     raise_exception = False
     template_name = "terminusgps_tracker/subscriptions/create.html"
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        customer = Customer.objects.get(user=self.request.user)
+        kwargs.update({"customer": customer})
+        return kwargs
+
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         customer: Customer = Customer.objects.get(user=self.request.user)
@@ -93,7 +99,7 @@ class CustomerSubscriptionCreateView(
                         trialOccurrences=0,
                     ),
                     amount=grand_total,
-                    trailAmount=decimal.Decimal("0.00"),
+                    trialAmount=decimal.Decimal("0.00"),
                     profile=apicontractsv1.customerProfileIdType(
                         customerProfileId=str(
                             customer.authorizenet_profile_id

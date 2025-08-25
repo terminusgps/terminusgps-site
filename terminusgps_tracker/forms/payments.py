@@ -1,11 +1,12 @@
-import datetime
-
 from django import forms
 from django.conf import settings
-from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
 
-from terminusgps_tracker.forms.fields import AddressField, CreditCardField
+from terminusgps_tracker.forms.fields import (
+    AddressField,
+    AddressWidget,
+    CreditCardField,
+    CreditCardWidget,
+)
 
 
 class CustomerPaymentMethodCreationForm(forms.Form):
@@ -48,8 +49,44 @@ class CustomerPaymentMethodCreationForm(forms.Form):
             }
         ),
     )
-    credit_card = CreditCardField(label="Credit Card")
-    address = AddressField(label="Address")
+    credit_card = CreditCardField(
+        fields=(
+            forms.CharField(label="Card #"),
+            forms.DateField(label="Expiration Date"),
+            forms.CharField(label="CCV #"),
+        ),
+        widget=CreditCardWidget(
+            widgets={
+                "number": forms.widgets.TextInput,
+                "expiry": forms.widgets.DateInput(format="%d/%Y"),
+                "ccv": forms.widgets.TextInput,
+            }
+        ),
+    )
+    address = AddressField(
+        fields=(
+            forms.CharField(label="First Name"),
+            forms.CharField(label="Last Name"),
+            forms.CharField(label="Phone #"),
+            forms.CharField(label="Street"),
+            forms.CharField(label="City"),
+            forms.CharField(label="State"),
+            forms.CharField(label="Zip"),
+            forms.CharField(label="Country"),
+        ),
+        widget=AddressWidget(
+            widgets={
+                "first_name": forms.widgets.TextInput,
+                "last_name": forms.widgets.TextInput,
+                "phone_number": forms.widgets.TextInput,
+                "street": forms.widgets.TextInput,
+                "city": forms.widgets.TextInput,
+                "state": forms.widgets.TextInput,
+                "zip": forms.widgets.TextInput,
+                "country": forms.widgets.TextInput,
+            }
+        ),
+    )
     default = forms.BooleanField(
         label="Set as default payment method?",
         required=False,
@@ -66,20 +103,3 @@ class CustomerPaymentMethodCreationForm(forms.Form):
             attrs={"class": "accent-terminus-red-700"}
         ),
     )
-
-    def clean_credit_card(self):
-        cc = self.cleaned_data.get("credit_card")
-
-        if cc:
-            expiry_date = datetime.datetime.strptime(
-                str(cc.expirationDate), "%Y-%m"
-            )
-            if not expiry_date >= datetime.datetime.now():
-                raise ValidationError(
-                    _(
-                        "Expiration date cannot be in the past, got '%(expiry)s'."
-                    ),
-                    code="invalid",
-                    params={"expiry": str(cc.expirationDate)},
-                )
-            return cc
