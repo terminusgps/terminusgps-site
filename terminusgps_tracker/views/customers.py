@@ -1,6 +1,8 @@
 import typing
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpRequest, HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
@@ -24,6 +26,34 @@ class CustomerDashboardView(
     permission_denied_message = "Please login to view this content."
     raise_exception = False
     template_name = "terminusgps_tracker/customers/dashboard.html"
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        customer = Customer.objects.get(user=self.request.user)
+        if customer.units.count() == 0:
+            messages.add_message(
+                request,
+                messages.WARNING,
+                f"<a class='' href='{reverse('tracker:units')}'>Please register a unit</a>",
+            )
+        if customer.payments.count() == 0:
+            messages.add_message(
+                request,
+                messages.WARNING,
+                f"<a class='' href='{reverse('tracker:account')}'>Please add a payment method</a>",
+            )
+        if customer.addresses.count() == 0:
+            messages.add_message(
+                request,
+                messages.WARNING,
+                f"<a class='' href='{reverse('tracker:account')}'>Please add a shipping address</a>",
+            )
+        if not customer.is_subscribed:
+            messages.add_message(
+                request,
+                messages.WARNING,
+                f"<a class='' href='{reverse('tracker:subscription')}'>Please subscribe</a>",
+            )
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
@@ -95,54 +125,3 @@ class CustomerUnitsView(
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         context["customer"] = Customer.objects.get(user=self.request.user)
         return context
-
-
-class CustomerTodoView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
-):
-    content_type = "text/html"
-    http_method_names = ["get"]
-    partial_template_name = "terminusgps_tracker/customers/partials/_todo.html"
-    template_name = "terminusgps_tracker/customers/todo.html"
-
-    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        customer: Customer = Customer.objects.select_related(
-            "addresses", "payments", "units"
-        ).get(user=self.request.user)
-        context["todo_list"] = self.generate_customer_todo_list(customer)
-        return context
-
-    def generate_customer_todo_list(
-        self, customer: Customer
-    ) -> list[dict[str, str]]:
-        todo_list: list[dict[str, str]] = []
-        if customer.units.count() == 0:
-            todo_list.append(
-                {
-                    "message": "Register your first unit",
-                    "link": reverse("tracker:create unit"),
-                }
-            )
-        if customer.addresses.count() == 0:
-            todo_list.append(
-                {
-                    "message": "Add a shipping address",
-                    "link": reverse("tracker:create address"),
-                }
-            )
-        if customer.payments.count() == 0:
-            todo_list.append(
-                {
-                    "message": "Add a payment method",
-                    "link": reverse("tracker:create payment"),
-                }
-            )
-        if not customer.subscription.exists():
-            todo_list.append(
-                {
-                    "message": "Subscribe!",
-                    "link": reverse("tracker:subscription"),
-                }
-            )
-        return todo_list

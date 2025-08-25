@@ -1,4 +1,4 @@
-{% load static %}
+{% load static terminusgps_tracker_display %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -17,6 +17,15 @@
                     <h2 class="text-xl font-bold md:text-2xl">{{ title }}</h2>
                     {% if subtitle %}<h3 class="font-light md:text-lg">{{ subtitle }}</h3>{% endif %}
                 </section>
+                {% if messages %}
+                <section id="messages">
+                    <ul id="messages-list" class="mx-8 mt-4 animate-jiggle">
+                        {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message.level|message_icon }} {{ message|safe }}</li>
+                        {% endfor %}
+                    </ul>
+                </section>
+                {% endif %}
                 <section class="flex flex-col gap-8 p-8">
                     {% block content %}{% endblock content %}
                 </section>

@@ -1,7 +1,7 @@
-<ul class="">
-    {% for todo in todo_list %}
-    <li class=""><a href="{{ todo.link }}">{{ todo.message }}</li>
-    {% empty %}
-    <li class="">You're all caught up!</li>
-    {% endfor %}
-</ul>
+{% for todo in todo_list %}
+<a href="{{ todo.link }}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">
+    <li>{{ todo.message }}</li>
+</a>
+{% empty %}
+<li>You're all caught up!</li>
+{% endfor %}

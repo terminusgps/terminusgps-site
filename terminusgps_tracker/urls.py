@@ -17,7 +17,6 @@ urlpatterns = [
         name="subscription",
     ),
     path("units/", views.CustomerUnitsView.as_view(), name="units"),
-    path("todo/", views.CustomerTodoView.as_view(), name="todo"),
     path(
         "subscriptions/create/",
         views.CustomerSubscriptionCreateView.as_view(),

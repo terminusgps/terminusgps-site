@@ -156,17 +156,6 @@ class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
     def get_form(self, form_class=None):
         form = super().get_form(form_class=form_class)
         form.fields["username"].validators.append(validate_email)
-        form.fields["username"].widget.attrs.update(
-            **{
-                "placeholder": "email@terminusgps.com",
-                "autofocus": True,
-                "inputmode": "email",
-                "enterkeyhint": "next",
-            }
-        )
-        form.fields["password"].widget.attrs.update(
-            **{"enterkeyhint": "done", "autocomplete": False}
-        )
         return form
 
     def get_initial(self, **kwargs) -> dict[str, typing.Any]:
@@ -205,7 +194,7 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
         customer = Customer.objects.create(
             user=get_user_model().objects.create_user(
                 username=form.cleaned_data["username"],
-                password=form.cleaned_data["password"],
+                password=form.cleaned_data["password1"],
                 first_name=form.cleaned_data["first_name"],
                 last_name=form.cleaned_data["last_name"],
                 email=form.cleaned_data["username"],

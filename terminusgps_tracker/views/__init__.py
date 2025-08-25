@@ -8,7 +8,6 @@ from .customers import (
     CustomerAccountView,
     CustomerDashboardView,
     CustomerSubscriptionView,
-    CustomerTodoView,
     CustomerUnitsView,
 )
 from .payments import (

@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 from authorizenet.constants import constants
+from django.contrib.messages import constants as messages
 
 os.umask(0)
 decimal.getcontext().prec = 4
@@ -51,6 +52,13 @@ ADMINS = [
     ("Blake", "blake@terminusgps.com"),
     ("Lili", "lili@terminusgps.com"),
 ]
+
+MESSAGE_TAGS = {
+    messages.ERROR: "text-red-800 dark:text-red-100 p-2 border-2 border-current rounded bg-red-100 dark:bg-red-600 flex items-center gap-2",
+    messages.INFO: "text-gray-800 dark:text-gray-100 p-2 border-2 border-current rounded bg-gray-100 dark:bg-gray-600 flex items-center gap-2",
+    messages.SUCCESS: "text-green-800 dark:text-green-100 p-2 border-2 border-current rounded bg-green-100 dark:bg-green-600 flex items-center gap-2",
+    messages.WARNING: "text-yellow-800 dark:text-yellow-100 p-2 border-2 border-current rounded bg-yellow-100 dark:bg-yellow-300 flex items-center gap-2",
+}
 
 
 TRACKER_APP_CONFIG = {
