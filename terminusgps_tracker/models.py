@@ -3,9 +3,12 @@ import decimal
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth import get_user_model
-from django.db import models
+from django.db import models, transaction
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from terminusgps.authorizenet import profiles as anet_profiles
+from terminusgps.authorizenet import subscriptions as anet_subscriptions
 from terminusgps.wialon.items import WialonObjectFactory
 from terminusgps.wialon.items.unit import WialonUnit
 from terminusgps.wialon.session import WialonSession
@@ -35,6 +38,16 @@ class Customer(models.Model):
         """Returns the customer's email address/username."""
         return self.user.email if self.user.email else self.user.username
 
+    def get_authorizenet_profile(self, include_issuer_info: bool = False):
+        """Returns the Authorizenet customer profile for the customer."""
+        assert self.authorizenet_profile_id is not None, (
+            "Customer authorizenet profile id wasn't set."
+        )
+        return anet_profiles.get_customer_profile(
+            customer_profile_id=self.authorizenet_profile_id,
+            include_issuer_info=include_issuer_info,
+        )
+
     def get_unit_price_sum(self) -> decimal.Decimal:
         """Returns the sum of all customer unit subscription tiers as a :py:obj:`~decimal.Decimal`."""
         aggregate = (
@@ -42,7 +55,17 @@ class Customer(models.Model):
             .select_related("tier")
             .aggregate(models.Sum("tier__price"))
         )
-        return round(aggregate["tier__price__sum"], 2)
+        return round(aggregate["tier__price__sum"], ndigits=2)
+
+    @property
+    def is_subscribed(self) -> bool:
+        """Whether or not the customer is subscribed."""
+        try:
+            active = CustomerSubscription.CustomerSubscriptionStatus.ACTIVE
+            status = CustomerSubscription.objects.get(customer=self).status
+            return status == active
+        except CustomerSubscription.DoesNotExist:
+            return False
 
 
 class CustomerWialonUnit(models.Model):
@@ -69,6 +92,7 @@ class CustomerWialonUnit(models.Model):
         verbose_name_plural = _("customer wialon units")
 
     def __str__(self) -> str:
+        """Returns the unit's name or 'Wialon Unit #<pk>'."""
         return self.name if self.name else f"Wialon Unit #{self.pk}"
 
     def get_wialon_unit(self, session: WialonSession) -> WialonUnit:
@@ -94,7 +118,39 @@ class CustomerPaymentMethod(models.Model):
         verbose_name_plural = _("customer payment methods")
 
     def __str__(self) -> str:
+        """Returns 'Payment Method #<pk>'."""
         return f"Payment Method #{self.pk}"
+
+    def get_absolute_url(self) -> str:
+        """Returns a URL pointing to the payment method's detail view."""
+        return reverse(
+            "tracker:detail payment",
+            kwargs={"customer_pk": self.customer.pk, "payment_pk": self.pk},
+        )
+
+    def get_delete_url(self) -> str:
+        """Returns a URL pointing to the payment method's delete view."""
+        return reverse(
+            "tracker:delete payment",
+            kwargs={"customer_pk": self.customer.pk, "payment_pk": self.pk},
+        )
+
+    def get_list_url(self) -> str:
+        """Returns a URL pointing to the payment method's list view."""
+        return reverse(
+            "tracker:list payment", kwargs={"customer_pk": self.customer.pk}
+        )
+
+    def get_authorizenet_profile(self, include_issuer_info: bool = False):
+        """Returns the Authorizenet payment profile for the payment method."""
+        assert self.customer.authorizenet_profile_id is not None, (
+            "Customer authorizenet profile id wasn't set."
+        )
+        return anet_profiles.get_customer_payment_profile(
+            customer_profile_id=self.customer.authorizenet_profile_id,
+            customer_payment_profile_id=self.pk,
+            include_issuer_info=include_issuer_info,
+        )
 
 
 class CustomerShippingAddress(models.Model):
@@ -114,7 +170,38 @@ class CustomerShippingAddress(models.Model):
         verbose_name_plural = _("customer shipping addresses")
 
     def __str__(self) -> str:
+        """Returns 'Shipping Address #<pk>'."""
         return f"Shipping Address #{self.pk}"
+
+    def get_absolute_url(self) -> str:
+        """Returns a URL pointing to the shipping address' detail view."""
+        return reverse(
+            "tracker:detail address",
+            kwargs={"customer_pk": self.customer.pk, "address_pk": self.pk},
+        )
+
+    def get_delete_url(self) -> str:
+        """Returns a URL pointing to the shipping address' delete view."""
+        return reverse(
+            "tracker:delete address",
+            kwargs={"customer_pk": self.customer.pk, "address_pk": self.pk},
+        )
+
+    def get_list_url(self) -> str:
+        """Returns a URL pointing to the shipping address' list view."""
+        return reverse(
+            "tracker:list address", kwargs={"customer_pk": self.customer.pk}
+        )
+
+    def get_authorizenet_profile(self):
+        """Returns the Authorizenet address profile for the shipping address."""
+        assert self.customer.authorizenet_profile_id, (
+            "Customer authorizenet profile id wasn't set."
+        )
+        return anet_profiles.get_customer_shipping_address(
+            customer_profile_id=self.customer.authorizenet_profile_id,
+            customer_address_profile_id=self.pk,
+        )
 
 
 class CustomerSubscription(models.Model):
@@ -160,6 +247,19 @@ class CustomerSubscription(models.Model):
         """Returns the subscription name."""
         return self.name
 
+    def get_authorizenet_profile(self, include_transactions: bool = False):
+        return anet_subscriptions.get_subscription(
+            subscription_id=self.pk, include_transactions=include_transactions
+        )
+
+    def get_authorizenet_status(self) -> str | None:
+        """Returns the current subscription status from the Authorizenet API."""
+        response = anet_subscriptions.get_subscription_status(
+            subscription_id=self.pk
+        )
+        if response is not None and hasattr(response, "status"):
+            return str(response.status)
+
     def get_next_payment_date(self) -> datetime.datetime:
         """Returns the next expected payment date for the subscription."""
         now = timezone.now()
@@ -175,6 +275,12 @@ class CustomerSubscription(models.Model):
         """Returns the number of days remaining before the next subscription payment is required."""
         next_payment = self.get_next_payment_date()
         return (next_payment - timezone.now()).days
+
+    @transaction.atomic
+    def refresh_status(self) -> None:
+        """Sets the subscription status to the status returned by the Authorizenet API."""
+        if new_status := self.get_authorizenet_status():
+            self.status = new_status
 
 
 class CustomerSubscriptionTier(models.Model):

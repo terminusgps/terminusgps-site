@@ -158,7 +158,6 @@ class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
         form.fields["username"].validators.append(validate_email)
         form.fields["username"].widget.attrs.update(
             **{
-                "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "email@terminusgps.com",
                 "autofocus": True,
                 "inputmode": "email",
@@ -166,11 +165,7 @@ class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
             }
         )
         form.fields["password"].widget.attrs.update(
-            **{
-                "class": settings.DEFAULT_FIELD_CLASS,
-                "enterkeyhint": "done",
-                "autocomplete": False,
-            }
+            **{"enterkeyhint": "done", "autocomplete": False}
         )
         return form
 

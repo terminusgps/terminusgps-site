@@ -23,30 +23,30 @@ sdist = { url = "https://files.pythonhosted.org/packages/2d/9a/61c151f508a9b3201
 
 [[package]]
 name = "boto3"
-version = "1.40.15"
+version = "1.40.16"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d3/1d/e7928de166f328d5c7993924c4df048de1c8de759f8d088aab0fa1a0e6b5/boto3-1.40.15.tar.gz", hash = "sha256:271b379ce5ad35ca82f1009e917528a182eed0e2de197ccffb0c51acadec5c79", size = 111977 }
+sdist = { url = "https://files.pythonhosted.org/packages/ad/d4/ad261cb17f202082ba8598fd6d1d27eac5d11307ce99e3f5867bc9e376ee/boto3-1.40.16.tar.gz", hash = "sha256:667bc3a9bd1f26579957d95a2612359103c343dd74d44f202d09a155ed4189c6", size = 111944 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1e/c1/25a79b651e916c5205740b6ad9d3039c81f588447821232667170afdb9bb/boto3-1.40.15-py3-none-any.whl", hash = "sha256:52b8aa78c9906c4e49dcec6817c041df33c9825073bf66e7df8fc00afbe47b4b", size = 140075 },
+    { url = "https://files.pythonhosted.org/packages/f1/ce/6030ebcde6a19920c36d633643811a80e53d2b92a4a125ddf07520b2da66/boto3-1.40.16-py3-none-any.whl", hash = "sha256:4b7fbd2b469d5fa6325f0e90310b2d430c9a35e8a984a9919103e6d248422537", size = 140076 },
 ]
 
 [[package]]
 name = "botocore"
-version = "1.40.15"
+version = "1.40.16"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jmespath" },
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f0/ed/b99cdd9d415f8dcb6313e64458958ba5e305927896068e1b69fed5979e50/botocore-1.40.15.tar.gz", hash = "sha256:4960800e4c5a7b43db22550979c22f5a324cbaf75ef494bbb2cf400ef1e6aca7", size = 14369447 }
+sdist = { url = "https://files.pythonhosted.org/packages/25/4c/7087a282f10dc2258a107e4a29645678b5d3fa7cbabed05d540370aa8c57/botocore-1.40.16.tar.gz", hash = "sha256:522a8b7e3837667aca978b5b2dd2d12c3834f58f13df3c8d3369070d883d608d", size = 14368291 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/de/d7/9490322303df0c0dfa62a3c8c7e15e31259f1a435adacaf058a437cf4e6b/botocore-1.40.15-py3-none-any.whl", hash = "sha256:b364e039d2b67e509cfb089cb39b295251e48a60cc68fd591defbe10b44d83f9", size = 14028055 },
+    { url = "https://files.pythonhosted.org/packages/03/5c/81ff55d99c0f38fdcaee693228a6af61486f368fe7e49bc27da1317682b9/botocore-1.40.16-py3-none-any.whl", hash = "sha256:0296a245cb349431279d825522ae70270edf8d8be7b91108fdcc086ea347c0b6", size = 14030380 },
 ]
 
 [[package]]
@@ -112,19 +112,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/39/17/4567ee12bb84114c544d5c4a792e7226db517ac78f552111e9dc62d1de14/django-5.2.2.tar.gz", hash = "sha256:85852e517f84435e9b13421379cd6c43ef5b48a9c8b391d29a26f7900967e952", size = 10827542 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b4/5c/5d00acab6c062b154e5a0f092938ae5a0c698dbc4362b68e23200960f32c/django-5.2.2-py3-none-any.whl", hash = "sha256:997ef2162d04ead6869551b22cde4e06da1f94cf595f4af3f3d3afeae1f3f6fe", size = 8302562 },
-]
-
-[[package]]
-name = "django-debug-toolbar"
-version = "6.0.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "django" },
-    { name = "sqlparse" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/c5/d5/5fc90234532088aeec5faa48d5b09951cc7eab6626030ed427d3bd8cd9bc/django_debug_toolbar-6.0.0.tar.gz", hash = "sha256:6eb9fa6f4a5884bf04004700ffb5a44043f1fff38784447fc52c1633448c8c14", size = 305331 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/05/b5/4724a8c18fcc5b09dca7b7a0e70c34208317bb110075ad12484d6588ae91/django_debug_toolbar-6.0.0-py3-none-any.whl", hash = "sha256:0cf2cac5c307b77d6e143c914e5c6592df53ffe34642d93929e5ef095ae56841", size = 266967 },
 ]
 
 [[package]]
@@ -609,7 +596,6 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "certifi" },
-    { name = "django-debug-toolbar" },
     { name = "django-stubs" },
     { name = "django-stubs-ext" },
 ]
@@ -634,7 +620,6 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "certifi", specifier = ">=2025.1.31" },
-    { name = "django-debug-toolbar", specifier = ">=6.0.0" },
     { name = "django-stubs", specifier = ">=5.2.2" },
     { name = "django-stubs-ext", specifier = ">=5.2.2" },
 ]
@@ -650,11 +635,11 @@ wheels = [
 
 [[package]]
 name = "typing-extensions"
-version = "4.14.1"
+version = "4.15.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/98/5a/da40306b885cc8c09109dc2e1abd358d5684b1425678151cdaed4731c822/typing_extensions-4.14.1.tar.gz", hash = "sha256:38b39f4aeeab64884ce9f74c94263ef78f3c22467c8724005483154c26648d36", size = 107673 }
+sdist = { url = "https://files.pythonhosted.org/packages/72/94/1a15dd82efb362ac84269196e94cf00f187f7ed21c242792a923cdb1c61f/typing_extensions-4.15.0.tar.gz", hash = "sha256:0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466", size = 109391 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b5/00/d631e67a838026495268c2f6884f3711a15a9a2a96cd244fdaea53b823fb/typing_extensions-4.14.1-py3-none-any.whl", hash = "sha256:d1e1e3b58374dc93031d6eda2420a48ea44a36c2b4766a4fdeb3710755731d76", size = 43906 },
+    { url = "https://files.pythonhosted.org/packages/18/67/36e9267722cc04a6b9f15c7f3441c2363321a3ea07da7ae0c0707beb2a9c/typing_extensions-4.15.0-py3-none-any.whl", hash = "sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548", size = 44614 },
 ]
 
 [[package]]

@@ -18,8 +18,7 @@
                     {% if subtitle %}<h3 class="font-light md:text-lg">{{ subtitle }}</h3>{% endif %}
                 </section>
                 <section class="flex flex-col gap-8 p-8">
-                    {% block content %}
-                    {% endblock content %}
+                    {% block content %}{% endblock content %}
                 </section>
             </div>
         </main>

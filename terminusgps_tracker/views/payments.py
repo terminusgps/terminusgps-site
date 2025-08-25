@@ -3,11 +3,10 @@ import typing
 from authorizenet import apicontractsv1
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView
@@ -45,6 +44,7 @@ class CustomerPaymentMethodCreateView(
     )
     permission_denied_message = "Please login to view this content."
     raise_exception = False
+    success_url = reverse_lazy("tracker:account")
     template_name = "terminusgps_tracker/payments/create.html"
 
     def get_initial(self, **kwargs) -> dict[str, typing.Any]:
@@ -77,11 +77,7 @@ class CustomerPaymentMethodCreateView(
                 CustomerShippingAddress.objects.create(
                     id=int(response.customerAddressId), customer=customer
                 )
-            return HttpResponseRedirect(
-                reverse(
-                    "tracker:list payment", kwargs={"customer_pk": customer.pk}
-                )
-            )
+            return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
             match e.code:
                 case _:
@@ -119,11 +115,7 @@ class CustomerPaymentMethodDetailView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        payment: CustomerPaymentMethod = kwargs["object"]
-        context["profile"] = profiles.get_customer_payment_profile(
-            customer_profile_id=payment.customer.authorizenet_profile_id,
-            customer_payment_profile_id=payment.pk,
-        )
+        context["profile"] = kwargs["object"].get_authorizenet_profile()
         return context
 
 
@@ -157,15 +149,15 @@ class CustomerPaymentMethodDeleteView(
     @transaction.atomic
     def form_valid(self, form: forms.Form) -> HttpResponse:
         try:
+            customer_pk: int = self.kwargs["customer_pk"]
+            customer: Customer = Customer.objects.get(pk=customer_pk)
+            payment: CustomerPaymentMethod = self.get_object()
+
             profiles.delete_customer_payment_profile(
-                customer_profile_id=Customer.objects.get(
-                    pk=self.kwargs["customer_pk"]
-                ).authorizenet_profile_id,
-                customer_payment_profile_id=self.object.pk,
+                customer_profile_id=customer.authorizenet_profile_id,
+                customer_payment_profile_id=payment.pk,
             )
-            response = super().form_valid(form=form)
-            response.headers["HX-Retarget"] = "#payment-list"
-            return response
+            return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
             match e.code:
                 case "E00105":
@@ -190,10 +182,8 @@ class CustomerPaymentMethodDeleteView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["profile"] = profiles.get_customer_payment_profile(
-            customer_profile_id=payment.customer.authorizenet_profile_id,
-            customer_payment_profile_id=payment.pk,
-        )
+        if kwargs.get("object"):
+            context["profile"] = kwargs["object"].get_authorizenet_profile()
         return context
 
 
@@ -212,11 +202,6 @@ class CustomerPaymentMethodListView(
     queryset = CustomerPaymentMethod.objects.none()
     template_name = "terminusgps_tracker/payments/list.html"
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-        self.sync_customer_payment_methods(customer)
-        return super().get(request, *args, **kwargs)
-
     def get_queryset(
         self,
     ) -> QuerySet[CustomerPaymentMethod, CustomerPaymentMethod]:
@@ -227,55 +212,3 @@ class CustomerPaymentMethodListView(
             .select_related("customer")
             .order_by(self.get_ordering())
         )
-
-    @transaction.atomic
-    def sync_customer_payment_methods(self, customer: Customer) -> None:
-        local_ids = self.get_local_payment_profile_ids(customer)
-        remote_ids = self.get_remote_payment_profile_ids(customer)
-        ids_to_create = set(remote_ids) - set(local_ids) if remote_ids else []
-        ids_to_delete = set(local_ids) - set(remote_ids) if local_ids else []
-
-        if ids_to_create:
-            CustomerPaymentMethod.objects.bulk_create(
-                [
-                    CustomerPaymentMethod(id=id, customer=customer)
-                    for id in ids_to_create
-                ],
-                ignore_conflicts=True,
-            )
-
-        if ids_to_delete:
-            CustomerPaymentMethod.objects.filter(
-                id__in=ids_to_delete, customer=customer
-            ).delete()
-
-    @staticmethod
-    def get_local_payment_profile_ids(customer: Customer) -> list[int]:
-        """Returns a list of payment profile ids for the customer from the local database."""
-        return list(customer.payments.values_list("id", flat=True))
-
-    @staticmethod
-    def get_remote_payment_profile_ids(customer: Customer) -> list[int]:
-        """Returns a list of the payment profile ids for the customer from Authorizenet."""
-        if cached_response := cache.get(f"get_customer_profile_{customer.pk}"):
-            response = cached_response
-        else:
-            response = profiles.get_customer_profile(
-                customer_profile_id=customer.authorizenet_profile_id,
-                include_issuer_info=False,
-            )
-            cache.set(
-                f"get_customer_profile_{customer.pk}", response, timeout=60 * 3
-            )
-
-        if response is None or not all(
-            [
-                hasattr(response, "profile"),
-                hasattr(response.profile, "paymentProfiles"),
-            ]
-        ):
-            return []
-        return [
-            int(paymentProfile.customerPaymentProfileId)
-            for paymentProfile in response.profile.paymentProfiles
-        ]

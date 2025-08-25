@@ -2,11 +2,10 @@ import typing
 
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView
@@ -37,6 +36,7 @@ class CustomerShippingAddressCreateView(
     )
     permission_denied_message = "Please login to view this content."
     raise_exception = False
+    success_url = reverse_lazy("tracker:account")
     template_name = "terminusgps_tracker/addresses/create.html"
 
     def get_initial(self, **kwargs) -> dict[str, typing.Any]:
@@ -59,11 +59,7 @@ class CustomerShippingAddressCreateView(
             CustomerShippingAddress.objects.create(
                 id=int(response.customerAddressId), customer=customer
             )
-            return HttpResponseRedirect(
-                reverse(
-                    "tracker:list address", kwargs={"customer_pk": customer.pk}
-                )
-            )
+            return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
             match e.code:
                 case _:
@@ -101,11 +97,7 @@ class CustomerShippingAddressDetailView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        address: CustomerShippingAddress = kwargs["object"]
-        context["profile"] = profiles.get_customer_shipping_address(
-            customer_profile_id=address.customer.authorizenet_profile_id,
-            customer_address_profile_id=address.pk,
-        )
+        context["profile"] = kwargs["object"].get_authorizenet_profile()
         return context
 
 
@@ -123,6 +115,12 @@ class CustomerShippingAddressDeleteView(
     queryset = CustomerShippingAddress.objects.none()
     template_name = "terminusgps_tracker/addresses/delete.html"
 
+    def get_success_url(self) -> str:
+        return reverse(
+            "tracker:list address",
+            kwargs={"customer_pk": self.kwargs["customer_pk"]},
+        )
+
     def get_queryset(
         self,
     ) -> QuerySet[CustomerShippingAddress, CustomerShippingAddress]:
@@ -132,11 +130,13 @@ class CustomerShippingAddressDeleteView(
 
     def form_valid(self, form: forms.Form) -> HttpResponse:
         try:
+            customer_pk: int = self.kwargs["customer_pk"]
+            customer: Customer = Customer.objects.get(pk=customer_pk)
+            address: CustomerShippingAddress = self.get_object()
+
             profiles.delete_customer_shipping_address(
-                customer_profile_id=Customer.objects.get(
-                    pk=self.kwargs["customer_pk"]
-                ).authorizenet_profile_id,
-                customer_address_profile_id=self.object.pk,
+                customer_profile_id=customer.authorizenet_profile_id,
+                customer_address_profile_id=address.pk,
             )
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
@@ -154,11 +154,8 @@ class CustomerShippingAddressDeleteView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        address: CustomerShippingAddress = kwargs["object"]
-        context["profile"] = profiles.get_customer_shipping_address(
-            customer_profile_id=address.customer.authorizenet_profile_id,
-            customer_address_profile_id=address.pk,
-        )
+        if kwargs.get("object"):
+            context["profile"] = kwargs["object"].get_authorizenet_profile()
         return context
 
 
@@ -177,11 +174,6 @@ class CustomerShippingAddressListView(
     queryset = CustomerShippingAddress.objects.none()
     template_name = "terminusgps_tracker/addresses/list.html"
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-        self.sync_customer_address_profiles(customer)
-        return super().get(request, *args, **kwargs)
-
     def get_queryset(
         self,
     ) -> QuerySet[CustomerShippingAddress, CustomerShippingAddress]:
@@ -192,56 +184,3 @@ class CustomerShippingAddressListView(
             .select_related("customer")
             .order_by(self.get_ordering())
         )
-
-    @transaction.atomic
-    def sync_customer_address_profiles(self, customer: Customer) -> None:
-        """Syncs the customer's shipping addresses with Authorizenet."""
-        remote_ids = self.get_remote_address_profile_ids(customer)
-        local_ids = self.get_local_address_profile_ids(customer)
-        ids_to_create = set(remote_ids) - set(local_ids) if remote_ids else []
-        ids_to_delete = set(local_ids) - set(remote_ids) if local_ids else []
-
-        if ids_to_create:
-            CustomerShippingAddress.objects.bulk_create(
-                [
-                    CustomerShippingAddress(id=id, customer=customer)
-                    for id in ids_to_create
-                ],
-                ignore_conflicts=True,
-            )
-
-        if ids_to_delete:
-            CustomerShippingAddress.objects.filter(
-                id__in=ids_to_delete, customer=customer
-            ).delete()
-
-    @staticmethod
-    def get_local_address_profile_ids(customer: Customer) -> list[int]:
-        """Returns a list of address profile ids for the customer from the local database."""
-        return list(customer.addresses.values_list("id", flat=True))
-
-    @staticmethod
-    def get_remote_address_profile_ids(customer: Customer) -> list[int]:
-        """Returns a list of address profile ids for the customer from Authorizenet."""
-        if cached_response := cache.get(f"get_customer_profile_{customer.pk}"):
-            response = cached_response
-        else:
-            response = profiles.get_customer_profile(
-                customer_profile_id=customer.authorizenet_profile_id,
-                include_issuer_info=False,
-            )
-            cache.set(
-                f"get_customer_profile_{customer.pk}", response, timeout=60 * 3
-            )
-
-        if response is None or not all(
-            [
-                hasattr(response, "profile"),
-                hasattr(response.profile, "shipToList"),
-            ]
-        ):
-            return []
-        return [
-            int(address.customerAddressId)
-            for address in response.profile.shipToList
-        ]

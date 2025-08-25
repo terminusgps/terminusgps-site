@@ -7,13 +7,12 @@ from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView, UpdateView
 from terminusgps.authorizenet import subscriptions as anet_subscriptions
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
-from terminusgps.wialon.items import WialonObjectFactory
 from terminusgps.wialon.items.unit import WialonUnit
 from terminusgps.wialon.session import WialonSession
 from terminusgps.wialon.utils import get_unit_by_imei
@@ -44,6 +43,7 @@ class CustomerWialonUnitCreateView(
     permission_denied_message = "Please login to view this content."
     raise_exception = False
     template_name = "terminusgps_tracker/units/create.html"
+    success_url = reverse_lazy("tracker:units")
 
     def get_initial(self) -> dict[str, typing.Any]:
         initial: dict[str, typing.Any] = super().get_initial()
@@ -83,11 +83,7 @@ class CustomerWialonUnitCreateView(
                 name=name,
                 tier=CustomerSubscriptionTier.objects.first(),
             )
-            return HttpResponseRedirect(
-                reverse(
-                    "tracker:list unit", kwargs={"customer_pk": customer.pk}
-                )
-            )
+            return super().form_valid(form=form)
 
 
 class CustomerWialonUnitDetailView(
@@ -112,8 +108,7 @@ class CustomerWialonUnitDetailView(
         obj: CustomerWialonUnit = self.get_object()
         if not obj.name:
             with WialonSession(token=settings.WIALON_TOKEN) as session:
-                factory = WialonObjectFactory(session)
-                unit = factory.get("avl_unit", obj.pk)
+                unit = obj.get_wialon_unit(session)
                 obj.name = unit.get_name()
                 obj.save()
         return super().get(request, *args, **kwargs)
@@ -132,16 +127,6 @@ class CustomerWialonUnitUpdateView(
     template_name = "terminusgps_tracker/units/update.html"
     pk_url_kwarg = "unit_pk"
 
-    def get_form(self, form_class=None) -> forms.ModelForm:
-        form = super().get_form(form_class=form_class)
-        form.fields["name"].widget.attrs.update(
-            {"class": settings.DEFAULT_FIELD_CLASS}
-        )
-        form.fields["tier"].widget.attrs.update(
-            {"class": settings.DEFAULT_FIELD_CLASS}
-        )
-        return form
-
     def get_success_url(self) -> str:
         return reverse(
             "tracker:detail unit",
@@ -158,21 +143,28 @@ class CustomerWialonUnitUpdateView(
 
     def form_valid(self, form: forms.ModelForm) -> HttpResponse:
         obj: CustomerWialonUnit = self.get_object()
-        response = super().form_valid(form=form)
+        customer: Customer = obj.customer
+        if not customer.is_subscribed:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! You need to subscribe to do that."),
+                    code="invalid",
+                ),
+            )
+            return self.form_invalid(form=form)
 
+        response = super().form_valid(form=form)
         if "name" in form.changed_data:
             new_name: str = form.cleaned_data["name"]
             with WialonSession(token=settings.WIALON_TOKEN) as session:
-                factory = WialonObjectFactory(session)
-                unit = factory.get("avl_unit", obj.pk)
+                unit = obj.get_wialon_unit(session)
                 unit.set_name(new_name)
-
         if "tier" in form.changed_data:
             new_amount: decimal.Decimal = obj.customer.get_unit_price_sum()
             anet_subscriptions.update_subscription(
                 obj.pk, apicontractsv1.ARBSubscriptionType(amount=new_amount)
             )
-
         return response
 
 

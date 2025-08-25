@@ -72,7 +72,6 @@ skip-magic-trailing-comma = true
 [dependency-groups]
 dev = [
     "certifi>=2025.1.31",
-    "django-debug-toolbar>=6.0.0",
     "django-stubs>=5.2.2",
     "django-stubs-ext>=5.2.2",
 ]
