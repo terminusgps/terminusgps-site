@@ -1,6 +1,6 @@
 {% load tz %}
 <section id="info" class="text-center flex flex-col gap-4">
-    <h2 class="text-lg font-semibold">{{ subscription.name }}</h2>
+    <h2 class="text-lg font-semibold">Subscription Details</h2>
     <p class="text-sm md:text-lg">You'll see a <span class="font-semibold">${{ profile.subscription.amount|floatformat:2 }}</span> charge from us every month on the <span class="font-semibold">{{ subscription.start_date|date:'jS' }}</span>.</p>
 </section>
 <section id="unit-list" class="flex flex-col gap-4">
@@ -10,7 +10,7 @@
             <thead class="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
                 <tr>
                     <th scope="col" class="px-6 py-3">
-                        Unit
+                        Name
                     </th>
                     <th scope="col" class="px-6 py-3">
                         Tier
@@ -40,13 +40,13 @@
 </section>
 <section id="transactions" class="flex flex-col gap-4">
     <h3 class="font-semibold">Transactions</h3>
-    <div class="rounded border p-4">
-        {% if not profile.subscription.arbTransactions %}
-        <p>No transactions yet.</p>
-        {% else %}
-        {% for t in profile.subscription.arbTransactions %}<p>{{ t.payNum }}: {{ t.response }}</p>{% endfor %}
-        {% endif %}
-    </div>
+    <ul class="rounded border p-4 bg-gray-50 dark:bg-gray-600">
+        {% for t in profile.subscription.arbTransactions %}
+        <li>{{ t.payNum }}: {{ t.response }}</li>
+        {% empty %}
+        <li>No transactions yet.</li>
+        {% endfor %}
+    </ul>
 </section>
 <section id="buttons" class="flex flex-col items-center gap-4">
     <button class="group w-full cursor-pointer rounded border border-current bg-gray-100 p-2 text-center text-red-700 transition-colors duration-300 ease-in-out hover:bg-red-100" type="button" hx-get="{{ subscription.get_delete_url }}">

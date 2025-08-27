@@ -32,7 +32,7 @@ class CustomerDashboardView(
         if not customer.is_subscribed:
             messages.add_message(
                 request,
-                messages.WARNING,
+                messages.ERROR,
                 "You aren't subscribed! You can't access your units until you subscribe.",
             )
         return super().get(request, *args, **kwargs)
@@ -82,10 +82,13 @@ class CustomerSubscriptionView(
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         customer = Customer.objects.get(user=self.request.user)
         context["customer"] = customer
-        context["subscription"] = CustomerSubscription.objects.get(
-            customer=customer
-        )
         context["title"] = f"{customer.user.first_name}'s Subscription"
+        try:
+            context["subscription"] = CustomerSubscription.objects.get(
+                customer=customer
+            )
+        except CustomerSubscription.DoesNotExist:
+            context["subscription"] = None
         return context
 
 

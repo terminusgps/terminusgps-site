@@ -325,6 +325,8 @@ class CustomerSubscription(models.Model):
         response = anet_subscriptions.get_subscription_status(
             subscription_id=self.pk
         )
+        print(f"{response = }")
+        print(f"{response.status = }")
         if response is not None and hasattr(response, "status"):
             return str(response.status)
 

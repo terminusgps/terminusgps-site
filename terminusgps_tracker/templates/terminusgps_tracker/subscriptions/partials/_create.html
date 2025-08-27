@@ -1,4 +1,4 @@
-<form hx-target="this" class="group group flex flex-col gap-4" hx-post="{% url 'tracker:create subscription' %}" method="post">
+<form class="group group flex flex-col gap-4" hx-post="{% url 'tracker:create subscription' %}" method="post" hx-target="#subscription">
     {% with customer.units.count as num_units %}
     {% if form.non_field_errors %}<div class="inset-shadow w-full animate-jiggle rounded border border-current bg-red-200 p-2 text-center text-red-600">{{ form.non_field_errors }}</div>{% endif %}
     {% csrf_token %}
@@ -7,8 +7,6 @@
     <section id="info">
         {% if num_units != 0 %}
         <p>You're about to subscribe with {{ num_units }} registered unit{{ num_units|pluralize }}.</p>
-        <p>You'll be charged ${{ grand_total|floatformat:2 }} every month on the {% now 'jS' %}.</p>
-        <br>
         <p>Subtotal: ${{ sub_total|floatformat:2 }}</p>
         <p>Grand Total: ${{ grand_total|floatformat:2 }}</p>
         {% else %}

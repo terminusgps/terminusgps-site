@@ -143,6 +143,7 @@ class CustomerSubscriptionCreateView(
             subscription.pk = int(response.subscriptionId)
             subscription.save()
             subscription.refresh_status()
+            subscription.save()
             return HttpResponseRedirect(
                 reverse("tracker:create subscription success")
             )
