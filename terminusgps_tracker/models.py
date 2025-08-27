@@ -2,6 +2,7 @@ import datetime
 import decimal
 
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.db import models, transaction
@@ -59,6 +60,20 @@ class Customer(models.Model):
             cache.set(cache_key, response, timeout=60 * 2)
             return response
 
+    def get_wialon_account_days(
+        self, session: WialonSession | None = None
+    ) -> int:
+        """Returns the number of days on the customer's Wialon account."""
+        assert self.wialon_resource_id, "Wialon resource id wasn't set."
+        if session is not None:
+            factory = WialonObjectFactory(session)
+            account = factory.get("account", self.wialon_resource_id)
+            return int(account.get_data().get("daysCounter"))
+        with WialonSession(token=settings.WIALON_TOKEN) as session:
+            factory = WialonObjectFactory(session)
+            account = factory.get("account", self.wialon_resource_id)
+            return int(account.get_data().get("daysCounter"))
+
     @property
     def is_subscribed(self) -> bool:
         """Whether or not the customer is subscribed."""
@@ -68,11 +83,6 @@ class Customer(models.Model):
             return status == active
         except CustomerSubscription.DoesNotExist:
             return False
-
-    @property
-    def num_units(self) -> int:
-        """Total number of assigned units."""
-        return CustomerWialonUnit.objects.filter(customer=self).count()
 
 
 class CustomerWialonUnit(models.Model):
@@ -314,7 +324,17 @@ class CustomerSubscription(models.Model):
             },
         )
 
+    def get_update_url(self) -> str:
+        return reverse(
+            "tracker:update subscription",
+            kwargs={
+                "customer_pk": self.customer.pk,
+                "subscription_pk": self.pk,
+            },
+        )
+
     def get_authorizenet_profile(self, include_transactions: bool = False):
+        """Returns the subscription profile from the Authorizenet API."""
         response = anet_subscriptions.get_subscription(
             subscription_id=self.pk, include_transactions=include_transactions
         )
@@ -325,8 +345,6 @@ class CustomerSubscription(models.Model):
         response = anet_subscriptions.get_subscription_status(
             subscription_id=self.pk
         )
-        print(f"{response = }")
-        print(f"{response.status = }")
         if response is not None and hasattr(response, "status"):
             return str(response.status)
 

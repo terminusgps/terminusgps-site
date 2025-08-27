@@ -131,7 +131,9 @@ class CustomerShippingAddressDeleteView(
                 customer_profile_id=customer.authorizenet_profile_id,
                 customer_address_profile_id=address.pk,
             )
-            return super().form_valid(form=form)
+            response = super().form_valid(form=form)
+            response.headers["HX-Retarget"] = "#address-list"
+            return response
         except AuthorizenetControllerExecutionError as e:
             match e.code:
                 case _:

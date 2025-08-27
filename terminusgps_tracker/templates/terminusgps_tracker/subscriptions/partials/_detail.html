@@ -1,5 +1,5 @@
 {% load tz %}
-<section id="info" class="text-center flex flex-col gap-4">
+<section id="info" class="flex flex-col gap-4 text-center">
     <h2 class="text-lg font-semibold">Subscription Details</h2>
     <p class="text-sm md:text-lg">You'll see a <span class="font-semibold">${{ profile.subscription.amount|floatformat:2 }}</span> charge from us every month on the <span class="font-semibold">{{ subscription.start_date|date:'jS' }}</span>.</p>
 </section>
@@ -40,7 +40,7 @@
 </section>
 <section id="transactions" class="flex flex-col gap-4">
     <h3 class="font-semibold">Transactions</h3>
-    <ul class="rounded border p-4 bg-gray-50 dark:bg-gray-600">
+    <ul class="rounded border bg-gray-50 p-4 dark:bg-gray-600">
         {% for t in profile.subscription.arbTransactions %}
         <li>{{ t.payNum }}: {{ t.response }}</li>
         {% empty %}
@@ -48,8 +48,16 @@
         {% endfor %}
     </ul>
 </section>
-<section id="buttons" class="flex flex-col items-center gap-4">
-    <button class="group w-full cursor-pointer rounded border border-current bg-gray-100 p-2 text-center text-red-700 transition-colors duration-300 ease-in-out hover:bg-red-100" type="button" hx-get="{{ subscription.get_delete_url }}">
+<section id="buttons" class="flex flex-col items-center gap-2">
+    <button class="group w-full cursor-pointer rounded border border-current bg-gray-200 p-2 text-center text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-100" type="button" hx-get="{{ subscription.get_update_url }}">
+        <div class="flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden size-6 animate-spin group-[.htmx-request]:flex">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+            <p>Update</p>
+        </div>
+    </button>
+    <button class="group w-full cursor-pointer rounded border border-current bg-red-200 p-2 text-center text-red-700 transition-colors duration-300 ease-in-out hover:bg-red-100" type="button" hx-get="{{ subscription.get_delete_url }}">
         <div class="flex items-center justify-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden size-6 animate-spin group-[.htmx-request]:flex">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />

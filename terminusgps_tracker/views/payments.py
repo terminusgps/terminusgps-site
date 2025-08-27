@@ -153,7 +153,9 @@ class CustomerPaymentMethodDeleteView(
                 customer_profile_id=customer.authorizenet_profile_id,
                 customer_payment_profile_id=payment.pk,
             )
-            return super().form_valid(form=form)
+            response = super().form_valid(form=form)
+            response.headers["HX-Retarget"] = "#payment-list"
+            return response
         except AuthorizenetControllerExecutionError as e:
             match e.code:
                 case "E00105":

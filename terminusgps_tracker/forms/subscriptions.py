@@ -33,20 +33,6 @@ class CustomerShippingAddressChoiceField(forms.ModelChoiceField):
         return str(obj)
 
 
-class CustomerSubscriptionCreationForm(forms.Form):
-    def __init__(self, customer: Customer, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.fields["address"].queryset = customer.addresses.all()
-        self.fields["payment"].queryset = customer.payments.all()
-
-    payment = CustomerPaymentMethodChoiceField(
-        empty_label=None, label="Payment Method", queryset=None
-    )
-    address = CustomerShippingAddressChoiceField(
-        empty_label=None, label="Shipping Address", queryset=None
-    )
-
-
 class CustomerSubscriptionUpdateForm(forms.Form):
     def __init__(self, customer: Customer, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

@@ -15,16 +15,17 @@ from django.views.generic import (
     CreateView,
     DeleteView,
     DetailView,
-    FormView,
     TemplateView,
+    UpdateView,
 )
 from terminusgps.authorizenet import subscriptions as anet_subscriptions
 from terminusgps.authorizenet.controllers import (
     AuthorizenetControllerExecutionError,
 )
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
+from terminusgps.wialon.items import WialonObjectFactory
+from terminusgps.wialon.session import WialonSession
 
-from terminusgps_tracker.forms import CustomerSubscriptionUpdateForm
 from terminusgps_tracker.models import Customer, CustomerSubscription
 from terminusgps_tracker.views.mixins import (
     CustomerAuthenticationRequiredMixin,
@@ -144,6 +145,10 @@ class CustomerSubscriptionCreateView(
             subscription.save()
             subscription.refresh_status()
             subscription.save()
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                factory = WialonObjectFactory(session)
+                account = factory.get("account", customer.wialon_resource_id)
+                account.activate()
             return HttpResponseRedirect(
                 reverse("tracker:create subscription success")
             )
@@ -162,15 +167,31 @@ class CustomerSubscriptionCreateView(
 
 
 class CustomerSubscriptionUpdateView(
-    CustomerAuthenticationRequiredMixin, HtmxTemplateResponseMixin, FormView
+    CustomerAuthenticationRequiredMixin, HtmxTemplateResponseMixin, UpdateView
 ):
     content_type = "text/html"
-    form_class = CustomerSubscriptionUpdateForm
+    context_object_name = "subscription"
+    fields = ["payment", "address"]
     http_method_names = ["get", "post"]
+    model = CustomerSubscription
     partial_template_name = (
         "terminusgps_tracker/subscriptions/partials/_update.html"
     )
+    pk_url_kwarg = "subscription_pk"
+    queryset = CustomerSubscription.objects.none()
     template_name = "terminusgps_tracker/subscriptions/update.html"
+
+    def get_form(self, form_class=None):
+        form = super().get_form()
+        form.fields["payment"].widget.attrs.update(
+            {"class": settings.DEFAULT_FIELD_CLASS}
+        )
+        form.fields["payment"].label = "Payment Method"
+        form.fields["address"].widget.attrs.update(
+            {"class": settings.DEFAULT_FIELD_CLASS}
+        )
+        form.fields["address"].label = "Shipping Address"
+        return form
 
     def get_queryset(
         self,
@@ -180,32 +201,27 @@ class CustomerSubscriptionUpdateView(
         ).select_related("address", "customer", "payment")
 
     def get_success_url(self) -> str:
-        return reverse(
-            "tracker:detail subscription",
-            kwargs={
-                "customer_pk": self.kwargs["customer_pk"],
-                "subscription_pk": self.kwargs["subscription_pk"],
-            },
-        )
+        return self.get_object().get_absolute_url()
 
-    def form_valid(self, form: CustomerSubscriptionUpdateForm) -> HttpResponse:
+    def form_valid(self, form: forms.ModelForm) -> HttpResponse:
         try:
-            customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
+            response = super().form_valid(form=form)
             payment = form.cleaned_data["payment"]
             address = form.cleaned_data["address"]
+            sub = self.get_object()
             anet_subscriptions.update_subscription(
-                subscription_id=int(self.kwargs["subscription_pk"]),
+                subscription_id=sub.pk,
                 subscription_obj=apicontractsv1.ARBSubscriptionType(
                     profile=apicontractsv1.customerProfileIdType(
                         customerProfileId=str(
-                            customer.authorizenet_profile_id
+                            sub.customer.authorizenet_profile_id
                         ),
                         customerPaymentProfileId=str(payment.pk),
                         customerAddressId=str(address.pk),
                     )
                 ),
             )
-            return HttpResponseRedirect(self.get_success_url())
+            return response
         except AuthorizenetControllerExecutionError as e:
             match e.code:
                 case _:
@@ -282,9 +298,22 @@ class CustomerSubscriptionDeleteView(
 
     def form_valid(self, form: forms.Form) -> HttpResponse:
         try:
-            anet_subscriptions.cancel_subscription(
-                subscription_id=self.get_object().pk
-            )
+            sub = self.get_object()
+            anet_subscriptions.cancel_subscription(subscription_id=sub.pk)
+            remaining_days = sub.get_remaining_days()
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                account_days = sub.customer.get_wialon_account_days(session)
+                account_id = sub.customer.wialon_resource_id
+                factory = WialonObjectFactory(session)
+                account = factory.get("account", account_id)
+                account.set_flags(0x20)
+                account.do_payment(
+                    balance_update=decimal.Decimal("0.00"),
+                    days_update=remaining_days
+                    if remaining_days < account_days
+                    else 0,
+                    description=f"Canceled {sub.name}",
+                )
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
             match e.code:
