@@ -1,6 +1,7 @@
 import datetime
 import decimal
 
+from authorizenet import apicontractsv1
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -11,9 +12,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from terminusgps.authorizenet import profiles as anet_profiles
 from terminusgps.authorizenet import subscriptions as anet_subscriptions
-from terminusgps.authorizenet.controllers import (
-    AuthorizenetControllerExecutionError,
-)
 from terminusgps.wialon.items import WialonObjectFactory
 from terminusgps.wialon.items.unit import WialonUnit
 from terminusgps.wialon.session import WialonSession
@@ -130,29 +128,38 @@ class CustomerPaymentMethod(models.Model):
     )
     """Associated customer."""
 
+    cc_type = models.CharField(
+        max_length=12, default=None, null=True, blank=True
+    )
+    """Credit card type."""
+    cc_last_4 = models.CharField(
+        max_length=4, default=None, null=True, blank=True
+    )
+    """Credit card last 4 digits."""
+
     class Meta:
         verbose_name = _("customer payment method")
         verbose_name_plural = _("customer payment methods")
 
     def __str__(self) -> str:
-        """Returns '<CARD_TYPE> ending in <LAST_4>' or 'Payment Method #<ID>'."""
-        try:
-            payment_str = f"Payment Method #{self.pk}"
-            profile = self.get_authorizenet_profile()
-            if profile is not None and all(
+        return (
+            f"{self.cc_type} ending in {self.cc_last_4}"
+            if not self._needs_authorizenet_hydration()
+            else f"Payment Method #{self.pk}"
+        )
+
+    def save(self, **kwargs) -> None:
+        if self._needs_authorizenet_hydration():
+            credit_card = self._get_authorizenet_cc()
+            if credit_card is not None and all(
                 [
-                    hasattr(profile, "paymentProfile"),
-                    hasattr(profile.paymentProfile, "payment"),
-                    hasattr(profile.paymentProfile.payment, "creditCard"),
+                    hasattr(credit_card, "cardType"),
+                    hasattr(credit_card, "cardNumber"),
                 ]
             ):
-                cc = profile.paymentProfile.payment.creditCard
-                cc_type = str(cc.cardType)
-                cc_num = str(cc.cardNumber)
-                payment_str = f"{cc_type} ending in {cc_num[-4:]}"
-            return payment_str
-        except AuthorizenetControllerExecutionError:
-            return payment_str
+                self.cc_type = str(credit_card.cardType)
+                self.cc_last_4 = str(credit_card.cardNumber)[-4:]
+        return super().save(**kwargs)
 
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the payment method's detail view."""
@@ -179,17 +186,37 @@ class CustomerPaymentMethod(models.Model):
         assert self.customer.authorizenet_profile_id is not None, (
             "Customer authorizenet profile id wasn't set."
         )
-
-        cache_key: str = f"CustomerPaymentMethod:{self.pk}:get_authorizenet_profile:include_issuer_info_{include_issuer_info}"
-        if cached_response := cache.get(cache_key):
-            return cached_response
-        response = anet_profiles.get_customer_payment_profile(
+        return anet_profiles.get_customer_payment_profile(
             customer_profile_id=self.customer.authorizenet_profile_id,
             customer_payment_profile_id=self.pk,
             include_issuer_info=include_issuer_info,
         )
-        cache.set(cache_key, response, timeout=60 * 15)
-        return response
+
+    def _needs_authorizenet_hydration(self) -> bool:
+        return not all([self.cc_type, self.cc_last_4])
+
+    def _get_authorizenet_cc(self) -> apicontractsv1.creditCardType | None:
+        response = self.get_authorizenet_profile()
+        if response is not None and all(
+            [
+                hasattr(response, "paymentProfile"),
+                hasattr(response.paymentProfile, "payment"),
+                hasattr(response.paymentProfile.payment, "creditCard"),
+            ]
+        ):
+            return response.paymentProfile.payment.creditCard
+
+    def _get_authorizenet_cc_type(
+        self, cc: apicontractsv1.creditCardType | None = None
+    ) -> str | None:
+        if cc is not None and hasattr(cc, "cardType"):
+            return str(cc.cardType)
+
+    def _get_authorizenet_cc_last_4(
+        self, cc: apicontractsv1.creditCardType | None = None
+    ) -> str | None:
+        if cc is not None and hasattr(cc, "cardNumber"):
+            return str(cc.cardNumber)[-4:]
 
 
 class CustomerShippingAddress(models.Model):
@@ -204,14 +231,24 @@ class CustomerShippingAddress(models.Model):
     )
     """Associated customer."""
 
+    street = models.CharField(
+        max_length=64, default=None, null=True, blank=True
+    )
+
     class Meta:
         verbose_name = _("customer shipping address")
         verbose_name_plural = _("customer shipping addresses")
 
     def __str__(self) -> str:
-        """Returns '<STREET>' or 'Shipping Address #<pk>'."""
-        try:
-            address_str = f"Shipping Address #{self.pk}"
+        """Returns '<STREET>' or 'Shipping Address #<ID>'."""
+        return (
+            self.street
+            if not self._needs_authorizenet_hydration()
+            else f"Shipping Address #{self.pk}"
+        )
+
+    def save(self, **kwargs) -> None:
+        if self._needs_authorizenet_hydration():
             response = self.get_authorizenet_profile()
             if response is not None and all(
                 [
@@ -219,10 +256,8 @@ class CustomerShippingAddress(models.Model):
                     hasattr(response.address, "address"),
                 ]
             ):
-                address_str = str(response.address.address)
-            return address_str
-        except AuthorizenetControllerExecutionError:
-            return address_str
+                self.street = str(response.address.address)
+        return super().save(**kwargs)
 
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the shipping address' detail view."""
@@ -249,18 +284,13 @@ class CustomerShippingAddress(models.Model):
         assert self.customer.authorizenet_profile_id, (
             "Customer authorizenet profile id wasn't set."
         )
-
-        cache_key: str = (
-            f"CustomerShippingAddress:{self.pk}:get_authorizenet_profile"
-        )
-        if cached_response := cache.get(cache_key):
-            return cached_response
-        response = anet_profiles.get_customer_shipping_address(
+        return anet_profiles.get_customer_shipping_address(
             customer_profile_id=self.customer.authorizenet_profile_id,
             customer_address_profile_id=self.pk,
         )
-        cache.set(cache_key, response, timeout=60 * 15)
-        return response
+
+    def _needs_authorizenet_hydration(self) -> bool:
+        return not all([self.street])
 
 
 class CustomerSubscription(models.Model):
@@ -307,6 +337,7 @@ class CustomerSubscription(models.Model):
         return self.name
 
     def get_absolute_url(self) -> str:
+        """Returns a URL pointing to the subscription's detail view."""
         return reverse(
             "tracker:detail subscription",
             kwargs={
@@ -316,6 +347,7 @@ class CustomerSubscription(models.Model):
         )
 
     def get_delete_url(self) -> str:
+        """Returns a URL pointing to the subscription's delete view."""
         return reverse(
             "tracker:delete subscription",
             kwargs={
@@ -325,6 +357,7 @@ class CustomerSubscription(models.Model):
         )
 
     def get_update_url(self) -> str:
+        """Returns a URL pointing to the subscription's update view."""
         return reverse(
             "tracker:update subscription",
             kwargs={
