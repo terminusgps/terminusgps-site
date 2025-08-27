@@ -11,7 +11,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import CreateView, DeleteView, DetailView, FormView
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    FormView,
+    TemplateView,
+)
 from terminusgps.authorizenet import subscriptions as anet_subscriptions
 from terminusgps.authorizenet.controllers import (
     AuthorizenetControllerExecutionError,
@@ -25,14 +31,30 @@ from terminusgps_tracker.views.mixins import (
 )
 
 
+class CustomerSubscriptionCreateSuccessView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
+):
+    content_type = "text/html"
+    http_method_names = ["get"]
+    partial_template_name = (
+        "terminusgps_tracker/subscriptions/partials/_create_success.html"
+    )
+    template_name = "terminusgps_tracker/subscriptions/create_success.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["customer"] = Customer.objects.get(user=self.request.user)
+        return context
+
+
 class CustomerSubscriptionCreateView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, CreateView
 ):
     content_type = "text/html"
     fields = ["payment", "address"]
     http_method_names = ["get", "post"]
-    model = CustomerSubscription
     login_url = reverse_lazy("login")
+    model = CustomerSubscription
     partial_template_name = (
         "terminusgps_tracker/subscriptions/partials/_create.html"
     )
@@ -72,19 +94,6 @@ class CustomerSubscriptionCreateView(
             context["grand_total"] = None
         return context
 
-    def get_success_url(
-        self, subscription: CustomerSubscription | None = None
-    ) -> str:
-        if not subscription:
-            return reverse("tracker:subscription")
-        return reverse(
-            "tracker:detail subscription",
-            kwargs={
-                "customer_pk": subscription.customer.pk,
-                "subscription_pk": subscription.pk,
-            },
-        )
-
     def form_valid(self, form: forms.ModelForm) -> HttpResponse:
         customer = Customer.objects.get(user=self.request.user)
         if customer.units.count() == 0:
@@ -106,32 +115,37 @@ class CustomerSubscriptionCreateView(
                 customer=customer,
                 address=form.cleaned_data["address"],
                 payment=form.cleaned_data["payment"],
+                name=f"{customer.user.first_name}'s Subscription",
+                start_date=timezone.now(),
             )
 
             response = anet_subscriptions.create_subscription(
                 subscription_obj=apicontractsv1.ARBSubscriptionType(
-                    name=f"{customer.user.first_name}'s Subscription",
+                    name=subscription.name,
                     paymentSchedule=apicontractsv1.paymentScheduleType(
                         interval=apicontractsv1.paymentScheduleTypeInterval(
                             length=1,
                             unit=apicontractsv1.ARBSubscriptionUnitEnum.months,
                         ),
-                        startDate=timezone.now(),
+                        startDate=subscription.start_date,
                         totalOccurrences=9999,
                         trialOccurrences=0,
                     ),
                     amount=subscription.get_grand_total(),
                     trialAmount=decimal.Decimal("0.00"),
                     profile=apicontractsv1.customerProfileIdType(
-                        customerProfileId=customer_profile_id,
-                        customerPaymentProfileId=payment_profile_id,
-                        customerAddressId=address_profile_id,
+                        customerProfileId=str(customer_profile_id),
+                        customerPaymentProfileId=str(payment_profile_id),
+                        customerAddressId=str(address_profile_id),
                     ),
                 )
             )
             subscription.pk = int(response.subscriptionId)
             subscription.save()
-            return HttpResponseRedirect(self.get_success_url(subscription))
+            subscription.refresh_status()
+            return HttpResponseRedirect(
+                reverse("tracker:create subscription success")
+            )
         except AuthorizenetControllerExecutionError as e:
             match e.code:
                 case _:
@@ -222,6 +236,7 @@ class CustomerSubscriptionDetailView(
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         subscription: CustomerSubscription = kwargs["object"]
+        context["unit_list"] = subscription.customer.units.all()
         context["profile"] = anet_subscriptions.get_subscription(
             subscription_id=subscription.pk, include_transactions=True
         )
@@ -248,7 +263,14 @@ class CustomerSubscriptionDeleteView(
     )
     pk_url_kwarg = "subscription_pk"
     queryset = CustomerSubscription.objects.none()
+    success_url = reverse_lazy("tracker:create subscription")
     template_name = "terminusgps_tracker/subscriptions/delete.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        if kwargs.get("object"):
+            context["remaining_days"] = kwargs["object"].get_remaining_days()
+        return context
 
     def get_queryset(
         self,
@@ -275,9 +297,3 @@ class CustomerSubscriptionDeleteView(
                         ),
                     )
             return self.form_invalid(form=form)
-
-    def get_success_url(self) -> str:
-        return reverse(
-            "tracker:account",
-            kwargs={"customer_pk": self.kwargs["customer_pk"]},
-        )

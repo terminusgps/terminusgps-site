@@ -1,29 +1,60 @@
 {% load tz %}
-<section id="info" class="flex flex-col gap-4">
-    <h2 class="text-center text-lg font-semibold">{{ subscription.name }}</h2>
-    <section id="line-items" hx-get="{% url 'tracker:subscription items' subscription.customer.pk subscription.pk %}" hx-target="this" hx-trigger="load">
-    </section>
+<section id="info" class="text-center flex flex-col gap-4">
+    <h2 class="text-lg font-semibold">{{ subscription.name }}</h2>
+    <p class="text-sm md:text-lg">You'll see a <span class="font-semibold">${{ profile.subscription.amount|floatformat:2 }}</span> charge from us every month on the <span class="font-semibold">{{ subscription.start_date|date:'jS' }}</span>.</p>
 </section>
-<section id="total" class="mx-2 flex flex-col items-center gap-2 text-center text-pretty">
-    <p>Sub Total: ${{ sub_total }}</p>
-    <p class="font-semibold">Grand Total: ${{ grand_total }}</p>
-    <p class="font-light">(You'll be charged this amount every month at around {{ start_date|date:'P' }} on the {{ start_date|date:'jS' }})</p>
+<section id="unit-list" class="flex flex-col gap-4">
+    <h3 class="font-semibold">Units</h3>
+    <div class="relative overflow-x-auto rounded border">
+        <table class="w-full rounded text-left text-sm text-gray-500 dark:text-gray-400">
+            <thead class="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">
+                        Unit
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Tier
+                    </th>
+                    <th scope="col" class="px-6 py-3">
+                        Price
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for unit in unit_list %}
+                <tr class="border-gray-600 bg-white dark:border-gray-700 dark:bg-gray-800">
+                    <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 dark:text-white">
+                        {{ unit.name }}
+                    </th>
+                    <td class="px-6 py-4">
+                        {{ unit.tier }}
+                    </td>
+                    <td class="px-6 py-4">
+                        ${{ unit.tier.price|floatformat:2 }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </section>
-<section id="buttons" class="flex flex-col items-center gap-2">
-        <button class="group flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="button" hx-get="{{ subscription.get_update_url }}">
-            <div class="flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden size-6 animate-spin group-[.htmx-request]:flex">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-                </svg>
-                <p>Update</p>
-            </div>
-        </button>
-        <button class="group w-full cursor-pointer rounded border border-current bg-gray-100 p-2 text-center text-red-700 transition-colors duration-300 ease-in-out hover:bg-red-100" type="button" hx-get="{{ subscription.get_delete_url }}">
-            <div class="flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden size-6 animate-spin group-[.htmx-request]:flex">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-                </svg>
-                <p>Cancel</p>
-            </div>
-        </button>
+<section id="transactions" class="flex flex-col gap-4">
+    <h3 class="font-semibold">Transactions</h3>
+    <div class="rounded border p-4">
+        {% if not profile.subscription.arbTransactions %}
+        <p>No transactions yet.</p>
+        {% else %}
+        {% for t in profile.subscription.arbTransactions %}<p>{{ t.payNum }}: {{ t.response }}</p>{% endfor %}
+        {% endif %}
+    </div>
+</section>
+<section id="buttons" class="flex flex-col items-center gap-4">
+    <button class="group w-full cursor-pointer rounded border border-current bg-gray-100 p-2 text-center text-red-700 transition-colors duration-300 ease-in-out hover:bg-red-100" type="button" hx-get="{{ subscription.get_delete_url }}">
+        <div class="flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden size-6 animate-spin group-[.htmx-request]:flex">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+            <p>Cancel</p>
+        </div>
+    </button>
 </section>

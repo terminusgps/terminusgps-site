@@ -7,7 +7,7 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
-from terminusgps_tracker.models import Customer
+from terminusgps_tracker.models import Customer, CustomerSubscription
 
 
 class CustomerDashboardView(
@@ -78,24 +78,14 @@ class CustomerSubscriptionView(
     raise_exception = False
     template_name = "terminusgps_tracker/customers/subscription.html"
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        customer = Customer.objects.get(user=self.request.user)
-        if customer.payments.count() == 0:
-            messages.add_message(
-                request, messages.WARNING, "Please add a payment method"
-            )
-        if customer.addresses.count() == 0:
-            messages.add_message(
-                request, messages.WARNING, "Please add a shipping address"
-            )
-        return super().get(request, *args, **kwargs)
-
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["customer"] = Customer.objects.get(user=self.request.user)
-        context["title"] = (
-            f"{context['customer'].user.first_name}'s Subscription"
+        customer = Customer.objects.get(user=self.request.user)
+        context["customer"] = customer
+        context["subscription"] = CustomerSubscription.objects.get(
+            customer=customer
         )
+        context["title"] = f"{customer.user.first_name}'s Subscription"
         return context
 
 

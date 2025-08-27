@@ -296,30 +296,35 @@ class CustomerSubscription(models.Model):
         """Returns the subscription name."""
         return self.name
 
+    def get_absolute_url(self) -> str:
+        return reverse(
+            "tracker:detail subscription",
+            kwargs={
+                "customer_pk": self.customer.pk,
+                "subscription_pk": self.pk,
+            },
+        )
+
+    def get_delete_url(self) -> str:
+        return reverse(
+            "tracker:delete subscription",
+            kwargs={
+                "customer_pk": self.customer.pk,
+                "subscription_pk": self.pk,
+            },
+        )
+
     def get_authorizenet_profile(self, include_transactions: bool = False):
-        cache_key: str = f"CustomerSubscription:{self.pk}:get_authorizenet_status:include_transactions_{include_transactions}"
-        if cached_response := cache.get(cache_key):
-            return cached_response
         response = anet_subscriptions.get_subscription(
             subscription_id=self.pk, include_transactions=include_transactions
         )
-        cache.set(cache_key, response, timeout=60 * 3)
         return response
 
     def get_authorizenet_status(self) -> str | None:
         """Returns the current subscription status from the Authorizenet API."""
-        cache_key: str = (
-            f"CustomerSubscription:{self.pk}:get_authorizenet_status"
-        )
-        if cached_response := cache.get(cache_key):
-            if cached_response is not None and hasattr(
-                cached_response, "status"
-            ):
-                return str(cached_response.status)
         response = anet_subscriptions.get_subscription_status(
             subscription_id=self.pk
         )
-        cache.set(cache_key, response, timeout=60 * 3)
         if response is not None and hasattr(response, "status"):
             return str(response.status)
 

@@ -23,17 +23,22 @@ urlpatterns = [
         name="create subscription",
     ),
     path(
-        "subscriptions/detail/<int:customer_pk>/<int:subcription_pk>/",
+        "subscriptions/create/success/",
+        views.CustomerSubscriptionCreateView.as_view(),
+        name="create subscription success",
+    ),
+    path(
+        "subscriptions/detail/<int:customer_pk>/<int:subscription_pk>/",
         views.CustomerSubscriptionDetailView.as_view(),
         name="detail subscription",
     ),
     path(
-        "subscriptions/update/<int:customer_pk>/<int:subcription_pk>/",
+        "subscriptions/update/<int:customer_pk>/<int:subscription_pk>/",
         views.CustomerSubscriptionUpdateView.as_view(),
         name="update subscription",
     ),
     path(
-        "subscriptions/delete/<int:customer_pk>/<int:subcription_pk>/",
+        "subscriptions/delete/<int:customer_pk>/<int:subscription_pk>/",
         views.CustomerSubscriptionDeleteView.as_view(),
         name="delete subscription",
     ),
