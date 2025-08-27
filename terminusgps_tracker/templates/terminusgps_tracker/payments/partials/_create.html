@@ -1,11 +1,6 @@
 <form class="flex flex-col gap-4" action="{% url 'tracker:create payment' %}" method="post" hx-boost="true">
     {% if form.non_field_errors %}<div class="inset-shadow w-full animate-jiggle rounded border border-current bg-red-200 p-2 text-center text-red-600">{{ form.non_field_errors }}</div>{% endif %}
     {% csrf_token %}
-    <div class="flex items-center gap-2">
-        {{ form.first_name.as_field_group }}
-        {{ form.last_name.as_field_group }}
-    </div>
-    {{ form.phone.as_field_group }}
     {{ form.address.as_field_group }}
     {{ form.credit_card.as_field_group }}
     <div class="flex flex-col gap-2">

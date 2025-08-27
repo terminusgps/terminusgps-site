@@ -3,7 +3,7 @@ import typing
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
@@ -29,29 +29,11 @@ class CustomerDashboardView(
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         customer = Customer.objects.get(user=self.request.user)
-        if customer.units.count() == 0:
-            messages.add_message(
-                request,
-                messages.WARNING,
-                f"You don't have any units registered! Click <a class='decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200' href='{reverse('tracker:units')}'>here</a> to add one.",
-            )
-        if customer.payments.count() == 0:
-            messages.add_message(
-                request,
-                messages.WARNING,
-                f"You don't have any payment methods! Click <a class='decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200' href='{reverse('tracker:create payment')}'>here</a> to add one.",
-            )
-        if customer.payments.count() == 0:
-            messages.add_message(
-                request,
-                messages.WARNING,
-                f"You don't have any shipping addresses! Click <a class='decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200' href='{reverse('tracker:create address')}'>here</a> to add one.",
-            )
         if not customer.is_subscribed:
             messages.add_message(
                 request,
                 messages.WARNING,
-                f"You aren't subscribed yet! Click <a class='decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200' href='{reverse('tracker:subscription')}'>here</a> to subscribe.",
+                "You aren't subscribed! You can't access your units until you subscribe.",
             )
         return super().get(request, *args, **kwargs)
 

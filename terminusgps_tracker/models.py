@@ -10,6 +10,9 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from terminusgps.authorizenet import profiles as anet_profiles
 from terminusgps.authorizenet import subscriptions as anet_subscriptions
+from terminusgps.authorizenet.controllers import (
+    AuthorizenetControllerExecutionError,
+)
 from terminusgps.wialon.items import WialonObjectFactory
 from terminusgps.wialon.items.unit import WialonUnit
 from terminusgps.wialon.session import WialonSession
@@ -48,21 +51,13 @@ class Customer(models.Model):
         cache_key: str = f"Customer:{self.pk}:get_authorizenet_profile:include_issuer_info_{include_issuer_info}"
         if cached_response := cache.get(cache_key):
             return cached_response
-        response = anet_profiles.get_customer_profile(
-            customer_profile_id=self.authorizenet_profile_id,
-            include_issuer_info=include_issuer_info,
-        )
-        cache.set(cache_key, response, timeout=60 * 2)
-        return response
-
-    def get_unit_price_sum(self) -> decimal.Decimal:
-        """Returns the sum of all customer unit subscription tiers as a :py:obj:`~decimal.Decimal`."""
-        aggregate = (
-            CustomerWialonUnit.objects.filter(customer=self)
-            .select_related("tier")
-            .aggregate(models.Sum("tier__price"))
-        )
-        return round(aggregate["tier__price__sum"], ndigits=2)
+        else:
+            response = anet_profiles.get_customer_profile(
+                customer_profile_id=self.authorizenet_profile_id,
+                include_issuer_info=include_issuer_info,
+            )
+            cache.set(cache_key, response, timeout=60 * 2)
+            return response
 
     @property
     def is_subscribed(self) -> bool:
@@ -76,6 +71,7 @@ class Customer(models.Model):
 
     @property
     def num_units(self) -> int:
+        """Total number of assigned units."""
         return CustomerWialonUnit.objects.filter(customer=self).count()
 
 
@@ -129,8 +125,24 @@ class CustomerPaymentMethod(models.Model):
         verbose_name_plural = _("customer payment methods")
 
     def __str__(self) -> str:
-        """Returns 'Payment Method #<pk>'."""
-        return f"Payment Method #{self.pk}"
+        """Returns '<CARD_TYPE> ending in <LAST_4>' or 'Payment Method #<ID>'."""
+        try:
+            payment_str = f"Payment Method #{self.pk}"
+            profile = self.get_authorizenet_profile()
+            if profile is not None and all(
+                [
+                    hasattr(profile, "paymentProfile"),
+                    hasattr(profile.paymentProfile, "payment"),
+                    hasattr(profile.paymentProfile.payment, "creditCard"),
+                ]
+            ):
+                cc = profile.paymentProfile.payment.creditCard
+                cc_type = str(cc.cardType)
+                cc_num = str(cc.cardNumber)
+                payment_str = f"{cc_type} ending in {cc_num[-4:]}"
+            return payment_str
+        except AuthorizenetControllerExecutionError:
+            return payment_str
 
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the payment method's detail view."""
@@ -187,8 +199,20 @@ class CustomerShippingAddress(models.Model):
         verbose_name_plural = _("customer shipping addresses")
 
     def __str__(self) -> str:
-        """Returns 'Shipping Address #<pk>'."""
-        return f"Shipping Address #{self.pk}"
+        """Returns '<STREET>' or 'Shipping Address #<pk>'."""
+        try:
+            address_str = f"Shipping Address #{self.pk}"
+            response = self.get_authorizenet_profile()
+            if response is not None and all(
+                [
+                    hasattr(response, "address"),
+                    hasattr(response.address, "address"),
+                ]
+            ):
+                address_str = str(response.address.address)
+            return address_str
+        except AuthorizenetControllerExecutionError:
+            return address_str
 
     def get_absolute_url(self) -> str:
         """Returns a URL pointing to the shipping address' detail view."""
@@ -292,7 +316,6 @@ class CustomerSubscription(models.Model):
                 cached_response, "status"
             ):
                 return str(cached_response.status)
-
         response = anet_subscriptions.get_subscription_status(
             subscription_id=self.pk
         )
@@ -321,6 +344,28 @@ class CustomerSubscription(models.Model):
         """Sets the subscription status to the status returned by the Authorizenet API."""
         if new_status := self.get_authorizenet_status():
             self.status = new_status
+
+    def get_subtotal(self) -> decimal.Decimal:
+        """Calculates and returns a subtotal for the subscription."""
+        unit_qs = CustomerWialonUnit.objects.filter(customer=self.customer)
+        price_agg = unit_qs.aggregate(models.Sum("tier__price"))
+
+        if result := price_agg.get("tier__price__sum"):
+            return result
+        else:
+            raise ValueError(
+                f"Failed to aggregate unit prices for '{self.customer}': '{result}'."
+            )
+
+    def get_grand_total(
+        self, tax_rate: decimal.Decimal = decimal.Decimal("0.0825")
+    ) -> decimal.Decimal:
+        """Calculates and returns a grand total for the subscription based on ``tax_rate``."""
+        try:
+            subtotal = self.get_subtotal()
+            return round(subtotal * (1 + tax_rate), ndigits=2)
+        except ValueError:
+            raise
 
 
 class CustomerSubscriptionTier(models.Model):

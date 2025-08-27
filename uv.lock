@@ -23,30 +23,30 @@ sdist = { url = "https://files.pythonhosted.org/packages/2d/9a/61c151f508a9b3201
 
 [[package]]
 name = "boto3"
-version = "1.40.16"
+version = "1.40.18"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ad/d4/ad261cb17f202082ba8598fd6d1d27eac5d11307ce99e3f5867bc9e376ee/boto3-1.40.16.tar.gz", hash = "sha256:667bc3a9bd1f26579957d95a2612359103c343dd74d44f202d09a155ed4189c6", size = 111944 }
+sdist = { url = "https://files.pythonhosted.org/packages/36/35/a30dc21ca6582358e0ce963f38e85d42ea619f12e7be4101a834c21d749d/boto3-1.40.18.tar.gz", hash = "sha256:64301d39adecc154e3e595eaf0d4f28998ef0a5551f1d033aeac51a9e1a688e5", size = 111994 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f1/ce/6030ebcde6a19920c36d633643811a80e53d2b92a4a125ddf07520b2da66/boto3-1.40.16-py3-none-any.whl", hash = "sha256:4b7fbd2b469d5fa6325f0e90310b2d430c9a35e8a984a9919103e6d248422537", size = 140076 },
+    { url = "https://files.pythonhosted.org/packages/ad/b5/3fc1802eb24aef135c3ba69fff2a9bfcc6a7a8258fb396706b1a6a44de36/boto3-1.40.18-py3-none-any.whl", hash = "sha256:daa776ba1251a7458c9d6c7627873d0c2460c8e8272d35759065580e9193700a", size = 140076 },
 ]
 
 [[package]]
 name = "botocore"
-version = "1.40.16"
+version = "1.40.18"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jmespath" },
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/25/4c/7087a282f10dc2258a107e4a29645678b5d3fa7cbabed05d540370aa8c57/botocore-1.40.16.tar.gz", hash = "sha256:522a8b7e3837667aca978b5b2dd2d12c3834f58f13df3c8d3369070d883d608d", size = 14368291 }
+sdist = { url = "https://files.pythonhosted.org/packages/6a/91/2e745382793fa7d30810a7d5ca3e05f6817b6db07601ca5aaab12720caf9/botocore-1.40.18.tar.gz", hash = "sha256:afd69bdadd8c55cc89d69de0799829e555193a352d87867f746e19020271cc0f", size = 14375007 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/03/5c/81ff55d99c0f38fdcaee693228a6af61486f368fe7e49bc27da1317682b9/botocore-1.40.16-py3-none-any.whl", hash = "sha256:0296a245cb349431279d825522ae70270edf8d8be7b91108fdcc086ea347c0b6", size = 14030380 },
+    { url = "https://files.pythonhosted.org/packages/1a/f5/bd57bf21fdcc4e500cc406ed2c296e626ddd160f0fee2a4932256e5d62d8/botocore-1.40.18-py3-none-any.whl", hash = "sha256:57025c46ca00cf8cec25de07a759521bfbfb3036a0f69b272654a354615dc45f", size = 14039935 },
 ]
 
 [[package]]
@@ -436,16 +436,16 @@ wheels = [
 
 [[package]]
 name = "python-terminusgps"
-version = "42.2.1"
+version = "42.2.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "authorizenet" },
     { name = "django" },
     { name = "python-wialon" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5e/91/99b1448cec8d3c014a7be32ab37dea966a3b16521ecdc682d495697f4b8f/python_terminusgps-42.2.1.tar.gz", hash = "sha256:b2567bdb8bdbf234d84e7a8d3ed42914dd0860d04ff2dde293c909a6679ff2cf", size = 61745 }
+sdist = { url = "https://files.pythonhosted.org/packages/3a/0f/90e69a70af32579f71d8ffab02ec46d80e191d165507a2dc5ea67a4da7b7/python_terminusgps-42.2.4.tar.gz", hash = "sha256:32608b6faa41a0f0416c3f3d4bb4241b838f5e7388a3ed9c7e799b3d655a8959", size = 61739 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4d/72/37d84810bf782952383d3c00325db19cfc6f0df6e784df436088a95918bd/python_terminusgps-42.2.1-py3-none-any.whl", hash = "sha256:9933ba53558d3ceeb62d4d829635a554d6614f77579ea807e6162bd5050304d0", size = 51156 },
+    { url = "https://files.pythonhosted.org/packages/74/eb/c7af365a306db0c7d4bc227a1834ba692f4c4969122f7ed51e1fdc8fe78e/python_terminusgps-42.2.4-py3-none-any.whl", hash = "sha256:ccf8ec6aaa2383e293671580b01824d4f6f79d1813b1c65dd3d49c1869abf944", size = 51146 },
 ]
 
 [[package]]
@@ -612,7 +612,7 @@ requires-dist = [
     { name = "pillow", specifier = "==11.3.0" },
     { name = "psycopg", specifier = ">=3.2.6" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
-    { name = "python-terminusgps", specifier = "==42.2.1" },
+    { name = "python-terminusgps", specifier = "==42.2.4" },
     { name = "python-wialon", specifier = "==1.2.4" },
     { name = "redis", extras = ["hiredis"], specifier = ">=6.4.0" },
 ]

@@ -60,30 +60,39 @@ class CustomerWialonUnitCreateView(
         name: str = form.cleaned_data["name"]
         customer: Customer = Customer.objects.get(user=self.request.user)
 
-        with WialonSession(token=settings.WIALON_TOKEN) as session:
-            unit: WialonUnit | None = get_unit_by_imei(imei, session)
-            if unit is None or not hasattr(unit, "id"):
-                form.add_error(
-                    "imei",
-                    ValidationError(
-                        _(
-                            "Whoops! Couldn't find a unit with IMEI # '%(imei)s'."
+        try:
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                unit: WialonUnit | None = get_unit_by_imei(imei, session)
+                if unit is None or not hasattr(unit, "id"):
+                    form.add_error(
+                        "imei",
+                        ValidationError(
+                            _(
+                                "Whoops! Couldn't find a unit with IMEI # '%(imei)s'."
+                            ),
+                            code="invalid",
+                            params={"imei": form.cleaned_data["imei"]},
                         ),
-                        code="invalid",
-                        params={"imei": form.cleaned_data["imei"]},
-                    ),
-                )
-                return self.form_invalid(form=form)
+                    )
+                    return self.form_invalid(form=form)
 
-            if unit.get_name() != name:
-                unit.set_name(name)
-            CustomerWialonUnit.objects.create(
-                id=unit.id,
-                customer=customer,
-                name=name,
-                tier=CustomerSubscriptionTier.objects.first(),
+                if unit.get_name() != name:
+                    unit.set_name(name)
+                CustomerWialonUnit.objects.create(
+                    id=unit.id,
+                    customer=customer,
+                    name=name,
+                    tier=CustomerSubscriptionTier.objects.first(),
+                )
+                return super().form_valid(form=form)
+        except Exception as e:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("Whoops! %(error)s"), code="invalid", params={"error": e}
+                ),
             )
-            return super().form_valid(form=form)
+            return self.form_invalid(form=form)
 
 
 class CustomerWialonUnitDetailView(

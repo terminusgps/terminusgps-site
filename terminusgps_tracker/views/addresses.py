@@ -13,7 +13,6 @@ from terminusgps.authorizenet import profiles
 from terminusgps.authorizenet.controllers import (
     AuthorizenetControllerExecutionError,
 )
-from terminusgps.authorizenet.utils import generate_customer_address
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
 from terminusgps_tracker.forms import CustomerShippingAddressCreationForm
@@ -39,17 +38,6 @@ class CustomerShippingAddressCreateView(
     success_url = reverse_lazy("tracker:account")
     template_name = "terminusgps_tracker/addresses/create.html"
 
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class=form_class)
-        print(f"{form.fields["address"] = }")
-        return form
-
-    def get_initial(self, **kwargs) -> dict[str, typing.Any]:
-        initial: dict[str, typing.Any] = super().get_initial(**kwargs)
-        initial["first_name"] = self.request.user.first_name
-        initial["last_name"] = self.request.user.last_name
-        return initial
-
     @transaction.atomic
     def form_valid(
         self, form: CustomerShippingAddressCreationForm
@@ -58,7 +46,7 @@ class CustomerShippingAddressCreateView(
             customer = Customer.objects.get(user=self.request.user)
             response = profiles.create_customer_shipping_address(
                 customer_profile_id=customer.authorizenet_profile_id,
-                new_address=generate_customer_address(form),
+                new_address=form.cleaned_data["address"],
                 default=form.cleaned_data["default"],
             )
             CustomerShippingAddress.objects.create(
@@ -71,9 +59,9 @@ class CustomerShippingAddressCreateView(
                     form.add_error(
                         None,
                         ValidationError(
-                            _(
-                                "Whoops! Something went wrong, please try again later."
-                            )
+                            _("%(code)s: '%(message)s'"),
+                            code="invalid",
+                            params={"code": e.code, "message": e.message},
                         ),
                     )
             return self.form_invalid(form=form)

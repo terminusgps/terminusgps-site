@@ -1,0 +1,5 @@
+<div class="flex gap-2">
+{% for subwidget in widget.subwidgets %}
+{% include subwidget.template_name with widget=subwidget %}
+{% endfor %}
+</div>

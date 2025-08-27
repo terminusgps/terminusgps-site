@@ -1,4 +1,5 @@
 from django import forms
+from django.conf import settings
 from terminusgps.wialon.validators import validate_imei_number
 
 
@@ -9,7 +10,7 @@ class CustomerWialonUnitCreationForm(forms.Form):
         min_length=4,
         widget=forms.widgets.TextInput(
             attrs={
-                "class": "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[.errorlist]:text-red-800 group-has-[.errorlist]:bg-red-100",
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "My Vehicle",
                 "inputmode": "text",
                 "enterkeyhint": "next",
@@ -25,7 +26,7 @@ class CustomerWialonUnitCreationForm(forms.Form):
         validators=[validate_imei_number],
         widget=forms.widgets.TextInput(
             attrs={
-                "class": "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[.errorlist]:text-red-800 group-has-[.errorlist]:bg-red-100",
+                "class": settings.DEFAULT_FIELD_CLASS,
                 "placeholder": "355197370065555",
                 "inputmode": "numeric",
                 "enterkeyhint": "done",

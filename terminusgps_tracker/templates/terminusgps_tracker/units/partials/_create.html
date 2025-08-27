@@ -1,9 +1,7 @@
-<form class="flex flex-col gap-4" action="{% url 'tracker:create unit' %}" method="post" hx-boost="true">
+<form class="flex flex-col gap-4 rounded border-2 border-current p-4" action="{% url 'tracker:create unit' %}" method="post" hx-boost="true">
     {% if form.non_field_errors %}<div class="inset-shadow w-full animate-jiggle rounded border border-current bg-red-200 p-2 text-center text-red-600">{{ form.non_field_errors }}</div>{% endif %}
     {% csrf_token %}
-    <div class="flex flex-col gap-2 md:flex-row">
-        {{ form.name.as_field_group }}
-        {{ form.imei.as_field_group }}
-    </div>
+    {{ form.name.as_field_group }}
+    {{ form.imei.as_field_group }}
     <button class="w-full cursor-pointer rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit">Register</button>
 </form>

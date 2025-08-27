@@ -3,6 +3,7 @@ import typing
 
 from authorizenet import apicontractsv1
 from django import forms
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
@@ -10,34 +11,27 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import DeleteView, DetailView, FormView
+from django.views.generic import CreateView, DeleteView, DetailView, FormView
 from terminusgps.authorizenet import subscriptions as anet_subscriptions
 from terminusgps.authorizenet.controllers import (
     AuthorizenetControllerExecutionError,
 )
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
-from terminusgps_tracker.forms import (
-    CustomerSubscriptionCreationForm,
-    CustomerSubscriptionUpdateForm,
-)
+from terminusgps_tracker.forms import CustomerSubscriptionUpdateForm
 from terminusgps_tracker.models import Customer, CustomerSubscription
-from terminusgps_tracker.utils import (
-    calculate_grand_total,
-    calculate_sub_total,
-    calculate_tax,
-)
 from terminusgps_tracker.views.mixins import (
     CustomerAuthenticationRequiredMixin,
 )
 
 
 class CustomerSubscriptionCreateView(
-    LoginRequiredMixin, HtmxTemplateResponseMixin, FormView
+    LoginRequiredMixin, HtmxTemplateResponseMixin, CreateView
 ):
     content_type = "text/html"
-    form_class = CustomerSubscriptionCreationForm
+    fields = ["payment", "address"]
     http_method_names = ["get", "post"]
+    model = CustomerSubscription
     login_url = reverse_lazy("login")
     partial_template_name = (
         "terminusgps_tracker/subscriptions/partials/_create.html"
@@ -46,27 +40,43 @@ class CustomerSubscriptionCreateView(
     raise_exception = False
     template_name = "terminusgps_tracker/subscriptions/create.html"
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class=form_class)
+        form.fields["payment"].widget.attrs.update(
+            {"class": settings.DEFAULT_FIELD_CLASS}
+        )
+        form.fields["payment"].label = "Payment Method"
+        form.fields["address"].widget.attrs.update(
+            {"class": settings.DEFAULT_FIELD_CLASS}
+        )
+        form.fields["address"].label = "Shipping Address"
+        return form
+
+    def get_initial(self, **kwargs) -> dict[str, typing.Any]:
+        initial: dict[str, typing.Any] = super().get_initial(**kwargs)
         customer = Customer.objects.get(user=self.request.user)
-        kwargs.update({"customer": customer})
-        return kwargs
+        initial["payment"] = customer.payments.first()
+        initial["address"] = customer.addresses.first()
+        return initial
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        customer: Customer = Customer.objects.get(user=self.request.user)
-        sub_total = calculate_sub_total(customer)
-        tax = calculate_tax(sub_total)
-        grand_total = calculate_grand_total(sub_total, tax)
-
+        customer = Customer.objects.get(user=self.request.user)
+        subscription = CustomerSubscription(customer=customer)
         context["customer"] = customer
-        context["unit_list"] = customer.units.all()
-        context["sub_total"] = sub_total
-        context["tax"] = tax
-        context["grand_total"] = grand_total
+        if customer.units.count() != 0:
+            context["sub_total"] = subscription.get_subtotal()
+            context["grand_total"] = subscription.get_grand_total()
+        else:
+            context["sub_total"] = None
+            context["grand_total"] = None
         return context
 
-    def get_success_url(self, subscription: CustomerSubscription) -> str:
+    def get_success_url(
+        self, subscription: CustomerSubscription | None = None
+    ) -> str:
+        if not subscription:
+            return reverse("tracker:subscription")
         return reverse(
             "tracker:detail subscription",
             kwargs={
@@ -75,19 +85,31 @@ class CustomerSubscriptionCreateView(
             },
         )
 
-    def form_valid(
-        self, form: CustomerSubscriptionCreationForm
-    ) -> HttpResponse:
+    def form_valid(self, form: forms.ModelForm) -> HttpResponse:
+        customer = Customer.objects.get(user=self.request.user)
+        if customer.units.count() == 0:
+            form.add_error(
+                None,
+                ValidationError(
+                    _(
+                        "Whoops! You can't subscribe until you register a unit."
+                    ),
+                    code="invalid",
+                ),
+            )
+            return self.form_invalid(form=form)
         try:
-            customer = Customer.objects.get(user=self.request.user)
-            payment = form.cleaned_data["payment"]
-            address = form.cleaned_data["address"]
-            sub_total = calculate_sub_total(customer)
-            tax = calculate_tax(sub_total)
-            grand_total = calculate_grand_total(sub_total, tax)
+            customer_profile_id = customer.authorizenet_profile_id
+            payment_profile_id = form.cleaned_data["payment"].pk
+            address_profile_id = form.cleaned_data["address"].pk
+            subscription = CustomerSubscription(
+                customer=customer,
+                address=form.cleaned_data["address"],
+                payment=form.cleaned_data["payment"],
+            )
 
             response = anet_subscriptions.create_subscription(
-                apicontractsv1.ARBSubscriptionType(
+                subscription_obj=apicontractsv1.ARBSubscriptionType(
                     name=f"{customer.user.first_name}'s Subscription",
                     paymentSchedule=apicontractsv1.paymentScheduleType(
                         interval=apicontractsv1.paymentScheduleTypeInterval(
@@ -98,23 +120,17 @@ class CustomerSubscriptionCreateView(
                         totalOccurrences=9999,
                         trialOccurrences=0,
                     ),
-                    amount=grand_total,
+                    amount=subscription.get_grand_total(),
                     trialAmount=decimal.Decimal("0.00"),
                     profile=apicontractsv1.customerProfileIdType(
-                        customerProfileId=str(
-                            customer.authorizenet_profile_id
-                        ),
-                        customerPaymentProfileId=str(payment.pk),
-                        customerAddressId=str(address.pk),
+                        customerProfileId=customer_profile_id,
+                        customerPaymentProfileId=payment_profile_id,
+                        customerAddressId=address_profile_id,
                     ),
                 )
             )
-            subscription = CustomerSubscription.objects.create(
-                id=int(response.subscriptionId),
-                customer=customer,
-                payment=payment,
-                address=address,
-            )
+            subscription.pk = int(response.subscriptionId)
+            subscription.save()
             return HttpResponseRedirect(self.get_success_url(subscription))
         except AuthorizenetControllerExecutionError as e:
             match e.code:
@@ -122,9 +138,9 @@ class CustomerSubscriptionCreateView(
                     form.add_error(
                         None,
                         ValidationError(
-                            _(
-                                "Whoops! Something went wrong, please try again later."
-                            )
+                            _("%(code)s: '%(message)s'"),
+                            code="invalid",
+                            params={"code": e.code, "message": e.message},
                         ),
                     )
             return self.form_invalid(form=form)

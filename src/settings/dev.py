@@ -29,6 +29,7 @@ LOGIN_URL = "login/"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
 MERCHANT_AUTH_ENVIRONMENT = constants.SANDBOX
+FORM_RENDERER = "terminusgps.django.forms.renderer.TerminusgpsFormRenderer"
 MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
 MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
 MERCHANT_AUTH_VALIDATION_MODE = "testMode"
@@ -54,10 +55,10 @@ ADMINS = [
 ]
 
 MESSAGE_TAGS = {
-    messages.ERROR: "text-red-800 dark:text-red-100 p-2 border-2 border-current rounded bg-red-100 dark:bg-red-600 flex items-center gap-2",
-    messages.INFO: "text-gray-800 dark:text-gray-100 p-2 border-2 border-current rounded bg-gray-100 dark:bg-gray-600 flex items-center gap-2",
-    messages.SUCCESS: "text-green-800 dark:text-green-100 p-2 border-2 border-current rounded bg-green-100 dark:bg-green-600 flex items-center gap-2",
-    messages.WARNING: "text-yellow-800 dark:text-yellow-100 p-2 border-2 border-current rounded bg-yellow-100 dark:bg-yellow-300 flex items-center gap-2",
+    messages.ERROR: "text-red-800 dark:text-red-100 px-2 py-4 border-2 border-current rounded bg-red-100 dark:bg-red-600 flex items-center gap-2",
+    messages.INFO: "text-gray-800 dark:text-gray-100 px-2 py-4 border-2 border-current rounded bg-gray-100 dark:bg-gray-600 flex items-center gap-2",
+    messages.SUCCESS: "text-green-800 dark:text-green-100 px-2 py-4 border-2 border-current rounded bg-green-100 dark:bg-green-600 flex items-center gap-2",
+    messages.WARNING: "text-yellow-800 dark:text-yellow-100 px-2 py-4 border-2 border-current rounded bg-yellow-100 dark:bg-yellow-300 flex items-center gap-2",
 }
 
 

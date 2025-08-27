@@ -14,10 +14,6 @@ from terminusgps.authorizenet import profiles
 from terminusgps.authorizenet.controllers import (
     AuthorizenetControllerExecutionError,
 )
-from terminusgps.authorizenet.utils import (
-    generate_customer_address,
-    generate_customer_payment,
-)
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
 from terminusgps_tracker.forms import CustomerPaymentMethodCreationForm
@@ -47,12 +43,6 @@ class CustomerPaymentMethodCreateView(
     success_url = reverse_lazy("tracker:account")
     template_name = "terminusgps_tracker/payments/create.html"
 
-    def get_initial(self, **kwargs) -> dict[str, typing.Any]:
-        initial: dict[str, typing.Any] = super().get_initial(**kwargs)
-        initial["first_name"] = self.request.user.first_name
-        initial["last_name"] = self.request.user.last_name
-        return initial
-
     @transaction.atomic
     def form_valid(
         self, form: CustomerPaymentMethodCreationForm
@@ -62,8 +52,11 @@ class CustomerPaymentMethodCreateView(
             response = profiles.create_customer_payment_profile(
                 customer_profile_id=customer.authorizenet_profile_id,
                 new_payment_profile=apicontractsv1.customerPaymentProfileType(
-                    payment=generate_customer_payment(form),
-                    billTo=generate_customer_address(form),
+                    billTo=form.cleaned_data["address"],
+                    payment=apicontractsv1.paymentType(
+                        creditCard=form.cleaned_data["credit_card"]
+                    ),
+                    defaultPaymentProfile=form.cleaned_data["default"],
                 ),
             )
             CustomerPaymentMethod.objects.create(
@@ -72,7 +65,8 @@ class CustomerPaymentMethodCreateView(
             if form.cleaned_data["create_shipping_address"]:
                 response = profiles.create_customer_shipping_address(
                     customer_profile_id=customer.authorizenet_profile_id,
-                    new_address=generate_customer_address(form),
+                    new_address=form.cleaned_data["address"],
+                    default=form.cleaned_data["default"],
                 )
                 CustomerShippingAddress.objects.create(
                     id=int(response.customerAddressId), customer=customer
@@ -84,9 +78,9 @@ class CustomerPaymentMethodCreateView(
                     form.add_error(
                         None,
                         ValidationError(
-                            _(
-                                "Whoops! Something went wrong, please try again later."
-                            )
+                            _("%(code)s: '%(message)s'"),
+                            code="invalid",
+                            params={"code": e.code, "message": e.message},
                         ),
                     )
             return self.form_invalid(form=form)
@@ -115,7 +109,8 @@ class CustomerPaymentMethodDetailView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["profile"] = kwargs["object"].get_authorizenet_profile()
+        if kwargs.get("object"):
+            context["profile"] = kwargs["object"].get_authorizenet_profile()
         return context
 
 
@@ -124,6 +119,7 @@ class CustomerPaymentMethodDeleteView(
 ):
     content_type = "text/html"
     context_object_name = "payment"
+    extra_context = {"title": "Payment Method Delete"}
     http_method_names = ["get", "post"]
     model = CustomerPaymentMethod
     partial_template_name = (
@@ -193,7 +189,7 @@ class CustomerPaymentMethodListView(
     allow_empty = True
     content_type = "text/html"
     context_object_name = "payment_list"
-    extra_context = {"title": "Customer Payment Method List"}
+    extra_context = {"title": "Payment Method List"}
     http_method_names = ["get"]
     model = CustomerPaymentMethod
     ordering = "pk"
