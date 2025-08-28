@@ -1,23 +1,22 @@
-{% load tz terminusgps_tracker_display %}
 <section id="info" class="flex flex-col gap-4 text-center">
     <h2 class="text-lg font-semibold">Your Subscription</h2>
-    <p class="text-sm md:text-lg">You'll see a <span class="font-semibold">${{ profile.subscription.amount|floatformat:2 }}</span> charge from us every month on the <span class="font-semibold">{{ subscription.start_date|date:'jS' }}</span>.</p>
+    <p class="text-sm md:text-lg">You're being charged <span class="font-semibold">${{ profile.subscription.amount|floatformat:2 }}</span> every month on the <span class="font-semibold">{{ subscription.start_date|date:'jS' }}</span>.</p>
 </section>
 <section id="payment" class="flex flex-col gap-4">
-    <h3 class="font-semibold">Payment Information</h3>
-    <section class="flex flex-col gap-2 rounded border bg-gray-50 p-4 dark:bg-gray-600">
-        <div id="payment-{{ subscription.payment.pk }}" class="flex gap-2 items-center">
+    <h3 class="text-center font-semibold md:text-left">Payment Information</h3>
+    <section class="flex flex-col justify-around gap-4 rounded border bg-gray-50 p-4 md:flex-row dark:bg-gray-600">
+        <div id="payment-{{ subscription.payment.pk }}" class="flex w-full flex-col items-center gap-2 rounded border bg-gray-200 p-2 dark:bg-gray-800 dark:text-gray-100">
             <p>Payment Method:</p>
             <p class="font-semibold">{{ subscription.payment }}</p>
         </div>
-        <div id="address-{{ subscription.address.pk }}" class="flex gap-2 items-center">
+        <div id="address-{{ subscription.address.pk }}" class="flex w-full flex-col items-center gap-2 rounded border bg-gray-200 p-2 dark:bg-gray-800 dark:text-gray-100">
             <p>Shipping Address:</p>
             <p class="font-semibold">{{ subscription.address }}</p>
         </div>
     </section>
 </section>
 <section id="unit-list" class="flex flex-col gap-4">
-    <h3 class="font-semibold">Units</h3>
+    <h3 class="text-center font-semibold md:text-left">Units</h3>
     <div class="relative overflow-x-auto rounded border">
         <table class="w-full rounded text-left text-sm text-gray-500 dark:text-gray-400">
             <thead class="bg-gray-50 text-xs text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-400">
@@ -36,7 +35,7 @@
             <tbody>
                 {% for unit in unit_list %}
                 <tr class="border-gray-600 bg-white dark:border-gray-700 dark:bg-gray-800">
-                    <th scope="row" class="px-6 py-4 font-medium whitespace-nowrap text-gray-900 dark:text-white">
+                    <th scope="row" class="px-6 py-4 font-semibold whitespace-nowrap text-gray-900 dark:text-white">
                         {{ unit.name }}
                     </th>
                     <td class="px-6 py-4">
@@ -52,7 +51,7 @@
     </div>
 </section>
 <section id="transactions" class="flex flex-col gap-4">
-    <h3 class="font-semibold">Transactions</h3>
+    <h3 class="text-center font-semibold md:text-left">Transactions</h3>
     <ul class="rounded border bg-gray-50 p-4 dark:bg-gray-600">
         {% for t in profile.subscription.arbTransactions %}
         <li>{{ t.payNum }}: {{ t.response }}</li>
