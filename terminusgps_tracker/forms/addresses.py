@@ -9,4 +9,7 @@ class CustomerShippingAddressCreationForm(forms.Form):
         label="Set as your default shipping address?",
         required=False,
         initial=True,
+        widget=forms.widgets.CheckboxInput(
+            attrs={"class": "accent-terminus-red-700"}
+        ),
     )
