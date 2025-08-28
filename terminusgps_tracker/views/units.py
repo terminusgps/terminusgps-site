@@ -144,6 +144,7 @@ class CustomerWialonUnitUpdateView(
         form.fields["tier"].widget.attrs.update(
             {"class": settings.DEFAULT_FIELD_CLASS}
         )
+        form.fields["tier"].empty_label = None
         return form
 
     def get_success_url(self) -> str:
@@ -162,23 +163,14 @@ class CustomerWialonUnitUpdateView(
 
     def form_valid(self, form: forms.ModelForm) -> HttpResponse:
         obj: CustomerWialonUnit = self.get_object()
-        if not obj.customer.is_subscribed:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Whoops! You need to subscribe to do that."),
-                    code="invalid",
-                ),
-            )
-            return self.form_invalid(form=form)
-
         response = super().form_valid(form=form)
+
         if "name" in form.changed_data:
             new_name: str = form.cleaned_data["name"]
             with WialonSession(token=settings.WIALON_TOKEN) as session:
                 unit = obj.get_wialon_unit(session)
                 unit.set_name(new_name)
-        if "tier" in form.changed_data:
+        if "tier" in form.changed_data and obj.customer.is_subscribed:
             sub = CustomerSubscription.objects.get(customer=obj.customer)
             anet_subscriptions.update_subscription(
                 sub.pk,

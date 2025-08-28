@@ -33,7 +33,7 @@ class CustomerDashboardView(
             messages.add_message(
                 request,
                 messages.ERROR,
-                "You aren't subscribed! You can't access your units until you subscribe.",
+                "You won't be able to access the platform until you subscribe.",
             )
         return super().get(request, *args, **kwargs)
 

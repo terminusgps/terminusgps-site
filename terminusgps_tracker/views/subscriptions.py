@@ -307,7 +307,7 @@ class CustomerSubscriptionDeleteView(
             anet_subscriptions.cancel_subscription(subscription_id=sub.pk)
             remaining_days = sub.get_remaining_days()
             with WialonSession(token=settings.WIALON_TOKEN) as session:
-                account_days = sub.customer.get_wialon_account_days(session)
+                account_days = sub.customer.get_wialon_account_days()
                 account_id = sub.customer.wialon_resource_id
                 factory = WialonObjectFactory(session)
                 account = factory.get("account", account_id)
