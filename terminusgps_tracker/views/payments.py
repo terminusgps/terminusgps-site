@@ -1,21 +1,18 @@
 import typing
 
 from authorizenet import apicontractsv1
+from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from django.urls import reverse, reverse_lazy
+from django.http import HttpResponse
+from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView
 from terminusgps.authorizenet import profiles
 from terminusgps.authorizenet.controllers import (
     AuthorizenetControllerExecutionError,
-)
-from terminusgps.authorizenet.utils import (
-    generate_customer_address,
-    generate_customer_payment,
 )
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 
@@ -25,167 +22,16 @@ from terminusgps_tracker.models import (
     CustomerPaymentMethod,
     CustomerShippingAddress,
 )
-from terminusgps_tracker.views.mixins import CustomerOrStaffRequiredMixin
-
-
-class CustomerPaymentMethodListView(
-    LoginRequiredMixin,
-    CustomerOrStaffRequiredMixin,
-    HtmxTemplateResponseMixin,
-    ListView,
-):
-    allow_empty = True
-    content_type = "text/html"
-    context_object_name = "payment_list"
-    extra_context = {"title": "Payment Method List"}
-    http_method_names = ["get"]
-    login_url = reverse_lazy("login")
-    model = CustomerPaymentMethod
-    ordering = "pk"
-    partial_template_name = "terminusgps_tracker/payments/partials/_list.html"
-    permission_denied_message = "Please login to view this content."
-    queryset = CustomerPaymentMethod.objects.none()
-    raise_exception = False
-    template_name = "terminusgps_tracker/payments/list.html"
-
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-        customer.authorizenet_sync_payment_methods()
-        return super().get(request, *args, **kwargs)
-
-    def get_queryset(
-        self,
-    ) -> QuerySet[CustomerPaymentMethod, CustomerPaymentMethod]:
-        return (
-            CustomerPaymentMethod.objects.filter(
-                customer__pk=self.kwargs["customer_pk"]
-            )
-            .select_related("customer")
-            .order_by(self.get_ordering())
-        )
-
-
-class CustomerPaymentMethodDetailView(
-    LoginRequiredMixin,
-    CustomerOrStaffRequiredMixin,
-    HtmxTemplateResponseMixin,
-    DetailView,
-):
-    content_type = "text/html"
-    context_object_name = "payment"
-    extra_context = {"title": "Payment Method Details"}
-    http_method_names = ["get"]
-    login_url = reverse_lazy("login")
-    model = CustomerPaymentMethod
-    partial_template_name = (
-        "terminusgps_tracker/payments/partials/_detail.html"
-    )
-    permission_denied_message = "Please login to view this content."
-    pk_url_kwarg = "payment_pk"
-    queryset = CustomerPaymentMethod.objects.none()
-    raise_exception = False
-    template_name = "terminusgps_tracker/payments/detail.html"
-
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        """Syncs the payment method's data with Authorizenet before returning a response."""
-        payment = self.get_object()
-        if payment.authorizenet_needs_sync():
-            payment.authorizenet_sync()
-            payment.save()
-        return super().get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["profile"] = self.get_object().authorizenet_get_profile()
-        return context
-
-    def get_queryset(
-        self,
-    ) -> QuerySet[CustomerPaymentMethod, CustomerPaymentMethod]:
-        return CustomerPaymentMethod.objects.filter(
-            customer__pk=self.kwargs["customer_pk"]
-        ).select_related("customer")
-
-
-class CustomerPaymentMethodDeleteView(
-    LoginRequiredMixin,
-    CustomerOrStaffRequiredMixin,
-    HtmxTemplateResponseMixin,
-    DeleteView,
-):
-    content_type = "text/html"
-    context_object_name = "payment"
-    extra_context = {"title": "Delete Payment Method"}
-    http_method_names = ["get", "post"]
-    login_url = reverse_lazy("login")
-    model = CustomerPaymentMethod
-    partial_template_name = (
-        "terminusgps_tracker/payments/partials/_delete.html"
-    )
-    permission_denied_message = "Please login to view this content."
-    pk_url_kwarg = "payment_pk"
-    queryset = CustomerPaymentMethod.objects.none()
-    raise_exception = False
-    template_name = "terminusgps_tracker/payments/delete.html"
-
-    def get_success_url(self) -> str:
-        return reverse(
-            "tracker:payment list",
-            kwargs={"customer_pk": self.get_object().customer.pk},
-        )
-
-    def get_queryset(
-        self,
-    ) -> QuerySet[CustomerPaymentMethod, CustomerPaymentMethod]:
-        return CustomerPaymentMethod.objects.filter(
-            customer__pk=self.kwargs["customer_pk"]
-        ).select_related("customer")
-
-    def form_valid(self, form=None) -> HttpResponse | HttpResponseRedirect:
-        try:
-            customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-            profiles.delete_customer_payment_profile(
-                customer.authorizenet_profile_id, self.object.pk
-            )
-            return super().form_valid(form=form)
-        except AuthorizenetControllerExecutionError as e:
-            match e.code:
-                case "E00105":
-                    form.add_error(
-                        None,
-                        ValidationError(
-                            _(
-                                "Whoops! This payment method is associated with an active or suspended subscription. Nothing was deleted."
-                            ),
-                            code="invalid",
-                        ),
-                    )
-                case _:
-                    form.add_error(
-                        None,
-                        ValidationError(
-                            _(
-                                "Whoops! Something went wrong, nothing was deleted."
-                            ),
-                            code="invalid",
-                        ),
-                    )
-            return self.form_invalid(form=form)
-
-    def form_invalid(self, form=None) -> HttpResponse:
-        response = self.render_to_response(self.get_context_data(form=form))
-        response.headers["HX-Retarget"] = f"#payment-{self.object.pk}"
-        return response
+from terminusgps_tracker.views.mixins import (
+    CustomerAuthenticationRequiredMixin,
+)
 
 
 class CustomerPaymentMethodCreateView(
-    LoginRequiredMixin,
-    CustomerOrStaffRequiredMixin,
-    HtmxTemplateResponseMixin,
-    FormView,
+    LoginRequiredMixin, HtmxTemplateResponseMixin, FormView
 ):
     content_type = "text/html"
-    extra_context = {"title": "Create Payment Method"}
+    extra_context = {"title": "Add Payment Method"}
     form_class = CustomerPaymentMethodCreationForm
     http_method_names = ["get", "post"]
     login_url = reverse_lazy("login")
@@ -197,53 +43,131 @@ class CustomerPaymentMethodCreateView(
     success_url = reverse_lazy("tracker:account")
     template_name = "terminusgps_tracker/payments/create.html"
 
-    def get_initial(self) -> dict[str, typing.Any]:
-        initial: dict[str, typing.Any] = super().get_initial()
-        customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-        initial["first_name"] = customer.user.first_name
-        initial["last_name"] = customer.user.last_name
-        initial["create_shipping_address"] = customer.addresses.count() == 0
+    def get_initial(self, **kwargs) -> dict[str, typing.Any]:
+        initial: dict[str, typing.Any] = super().get_initial(**kwargs)
+        customer = Customer.objects.get(user=self.request.user)
+        if customer.addresses.count() != 0:
+            initial["create_shipping_address"] = False
         return initial
 
     @transaction.atomic
     def form_valid(
         self, form: CustomerPaymentMethodCreationForm
-    ) -> HttpResponse | HttpResponseRedirect:
+    ) -> HttpResponse:
         try:
-            customer = Customer.objects.get(pk=self.kwargs["customer_pk"])
-            address = generate_customer_address(form)
-            payment = generate_customer_payment(form)
-
+            customer = Customer.objects.get(user=self.request.user)
+            payment_method = CustomerPaymentMethod(customer=customer)
             response = profiles.create_customer_payment_profile(
-                customer.authorizenet_profile_id,
-                apicontractsv1.customerPaymentProfileType(
-                    billTo=address,
-                    payment=payment,
+                customer_profile_id=customer.authorizenet_profile_id,
+                new_payment_profile=apicontractsv1.customerPaymentProfileType(
+                    billTo=form.cleaned_data["address"],
+                    payment=apicontractsv1.paymentType(
+                        creditCard=form.cleaned_data["credit_card"]
+                    ),
                     defaultPaymentProfile=form.cleaned_data["default"],
                 ),
             )
-            CustomerPaymentMethod.objects.create(
-                id=int(response.customerPaymentProfileId), customer=customer
-            )
-
+            payment_method.pk = int(response.customerPaymentProfileId)
+            payment_method.save()
             if form.cleaned_data["create_shipping_address"]:
+                shipping_address = CustomerShippingAddress(customer=customer)
                 response = profiles.create_customer_shipping_address(
-                    customer.authorizenet_profile_id, address
+                    customer_profile_id=customer.authorizenet_profile_id,
+                    new_address=form.cleaned_data["address"],
+                    default=form.cleaned_data["default"],
                 )
-                CustomerShippingAddress.objects.create(
-                    id=int(response.customerAddressId), customer=customer
-                )
-            return HttpResponseRedirect(self.get_success_url())
+                shipping_address.pk = int(response.customerAddressId)
+                shipping_address.save()
+            return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
             match e.code:
-                case "E00039":
+                case _:
+                    form.add_error(
+                        None,
+                        ValidationError(
+                            _("%(code)s: '%(message)s'"),
+                            code="invalid",
+                            params={"code": e.code, "message": e.message},
+                        ),
+                    )
+            return self.form_invalid(form=form)
+
+
+class CustomerPaymentMethodDetailView(
+    CustomerAuthenticationRequiredMixin, HtmxTemplateResponseMixin, DetailView
+):
+    content_type = "text/html"
+    context_object_name = "payment"
+    http_method_names = ["get"]
+    model = CustomerPaymentMethod
+    partial_template_name = (
+        "terminusgps_tracker/payments/partials/_detail.html"
+    )
+    pk_url_kwarg = "payment_pk"
+    queryset = CustomerPaymentMethod.objects.none()
+    template_name = "terminusgps_tracker/payments/detail.html"
+
+    def get_queryset(
+        self,
+    ) -> QuerySet[CustomerPaymentMethod, CustomerPaymentMethod]:
+        return CustomerPaymentMethod.objects.filter(
+            customer__pk=self.kwargs["customer_pk"]
+        ).select_related("customer")
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["profile"] = (
+            kwargs["object"].get_authorizenet_profile()
+            if kwargs.get("object") is not None
+            else None
+        )
+        return context
+
+
+class CustomerPaymentMethodDeleteView(
+    CustomerAuthenticationRequiredMixin, HtmxTemplateResponseMixin, DeleteView
+):
+    content_type = "text/html"
+    context_object_name = "payment"
+    extra_context = {"title": "Payment Method Delete"}
+    http_method_names = ["get", "post"]
+    model = CustomerPaymentMethod
+    partial_template_name = (
+        "terminusgps_tracker/payments/partials/_delete.html"
+    )
+    pk_url_kwarg = "payment_pk"
+    queryset = CustomerPaymentMethod.objects.none()
+    template_name = "terminusgps_tracker/payments/delete.html"
+
+    def get_success_url(self) -> str:
+        payment = self.get_object()
+        return payment.get_list_url()
+
+    def get_queryset(
+        self,
+    ) -> QuerySet[CustomerPaymentMethod, CustomerPaymentMethod]:
+        return CustomerPaymentMethod.objects.filter(
+            customer__pk=self.kwargs["customer_pk"]
+        ).select_related("customer")
+
+    @transaction.atomic
+    def form_valid(self, form: forms.Form) -> HttpResponse:
+        try:
+            payment_method = self.get_object()
+            profiles.delete_customer_payment_profile(
+                customer_profile_id=payment_method.customer.authorizenet_profile_id,
+                customer_payment_profile_id=payment_method.pk,
+            )
+            return super().form_valid(form=form)
+        except AuthorizenetControllerExecutionError as e:
+            match e.code:
+                case "E00105":
                     form.add_error(
                         None,
                         ValidationError(
                             _(
-                                "Whoops! A duplicate payment method or shipping address already exists."
-                            ),
-                            code="invalid",
+                                "Whoops! The payment method couldn't be deleted because it's associated with an active or suspended subscription."
+                            )
                         ),
                     )
                 case _:
@@ -251,9 +175,35 @@ class CustomerPaymentMethodCreateView(
                         None,
                         ValidationError(
                             _(
-                                "Whoops! Something went wrong. Please try again later."
-                            ),
-                            code="invalid",
+                                "Whoops! Something went wrong, please try again later."
+                            )
                         ),
                     )
             return self.form_invalid(form=form)
+
+
+class CustomerPaymentMethodListView(
+    CustomerAuthenticationRequiredMixin, HtmxTemplateResponseMixin, ListView
+):
+    allow_empty = True
+    content_type = "text/html"
+    context_object_name = "payment_list"
+    extra_context = {"title": "Payment Method List"}
+    http_method_names = ["get"]
+    model = CustomerPaymentMethod
+    ordering = "pk"
+    paginate_by = 4
+    partial_template_name = "terminusgps_tracker/payments/partials/_list.html"
+    queryset = CustomerPaymentMethod.objects.none()
+    template_name = "terminusgps_tracker/payments/list.html"
+
+    def get_queryset(
+        self,
+    ) -> QuerySet[CustomerPaymentMethod, CustomerPaymentMethod]:
+        return (
+            CustomerPaymentMethod.objects.filter(
+                customer__pk=self.kwargs["customer_pk"]
+            )
+            .select_related("customer")
+            .order_by(self.get_ordering())
+        )

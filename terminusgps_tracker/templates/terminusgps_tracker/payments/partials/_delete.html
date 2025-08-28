@@ -1,12 +1,12 @@
-<form class="flex w-full flex-col gap-4" hx-post="{% url 'tracker:payment delete' payment.customer.pk payment.pk %}" method="post">
+<form class="flex w-full flex-col gap-4" hx-post="{{ payment.get_delete_url }}" method="post" hx-target="#payment-{{ payment.pk }}">
     {% if form.non_field_errors %}<div class="inset-shadow w-full animate-jiggle rounded border border-current bg-red-200 p-2 text-center text-red-600">{{ form.non_field_errors }}</div>{% endif %}
-    <p class="text-center font-semibold">Delete {{ payment.cc_type }} ending in '{{ payment.cc_last_4 }}'?</p>
+    <p class="text-center font-semibold">Delete '{{ payment }}'?</p>
     {% csrf_token %}
     <section id="buttons" class="flex flex-col gap-2">
-        <button class="w-full cursor-pointer rounded border border-current bg-gray-50 p-2 text-center text-red-800 transition-colors duration-300 ease-in-out hover:bg-red-50" type="submit" hx-post="{% url 'tracker:payment delete' payment.customer.pk payment.pk %}" hx-target="#payment-list">
+        <button class="w-full cursor-pointer rounded border border-current bg-gray-50 p-2 text-center text-red-800 transition-colors duration-300 ease-in-out hover:bg-red-50" type="submit" hx-swap="delete">
             <p>Confirm</p>
         </button>
-        <button class="w-full cursor-pointer rounded border border-current bg-gray-300 p-2 text-center transition-colors duration-300 ease-in-out hover:bg-gray-200" type="button" hx-get="{% url 'tracker:payment detail' payment.customer.pk payment.pk %}" hx-target="#payment-{{ payment.pk }}" hx-swap="outerHTML">
+        <button class="w-full cursor-pointer rounded border border-current bg-gray-300 p-2 text-center transition-colors duration-300 ease-in-out hover:bg-gray-200" type="button" hx-get="{{ payment.get_absolute_url }}" hx-swap="outerHTML">
             <p>Cancel</p>
         </button>
     </section>

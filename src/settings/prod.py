@@ -12,7 +12,7 @@ decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 
 ALLOWED_HOSTS = [
     ".terminusgps.com",
-    ".amazonaws.com",
+    ".elb.amazonaws.com",
     gethostbyname(gethostname()),
 ]
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent

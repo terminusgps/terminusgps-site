@@ -1,21 +1,20 @@
-<section id="info" class="flex items-center justify-center gap-2">
-    <h2 class="text-center text-lg font-semibold">{{ subscription.name }}</h2>
+<section id="info" class="flex flex-col gap-4 text-center">
+    <h2 class="text-lg font-semibold">Cancel Your Subscription</h2>
+    <p class="text-sm md:text-lg">You'll lose access to <a href="{% url 'hosting' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">the platform</a> in {{ remaining_days }} day{{ remaining_days|pluralize }}.</p>
 </section>
-<section id="warning" class="flex flex-col gap-2">
-    <p class="text-center font-semibold text-pretty text-gray-700 dark:text-gray-200">Are you sure you want to cancel your subscription?</p>
-    <p class="text-center font-light text-pretty text-gray-600 dark:text-gray-300">(You'll lose access to <a href="{% url 'hosting' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">the platform</a> in {{ remaining_days }} day{{ remaining_days|pluralize }})</p>
-</section>
-<form class="group flex flex-col gap-4" method="post" hx-post="{{ subscription.get_delete_url }}" hx-swap="outerHTML" hx-target="#subscription">
+<form class="group flex flex-col gap-4" method="post" hx-post="{{ subscription.get_delete_url }}">
     {% csrf_token %}
     {{ form }}
     <section id="buttons" class="flex flex-col gap-2">
-        <button class="flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-current bg-gray-100 p-2 text-center text-red-700 transition-colors duration-300 ease-in-out hover:bg-red-100" type="submit">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden size-6 animate-spin group-[.htmx-request]:flex">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-            </svg>
-            <p>Confirm</p>
+        <button class="group flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit">
+            <div class="flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden size-6 animate-spin group-[.htmx-request]:flex">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+                <p>Confirm</p>
+            </div>
         </button>
-        <button class="flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-current bg-gray-300 p-2 text-center text-gray-800 transition-colors duration-300 ease-in-out hover:bg-gray-100" type="button" hx-get="{% url 'tracker:subscription detail' subscription.customer.pk subscription.pk %}" hx-swap="innerHTML">
+        <button class="flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-current bg-gray-300 p-2 text-center text-gray-800 transition-colors duration-300 ease-in-out hover:bg-gray-100" type="button" hx-get="{{ subscription.get_absolute_url }}">
             <p>Back</p>
         </button>
     </section>

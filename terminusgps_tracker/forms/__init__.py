@@ -6,5 +6,4 @@ if settings.configured and not hasattr(settings, "DEFAULT_FIELD_CLASS"):
 
 from .addresses import CustomerShippingAddressCreationForm
 from .payments import CustomerPaymentMethodCreationForm
-from .subscriptions import SubscriptionCreationForm
 from .units import CustomerWialonUnitCreationForm

@@ -1,9 +1,6 @@
 from django import forms
 from django.conf import settings
-from terminusgps.wialon.validators import (
-    validate_imei_number,
-    validate_vin_number,
-)
+from terminusgps.wialon.validators import validate_imei_number
 
 
 class CustomerWialonUnitCreationForm(forms.Form):
@@ -33,21 +30,6 @@ class CustomerWialonUnitCreationForm(forms.Form):
                 "placeholder": "355197370065555",
                 "inputmode": "numeric",
                 "enterkeyhint": "done",
-            }
-        ),
-    )
-    vin = forms.CharField(
-        help_text="Optionally enter the VIN # for the vehicle your device is installed in.",
-        label="VIN #",
-        max_length=17,
-        required=False,
-        validators=[validate_vin_number],
-        widget=forms.widgets.TextInput(
-            attrs={
-                "class": settings.DEFAULT_FIELD_CLASS,
-                "placeholder": "1HGCP2F40BA049468",
-                "inputmode": "text",
-                "enterkeyhint": "next",
             }
         ),
     )

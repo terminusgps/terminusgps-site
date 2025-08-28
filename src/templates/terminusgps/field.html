@@ -1,17 +1,12 @@
-<div class="group flex w-full flex-col gap-2">
-    <div class="flex items-center gap-1 group-has-[.errorlist]:text-red-600">
-        <h2 class="select-none" for="{{ field.id_for_label }}">{{ field.label }}<h2>
-        {% if field.help_text %}
-        <svg hx-on:click="s=document.getElementById('{{ field.auto_id }}_helptext').getAttribute('aria-expanded')==='true'?'false':'true';document.getElementById('{{ field.auto_id }}_helptext').setAttribute('aria-expanded', s);" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 hover:scale-125">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
-        </svg>
-        {% endif %}
-    </div>
+<div class="flex w-full flex-col gap-2">
+    <label class="text-xl" for="{{ field.id_for_label }}">{{ field.label }}</label>
     {{ field }}
     {% if field.help_text %}
-    <span id="{{ field.auto_id }}_helptext" class="hidden aria-expanded:flex">{{ field.help_text }}</span>
+    <p class="invisible text-sm peer-invalid:visible">{{ field.help_text }}</p>
     {% endif %}
     {% if field.errors %}
-    <div id="errors" class="w-full animate-jiggle text-red-600">{{ field.errors }}</div>
+    <div id="errors" class="w-full animate-jiggle rounded border border-current bg-red-200 p-2 text-red-800">
+        {{ field.errors }}
+    </div>
     {% endif %}
 </div>

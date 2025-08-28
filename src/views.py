@@ -11,7 +11,9 @@ from django.urls import reverse_lazy
 from django.views.generic import FormView, RedirectView, TemplateView
 from terminusgps.authorizenet import profiles as anet_profiles
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
-from terminusgps.wialon import constants, flags, utils
+from terminusgps.wialon import constants as wialon_constants
+from terminusgps.wialon import utils as wialon_utils
+from terminusgps.wialon.items import WialonObjectFactory
 from terminusgps.wialon.session import WialonSession
 
 from terminusgps_tracker.models import Customer
@@ -154,22 +156,6 @@ class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
     def get_form(self, form_class=None):
         form = super().get_form(form_class=form_class)
         form.fields["username"].validators.append(validate_email)
-        form.fields["username"].widget.attrs.update(
-            **{
-                "class": settings.DEFAULT_FIELD_CLASS,
-                "placeholder": "email@terminusgps.com",
-                "autofocus": True,
-                "inputmode": "email",
-                "enterkeyhint": "next",
-            }
-        )
-        form.fields["password"].widget.attrs.update(
-            **{
-                "class": settings.DEFAULT_FIELD_CLASS,
-                "enterkeyhint": "done",
-                "autocomplete": False,
-            }
-        )
         return form
 
     def get_initial(self, **kwargs) -> dict[str, typing.Any]:
@@ -212,7 +198,8 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
             last_name=form.cleaned_data["last_name"],
             email=form.cleaned_data["username"],
         )
-        customer = Customer.objects.create(user=user)
+
+        customer = Customer(user=user)
         customer = self.authorizenet_create_customer_profile(form, customer)
         customer = self.wialon_create_customer_account(form, customer)
         customer.save()
@@ -235,16 +222,10 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
         :rtype: :py:obj:`~terminusgps_tracker.models.customers.Customer`
 
         """
-        email, first_name, last_name = (
-            str(form.cleaned_data["username"]),
-            str(form.cleaned_data["first_name"]),
-            str(form.cleaned_data["last_name"]),
-        )
-
         response = anet_profiles.create_customer_profile(
-            merchant_id=customer.pk,
-            email=email,
-            description=f"{first_name} {last_name}",
+            merchant_id=int(customer.pk),
+            email=str(form.cleaned_data["username"]),
+            description=f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']}",
         )
         customer.authorizenet_profile_id = int(response.customerProfileId)
         return customer
@@ -254,69 +235,51 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     def wialon_create_customer_account(
         form: TerminusgpsRegisterForm, customer: Customer
     ) -> Customer:
+        """
+        Creates a customer account and user in Wialon and their ids to the customer.
+
+        :param form: A Terminus GPS registration form.
+        :type form: :py:obj:`~terminusgps_tracker.forms.TerminusgpsRegisterForm`
+        :param customer: A customer object.
+        :type customer: :py:obj:`~terminusgps_tracker.models.customers.Customer`
+        :returns: A customer object with :py:attr:`wialon_user_id` and :py:attr:`wialon_resource_id` set.
+        :rtype: :py:obj:`~terminusgps_tracker.models.customers.Customer`
+
+        """
         email = form.cleaned_data["username"]
         password = form.cleaned_data["password1"]
-
         with WialonSession(token=settings.WIALON_TOKEN) as session:
-            super_user_id = (
-                session.wialon_api.core_create_user(
-                    **{
-                        "creatorId": int(settings.WIALON_ADMIN_ACCOUNT),
-                        "name": f"super_{email}",
-                        "password": utils.generate_wialon_password(),
-                        "dataFlags": int(flags.DataFlag.USER_BASE),
-                    }
-                )
-                .get("item", {})
-                .get("id")
+            factory = WialonObjectFactory(session)
+            super_user = factory.create(
+                items_type="user",
+                creator_id=settings.WIALON_ADMIN_ACCOUNT,
+                name=f"super_{email}",
+                password=wialon_utils.generate_wialon_password(),
             )
-            resource_id = (
-                session.wialon_api.core_create_resource(
-                    **{
-                        "creatorId": super_user_id,
-                        "name": f"account_{email}",
-                        "dataFlags": flags.DataFlag.RESOURCE_BASE,
-                    }
-                )
-                .get("item", {})
-                .get("id")
+            end_user = factory.create(
+                items_type="user",
+                creator_id=super_user.id,
+                name=email,
+                password=password,
             )
-            end_user_id = (
-                session.wialon_api.core_create_user(
-                    **{
-                        "creatorId": super_user_id,
-                        "name": email,
-                        "password": password,
-                        "dataFlags": flags.DataFlag.USER_BASE,
-                    }
-                )
-                .get("item", {})
-                .get("id")
+            resource = factory.create(
+                items_type="avl_resource",
+                creator_id=super_user.id,
+                name=f"account_{email}",
+                skip_creator_check=True,
             )
-            session.wialon_api.user_update_item_access(
-                **{
-                    "userId": end_user_id,
-                    "itemId": resource_id,
-                    "accessMask": constants.ACCESSMASK_RESOURCE_BASIC,
-                }
+            end_user.set_access(
+                resource,
+                access_mask=wialon_constants.ACCESSMASK_RESOURCE_BASIC,
             )
-            session.wialon_api.account_create_account(
-                **{"itemId": resource_id, "plan": "terminusgps_ext_hist"}
+            account = factory.create(
+                items_type="account",
+                resource_id=resource.id,
+                billing_plan="terminusgps_ext_hist",
             )
-            session.wialon_api.account_enable_account(
-                **{"itemId": resource_id, "enable": int(True)}
-            )
-            session.wialon_api.account_update_flags(
-                **{
-                    "itemId": resource_id,
-                    "flags": 0x1,
-                    "blockBalance": "0.00",
-                    "denyBalance": "0.00",
-                }
-            )
-            session.wialon_api.account_enable_account(
-                **{"itemId": resource_id, "enable": int(False)}
-            )
-            customer.wialon_user_id = int(end_user_id)
-            customer.wialon_resource_id = int(resource_id)
+            account.activate()
+            account.set_flags(0x1)
+            account.deactivate()
+            customer.wialon_user_id = end_user.id
+            customer.wialon_resource_id = resource.id
             return customer

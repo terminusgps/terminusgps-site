@@ -1,5 +1,6 @@
-<section id="info" class="flex items-center justify-center gap-2">
-    <h2 class="text-center text-lg font-semibold">{{ subscription.name }}</h2>
+<section id="info" class="flex flex-col gap-4 text-center">
+    <h2 class="text-lg font-semibold">Update Your Subscription</h2>
+    <p class="text-sm md:text-lg">You can choose a different payment method or shipping address for your subscription here.</p>
 </section>
 <form class="group flex flex-col gap-4" method="post" hx-post="{{ subscription.get_update_url }}" hx-target="#subscription">
     {% csrf_token %}
@@ -12,7 +13,7 @@
             </svg>
             <p>Confirm</p>
         </button>
-        <button class="flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-current bg-gray-300 p-2 text-center text-gray-800 transition-colors duration-300 ease-in-out hover:bg-gray-100" type="button" hx-get="{% url 'tracker:subscription detail' subscription.customer.pk subscription.pk %}">
+        <button class="group w-full cursor-pointer rounded border border-current bg-gray-200 p-2 text-center text-gray-700 transition-colors duration-300 ease-in-out hover:bg-gray-100" type="button" hx-get="{{ subscription.get_absolute_url }}">
             <p>Back</p>
         </button>
     </section>

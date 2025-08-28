@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 from authorizenet.constants import constants
+from django.contrib.messages import constants as messages
 
 os.umask(0)
 decimal.getcontext().prec = 4
@@ -12,7 +13,6 @@ decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = True
-DEBUG_TOOLBAR_CONFIG = {"ROOT_TAG_EXTRA_ATTRS": "hx-preserve"}
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[.errorlist]:text-red-800 group-has-[.errorlist]:bg-red-100"
 DEFAULT_FROM_EMAIL = "support@terminusgps.com"
@@ -23,13 +23,13 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-FORM_RENDERER = "terminusgps.django.forms.renderer.TerminusgpsFormRenderer"
 INTERNAL_IPS = ["127.0.0.1"]
 LANGUAGE_CODE = "en-us"
 LOGIN_URL = "login/"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
 MERCHANT_AUTH_ENVIRONMENT = constants.SANDBOX
+FORM_RENDERER = "terminusgps.django.forms.renderer.TerminusgpsFormRenderer"
 MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
 MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
 MERCHANT_AUTH_VALIDATION_MODE = "testMode"
@@ -53,6 +53,13 @@ ADMINS = [
     ("Blake", "blake@terminusgps.com"),
     ("Lili", "lili@terminusgps.com"),
 ]
+
+MESSAGE_TAGS = {
+    messages.ERROR: "text-red-800 dark:text-red-100 px-2 py-4 border-2 border-current rounded bg-red-100 dark:bg-red-600 flex items-center gap-2",
+    messages.INFO: "text-gray-800 dark:text-gray-100 px-2 py-4 border-2 border-current rounded bg-gray-100 dark:bg-gray-600 flex items-center gap-2",
+    messages.SUCCESS: "text-green-800 dark:text-green-100 px-2 py-4 border-2 border-current rounded bg-green-100 dark:bg-green-600 flex items-center gap-2",
+    messages.WARNING: "text-yellow-800 dark:text-yellow-100 px-2 py-4 border-2 border-current rounded bg-yellow-100 dark:bg-yellow-300 flex items-center gap-2",
+}
 
 
 TRACKER_APP_CONFIG = {
@@ -111,6 +118,14 @@ CACHES = {
     "default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}
 }
 
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django.core.cache.backends.redis.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379",
+#         "TIMEOUT": 60 * 15,
+#     }
+# }
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.admindocs",
@@ -120,7 +135,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
-    "debug_toolbar",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
     "terminusgps_installer.apps.TerminusgpsInstallerConfig",
 ]
@@ -131,7 +145,6 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]

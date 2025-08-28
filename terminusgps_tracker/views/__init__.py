@@ -8,7 +8,7 @@ from .customers import (
     CustomerAccountView,
     CustomerDashboardView,
     CustomerSubscriptionView,
-    CustomerWialonUnitsView,
+    CustomerUnitsView,
 )
 from .payments import (
     CustomerPaymentMethodCreateView,
@@ -17,18 +17,14 @@ from .payments import (
     CustomerPaymentMethodListView,
 )
 from .subscriptions import (
-    SubscriptionCreateView,
-    SubscriptionDeleteView,
-    SubscriptionDetailView,
-    SubscriptionItemListView,
-    SubscriptionTransactionDetailView,
-    SubscriptionTransactionsView,
-    SubscriptionUpdateView,
+    CustomerSubscriptionCreateView,
+    CustomerSubscriptionDeleteView,
+    CustomerSubscriptionDetailView,
+    CustomerSubscriptionUpdateView,
 )
 from .units import (
     CustomerWialonUnitCreateView,
     CustomerWialonUnitDetailView,
-    CustomerWialonUnitListDetailView,
-    CustomerWialonUnitListUpdateView,
     CustomerWialonUnitListView,
+    CustomerWialonUnitUpdateView,
 )

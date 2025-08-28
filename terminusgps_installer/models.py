@@ -2,7 +2,8 @@ from django.contrib.auth import get_user_model
 from django.db import models, transaction
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from terminusgps.wialon.items import WialonResource, WialonUnit
+from terminusgps.wialon.items.resource import WialonResource
+from terminusgps.wialon.items.unit import WialonUnit
 from terminusgps.wialon.session import WialonSession
 
 
