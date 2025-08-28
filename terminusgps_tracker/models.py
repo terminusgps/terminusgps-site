@@ -1,14 +1,11 @@
-import datetime
 import decimal
 
 from authorizenet import apicontractsv1
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.db import models, transaction
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from terminusgps.authorizenet import profiles as anet_profiles
 from terminusgps.authorizenet import subscriptions as anet_subscriptions
@@ -50,27 +47,34 @@ class Customer(models.Model):
         cache_key: str = f"Customer:{self.pk}:get_authorizenet_profile:include_issuer_info_{include_issuer_info}"
         if cached_response := cache.get(cache_key):
             return cached_response
-        else:
-            response = anet_profiles.get_customer_profile(
-                customer_profile_id=self.authorizenet_profile_id,
-                include_issuer_info=include_issuer_info,
-            )
-            cache.set(cache_key, response, timeout=60 * 2)
-            return response
+        response = anet_profiles.get_customer_profile(
+            customer_profile_id=self.authorizenet_profile_id,
+            include_issuer_info=include_issuer_info,
+        )
+        cache.set(cache_key, response, timeout=60 * 2)
+        return response
 
-    def get_wialon_account_days(
-        self, session: WialonSession | None = None
-    ) -> int:
-        """Returns the number of days on the customer's Wialon account."""
+    def get_wialon_account_days(self) -> int:
+        """
+        Returns the number of days on the customer's Wialon account.
+
+        :raises AssertionError: If the customer's Wialon resource id wasn't set.
+        :returns: Number of account days as an integer.
+        :rtype: :py:obj:`int`
+
+        """
         assert self.wialon_resource_id, "Wialon resource id wasn't set."
-        if session is not None:
-            factory = WialonObjectFactory(session)
-            account = factory.get("account", self.wialon_resource_id)
-            return int(account.get_data().get("daysCounter"))
+
+        cache_key: str = f"Customer:{self.pk}:get_wialon_account_days"
+        if cached_days := cache.get(cache_key):
+            return cached_days
         with WialonSession(token=settings.WIALON_TOKEN) as session:
             factory = WialonObjectFactory(session)
             account = factory.get("account", self.wialon_resource_id)
-            return int(account.get_data().get("daysCounter"))
+            data = account.get_data() or {}
+            days = int(data.get("daysCounter", 0))
+            cache.set(cache_key, days, timeout=60 * 15)
+            return days
 
     @property
     def is_subscribed(self) -> bool:
@@ -110,10 +114,30 @@ class CustomerWialonUnit(models.Model):
         """Returns the unit's name or 'Wialon Unit #<pk>'."""
         return self.name if self.name else f"Wialon Unit #{self.pk}"
 
+    def save(self, **kwargs) -> None:
+        """Retrieves and sets :py:attr:`name` using the Wialon API before saving."""
+        if self._needs_wialon_hydration():
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                unit = self.get_wialon_unit(session)
+                self.name = unit.get_name()
+        return super().save(**kwargs)
+
     def get_wialon_unit(self, session: WialonSession) -> WialonUnit:
-        """Returns the customer Wialon unit as an instance of :py:obj:`~terminusgps.wialon.items.unit.WialonUnit`."""
+        """
+        Returns the customer Wialon unit as an instance of :py:obj:`~terminusgps.wialon.items.unit.WialonUnit`.
+
+        :param session: A valid Wialon API session.
+        :type session: :py:obj:`~terminusgps.wialon.session.WialonSession`
+        :returns: A Wialon unit.
+        :rtype: :py:obj:`~terminusgps.wialon.items.unit.WialonUnit`
+
+        """
         factory = WialonObjectFactory(session)
         return factory.get("avl_unit", self.pk)
+
+    def _needs_wialon_hydration(self) -> bool:
+        """Whether or not the unit needs to retrieve data from the Wialon API."""
+        return not all([self.name])
 
 
 class CustomerPaymentMethod(models.Model):
@@ -149,8 +173,9 @@ class CustomerPaymentMethod(models.Model):
         )
 
     def save(self, **kwargs) -> None:
+        """Retrieves and sets :py:attr:`cc_type` and :py:attr:`cc_last_4` from the Authorizenet API."""
         if self._needs_authorizenet_hydration():
-            credit_card = self._get_authorizenet_cc()
+            credit_card = self._get_authorizenet_credit_card()
             if credit_card is not None and all(
                 [
                     hasattr(credit_card, "cardType"),
@@ -192,10 +217,16 @@ class CustomerPaymentMethod(models.Model):
             include_issuer_info=include_issuer_info,
         )
 
-    def _needs_authorizenet_hydration(self) -> bool:
-        return not all([self.cc_type, self.cc_last_4])
+    def _get_authorizenet_credit_card(
+        self,
+    ) -> apicontractsv1.creditCardType | None:
+        """
+        Returns obfuscated credit card data for the payment method.
 
-    def _get_authorizenet_cc(self) -> apicontractsv1.creditCardType | None:
+        :returns: A credit card from Authorizenet.
+        :rtype: :py:obj:`~authorizenet.apicontractsv1.creditCardType` | :py:obj:`None`
+
+        """
         response = self.get_authorizenet_profile()
         if response is not None and all(
             [
@@ -206,17 +237,9 @@ class CustomerPaymentMethod(models.Model):
         ):
             return response.paymentProfile.payment.creditCard
 
-    def _get_authorizenet_cc_type(
-        self, cc: apicontractsv1.creditCardType | None = None
-    ) -> str | None:
-        if cc is not None and hasattr(cc, "cardType"):
-            return str(cc.cardType)
-
-    def _get_authorizenet_cc_last_4(
-        self, cc: apicontractsv1.creditCardType | None = None
-    ) -> str | None:
-        if cc is not None and hasattr(cc, "cardNumber"):
-            return str(cc.cardNumber)[-4:]
+    def _needs_authorizenet_hydration(self) -> bool:
+        """Whether or not the payment method needs to get data from the Authorizenet API."""
+        return not all([self.cc_type, self.cc_last_4])
 
 
 class CustomerShippingAddress(models.Model):
@@ -248,6 +271,7 @@ class CustomerShippingAddress(models.Model):
         )
 
     def save(self, **kwargs) -> None:
+        """Retrieves and sets :py:attr:`street` from the Authorizenet API."""
         if self._needs_authorizenet_hydration():
             response = self.get_authorizenet_profile()
             if response is not None and all(
@@ -290,6 +314,7 @@ class CustomerShippingAddress(models.Model):
         )
 
     def _needs_authorizenet_hydration(self) -> bool:
+        """Whether or not the shipping address needs to retrieve data from the Authorizenet API."""
         return not all([self.street])
 
 
@@ -381,21 +406,10 @@ class CustomerSubscription(models.Model):
         if response is not None and hasattr(response, "status"):
             return str(response.status)
 
-    def get_next_payment_date(self) -> datetime.datetime:
-        """Returns the next expected payment date for the subscription."""
-        now = timezone.now()
-        if not self.start_date:
-            return now
-
-        next = self.start_date.replace(
-            month=now.month, year=now.year
-        ) + relativedelta(months=1)
-        return next if now.day >= next.day else next.replace(month=now.month)
-
     def get_remaining_days(self) -> int:
         """Returns the number of days remaining before the next subscription payment is required."""
-        next_payment = self.get_next_payment_date()
-        return (next_payment - timezone.now()).days
+        # TODO: Calculate remaining days for subscription
+        return 0
 
     @transaction.atomic
     def refresh_status(self) -> None:

@@ -49,6 +49,7 @@ class CustomerPaymentMethodCreateView(
     ) -> HttpResponse:
         try:
             customer = Customer.objects.get(user=self.request.user)
+            payment_method = CustomerPaymentMethod(customer=customer)
             response = profiles.create_customer_payment_profile(
                 customer_profile_id=customer.authorizenet_profile_id,
                 new_payment_profile=apicontractsv1.customerPaymentProfileType(
@@ -59,18 +60,17 @@ class CustomerPaymentMethodCreateView(
                     defaultPaymentProfile=form.cleaned_data["default"],
                 ),
             )
-            CustomerPaymentMethod.objects.create(
-                id=int(response.customerPaymentProfileId), customer=customer
-            )
+            payment_method.pk = int(response.customerPaymentProfileId)
+            payment_method.save()
             if form.cleaned_data["create_shipping_address"]:
+                shipping_address = CustomerShippingAddress(customer=customer)
                 response = profiles.create_customer_shipping_address(
                     customer_profile_id=customer.authorizenet_profile_id,
                     new_address=form.cleaned_data["address"],
                     default=form.cleaned_data["default"],
                 )
-                CustomerShippingAddress.objects.create(
-                    id=int(response.customerAddressId), customer=customer
-                )
+                shipping_address.pk = int(response.customerAddressId)
+                shipping_address.save()
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
             match e.code:
@@ -109,8 +109,11 @@ class CustomerPaymentMethodDetailView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        if kwargs.get("object"):
-            context["profile"] = kwargs["object"].get_authorizenet_profile()
+        context["profile"] = (
+            kwargs["object"].get_authorizenet_profile()
+            if kwargs.get("object") is not None
+            else None
+        )
         return context
 
 
@@ -145,13 +148,10 @@ class CustomerPaymentMethodDeleteView(
     @transaction.atomic
     def form_valid(self, form: forms.Form) -> HttpResponse:
         try:
-            customer_pk: int = self.kwargs["customer_pk"]
-            customer: Customer = Customer.objects.get(pk=customer_pk)
-            payment: CustomerPaymentMethod = self.get_object()
-
+            payment_method = self.get_object()
             profiles.delete_customer_payment_profile(
-                customer_profile_id=customer.authorizenet_profile_id,
-                customer_payment_profile_id=payment.pk,
+                customer_profile_id=payment_method.customer.authorizenet_profile_id,
+                customer_payment_profile_id=payment_method.pk,
             )
             response = super().form_valid(form=form)
             response.headers["HX-Retarget"] = "#payment-list"
@@ -180,8 +180,11 @@ class CustomerPaymentMethodDeleteView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        if kwargs.get("object"):
-            context["profile"] = kwargs["object"].get_authorizenet_profile()
+        context["profile"] = (
+            kwargs["object"].get_authorizenet_profile()
+            if kwargs.get("object") is not None
+            else None
+        )
         return context
 
 

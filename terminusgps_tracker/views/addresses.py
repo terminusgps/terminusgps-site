@@ -44,14 +44,14 @@ class CustomerShippingAddressCreateView(
     ) -> HttpResponse:
         try:
             customer = Customer.objects.get(user=self.request.user)
+            shipping_address = CustomerShippingAddress(customer=customer)
             response = profiles.create_customer_shipping_address(
                 customer_profile_id=customer.authorizenet_profile_id,
                 new_address=form.cleaned_data["address"],
                 default=form.cleaned_data["default"],
             )
-            CustomerShippingAddress.objects.create(
-                id=int(response.customerAddressId), customer=customer
-            )
+            shipping_address.pk = int(response.customerAddressId)
+            shipping_address.save()
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
             match e.code:
@@ -90,7 +90,11 @@ class CustomerShippingAddressDetailView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["profile"] = kwargs["object"].get_authorizenet_profile()
+        context["profile"] = (
+            kwargs["object"].get_authorizenet_profile()
+            if kwargs.get("object") is not None
+            else None
+        )
         return context
 
 
@@ -149,8 +153,11 @@ class CustomerShippingAddressDeleteView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        if kwargs.get("object"):
-            context["profile"] = kwargs["object"].get_authorizenet_profile()
+        context["profile"] = (
+            kwargs["object"].get_authorizenet_profile()
+            if kwargs.get("object") is not None
+            else None
+        )
         return context
 
 

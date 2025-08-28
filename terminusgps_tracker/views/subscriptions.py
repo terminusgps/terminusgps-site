@@ -148,6 +148,7 @@ class CustomerSubscriptionCreateView(
             with WialonSession(token=settings.WIALON_TOKEN) as session:
                 factory = WialonObjectFactory(session)
                 account = factory.get("account", customer.wialon_resource_id)
+                account.set_flags(-0x20)
                 account.activate()
             return HttpResponseRedirect(
                 reverse("tracker:create subscription success")
