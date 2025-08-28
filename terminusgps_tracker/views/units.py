@@ -6,14 +6,14 @@ from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView, UpdateView
 from terminusgps.authorizenet import subscriptions as anet_subscriptions
 from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon.items.unit import WialonUnit
-from terminusgps.wialon.session import WialonSession
+from terminusgps.wialon.session import WialonAPIError, WialonSession
 from terminusgps.wialon.utils import get_unit_by_imei
 
 from terminusgps_tracker.forms import CustomerWialonUnitCreationForm
@@ -71,25 +71,28 @@ class CustomerWialonUnitCreateView(
                                 "Whoops! Couldn't find a unit with IMEI # '%(imei)s'."
                             ),
                             code="invalid",
-                            params={"imei": form.cleaned_data["imei"]},
+                            params={"imei": imei},
                         ),
                     )
                     return self.form_invalid(form=form)
 
                 if unit.get_name() != name:
                     unit.set_name(name)
-                CustomerWialonUnit.objects.create(
-                    id=unit.id,
+                customer_unit: CustomerWialonUnit = CustomerWialonUnit(
                     customer=customer,
                     name=name,
                     tier=CustomerSubscriptionTier.objects.first(),
                 )
+                customer_unit.pk = unit.id
+                customer_unit.save()
                 return super().form_valid(form=form)
-        except Exception as e:
+        except WialonAPIError as e:
             form.add_error(
                 None,
                 ValidationError(
-                    _("Whoops! %(error)s"), code="invalid", params={"error": e}
+                    _("Whoops! '%(error)s'"),
+                    code="invalid",
+                    params={"error": str(e)},
                 ),
             )
             return self.form_invalid(form=form)
@@ -112,15 +115,6 @@ class CustomerWialonUnitDetailView(
         return CustomerWialonUnit.objects.filter(
             customer__pk=self.kwargs["customer_pk"]
         ).select_related("customer")
-
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        obj: CustomerWialonUnit = self.get_object()
-        if not obj.name:
-            with WialonSession(token=settings.WIALON_TOKEN) as session:
-                unit = obj.get_wialon_unit(session)
-                obj.name = unit.get_name()
-                obj.save()
-        return super().get(request, *args, **kwargs)
 
 
 class CustomerWialonUnitUpdateView(
@@ -163,19 +157,22 @@ class CustomerWialonUnitUpdateView(
 
     def form_valid(self, form: forms.ModelForm) -> HttpResponse:
         obj: CustomerWialonUnit = self.get_object()
+        customer: Customer = obj.customer
         response = super().form_valid(form=form)
 
         if "name" in form.changed_data:
             new_name: str = form.cleaned_data["name"]
             with WialonSession(token=settings.WIALON_TOKEN) as session:
-                unit = obj.get_wialon_unit(session)
+                unit: WialonUnit = obj.get_wialon_unit(session)
                 unit.set_name(new_name)
-        if "tier" in form.changed_data and obj.customer.is_subscribed:
-            sub = CustomerSubscription.objects.get(customer=obj.customer)
+        if "tier" in form.changed_data and customer.is_subscribed:
+            subscription: CustomerSubscription = (
+                CustomerSubscription.objects.get(customer=customer)
+            )
             anet_subscriptions.update_subscription(
-                sub.pk,
+                subscription.pk,
                 apicontractsv1.ARBSubscriptionType(
-                    amount=sub.get_grand_total()
+                    amount=subscription.get_grand_total()
                 ),
             )
         return response
