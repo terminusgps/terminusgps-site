@@ -1,29 +1,11 @@
 [
     {
-        "model": "terminusgps_tracker.SubscriptionTier",
+        "model": "terminusgps_tracker.CustomerSubscriptionTier",
         "pk": 1,
         "fields": {
-            "name": "Basic",
-            "amount": 15.99,
-            "desc": "An affordable plan to get your GPS-tracking setup started."
-        }
-    },
-    {
-        "model": "terminusgps_tracker.SubscriptionTier",
-        "pk": 2,
-        "fields": {
             "name": "Standard",
-            "amount": 24.99,
-            "desc": "Our most popular plan with even more features."
-        }
-    },
-    {
-        "model": "terminusgps_tracker.SubscriptionTier",
-        "pk": 3,
-        "fields": {
-            "name": "Premium",
-            "amount": 29.99,
-            "desc": "An affordable plan to get your GPS-tracking setup started."
+            "price": 24.99,
+            "desc": "Our most popular plan."
         }
     }
 ]
