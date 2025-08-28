@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpResponse
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView
 from terminusgps.authorizenet import profiles
@@ -113,10 +113,8 @@ class CustomerShippingAddressDeleteView(
     template_name = "terminusgps_tracker/addresses/delete.html"
 
     def get_success_url(self) -> str:
-        return reverse(
-            "tracker:list address",
-            kwargs={"customer_pk": self.kwargs["customer_pk"]},
-        )
+        address = self.get_object()
+        return address.get_list_url()
 
     def get_queryset(
         self,
@@ -127,19 +125,23 @@ class CustomerShippingAddressDeleteView(
 
     def form_valid(self, form: forms.Form) -> HttpResponse:
         try:
-            customer_pk: int = self.kwargs["customer_pk"]
-            customer: Customer = Customer.objects.get(pk=customer_pk)
-            address: CustomerShippingAddress = self.get_object()
-
+            address = self.get_object()
             profiles.delete_customer_shipping_address(
-                customer_profile_id=customer.authorizenet_profile_id,
+                customer_profile_id=address.customer.authorizenet_profile_id,
                 customer_address_profile_id=address.pk,
             )
-            response = super().form_valid(form=form)
-            response.headers["HX-Retarget"] = "#address-list"
-            return response
+            return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
             match e.code:
+                case "E00107":
+                    form.add_error(
+                        None,
+                        ValidationError(
+                            _(
+                                "Whoops! The shipping address couldn't be deleted because it's associated with an active or suspended subscription."
+                            )
+                        ),
+                    )
                 case _:
                     form.add_error(
                         None,

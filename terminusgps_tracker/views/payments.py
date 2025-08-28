@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpResponse
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView
 from terminusgps.authorizenet import profiles
@@ -140,10 +140,8 @@ class CustomerPaymentMethodDeleteView(
     template_name = "terminusgps_tracker/payments/delete.html"
 
     def get_success_url(self) -> str:
-        return reverse(
-            "tracker:list payment",
-            kwargs={"customer_pk": self.kwargs["customer_pk"]},
-        )
+        payment = self.get_object()
+        return payment.get_list_url()
 
     def get_queryset(
         self,
@@ -160,9 +158,7 @@ class CustomerPaymentMethodDeleteView(
                 customer_profile_id=payment_method.customer.authorizenet_profile_id,
                 customer_payment_profile_id=payment_method.pk,
             )
-            response = super().form_valid(form=form)
-            response.headers["HX-Retarget"] = "#payment-list"
-            return response
+            return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
             match e.code:
                 case "E00105":
