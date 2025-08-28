@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('terminusgps_tracker', '0049_remove_customersubscriptiontier_desc_and_more'),
+        (
+            "terminusgps_tracker",
+            "0001_initial_squashed_0049_remove_customersubscriptiontier_desc_and_more",
+        )
     ]
 
     operations = [
         migrations.AddField(
-            model_name='customershippingaddress',
-            name='street',
-            field=models.CharField(blank=True, default=None, max_length=64, null=True),
-        ),
+            model_name="customershippingaddress",
+            name="street",
+            field=models.CharField(
+                blank=True, default=None, max_length=64, null=True
+            ),
+        )
     ]
