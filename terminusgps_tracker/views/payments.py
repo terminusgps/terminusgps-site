@@ -43,6 +43,13 @@ class CustomerPaymentMethodCreateView(
     success_url = reverse_lazy("tracker:account")
     template_name = "terminusgps_tracker/payments/create.html"
 
+    def get_initial(self, **kwargs) -> dict[str, typing.Any]:
+        initial: dict[str, typing.Any] = super().get_initial(**kwargs)
+        customer = Customer.objects.get(user=self.request.user)
+        if customer.addresses.count() != 0:
+            initial["create_shipping_address"] = False
+        return initial
+
     @transaction.atomic
     def form_valid(
         self, form: CustomerPaymentMethodCreationForm
@@ -177,15 +184,6 @@ class CustomerPaymentMethodDeleteView(
                         ),
                     )
             return self.form_invalid(form=form)
-
-    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["profile"] = (
-            kwargs["object"].get_authorizenet_profile()
-            if kwargs.get("object") is not None
-            else None
-        )
-        return context
 
 
 class CustomerPaymentMethodListView(

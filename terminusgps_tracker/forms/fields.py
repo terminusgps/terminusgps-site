@@ -16,16 +16,18 @@ class AddressWidget(forms.widgets.MultiWidget):
             field_attrs = [{} for _ in range(8)]
         widgets = {
             "first_name": forms.widgets.TextInput(
-                attrs=attrs | {"placeholder": "First"} | field_attrs[0]
+                attrs=attrs | {"placeholder": "First Name"} | field_attrs[0]
             ),
             "last_name": forms.widgets.TextInput(
-                attrs=attrs | {"placeholder": "Last"} | field_attrs[1]
+                attrs=attrs | {"placeholder": "Last Name"} | field_attrs[1]
             ),
             "phone_number": forms.widgets.TextInput(
-                attrs=attrs | {"placeholder": "+17135555555"} | field_attrs[2]
+                attrs=attrs | {"placeholder": "+17139045262"} | field_attrs[2]
             ),
             "street": forms.widgets.TextInput(
-                attrs=attrs | {"placeholder": "123 Main St"} | field_attrs[3]
+                attrs=attrs
+                | {"placeholder": "17610 South Dr"}
+                | field_attrs[3]
             ),
             "city": forms.widgets.TextInput(
                 attrs=attrs | {"placeholder": "Cypress"} | field_attrs[4]
@@ -34,10 +36,10 @@ class AddressWidget(forms.widgets.MultiWidget):
                 attrs=attrs | {"placeholder": "Texas"} | field_attrs[5]
             ),
             "zip": forms.widgets.TextInput(
-                attrs=attrs | {"placeholder": "77429"} | field_attrs[6]
+                attrs=attrs | {"placeholder": "77433"} | field_attrs[6]
             ),
             "country": forms.widgets.TextInput(
-                attrs=attrs | {"placeholder": "US"} | field_attrs[7]
+                attrs=attrs | {"placeholder": "USA"} | field_attrs[7]
             ),
         }
         super().__init__(widgets, attrs)

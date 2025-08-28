@@ -1,9 +1,9 @@
 <form class="flex w-full flex-col gap-4" hx-post="{{ payment.get_delete_url }}" method="post" hx-target="#payment-{{ payment.pk }}">
     {% if form.non_field_errors %}<div class="inset-shadow w-full animate-jiggle rounded border border-current bg-red-200 p-2 text-center text-red-600">{{ form.non_field_errors }}</div>{% endif %}
-    <p class="text-center font-semibold">Delete {{ profile.paymentProfile.payment.creditCard.cardType }} ending in '{{ profile.paymentProfile.payment.creditCard.cardNumber|cut:'XXXX' }}'?</p>
+    <p class="text-center font-semibold">Delete '{{ payment }}'?</p>
     {% csrf_token %}
     <section id="buttons" class="flex flex-col gap-2">
-        <button class="w-full cursor-pointer rounded border border-current bg-gray-50 p-2 text-center text-red-800 transition-colors duration-300 ease-in-out hover:bg-red-50" type="submit" hx-post="{{ payment.get_delete_url }}">
+        <button class="w-full cursor-pointer rounded border border-current bg-gray-50 p-2 text-center text-red-800 transition-colors duration-300 ease-in-out hover:bg-red-50" type="submit">
             <p>Confirm</p>
         </button>
         <button class="w-full cursor-pointer rounded border border-current bg-gray-300 p-2 text-center transition-colors duration-300 ease-in-out hover:bg-gray-200" type="button" hx-get="{{ payment.get_absolute_url }}" hx-swap="outerHTML">
