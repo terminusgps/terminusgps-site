@@ -69,10 +69,12 @@ class CustomerSubscriptionCreateView(
             {"class": settings.DEFAULT_FIELD_CLASS}
         )
         form.fields["payment"].label = "Payment Method"
+        form.fields["payment"].empty_label = None
         form.fields["address"].widget.attrs.update(
             {"class": settings.DEFAULT_FIELD_CLASS}
         )
         form.fields["address"].label = "Shipping Address"
+        form.fields["address"].empty_label = None
         return form
 
     def get_initial(self, **kwargs) -> dict[str, typing.Any]:
@@ -188,10 +190,12 @@ class CustomerSubscriptionUpdateView(
             {"class": settings.DEFAULT_FIELD_CLASS}
         )
         form.fields["payment"].label = "Payment Method"
+        form.fields["payment"].empty_label = None
         form.fields["address"].widget.attrs.update(
             {"class": settings.DEFAULT_FIELD_CLASS}
         )
         form.fields["address"].label = "Shipping Address"
+        form.fields["address"].empty_label = None
         return form
 
     def get_queryset(

@@ -1,7 +1,20 @@
-{% load tz %}
+{% load tz terminusgps_tracker_display %}
 <section id="info" class="flex flex-col gap-4 text-center">
-    <h2 class="text-lg font-semibold">Subscription Details</h2>
+    <h2 class="text-lg font-semibold">Your Subscription</h2>
     <p class="text-sm md:text-lg">You'll see a <span class="font-semibold">${{ profile.subscription.amount|floatformat:2 }}</span> charge from us every month on the <span class="font-semibold">{{ subscription.start_date|date:'jS' }}</span>.</p>
+</section>
+<section id="payment" class="flex flex-col gap-4">
+    <h3 class="font-semibold">Payment Information</h3>
+    <section class="flex flex-col gap-2 rounded border bg-gray-50 p-4 dark:bg-gray-600">
+        <div id="payment-{{ subscription.payment.pk }}" class="flex gap-2 items-center">
+            <p>Payment Method:</p>
+            <p class="font-semibold">{{ subscription.payment }}</p>
+        </div>
+        <div id="address-{{ subscription.address.pk }}" class="flex gap-2 items-center">
+            <p>Shipping Address:</p>
+            <p class="font-semibold">{{ subscription.address }}</p>
+        </div>
+    </section>
 </section>
 <section id="unit-list" class="flex flex-col gap-4">
     <h3 class="font-semibold">Units</h3>

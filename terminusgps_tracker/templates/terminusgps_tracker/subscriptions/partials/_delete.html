@@ -1,6 +1,6 @@
-<section id="warning" class="flex flex-col gap-4 text-center">
-    <p class="text-lg font-semibold">Cancel your subscription?</p>
-    <p class="text-sm font-light md:text-lg">(You'll lose access to <a href="{% url 'hosting' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">the platform</a> in {{ remaining_days }} day{{ remaining_days|pluralize }})</p>
+<section id="info" class="flex flex-col gap-4 text-center">
+    <h2 class="text-lg font-semibold">Cancel Your Subscription</h2>
+    <p class="text-sm md:text-lg">You'll lose access to <a href="{% url 'hosting' %}" class="decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">the platform</a> in {{ remaining_days }} day{{ remaining_days|pluralize }}.</p>
 </section>
 <form class="group flex flex-col gap-4" method="post" hx-post="{{ subscription.get_delete_url }}">
     {% csrf_token %}
