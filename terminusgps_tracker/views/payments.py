@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpResponse
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView
 from terminusgps.authorizenet import profiles
@@ -140,8 +140,10 @@ class CustomerPaymentMethodDeleteView(
     template_name = "terminusgps_tracker/payments/delete.html"
 
     def get_success_url(self) -> str:
-        payment = self.get_object()
-        return payment.get_list_url()
+        return reverse(
+            "tracker:list payment",
+            kwargs={"customer_pk": self.kwargs["customer_pk"]},
+        )
 
     def get_queryset(
         self,

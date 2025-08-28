@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpResponse
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, DetailView, FormView, ListView
 from terminusgps.authorizenet import profiles
@@ -113,8 +113,10 @@ class CustomerShippingAddressDeleteView(
     template_name = "terminusgps_tracker/addresses/delete.html"
 
     def get_success_url(self) -> str:
-        address = self.get_object()
-        return address.get_list_url()
+        return reverse(
+            "tracker:list address",
+            kwargs={"customer_pk": self.kwargs["customer_pk"]},
+        )
 
     def get_queryset(
         self,
@@ -123,6 +125,7 @@ class CustomerShippingAddressDeleteView(
             customer__pk=self.kwargs["customer_pk"]
         ).select_related("customer")
 
+    @transaction.atomic
     def form_valid(self, form: forms.Form) -> HttpResponse:
         try:
             address = self.get_object()
