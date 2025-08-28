@@ -191,15 +191,15 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     def form_valid(
         self, form: TerminusgpsRegisterForm
     ) -> HttpResponse | HttpResponseRedirect:
-        customer = Customer.objects.create(
-            user=get_user_model().objects.create_user(
-                username=form.cleaned_data["username"],
-                password=form.cleaned_data["password1"],
-                first_name=form.cleaned_data["first_name"],
-                last_name=form.cleaned_data["last_name"],
-                email=form.cleaned_data["username"],
-            )
+        user = get_user_model().objects.create_user(
+            username=form.cleaned_data["username"],
+            password=form.cleaned_data["password1"],
+            first_name=form.cleaned_data["first_name"],
+            last_name=form.cleaned_data["last_name"],
+            email=form.cleaned_data["username"],
         )
+
+        customer = Customer(user=user)
         customer = self.authorizenet_create_customer_profile(form, customer)
         customer = self.wialon_create_customer_account(form, customer)
         customer.save()
@@ -222,13 +222,12 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
         :rtype: :py:obj:`~terminusgps_tracker.models.customers.Customer`
 
         """
-        customer.authorizenet_profile_id = int(
-            anet_profiles.create_customer_profile(
-                merchant_id=customer.pk,
-                email=str(form.cleaned_data["username"]),
-                description=f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']}",
-            ).customerProfileId
+        response = anet_profiles.create_customer_profile(
+            merchant_id=int(customer.pk),
+            email=str(form.cleaned_data["username"]),
+            description=f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']}",
         )
+        customer.authorizenet_profile_id = int(response.customerProfileId)
         return customer
 
     @staticmethod
