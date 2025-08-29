@@ -70,16 +70,16 @@ class CustomerAdmin(admin.ModelAdmin):
                         id__in=ids_to_delete
                     ).delete()
 
-                self.message_user(
-                    request,
-                    ngettext(
-                        "%d customer had its payment methods synced with Authorizenet.",
-                        "%d customers had their payment methods synced with Authorizenet.",
-                        len(queryset),
-                    )
-                    % len(queryset),
-                    messages.SUCCESS,
+            self.message_user(
+                request,
+                ngettext(
+                    "%d customer had its payment methods synced with Authorizenet.",
+                    "%d customers had their payment methods synced with Authorizenet.",
+                    len(queryset),
                 )
+                % len(queryset),
+                messages.SUCCESS,
+            )
 
     @admin.action(
         description="Sync selected customer shipping addresses from Authorizenet"
@@ -126,16 +126,16 @@ class CustomerAdmin(admin.ModelAdmin):
                         id__in=ids_to_delete
                     ).delete()
 
-                self.message_user(
-                    request,
-                    ngettext(
-                        "%d customer had its shipping addresses synced with Authorizenet.",
-                        "%d customers had their shipping addresses synced with Authorizenet.",
-                        len(queryset),
-                    )
-                    % len(queryset),
-                    messages.SUCCESS,
+            self.message_user(
+                request,
+                ngettext(
+                    "%d customer had its shipping addresses synced with Authorizenet.",
+                    "%d customers had their shipping addresses synced with Authorizenet.",
+                    len(queryset),
                 )
+                % len(queryset),
+                messages.SUCCESS,
+            )
 
 
 @admin.register(CustomerWialonUnit)
