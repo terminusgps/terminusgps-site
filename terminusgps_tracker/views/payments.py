@@ -81,6 +81,16 @@ class CustomerPaymentMethodCreateView(
             return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as e:
             match e.code:
+                case "E00027":
+                    form.add_error(
+                        None,
+                        ValidationError(
+                            _(
+                                "Whoops! The credit card number you entered was invalid."
+                            ),
+                            code="invalid",
+                        ),
+                    )
                 case _:
                     form.add_error(
                         None,
