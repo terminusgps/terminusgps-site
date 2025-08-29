@@ -15,7 +15,7 @@ from terminusgps.wialon.session import WialonSession
 
 
 class Customer(models.Model):
-    """A human user."""
+    """A human customer."""
 
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
     """A Django user."""
@@ -38,53 +38,63 @@ class Customer(models.Model):
         """Returns the customer's email address/username."""
         return self.user.email if self.user.email else self.user.username
 
-    def get_authorizenet_profile(self, include_issuer_info: bool = False):
-        """Returns the Authorizenet customer profile for the customer."""
-        assert self.authorizenet_profile_id is not None, (
-            "Customer authorizenet profile id wasn't set."
-        )
-
-        cache_key: str = f"Customer:{self.pk}:get_authorizenet_profile:include_issuer_info_{include_issuer_info}"
-        if cached_response := cache.get(cache_key):
-            return cached_response
-        response = anet_profiles.get_customer_profile(
-            customer_profile_id=self.authorizenet_profile_id,
-            include_issuer_info=include_issuer_info,
-        )
-        cache.set(cache_key, response, timeout=60 * 2)
-        return response
-
-    def get_wialon_account_days(self) -> int:
-        """
-        Returns the number of days on the customer's Wialon account.
-
-        :raises AssertionError: If the customer's Wialon resource id wasn't set.
-        :returns: Number of account days as an integer.
-        :rtype: :py:obj:`int`
-
-        """
-        assert self.wialon_resource_id, "Wialon resource id wasn't set."
-
-        cache_key: str = f"Customer:{self.pk}:get_wialon_account_days"
-        if cached_days := cache.get(cache_key):
-            return cached_days
-        with WialonSession(token=settings.WIALON_TOKEN) as session:
-            factory = WialonObjectFactory(session)
-            account = factory.get("account", self.wialon_resource_id)
-            data = account.get_data() or {}
-            days = int(data.get("daysCounter", 0))
-            cache.set(cache_key, days, timeout=60 * 15)
-            return days
-
     @property
     def is_subscribed(self) -> bool:
-        """Whether or not the customer is subscribed."""
+        """
+        Whether or not the customer is subscribed.
+
+        :type: :py:obj:`bool`
+
+        """
         try:
             active = CustomerSubscription.CustomerSubscriptionStatus.ACTIVE
             status = CustomerSubscription.objects.get(customer=self).status
             return status == active
         except CustomerSubscription.DoesNotExist:
             return False
+
+    def get_authorizenet_profile(self, include_issuer_info: bool = False):
+        """
+        Returns the Authorizenet customer profile for the customer.
+
+        :param include_issuer_info: Whether or not to include issuer info in the response. Default is :py:obj:`False`.
+        :type include_issuer_info: :py:obj:`bool`
+        :returns: A :py:obj:`~authorizenet.apicontractsv1.getCustomerProfileRequest` response.
+        :rtype: :py:obj:`~authorizenet.apicontractsv1.getCustomerProfileResponse` | :py:obj:`None`
+
+        """
+        if self.authorizenet_profile_id is not None:
+            cache_key: str = f"Customer:{self.pk}:get_authorizenet_profile:include_issuer_info_{include_issuer_info}"
+            if cached_response := cache.get(cache_key):
+                return cached_response
+            else:
+                response = anet_profiles.get_customer_profile(
+                    customer_profile_id=self.authorizenet_profile_id,
+                    include_issuer_info=include_issuer_info,
+                )
+                cache.set(cache_key, response, timeout=60 * 2)
+                return response
+
+    def get_wialon_account_days(self) -> int | None:
+        """
+        Returns the number of days on the customer's Wialon account, if they have one.
+
+        :returns: Number of account days as an integer.
+        :rtype: :py:obj:`int` | :py:obj:`None`
+
+        """
+        if self.wialon_resource_id is not None:
+            cache_key: str = f"Customer:{self.pk}:get_wialon_account_days"
+            if cached_days := cache.get(cache_key):
+                return cached_days
+            else:
+                with WialonSession(token=settings.WIALON_TOKEN) as session:
+                    factory = WialonObjectFactory(session)
+                    account = factory.get("account", self.wialon_resource_id)
+                    data = account.get_data() or {}
+                    days = int(data.get("daysCounter", 0))
+                    cache.set(cache_key, days, timeout=60 * 15)
+                    return days
 
 
 class CustomerWialonUnit(models.Model):
@@ -136,7 +146,7 @@ class CustomerWialonUnit(models.Model):
         return factory.get("avl_unit", self.pk)
 
     def _needs_wialon_hydration(self) -> bool:
-        """Whether or not the unit needs to retrieve data from the Wialon API."""
+        """Whether or not the unit needs to get data from the Wialon API."""
         return not all([self.name])
 
 
@@ -207,15 +217,21 @@ class CustomerPaymentMethod(models.Model):
         )
 
     def get_authorizenet_profile(self, include_issuer_info: bool = False):
-        """Returns the Authorizenet payment profile for the payment method."""
-        assert self.customer.authorizenet_profile_id is not None, (
-            "Customer authorizenet profile id wasn't set."
-        )
-        return anet_profiles.get_customer_payment_profile(
-            customer_profile_id=self.customer.authorizenet_profile_id,
-            customer_payment_profile_id=self.pk,
-            include_issuer_info=include_issuer_info,
-        )
+        """
+        Returns the Authorizenet payment profile for the payment method.
+
+        :param include_issuer_info: Whether or not to include issuer info in the response. Default is :py:obj:`False`.
+        :type include_issuer_info: :py:obj:`bool`
+        :returns: An Authorizenet getCustomerPaymentProfileRequest response.
+        :rtype: :py:obj:`~authorizenet.apicontractsv1.getCustomerPaymentProfileResponse` | :py:obj:`None`
+
+        """
+        if self.customer.authorizenet_profile_id is not None:
+            return anet_profiles.get_customer_payment_profile(
+                customer_profile_id=self.customer.authorizenet_profile_id,
+                customer_payment_profile_id=self.pk,
+                include_issuer_info=include_issuer_info,
+            )
 
     def _get_authorizenet_credit_card(
         self,
@@ -238,7 +254,7 @@ class CustomerPaymentMethod(models.Model):
             return response.paymentProfile.payment.creditCard
 
     def _needs_authorizenet_hydration(self) -> bool:
-        """Whether or not the payment method needs to get data from the Authorizenet API."""
+        """Whether or not the payment method needs data from the Authorizenet API."""
         return not all([self.cc_type, self.cc_last_4])
 
 
@@ -304,17 +320,21 @@ class CustomerShippingAddress(models.Model):
         )
 
     def get_authorizenet_profile(self):
-        """Returns the Authorizenet address profile for the shipping address."""
-        assert self.customer.authorizenet_profile_id, (
-            "Customer authorizenet profile id wasn't set."
-        )
-        return anet_profiles.get_customer_shipping_address(
-            customer_profile_id=self.customer.authorizenet_profile_id,
-            customer_address_profile_id=self.pk,
-        )
+        """
+        Returns the Authorizenet address profile for the shipping address.
+
+        :returns: An Authorizenet getCustomerShippingAddressRequest response.
+        :rtype: :py:obj:`~authorizenet.apicontractsv1.getCustomerShippingAddressResponse` | :py:obj:`None`
+
+        """
+        if self.customer.authorizenet_profile_id is not None:
+            return anet_profiles.get_customer_shipping_address(
+                customer_profile_id=self.customer.authorizenet_profile_id,
+                customer_address_profile_id=self.pk,
+            )
 
     def _needs_authorizenet_hydration(self) -> bool:
-        """Whether or not the shipping address needs to retrieve data from the Authorizenet API."""
+        """Whether or not the shipping address needs data from the Authorizenet API."""
         return not all([self.street])
 
 
@@ -392,11 +412,18 @@ class CustomerSubscription(models.Model):
         )
 
     def get_authorizenet_profile(self, include_transactions: bool = False):
-        """Returns the subscription profile from the Authorizenet API."""
-        response = anet_subscriptions.get_subscription(
+        """
+        Returns the subscription profile from the Authorizenet API.
+
+        :param include_transactions: Whether or not to include transactions in the response. Default is :py:obj:`False`.
+        :type include_transactions: :py:obj:`bool`
+        :returns: A :py:obj:`~authorizenet.apicontractsv1.ARBGetSubscriptionRequest` response.
+        :rtype: :py:obj:`~authorizenet.apicontractsv1.ARBGetSubscriptionResponse` | :py:obj:`None`
+
+        """
+        return anet_subscriptions.get_subscription(
             subscription_id=self.pk, include_transactions=include_transactions
         )
-        return response
 
     def get_authorizenet_status(self) -> str | None:
         """Returns the current subscription status from the Authorizenet API."""
