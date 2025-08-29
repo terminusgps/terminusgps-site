@@ -26,7 +26,12 @@ from terminusgps.django.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon.items import WialonObjectFactory
 from terminusgps.wialon.session import WialonSession
 
-from terminusgps_tracker.models import Customer, CustomerSubscription
+from terminusgps_tracker.models import (
+    Customer,
+    CustomerPaymentMethod,
+    CustomerShippingAddress,
+    CustomerSubscription,
+)
 from terminusgps_tracker.views.mixins import (
     CustomerAuthenticationRequiredMixin,
 )
@@ -65,16 +70,25 @@ class CustomerSubscriptionCreateView(
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class=form_class)
+        address_qs = CustomerShippingAddress.objects.filter(
+            customer__user=self.request.user
+        )
+        payment_qs = CustomerPaymentMethod.objects.filter(
+            customer__user=self.request.user
+        )
+
         form.fields["payment"].widget.attrs.update(
             {"class": settings.DEFAULT_FIELD_CLASS}
         )
         form.fields["payment"].label = "Payment Method"
         form.fields["payment"].empty_label = None
+        form.fields["payment"].queryset = payment_qs
         form.fields["address"].widget.attrs.update(
             {"class": settings.DEFAULT_FIELD_CLASS}
         )
         form.fields["address"].label = "Shipping Address"
         form.fields["address"].empty_label = None
+        form.fields["address"].queryset = address_qs
         return form
 
     def get_initial(self, **kwargs) -> dict[str, typing.Any]:
@@ -185,17 +199,26 @@ class CustomerSubscriptionUpdateView(
     template_name = "terminusgps_tracker/subscriptions/update.html"
 
     def get_form(self, form_class=None):
-        form = super().get_form()
+        form = super().get_form(form_class=form_class)
+        address_qs = CustomerShippingAddress.objects.filter(
+            customer__user=self.request.user
+        )
+        payment_qs = CustomerPaymentMethod.objects.filter(
+            customer__user=self.request.user
+        )
+
         form.fields["payment"].widget.attrs.update(
             {"class": settings.DEFAULT_FIELD_CLASS}
         )
         form.fields["payment"].label = "Payment Method"
         form.fields["payment"].empty_label = None
+        form.fields["payment"].queryset = payment_qs
         form.fields["address"].widget.attrs.update(
             {"class": settings.DEFAULT_FIELD_CLASS}
         )
         form.fields["address"].label = "Shipping Address"
         form.fields["address"].empty_label = None
+        form.fields["address"].queryset = address_qs
         return form
 
     def get_queryset(
