@@ -55,7 +55,9 @@ class Customer(models.Model):
 
     def get_authorizenet_profile(self, include_issuer_info: bool = False):
         """
-        Returns the Authorizenet customer profile for the customer.
+        Returns the customer's profile from Authorizenet.
+
+        Returns :py:obj:`None` if :py:attr:`authorizenet_profile_id` wasn't set.
 
         :param include_issuer_info: Whether or not to include issuer info in the response. Default is :py:obj:`False`.
         :type include_issuer_info: :py:obj:`bool`
@@ -77,7 +79,9 @@ class Customer(models.Model):
 
     def get_wialon_account_days(self) -> int | None:
         """
-        Returns the number of days on the customer's Wialon account, if they have one.
+        Returns the number of days on the customer's Wialon account.
+
+        Returns :py:obj:`None` if :py:attr:`wialon_resource_id` wasn't set.
 
         :returns: Number of account days as an integer.
         :rtype: :py:obj:`int` | :py:obj:`None`
@@ -334,7 +338,7 @@ class CustomerShippingAddress(models.Model):
             )
 
     def _needs_authorizenet_hydration(self) -> bool:
-        """Whether or not the shipping address needs data from the Authorizenet API."""
+        """Whether or not the shipping address needs data from Authorizenet."""
         return not all([self.street])
 
 
@@ -468,7 +472,7 @@ class CustomerSubscription(models.Model):
 
 
 class CustomerSubscriptionTier(models.Model):
-    """A subscription tier for a customer unit."""
+    """A customer subscription tier."""
 
     name = models.CharField(max_length=64)
     """Subscription tier name."""
@@ -480,5 +484,5 @@ class CustomerSubscriptionTier(models.Model):
         return self.name
 
     def get_price_display(self) -> str:
-        """Returns the dollar amount of the subscription tier with a dollar sign."""
+        """Returns the price of the subscription tier with a dollar sign."""
         return f"${self.price}"
