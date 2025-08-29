@@ -257,11 +257,11 @@ class CustomerSubscriptionDetailView(
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        subscription: CustomerSubscription = kwargs["object"]
-        context["unit_list"] = subscription.customer.units.all()
-        context["profile"] = anet_subscriptions.get_subscription(
-            subscription_id=subscription.pk, include_transactions=True
-        )
+        if kwargs.get("object"):
+            context["unit_list"] = kwargs["object"].customer.units.all()
+            context["profile"] = anet_subscriptions.get_subscription(
+                subscription_id=kwargs["object"].pk, include_transactions=True
+            )
         return context
 
     def get_queryset(
