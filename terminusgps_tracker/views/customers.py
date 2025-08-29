@@ -28,7 +28,7 @@ class CustomerDashboardView(
     template_name = "terminusgps_tracker/customers/dashboard.html"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        customer = Customer.objects.get(user=self.request.user)
+        customer = Customer.objects.get(user=request.user)
         if not customer.is_subscribed:
             messages.add_message(
                 request,
