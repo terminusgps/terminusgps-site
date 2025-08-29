@@ -155,7 +155,13 @@ class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class=form_class)
+        form.fields["username"].widget.attrs.update(
+            {"class": settings.DEFAULT_FIELD_CLASS}
+        )
         form.fields["username"].validators.append(validate_email)
+        form.fields["password"].widget.attrs.update(
+            {"class": settings.DEFAULT_FIELD_CLASS}
+        )
         return form
 
     def get_initial(self, **kwargs) -> dict[str, typing.Any]:
