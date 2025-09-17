@@ -11,19 +11,17 @@ authors = [
     { name = "Peter Speckman", email = "pspeckman@terminusgps.com" },
 ]
 dependencies = [
-    "authorizenet==1.1.5",
     "django-storages[s3]>=1.14.4",
-    "django==5.2.2",
+    "django==5.2.6",
     "gunicorn>=23.0.0",
-    "lxml==4.9.4",
     "numpy==2.0.1",
     "pandas==2.2.3",
     "pillow==11.3.0",
-    "python-terminusgps==42.2.4",
-    "python-wialon==1.2.4",
+    "python-terminusgps==46.0.0",
     "psycopg>=3.2.6",
     "psycopg2-binary>=2.9.10",
     "redis[hiredis]>=6.4.0",
+    "terminusgps-payments>=1.0.0",
 ]
 
 [tool.pyright]
