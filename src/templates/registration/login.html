@@ -1,0 +1,30 @@
+{% extends "terminusgps/layout.html" %}
+{% block content %}
+{% if form.errors %}
+<p>Username and password didn't match.</p>
+{% endif %}
+
+{% if next %}
+    {% if user.is_authenticated %}
+    <p>Your account is prohibited from viewing this content.</p>
+    {% else %}
+    <p>Please login to view this content.</p>
+    {% endif %}
+{% endif %}
+
+<form class="flex flex-col gap-4" action="{% url 'login' %}" method="post">
+    {% csrf_token %}
+    <div class="flex flex-col gap-2 group">
+        {{ form.username.as_field_group }}
+    </div>
+    <div class="flex flex-col gap-2 group">
+        {{ form.password.as_field_group }}
+    </div>
+    <button class="w-full rounded border border-current bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit">Login</button>
+    <input type="hidden" name="next" value="{{ next }}">
+    <div class="flex justify-between gap-2">
+        <p class="text-sm">Forgot your password? Click <a href="{% url 'password_reset' %}" class="decoration w-fit text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">here</a> to reset it.</p>
+        <p class="text-sm">Don't have an account? Click <a href="{% url 'register' %}" class="decoration w-fit text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">here</a> to register.</p>
+    </div>
+</form>
+{% endblock content %}

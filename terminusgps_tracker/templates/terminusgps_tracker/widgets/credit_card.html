@@ -1,9 +1,0 @@
-{% for subwidget in widget.subwidgets %}
-{% if forloop.counter0 == 1 %}
-<div class="flex gap-2">
-{% endif %}
-{% include subwidget.template_name with widget=subwidget %}
-{% if forloop.counter0 == 2 %}
-</div>
-{% endif %}
-{% endfor %}

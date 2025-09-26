@@ -10,19 +10,20 @@ cached = lambda view_func: cache_page(timeout=60 * 15)(view_func)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", cached(views.TerminusgpsHomeView.as_view()), name="home"),
-    path("login/", views.TerminusgpsLoginView.as_view(), name="login"),
-    path("logout/", views.TerminusgpsLogoutView.as_view(), name="logout"),
-    path("hosting/", views.TerminusgpsHostingView.as_view(), name="hosting"),
-    path("about/", cached(views.TerminusgpsAboutView.as_view()), name="about"),
+    path("accounts/", include("django.contrib.auth.urls")),
     path(
-        "register/", views.TerminusgpsRegisterView.as_view(), name="register"
+        "accounts/register/",
+        views.TerminusgpsRegisterView.as_view(),
+        name="register",
     ),
+    path("", cached(views.TerminusgpsHomeView.as_view()), name="home"),
+    path("hosting/", views.TerminusgpsHostingView.as_view(), name="hosting"),
     path(
         "source/",
         views.TerminusgpsSourceCodeView.as_view(),
         name="source code",
     ),
+    path("about/", cached(views.TerminusgpsAboutView.as_view()), name="about"),
     path(
         "contact/",
         cached(views.TerminusgpsContactView.as_view()),
@@ -63,10 +64,7 @@ urlpatterns = [
         cached(views.TerminusgpsFrequentlyAskedQuestionsView.as_view()),
         name="faq",
     ),
-    path(
-        "install/",
-        include("terminusgps_installer.urls", namespace="installer"),
-    ),
+    path("payments/", include("terminusgps_payments.urls")),
     path("", include("terminusgps_tracker.urls", namespace="tracker")),
 ]
 

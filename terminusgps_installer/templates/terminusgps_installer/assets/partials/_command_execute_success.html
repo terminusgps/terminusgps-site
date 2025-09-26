@@ -1,4 +1,0 @@
-<div hx-get="{{ command.get_absolute_url }}" hx-target="#command-{{ command.pk }}" hx-trigger="load delay:3s" hx-swap="outerHTML">
-    <p class="font-semibold">Successfully executed '{{ command.name|default:'the command' }}'!</p>
-    <p>{{ last_msg }}</p>
-</div>

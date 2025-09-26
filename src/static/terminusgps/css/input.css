@@ -1,4 +1,6 @@
 @import "tailwindcss" source("../../../../");
+@plugin "@tailwindcss/forms";
+@source "../../../../.venv/lib/python3.12/site-packages/terminusgps_payments";
 
 @theme {
     --color-terminus-black: oklch(14.29% 0.0041 345.44);

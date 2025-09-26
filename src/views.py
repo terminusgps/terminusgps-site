@@ -1,24 +1,21 @@
-import typing
-
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.contrib.auth.views import LoginView, LogoutView
-from django.core.exceptions import ImproperlyConfigured
-from django.core.validators import validate_email
+from django.contrib.auth.models import User
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import transaction
-from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse_lazy
+from django.http import HttpResponse
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, RedirectView, TemplateView
-from terminusgps.authorizenet import profiles as anet_profiles
-from terminusgps.django.mixins import HtmxTemplateResponseMixin
-from terminusgps.wialon import constants as wialon_constants
-from terminusgps.wialon import utils as wialon_utils
+from terminusgps.authorizenet.service import (
+    AuthorizenetControllerExecutionError,
+)
+from terminusgps.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon.items import WialonObjectFactory
-from terminusgps.wialon.session import WialonSession
+from terminusgps.wialon.session import WialonAPIError, WialonSession
+from terminusgps_payments.models import CustomerProfile
+from terminusgps_payments.services import AuthorizenetService
 
 from terminusgps_tracker.models import Customer
 
-from . import emails
 from .forms import TerminusgpsRegisterForm
 
 if settings.configured and not hasattr(settings, "TRACKER_APP_CONFIG"):
@@ -41,16 +38,16 @@ class TerminusgpsCommercialUseView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "Commercial Use", "subtitle": ""}
     http_method_names = ["get"]
-    partial_template_name = "terminusgps/usage/partials/_commercial.html"
-    template_name = "terminusgps/usage/commercial.html"
+    template_name = "terminusgps/commercial_use.html"
+    partial_template_name = "terminusgps/partials/_commercial_use.html"
 
 
 class TerminusgpsIndividualUseView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "Individual Use", "subtitle": ""}
     http_method_names = ["get"]
-    partial_template_name = "terminusgps/usage/partials/_individual.html"
-    template_name = "terminusgps/usage/individual.html"
+    template_name = "terminusgps/individual_use.html"
+    partial_template_name = "terminusgps/partials/_individual_use.html"
 
 
 class TerminusgpsAboutView(HtmxTemplateResponseMixin, TemplateView):
@@ -88,8 +85,8 @@ class TerminusgpsTeenSafetyView(HtmxTemplateResponseMixin, TemplateView):
         "subtitle": "Tips and Tricks for Teen Drivers",
     }
     http_method_names = ["get"]
-    template_name = "terminusgps/safety/teen.html"
-    partial_template_name = "terminusgps/safety/partials/_teen.html"
+    template_name = "terminusgps/teen_safety.html"
+    partial_template_name = "terminusgps/partials/_teen_safety.html"
 
 
 class TerminusgpsSeniorSafetyView(HtmxTemplateResponseMixin, TemplateView):
@@ -99,8 +96,8 @@ class TerminusgpsSeniorSafetyView(HtmxTemplateResponseMixin, TemplateView):
         "subtitle": "Tips and Tricks for Senior Drivers",
     }
     http_method_names = ["get"]
-    template_name = "terminusgps/safety/senior.html"
-    partial_template_name = "terminusgps/safety/partials/_senior.html"
+    template_name = "terminusgps/senior_safety.html"
+    partial_template_name = "terminusgps/partials/_senior_safety.html"
 
 
 class TerminusgpsTermsAndConditionsView(
@@ -140,47 +137,6 @@ class TerminusgpsPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps/privacy.html"
 
 
-class TerminusgpsLoginView(HtmxTemplateResponseMixin, LoginView):
-    content_type = "text/html"
-    extra_context = {
-        "title": "Login",
-        "subtitle": "We know where ours are... do you?",
-    }
-    http_method_names = ["get", "post"]
-    next_page = reverse_lazy("tracker:dashboard")
-    partial_template_name = "terminusgps/auth/partials/_login.html"
-    redirect_authenticated_user = True
-    success_url = reverse_lazy("tracker:dashboard")
-    template_name = "terminusgps/auth/login.html"
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class=form_class)
-        form.fields["username"].widget.attrs.update(
-            {"class": settings.DEFAULT_FIELD_CLASS}
-        )
-        form.fields["username"].validators.append(validate_email)
-        form.fields["password"].widget.attrs.update(
-            {"class": settings.DEFAULT_FIELD_CLASS}
-        )
-        return form
-
-    def get_initial(self, **kwargs) -> dict[str, typing.Any]:
-        initial: dict[str, typing.Any] = super().get_initial()
-        if self.request.GET.get("username"):
-            initial["username"] = self.request.GET.get("username")
-        return initial
-
-
-class TerminusgpsLogoutView(HtmxTemplateResponseMixin, LogoutView):
-    content_type = "text/html"
-    extra_context = {"title": "Logout"}
-    http_method_names = ["get", "post", "options"]
-    next_page = reverse_lazy("login")
-    partial_template_name = "terminusgps/auth/partials/_logout.html"
-    success_url_allowed_hosts = settings.ALLOWED_HOSTS
-    template_name = "terminusgps/auth/logout.html"
-
-
 class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     content_type = "text/html"
     extra_context = {
@@ -188,104 +144,74 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
         "subtitle": "You'll know where yours are...",
     }
     form_class = TerminusgpsRegisterForm
-    http_method_names = ["get", "post"]
-    template_name = "terminusgps/auth/register.html"
-    partial_template_name = "terminusgps/auth/partials/_register.html"
-    success_url = reverse_lazy("tracker:dashboard")
+    partial_template_name = "registration/partials/_register.html"
+    template_name = "registration/register.html"
 
     @transaction.atomic
-    def form_valid(
-        self, form: TerminusgpsRegisterForm
-    ) -> HttpResponse | HttpResponseRedirect:
-        user = get_user_model().objects.create_user(
-            username=form.cleaned_data["username"],
+    def form_valid(self, form: TerminusgpsRegisterForm) -> HttpResponse:
+        try:
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                customer = self.wialon_registration_flow(form, session)
+            user = form.save(commit=True)
+            user.email = form.cleaned_data["username"]
+            customer.user = user
+            customer.save()
+            customer_profile = self.authorizenet_registration_flow(
+                user, AuthorizenetService()
+            )
+            customer_profile.save()
+            return super().form_valid(form=form)
+        except WialonAPIError as e:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("%(e)s"), code="invalid", params={"e": str(e)}
+                ),
+            )
+            return self.form_invalid(form=form)
+        except AuthorizenetControllerExecutionError as e:
+            form.add_error(
+                None,
+                ValidationError(
+                    _("%(code)s: %(message)s"),
+                    code="invalid",
+                    params={"code": e.code, "message": e.message},
+                ),
+            )
+            return self.form_invalid(form=form)
+
+    @transaction.atomic
+    def wialon_registration_flow(
+        self, form: TerminusgpsRegisterForm, session: WialonSession
+    ) -> Customer:
+        factory = WialonObjectFactory(session)
+        user = factory.create(
+            "user",
+            creator_id=settings.WIALON_ADMIN_ID,
+            name=form.cleaned_data["username"],
             password=form.cleaned_data["password1"],
-            first_name=form.cleaned_data["first_name"],
-            last_name=form.cleaned_data["last_name"],
-            email=form.cleaned_data["username"],
+        )
+        resource = factory.create(
+            "avl_resource",
+            creator_id=getattr(user, "id"),
+            name=f"account_{form.cleaned_data['username']}",
+        )
+        account = factory.create(
+            "account",
+            resource_id=getattr(resource, "id"),
+            billing_plan="terminusgps_ext_hist",
+        )
+        account.deactivate()
+        return Customer(
+            wialon_resource_id=getattr(resource, "id"),
+            wialon_user_id=getattr(user, "id"),
         )
 
-        customer = Customer(user=user)
-        customer = self.authorizenet_create_customer_profile(form, customer)
-        customer = self.wialon_create_customer_account(form, customer)
-        customer.save()
-        emails.send_registration_email(customer)
-        return super().form_valid(form=form)
-
-    @staticmethod
     @transaction.atomic
-    def authorizenet_create_customer_profile(
-        form: TerminusgpsRegisterForm, customer: Customer
-    ) -> Customer:
-        """
-        Creates a customer profile in Authorizenet and saves its id to the customer.
-
-        :param form: A Terminus GPS registration form.
-        :type form: :py:obj:`~terminusgps_tracker.forms.TerminusgpsRegisterForm`
-        :param customer: A customer object.
-        :type customer: :py:obj:`~terminusgps_tracker.models.customers.Customer`
-        :returns: A customer object with :py:attr:`authorizenet_id` set.
-        :rtype: :py:obj:`~terminusgps_tracker.models.customers.Customer`
-
-        """
-        response = anet_profiles.create_customer_profile(
-            merchant_id=int(customer.pk),
-            email=str(form.cleaned_data["username"]),
-            description=f"{form.cleaned_data['first_name']} {form.cleaned_data['last_name']}",
-        )
-        customer.authorizenet_profile_id = int(response.customerProfileId)
-        return customer
-
-    @staticmethod
-    @transaction.atomic
-    def wialon_create_customer_account(
-        form: TerminusgpsRegisterForm, customer: Customer
-    ) -> Customer:
-        """
-        Creates a customer account and user in Wialon and their ids to the customer.
-
-        :param form: A Terminus GPS registration form.
-        :type form: :py:obj:`~terminusgps_tracker.forms.TerminusgpsRegisterForm`
-        :param customer: A customer object.
-        :type customer: :py:obj:`~terminusgps_tracker.models.customers.Customer`
-        :returns: A customer object with :py:attr:`wialon_user_id` and :py:attr:`wialon_resource_id` set.
-        :rtype: :py:obj:`~terminusgps_tracker.models.customers.Customer`
-
-        """
-        email = form.cleaned_data["username"]
-        password = form.cleaned_data["password1"]
-        with WialonSession(token=settings.WIALON_TOKEN) as session:
-            factory = WialonObjectFactory(session)
-            super_user = factory.create(
-                items_type="user",
-                creator_id=settings.WIALON_ADMIN_ACCOUNT,
-                name=f"super_{email}",
-                password=wialon_utils.generate_wialon_password(),
-            )
-            end_user = factory.create(
-                items_type="user",
-                creator_id=super_user.id,
-                name=email,
-                password=password,
-            )
-            resource = factory.create(
-                items_type="avl_resource",
-                creator_id=super_user.id,
-                name=f"account_{email}",
-                skip_creator_check=True,
-            )
-            end_user.set_access(
-                resource,
-                access_mask=wialon_constants.ACCESSMASK_RESOURCE_BASIC,
-            )
-            account = factory.create(
-                items_type="account",
-                resource_id=resource.id,
-                billing_plan="terminusgps_ext_hist",
-            )
-            account.activate()
-            account.set_flags(0x1)
-            account.deactivate()
-            customer.wialon_user_id = end_user.id
-            customer.wialon_resource_id = resource.id
-            return customer
+    def authorizenet_registration_flow(
+        self, user: User, service: AuthorizenetService
+    ) -> CustomerProfile:
+        customer_profile = CustomerProfile(user=user)
+        anet_response = service.create_customer_profile(customer_profile)
+        customer_profile.pk = int(anet_response.customerProfileId)
+        return customer_profile

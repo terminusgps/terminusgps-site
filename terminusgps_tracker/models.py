@@ -1,34 +1,38 @@
 import decimal
 
-from authorizenet import apicontractsv1
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.cache import cache
-from django.db import models, transaction
+from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from terminusgps.authorizenet import profiles as anet_profiles
-from terminusgps.authorizenet import subscriptions as anet_subscriptions
-from terminusgps.wialon.items import WialonObjectFactory
-from terminusgps.wialon.items.unit import WialonUnit
-from terminusgps.wialon.session import WialonSession
+from terminusgps.authorizenet.constants import SubscriptionStatus
+from terminusgps_payments.models import Subscription
+
+from .managers import UserExclusiveManager
 
 
 class Customer(models.Model):
-    """A human customer."""
+    """A Terminus GPS customer."""
 
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
     """A Django user."""
-    authorizenet_profile_id = models.IntegerField(
-        default=None, null=True, blank=True
+    subscription = models.ForeignKey(
+        "terminusgps_payments.Subscription",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        default=None,
     )
-    """Authorizenet customer profile id."""
+    """Customer subscription."""
     wialon_user_id = models.IntegerField(default=None, null=True, blank=True)
     """Wialon user id."""
     wialon_resource_id = models.IntegerField(
         default=None, null=True, blank=True
     )
     """Wialon resource/account id."""
+    tax_rate = models.DecimalField(
+        default=0.0825, decimal_places=4, max_digits=5
+    )
+    """Customer tax rate."""
 
     class Meta:
         verbose_name = _("customer")
@@ -38,451 +42,102 @@ class Customer(models.Model):
         """Returns the customer's email address/username."""
         return self.user.email if self.user.email else self.user.username
 
+    def get_tax_rate_display(self) -> str:
+        """Returns the customer's tax rate as a percentage."""
+        return f"{self.tax_rate:.2%}"
+
+    def get_units(self) -> models.QuerySet:
+        """Returns a queryset of customer wialon units for the customer."""
+        return CustomerWialonUnit.objects.for_user(self.user)
+
+    def get_subscription_subtotal(self) -> decimal.Decimal:
+        """Returns the subscription subtotal for the customer."""
+        unit_qs = self.get_units()
+        if unit_qs.count() == 0:
+            return decimal.Decimal("0.00")
+        prices_aggregate = unit_qs.aggregate(models.Sum("tier__price"))
+        return prices_aggregate["tier__price__sum"]
+
+    def get_subscription_grand_total(self) -> decimal.Decimal:
+        """Returns the subscription grand total for the customer."""
+        subtotal = self.get_subscription_subtotal()
+        return round(subtotal * (1 + self.tax_rate), ndigits=2)
+
     @property
     def is_subscribed(self) -> bool:
-        """
-        Whether or not the customer is subscribed.
-
-        :type: :py:obj:`bool`
-
-        """
+        """Whether the customer is subscribed to Terminus GPS."""
         try:
-            active = CustomerSubscription.CustomerSubscriptionStatus.ACTIVE
-            status = CustomerSubscription.objects.get(customer=self).status
-            return status == active
-        except CustomerSubscription.DoesNotExist:
+            subscription = Subscription.objects.filter(
+                customer_profile__user=self.user
+            ).get(name="Terminus GPS Subscription")
+            return subscription.status == SubscriptionStatus.ACTIVE
+        except Subscription.DoesNotExist:
             return False
-
-    def get_authorizenet_profile(self, include_issuer_info: bool = False):
-        """
-        Returns the customer's profile from Authorizenet.
-
-        Returns :py:obj:`None` if :py:attr:`authorizenet_profile_id` wasn't set.
-
-        :param include_issuer_info: Whether or not to include issuer info in the response. Default is :py:obj:`False`.
-        :type include_issuer_info: :py:obj:`bool`
-        :returns: A :py:obj:`~authorizenet.apicontractsv1.getCustomerProfileRequest` response.
-        :rtype: :py:obj:`~authorizenet.apicontractsv1.getCustomerProfileResponse` | :py:obj:`None`
-
-        """
-        if self.authorizenet_profile_id is not None:
-            cache_key: str = f"Customer:{self.pk}:get_authorizenet_profile:include_issuer_info_{include_issuer_info}"
-            if cached_response := cache.get(cache_key):
-                return cached_response
-            else:
-                response = anet_profiles.get_customer_profile(
-                    customer_profile_id=self.authorizenet_profile_id,
-                    include_issuer_info=include_issuer_info,
-                )
-                cache.set(cache_key, response, timeout=60 * 2)
-                return response
-
-    def get_wialon_account_days(self) -> int | None:
-        """
-        Returns the number of days on the customer's Wialon account.
-
-        Returns :py:obj:`None` if :py:attr:`wialon_resource_id` wasn't set.
-
-        :returns: Number of account days as an integer.
-        :rtype: :py:obj:`int` | :py:obj:`None`
-
-        """
-        if self.wialon_resource_id is not None:
-            cache_key: str = f"Customer:{self.pk}:get_wialon_account_days"
-            if cached_days := cache.get(cache_key):
-                return cached_days
-            else:
-                with WialonSession(token=settings.WIALON_TOKEN) as session:
-                    factory = WialonObjectFactory(session)
-                    account = factory.get("account", self.wialon_resource_id)
-                    data = account.get_data() or {}
-                    days = int(data.get("daysCounter", 0))
-                    cache.set(cache_key, days, timeout=60 * 15)
-                    return days
 
 
 class CustomerWialonUnit(models.Model):
-    """A Wialon unit for a customer."""
+    """A customer Wialon unit."""
 
-    id = models.PositiveBigIntegerField(primary_key=True)
+    wialon_id = models.PositiveIntegerField()
     """Wialon unit id."""
-    name = models.CharField(max_length=64, null=True, blank=True, default=None)
-    """Wialon unit name."""
-    tier = models.ForeignKey(
-        "terminusgps_tracker.CustomerSubscriptionTier",
-        on_delete=models.RESTRICT,
+    name = models.CharField(
+        max_length=64,
+        null=True,
+        blank=True,
+        default=None,
+        help_text="Enter a memorable name.",
     )
-    """Subscription tier for the unit."""
+    """Wialon unit name."""
+    imei = models.CharField(
+        max_length=16,
+        help_text="Enter the IMEI # found on your installed device.",
+    )
+    """Wialon unit IMEI # (sys_unique_id in Wialon)."""
+    tier = models.ForeignKey(
+        "terminusgps_tracker.SubscriptionTier",
+        on_delete=models.PROTECT,
+        related_name="units",
+        help_text="Select a tier.",
+    )
+    """Subscription tier."""
     customer = models.ForeignKey(
         "terminusgps_tracker.Customer",
         on_delete=models.CASCADE,
         related_name="units",
     )
     """Associated customer."""
+    objects = UserExclusiveManager()
 
     class Meta:
-        verbose_name = _("customer wialon unit")
-        verbose_name_plural = _("customer wialon units")
+        verbose_name = _("wialon unit")
+        verbose_name_plural = _("wialon units")
 
     def __str__(self) -> str:
         """Returns the unit's name or 'Wialon Unit #<pk>'."""
         return self.name if self.name else f"Wialon Unit #{self.pk}"
 
-    def save(self, **kwargs) -> None:
-        """Retrieves and sets :py:attr:`name` using the Wialon API before saving."""
-        if self._needs_wialon_hydration():
-            with WialonSession(token=settings.WIALON_TOKEN) as session:
-                unit = self.get_wialon_unit(session)
-                self.name = unit.get_name()
-        return super().save(**kwargs)
-
-    def get_wialon_unit(self, session: WialonSession) -> WialonUnit:
-        """
-        Returns the customer Wialon unit as an instance of :py:obj:`~terminusgps.wialon.items.unit.WialonUnit`.
-
-        :param session: A valid Wialon API session.
-        :type session: :py:obj:`~terminusgps.wialon.session.WialonSession`
-        :returns: A Wialon unit.
-        :rtype: :py:obj:`~terminusgps.wialon.items.unit.WialonUnit`
-
-        """
-        factory = WialonObjectFactory(session)
-        return factory.get("avl_unit", self.pk)
-
-    def _needs_wialon_hydration(self) -> bool:
-        """Whether or not the unit needs to get data from the Wialon API."""
-        return not all([self.name])
-
-
-class CustomerPaymentMethod(models.Model):
-    """A payment method for a customer."""
-
-    id = models.PositiveBigIntegerField(primary_key=True)
-    """Authorizenet customer payment profile id."""
-    customer = models.ForeignKey(
-        "terminusgps_tracker.Customer",
-        on_delete=models.CASCADE,
-        related_name="payments",
-    )
-    """Associated customer."""
-
-    cc_type = models.CharField(
-        max_length=12, default=None, null=True, blank=True
-    )
-    """Credit card type."""
-    cc_last_4 = models.CharField(
-        max_length=4, default=None, null=True, blank=True
-    )
-    """Credit card last 4 digits."""
-
-    class Meta:
-        verbose_name = _("customer payment method")
-        verbose_name_plural = _("customer payment methods")
-
-    def __str__(self) -> str:
-        return (
-            f"{self.cc_type} ending in {self.cc_last_4}"
-            if not self._needs_authorizenet_hydration()
-            else f"Payment Method #{self.pk}"
-        )
-
-    def save(self, **kwargs) -> None:
-        """Retrieves and sets :py:attr:`cc_type` and :py:attr:`cc_last_4` from the Authorizenet API."""
-        if self._needs_authorizenet_hydration():
-            credit_card = self._get_authorizenet_credit_card()
-            if credit_card is not None and all(
-                [
-                    hasattr(credit_card, "cardType"),
-                    hasattr(credit_card, "cardNumber"),
-                ]
-            ):
-                self.cc_type = str(credit_card.cardType)
-                self.cc_last_4 = str(credit_card.cardNumber)[-4:]
-        return super().save(**kwargs)
-
     def get_absolute_url(self) -> str:
-        """Returns a URL pointing to the payment method's detail view."""
+        """Returns a URL pointing to the unit's detail view."""
         return reverse(
-            "tracker:detail payment",
-            kwargs={"customer_pk": self.customer.pk, "payment_pk": self.pk},
+            "terminusgps_tracker:detail unit", kwargs={"unit_pk": self.pk}
         )
 
-    def get_delete_url(self) -> str:
-        """Returns a URL pointing to the payment method's delete view."""
-        return reverse(
-            "tracker:delete payment",
-            kwargs={"customer_pk": self.customer.pk, "payment_pk": self.pk},
-        )
 
-    def get_list_url(self) -> str:
-        """Returns a URL pointing to the payment method's list view."""
-        return reverse(
-            "tracker:list payment", kwargs={"customer_pk": self.customer.pk}
-        )
-
-    def get_authorizenet_profile(self, include_issuer_info: bool = False):
-        """
-        Returns the Authorizenet payment profile for the payment method.
-
-        :param include_issuer_info: Whether or not to include issuer info in the response. Default is :py:obj:`False`.
-        :type include_issuer_info: :py:obj:`bool`
-        :returns: An Authorizenet getCustomerPaymentProfileRequest response.
-        :rtype: :py:obj:`~authorizenet.apicontractsv1.getCustomerPaymentProfileResponse` | :py:obj:`None`
-
-        """
-        if self.customer.authorizenet_profile_id is not None:
-            return anet_profiles.get_customer_payment_profile(
-                customer_profile_id=self.customer.authorizenet_profile_id,
-                customer_payment_profile_id=self.pk,
-                include_issuer_info=include_issuer_info,
-            )
-
-    def _get_authorizenet_credit_card(
-        self,
-    ) -> apicontractsv1.creditCardType | None:
-        """
-        Returns obfuscated credit card data for the payment method.
-
-        :returns: A credit card from Authorizenet.
-        :rtype: :py:obj:`~authorizenet.apicontractsv1.creditCardType` | :py:obj:`None`
-
-        """
-        response = self.get_authorizenet_profile()
-        if response is not None and all(
-            [
-                hasattr(response, "paymentProfile"),
-                hasattr(response.paymentProfile, "payment"),
-                hasattr(response.paymentProfile.payment, "creditCard"),
-            ]
-        ):
-            return response.paymentProfile.payment.creditCard
-
-    def _needs_authorizenet_hydration(self) -> bool:
-        """Whether or not the payment method needs data from the Authorizenet API."""
-        return not all([self.cc_type, self.cc_last_4])
-
-
-class CustomerShippingAddress(models.Model):
-    """A shipping address for a customer."""
-
-    id = models.PositiveBigIntegerField(primary_key=True)
-    """Authorizenet customer shipping profile id."""
-    customer = models.ForeignKey(
-        "terminusgps_tracker.Customer",
-        on_delete=models.CASCADE,
-        related_name="addresses",
-    )
-    """Associated customer."""
-
-    street = models.CharField(
-        max_length=64, default=None, null=True, blank=True
-    )
-
-    class Meta:
-        verbose_name = _("customer shipping address")
-        verbose_name_plural = _("customer shipping addresses")
-
-    def __str__(self) -> str:
-        """Returns '<STREET>' or 'Shipping Address #<ID>'."""
-        return (
-            self.street
-            if not self._needs_authorizenet_hydration()
-            else f"Shipping Address #{self.pk}"
-        )
-
-    def save(self, **kwargs) -> None:
-        """Retrieves and sets :py:attr:`street` from the Authorizenet API."""
-        if self._needs_authorizenet_hydration():
-            response = self.get_authorizenet_profile()
-            if response is not None and all(
-                [
-                    hasattr(response, "address"),
-                    hasattr(response.address, "address"),
-                ]
-            ):
-                self.street = str(response.address.address)
-        return super().save(**kwargs)
-
-    def get_absolute_url(self) -> str:
-        """Returns a URL pointing to the shipping address' detail view."""
-        return reverse(
-            "tracker:detail address",
-            kwargs={"customer_pk": self.customer.pk, "address_pk": self.pk},
-        )
-
-    def get_delete_url(self) -> str:
-        """Returns a URL pointing to the shipping address' delete view."""
-        return reverse(
-            "tracker:delete address",
-            kwargs={"customer_pk": self.customer.pk, "address_pk": self.pk},
-        )
-
-    def get_list_url(self) -> str:
-        """Returns a URL pointing to the shipping address' list view."""
-        return reverse(
-            "tracker:list address", kwargs={"customer_pk": self.customer.pk}
-        )
-
-    def get_authorizenet_profile(self):
-        """
-        Returns the Authorizenet address profile for the shipping address.
-
-        :returns: An Authorizenet getCustomerShippingAddressRequest response.
-        :rtype: :py:obj:`~authorizenet.apicontractsv1.getCustomerShippingAddressResponse` | :py:obj:`None`
-
-        """
-        if self.customer.authorizenet_profile_id is not None:
-            return anet_profiles.get_customer_shipping_address(
-                customer_profile_id=self.customer.authorizenet_profile_id,
-                customer_address_profile_id=self.pk,
-            )
-
-    def _needs_authorizenet_hydration(self) -> bool:
-        """Whether or not the shipping address needs data from Authorizenet."""
-        return not all([self.street])
-
-
-class CustomerSubscription(models.Model):
-    class CustomerSubscriptionStatus(models.TextChoices):
-        ACTIVE = "active", _("Active")
-        """Subscription is active in Authorizenet."""
-        CANCELED = "canceled", _("Canceled")
-        """Subscription was canceled in Authorizenet."""
-        EXPIRED = "expired", _("Expired")
-        """Subscription was expired in Authorizenet."""
-        SUSPENDED = "suspended", _("Suspended")
-        """Subscription was suspended in Authorizenet."""
-        TERMINATED = "terminated", _("Terminated")
-        """Subscription was terminated in Authorizenet."""
-
-    id = models.PositiveBigIntegerField(primary_key=True)
-    """Authorizenet subscription id."""
-    name = models.CharField(max_length=31)
-    """Authorizenet subscription name."""
-    status = models.CharField(
-        max_length=16,
-        choices=CustomerSubscriptionStatus.choices,
-        default=CustomerSubscriptionStatus.SUSPENDED,
-    )
-    """Authorizenet subscription status."""
-    customer = models.OneToOneField(
-        "terminusgps_tracker.Customer", on_delete=models.RESTRICT
-    )
-    """Associated customer."""
-    payment = models.OneToOneField(
-        "terminusgps_tracker.CustomerPaymentMethod", on_delete=models.RESTRICT
-    )
-    """Associated payment method."""
-    address = models.OneToOneField(
-        "terminusgps_tracker.CustomerShippingAddress",
-        on_delete=models.RESTRICT,
-    )
-    """Associated shipping address."""
-    start_date = models.DateTimeField(null=True, blank=True, default=None)
-    """Start date/time for the subscription."""
-
-    def __str__(self) -> str:
-        """Returns the subscription name."""
-        return self.name
-
-    def get_absolute_url(self) -> str:
-        """Returns a URL pointing to the subscription's detail view."""
-        return reverse(
-            "tracker:detail subscription",
-            kwargs={
-                "customer_pk": self.customer.pk,
-                "subscription_pk": self.pk,
-            },
-        )
-
-    def get_delete_url(self) -> str:
-        """Returns a URL pointing to the subscription's delete view."""
-        return reverse(
-            "tracker:delete subscription",
-            kwargs={
-                "customer_pk": self.customer.pk,
-                "subscription_pk": self.pk,
-            },
-        )
-
-    def get_update_url(self) -> str:
-        """Returns a URL pointing to the subscription's update view."""
-        return reverse(
-            "tracker:update subscription",
-            kwargs={
-                "customer_pk": self.customer.pk,
-                "subscription_pk": self.pk,
-            },
-        )
-
-    def get_authorizenet_profile(self, include_transactions: bool = False):
-        """
-        Returns the subscription profile from the Authorizenet API.
-
-        :param include_transactions: Whether or not to include transactions in the response. Default is :py:obj:`False`.
-        :type include_transactions: :py:obj:`bool`
-        :returns: A :py:obj:`~authorizenet.apicontractsv1.ARBGetSubscriptionRequest` response.
-        :rtype: :py:obj:`~authorizenet.apicontractsv1.ARBGetSubscriptionResponse` | :py:obj:`None`
-
-        """
-        return anet_subscriptions.get_subscription(
-            subscription_id=self.pk, include_transactions=include_transactions
-        )
-
-    def get_authorizenet_status(self) -> str | None:
-        """Returns the current subscription status from the Authorizenet API."""
-        response = anet_subscriptions.get_subscription_status(
-            subscription_id=self.pk
-        )
-        if response is not None and hasattr(response, "status"):
-            return str(response.status)
-
-    def get_remaining_days(self) -> int:
-        """Returns the number of days remaining before the next subscription payment is required."""
-        # TODO: Calculate remaining days for subscription
-        return 0
-
-    @transaction.atomic
-    def refresh_status(self) -> None:
-        """Sets the subscription status to the status returned by the Authorizenet API."""
-        if new_status := self.get_authorizenet_status():
-            self.status = new_status
-
-    def get_subtotal(self) -> decimal.Decimal:
-        """Calculates and returns a subtotal for the subscription."""
-        unit_qs = CustomerWialonUnit.objects.filter(customer=self.customer)
-        price_agg = unit_qs.aggregate(models.Sum("tier__price"))
-
-        if result := price_agg.get("tier__price__sum"):
-            return result
-        else:
-            raise ValueError(
-                f"Failed to aggregate unit prices for '{self.customer}': '{result}'."
-            )
-
-    def get_grand_total(
-        self, tax_rate: decimal.Decimal = decimal.Decimal("0.0825")
-    ) -> decimal.Decimal:
-        """Calculates and returns a grand total for the subscription based on ``tax_rate``."""
-        try:
-            subtotal = self.get_subtotal()
-            return round(subtotal * (1 + tax_rate), ndigits=2)
-        except ValueError:
-            raise
-
-
-class CustomerSubscriptionTier(models.Model):
-    """A customer subscription tier."""
+class SubscriptionTier(models.Model):
+    """A subscription tier."""
 
     name = models.CharField(max_length=64)
     """Subscription tier name."""
-    price = models.DecimalField(max_digits=9, decimal_places=2, default=24.99)
-    """Subscription tier dollar amount."""
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=24.99)
+    """Subscription tier price."""
+
+    class Meta:
+        verbose_name = _("subscription tier")
+        verbose_name_plural = _("subscription tiers")
 
     def __str__(self) -> str:
         """Returns the subscription tier name."""
         return self.name
 
     def get_price_display(self) -> str:
-        """Returns the price of the subscription tier with a dollar sign."""
         return f"${self.price}"

@@ -25,11 +25,11 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 INTERNAL_IPS = ["127.0.0.1"]
 LANGUAGE_CODE = "en-us"
+LOGIN_REDIRECT_URL = "dashboard/"
 LOGIN_URL = "login/"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
 MERCHANT_AUTH_ENVIRONMENT = constants.SANDBOX
-FORM_RENDERER = "terminusgps.django.forms.renderer.TerminusgpsFormRenderer"
 MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
 MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
 MERCHANT_AUTH_VALIDATION_MODE = "testMode"
@@ -118,14 +118,6 @@ CACHES = {
     "default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}
 }
 
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-#         "LOCATION": "redis://127.0.0.1:6379",
-#         "TIMEOUT": 60 * 15,
-#     }
-# }
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.admindocs",
@@ -135,8 +127,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
+    "terminusgps_payments.apps.TerminusgpsPaymentsConfig",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
-    "terminusgps_installer.apps.TerminusgpsInstallerConfig",
 ]
 
 MIDDLEWARE = [
