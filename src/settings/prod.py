@@ -53,7 +53,7 @@ TIME_ZONE = "US/Central"
 USE_I18N = True
 USE_TZ = True
 USE_X_FORWARDED_HOST = True
-WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID")
+WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID", "27881459")
 WIALON_DEFAULT_PLAN = os.getenv("WIALON_DEFAULT_PLAN", "terminusgps_ext_hist")
 WIALON_TOKEN = os.getenv("WIALON_TOKEN")
 WSGI_APPLICATION = "src.wsgi.application"
@@ -172,12 +172,15 @@ STORAGES = {
     },
 }
 
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django.core.cache.backends.redis.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379",
+#         "TIMEOUT": 60 * 15,
+#     }
+# }
 CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379",
-        "TIMEOUT": 60 * 15,
-    }
+    "default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}
 }
 
 INSTALLED_APPS = [
