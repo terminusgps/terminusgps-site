@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import transaction
 from django.http import HttpResponse
+from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, RedirectView, TemplateView
 from terminusgps.authorizenet.service import (
@@ -146,14 +147,23 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     form_class = TerminusgpsRegisterForm
     partial_template_name = "registration/partials/_register.html"
     template_name = "registration/register.html"
+    success_url = reverse_lazy("terminusgps_tracker:dashboard")
 
     @transaction.atomic
     def form_valid(self, form: TerminusgpsRegisterForm) -> HttpResponse:
         try:
-            with WialonSession(token=settings.WIALON_TOKEN) as session:
-                customer = self.wialon_registration_flow(form, session)
+            username = form.cleaned_data["username"]
+            password = form.cleaned_data["password1"]
+
             user = form.save(commit=True)
-            user.email = form.cleaned_data["username"]
+            user.email = username
+            user.first_name = form.cleaned_data["first_name"]
+            user.last_name = form.cleaned_data["last_name"]
+
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                customer = self.wialon_registration_flow(
+                    username, password, session
+                )
             customer.user = user
             customer.save()
             customer_profile = self.authorizenet_registration_flow(
@@ -182,30 +192,32 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
 
     @transaction.atomic
     def wialon_registration_flow(
-        self, form: TerminusgpsRegisterForm, session: WialonSession
+        self, username: str, password: str, session: WialonSession
     ) -> Customer:
         factory = WialonObjectFactory(session)
         user = factory.create(
             "user",
             creator_id=settings.WIALON_ADMIN_ID,
-            name=form.cleaned_data["username"],
-            password=form.cleaned_data["password1"],
+            name=username,
+            password=password,
         )
         resource = factory.create(
             "avl_resource",
-            creator_id=getattr(user, "id"),
-            name=f"account_{form.cleaned_data['username']}",
+            creator_id=user.id,
+            name=f"account_{username}",
+            skip_creator_check=True,
         )
         account = factory.create(
             "account",
-            resource_id=getattr(resource, "id"),
+            resource_id=resource.id,
             billing_plan="terminusgps_ext_hist",
         )
         account.deactivate()
-        return Customer(
-            wialon_resource_id=getattr(resource, "id"),
-            wialon_user_id=getattr(user, "id"),
-        )
+
+        customer = Customer()
+        customer.wialon_resource_id = resource.id
+        customer.wialon_user_id = user.id
+        return customer
 
     @transaction.atomic
     def authorizenet_registration_flow(

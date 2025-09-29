@@ -195,6 +195,7 @@ class CustomerSubscriptionCreateView(
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         customer = Customer.objects.get(user=self.request.user)
 
+        context["num_units"] = customer.units.count()
         context["customer"] = customer
         context["subtotal"] = customer.get_subscription_subtotal()
         context["tax"] = context["subtotal"] * customer.tax_rate

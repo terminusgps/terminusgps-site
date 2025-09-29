@@ -41,11 +41,12 @@ class CustomerWialonUnitCreateView(
 
     def get_initial(self, **kwargs) -> dict[str, typing.Any]:
         initial: dict[str, typing.Any] = super().get_initial(**kwargs)
+        initial["tier"] = SubscriptionTier.objects.first()
         if imei := str(self.request.GET.get("imei")):
             if imei.isdigit() and len(imei) <= 16:
                 initial["imei"] = imei
-        initial["tier"] = SubscriptionTier.objects.first()
-        initial["name"] = f"{self.request.user.first_name}'s Ride"
+        if self.request.user.first_name:
+            initial["name"] = f"{self.request.user.first_name}'s Ride"
         return initial
 
     @transaction.atomic

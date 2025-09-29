@@ -1,6 +1,7 @@
 from string import ascii_lowercase, ascii_uppercase, digits, punctuation
 
-from django.contrib.auth.forms import UserCreationForm
+from django import forms
+from django.contrib.auth.forms import BaseUserCreationForm
 from django.core.validators import validate_email
 from django.forms import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -49,20 +50,20 @@ def validate_wialon_password(value: str) -> None:
         )
 
 
-class TerminusgpsRegisterForm(UserCreationForm):
-    def clean_username(self):
-        super().clean_username()
-        if username := self.cleaned_data.get("username"):
-            try:
-                validate_email(username)
-                return username
-            except ValidationError as e:
-                self.add_error("username", e)
+class TerminusgpsRegisterForm(BaseUserCreationForm):
+    first_name = forms.CharField(
+        max_length=64, help_text="Please enter your first name."
+    )
+    last_name = forms.CharField(
+        max_length=64, help_text="Please enter your last name."
+    )
 
-    def clean_password1(self):
-        super().clean_password1()
-        if password := self.cleaned_data.get("password1"):
-            try:
-                validate_wialon_password(password)
-            except ValidationError as e:
-                self.add_error("password1", e)
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields["username"].validators.append(validate_email)
+        self.fields["password1"].validators.append(validate_wialon_password)
+        self.fields["password2"].validators.append(validate_wialon_password)
+
+        self.fields[
+            "username"
+        ].help_text = "Required. Please enter a valid email address."
