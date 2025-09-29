@@ -34,7 +34,8 @@ EMAIL_USE_TLS = True
 FILE_CHARSET = "utf-8"
 FORM_RENDERER = "terminusgps.django.forms.renderer.TerminusgpsFormRenderer"
 LANGUAGE_CODE = "en-us"
-LOGIN_URL = "login/"
+LOGIN_REDIRECT_URL = "/dashboard/"
+LOGIN_URL = "/accounts/login/"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
 MERCHANT_AUTH_ENVIRONMENT = constants.PRODUCTION
@@ -189,6 +190,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
+    "terminusgps_payments.apps.TerminusgpsPaymentsConfig",
     "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
 ]
 
