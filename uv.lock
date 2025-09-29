@@ -575,7 +575,7 @@ wheels = [
 
 [[package]]
 name = "terminusgps-payments"
-version = "1.2.0"
+version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "authorizenet" },
@@ -583,9 +583,9 @@ dependencies = [
     { name = "psycopg" },
     { name = "python-terminusgps" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/53/34/e9ddb640cf6a3619d2a076b8e5307890f0c23da1ffa1ee03ac3ca6cbe5f3/terminusgps_payments-1.2.0.tar.gz", hash = "sha256:edc06d3c047d07e91d2f9f554a9a74a46d5609dce0044673ede21ba90ef0b55a", size = 75820 }
+sdist = { url = "https://files.pythonhosted.org/packages/af/1e/d82b1bee5d19fb0e03b793fbb608845c7fa2315a994368b4e4b8e7ec1ad8/terminusgps_payments-1.4.0.tar.gz", hash = "sha256:d70a07cd876a1581f70d67094991d7ed290b2438d702bd8fdc10aacc8e9cfc7e", size = 75795 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/dc/47/c2fb34c8578144605cbbff013ace6659fbd258d862fb7ce932c69de6f997/terminusgps_payments-1.2.0-py3-none-any.whl", hash = "sha256:f3b901e6154ce615e95a0bddf42fabf39e1534a54278084575297308a1e65760", size = 77655 },
+    { url = "https://files.pythonhosted.org/packages/f3/32/86a06b4c681971b666bb7d1c6c0ca5efad4059d9dfc42fd93a34c02772b3/terminusgps_payments-1.4.0-py3-none-any.whl", hash = "sha256:1245d0705be5ebdddda43bb638a14f9ca75cb2470f7a7c640d80261f15b34b63", size = 77927 },
 ]
 
 [[package]]
@@ -625,7 +625,7 @@ requires-dist = [
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
     { name = "python-terminusgps", specifier = "==46.1.0" },
     { name = "redis", extras = ["hiredis"], specifier = ">=6.4.0" },
-    { name = "terminusgps-payments", specifier = ">=1.2.0" },
+    { name = "terminusgps-payments", specifier = ">=1.4.0" },
 ]
 
 [package.metadata.requires-dev]
