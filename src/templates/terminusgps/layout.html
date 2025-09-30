@@ -1,17 +1,17 @@
-{% load static terminusgps_tracker_display %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ title }} | Terminus GPS</title>
-        <link href="{% static 'terminusgps/favicon.ico' %}" rel="shortcut icon" type="image/x-icon">
-        <link href="{% static 'terminusgps/css/output.css' %}" rel="stylesheet" type="text/css">
+        <title>{{ title|default:'Terminus GPS' }} | Terminus GPS</title>
+        <link rel="shortcut icon" type="image/x-icon" href="{% static 'terminusgps/favicon.ico' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'terminusgps/css/output.css' %}">
         <script src="{% static 'terminusgps/js/htmx.min.js' %}" defer></script>
     </head>
-    <body class="h-fit bg-gradient-to-b from-terminus-red-100 to-terminus-red-900 bg-no-repeat text-gray-800 dark:text-gray-100">
+    <body class="h-fit text-gray-800 dark:text-gray-100 bg-gradient-to-t from-terminus-red-600 to-terminus-red-400">
         {% include "terminusgps/navbar.html" %}
-        <main class="container mx-auto -mt-2 max-w-screen-lg">
+        <main class="container mx-auto -mt-2 max-w-screen-3xl">
             <div class="border-lr mx-8 border-gray-600 bg-stone-100 dark:bg-terminus-gray-800">
                 {% if title %}
                 <section class="mt-2 flex flex-col gap-2 bg-gray-200 p-8 shadow-inner dark:bg-terminus-gray-700">
