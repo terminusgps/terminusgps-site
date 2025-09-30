@@ -138,7 +138,7 @@ logging.config.dictConfig(
             "django": {
                 "handlers": ["console"],
                 "level": "INFO",
-                "propagate": True,
+                "propagate": False,
             },
             "authorizenet.sdk": {
                 "handlers": ["console"],
@@ -146,8 +146,8 @@ logging.config.dictConfig(
                 "propagate": True,
             },
             "gunicorn": {
-                "level": "INFO",
                 "handlers": ["console"],
+                "level": "INFO",
                 "propagate": True,
             },
         },
