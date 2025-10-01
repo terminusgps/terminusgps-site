@@ -4,7 +4,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ title|default:'Terminus GPS' }} | Terminus GPS</title>
+        <title>{% if title == "Terminus GPS" %}Home{% else %}{{ title|default:'Terminus GPS' }}{% endif %} | Terminus GPS</title>
         <link rel="shortcut icon" type="image/x-icon" href="{% static 'terminusgps/favicon.ico' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'terminusgps/css/output.css' %}">
         <script src="{% static 'terminusgps/js/htmx.min.js' %}" defer></script>
