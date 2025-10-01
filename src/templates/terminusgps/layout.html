@@ -4,17 +4,17 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ title|default:'Terminus GPS' }} | Terminus GPS</title>
+        <title>{% if title == "Terminus GPS" %}Home{% else %}{{ title|default:'Terminus GPS' }}{% endif %} | Terminus GPS</title>
         <link rel="shortcut icon" type="image/x-icon" href="{% static 'terminusgps/favicon.ico' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'terminusgps/css/output.css' %}">
         <script src="{% static 'terminusgps/js/htmx.min.js' %}" defer></script>
     </head>
-    <body class="h-fit text-gray-800 bg-no-repeat dark:text-gray-100 bg-gradient-to-t from-terminus-red-600 to-terminus-red-400">
+    <body class="h-fit text-gray-800 dark:text-gray-200 bg-[url(/static/terminusgps/img/background-light.png)] dark:bg-[url(/static/terminusgps/img/background-dark.png)]">
         {% include "terminusgps/navbar.html" %}
         <main class="container mx-auto -mt-2">
-            <div class="border-lr mx-8 border-gray-600 bg-stone-100 dark:bg-terminus-gray-800">
+            <div class="border-lr mx-8 border-gray-600 bg-stone-100 dark:bg-zinc-600">
                 {% if title %}
-                <section class="mt-2 flex flex-col gap-2 bg-gray-200 p-8 shadow-inner dark:bg-terminus-gray-700">
+                <section class="mt-2 flex flex-col gap-2 bg-gray-200 p-8 shadow-inner dark:bg-zinc-700">
                     <div class="flex items-center gap-2">
                         <h2 class="text-xl font-bold md:text-2xl">{{ title }}</h2>
                         <svg id="loading" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="htmx-indicator size-8 animate-spin">
@@ -26,6 +26,8 @@
                 {% endif %}
                 <section class="flex flex-col gap-8 p-8"{% if title %} hx-indicator="#loading"{% endif %}>
                     {% block content %}{% endblock content %}
+                </section>
+                <section class="flex flex-col gap-2 bg-gray-200 p-8 dark:bg-zinc-700">
                 </section>
             </div>
         </main>

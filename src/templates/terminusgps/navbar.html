@@ -1,7 +1,7 @@
 {% load static %}
-<nav class="flex justify-between bg-stone-100 text-gray-800 drop-shadow dark:bg-terminus-gray-900">
+<nav class="flex justify-between bg-stone-100 text-gray-800 drop-shadow dark:bg-zinc-600">
     <a href="{% url 'home' %}" class="group flex items-center space-x-1">
-        <img src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="size-16 animate-coin-slow hover:animate-none">
+        <img src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="size-16 animate-coin-slow group-hover:animate-none">
         <img src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24">
     </a>
     {% if user and user.is_authenticated %}

@@ -70,9 +70,8 @@ class TerminusgpsContactView(HtmxTemplateResponseMixin, TemplateView):
 class TerminusgpsHomeView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {
-        "title": "Home",
-        "subtitle": settings.TRACKER_APP_CONFIG["MOTD"],
-        "socials": settings.TRACKER_APP_CONFIG["SOCIALS"],
+        "title": "Terminus GPS",
+        "subtitle": "Industry-leading GPS monitoring hardware and software",
     }
     http_method_names = ["get"]
     template_name = "terminusgps/home.html"
