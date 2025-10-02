@@ -51,8 +51,8 @@ class TerminusgpsCommercialUseView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "Commercial Use", "subtitle": ""}
     http_method_names = ["get"]
-    template_name = "terminusgps/commercial_use.html"
     partial_template_name = "terminusgps/partials/_commercial_use.html"
+    template_name = "terminusgps/commercial_use.html"
 
 
 @method_decorator(cache_page(timeout=60 * 15), name="dispatch")
@@ -60,8 +60,8 @@ class TerminusgpsIndividualUseView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "Individual Use", "subtitle": ""}
     http_method_names = ["get"]
-    template_name = "terminusgps/individual_use.html"
     partial_template_name = "terminusgps/partials/_individual_use.html"
+    template_name = "terminusgps/individual_use.html"
 
 
 @method_decorator(cache_page(timeout=60 * 15), name="dispatch")
@@ -78,8 +78,8 @@ class TerminusgpsContactView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "Contact", "subtitle": "Get in touch with us"}
     http_method_names = ["get"]
-    template_name = "terminusgps/contact.html"
     partial_template_name = "terminusgps/partials/_contact.html"
+    template_name = "terminusgps/contact.html"
 
 
 @method_decorator(cache_page(timeout=60 * 15), name="dispatch")
@@ -90,8 +90,8 @@ class TerminusgpsHomeView(HtmxTemplateResponseMixin, TemplateView):
         "subtitle": "Industry-leading GPS monitoring hardware and software",
     }
     http_method_names = ["get"]
-    template_name = "terminusgps/home.html"
     partial_template_name = "terminusgps/partials/_home.html"
+    template_name = "terminusgps/home.html"
 
 
 @method_decorator(cache_page(timeout=60 * 15), name="dispatch")
@@ -102,8 +102,8 @@ class TerminusgpsTeenSafetyView(HtmxTemplateResponseMixin, TemplateView):
         "subtitle": "Tips and Tricks for Teen Drivers",
     }
     http_method_names = ["get"]
-    template_name = "terminusgps/teen_safety.html"
     partial_template_name = "terminusgps/partials/_teen_safety.html"
+    template_name = "terminusgps/teen_safety.html"
 
 
 @method_decorator(cache_page(timeout=60 * 15), name="dispatch")
@@ -114,8 +114,8 @@ class TerminusgpsSeniorSafetyView(HtmxTemplateResponseMixin, TemplateView):
         "subtitle": "Tips and Tricks for Senior Drivers",
     }
     http_method_names = ["get"]
-    template_name = "terminusgps/senior_safety.html"
     partial_template_name = "terminusgps/partials/_senior_safety.html"
+    template_name = "terminusgps/senior_safety.html"
 
 
 @method_decorator(cache_page(timeout=60 * 15), name="dispatch")
