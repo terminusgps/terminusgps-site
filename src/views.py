@@ -4,7 +4,9 @@ from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db import transaction
 from django.http import HttpResponse
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.cache import cache_page
 from django.views.generic import FormView, RedirectView, TemplateView
 from terminusgps.authorizenet.service import (
     AuthorizenetControllerExecutionError,
@@ -35,6 +37,7 @@ class TerminusgpsHostingView(RedirectView):
     url = settings.TRACKER_APP_CONFIG.get("HOSTING_URL")
 
 
+@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class TerminusgpsCommercialUseView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "Commercial Use", "subtitle": ""}
@@ -43,6 +46,7 @@ class TerminusgpsCommercialUseView(HtmxTemplateResponseMixin, TemplateView):
     partial_template_name = "terminusgps/partials/_commercial_use.html"
 
 
+@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class TerminusgpsIndividualUseView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "Individual Use", "subtitle": ""}
@@ -51,6 +55,7 @@ class TerminusgpsIndividualUseView(HtmxTemplateResponseMixin, TemplateView):
     partial_template_name = "terminusgps/partials/_individual_use.html"
 
 
+@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class TerminusgpsAboutView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "About", "subtitle": "Why we do what we do"}
@@ -59,6 +64,7 @@ class TerminusgpsAboutView(HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps/about.html"
 
 
+@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class TerminusgpsContactView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "Contact", "subtitle": "Get in touch with us"}
@@ -67,6 +73,7 @@ class TerminusgpsContactView(HtmxTemplateResponseMixin, TemplateView):
     partial_template_name = "terminusgps/partials/_contact.html"
 
 
+@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class TerminusgpsHomeView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {
@@ -78,6 +85,7 @@ class TerminusgpsHomeView(HtmxTemplateResponseMixin, TemplateView):
     partial_template_name = "terminusgps/partials/_home.html"
 
 
+@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class TerminusgpsTeenSafetyView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {
@@ -89,6 +97,7 @@ class TerminusgpsTeenSafetyView(HtmxTemplateResponseMixin, TemplateView):
     partial_template_name = "terminusgps/partials/_teen_safety.html"
 
 
+@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class TerminusgpsSeniorSafetyView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {
@@ -100,6 +109,7 @@ class TerminusgpsSeniorSafetyView(HtmxTemplateResponseMixin, TemplateView):
     partial_template_name = "terminusgps/partials/_senior_safety.html"
 
 
+@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class TerminusgpsTermsAndConditionsView(
     HtmxTemplateResponseMixin, TemplateView
 ):
@@ -113,6 +123,7 @@ class TerminusgpsTermsAndConditionsView(
     template_name = "terminusgps/terms.html"
 
 
+@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class TerminusgpsFrequentlyAskedQuestionsView(
     HtmxTemplateResponseMixin, TemplateView
 ):
@@ -126,6 +137,7 @@ class TerminusgpsFrequentlyAskedQuestionsView(
     template_name = "terminusgps/faq.html"
 
 
+@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class TerminusgpsPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {
@@ -144,9 +156,10 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
         "subtitle": "You'll know where yours are...",
     }
     form_class = TerminusgpsRegisterForm
+    http_method_names = ["get", "post"]
     partial_template_name = "registration/partials/_register.html"
-    template_name = "registration/register.html"
     success_url = reverse_lazy("terminusgps_tracker:dashboard")
+    template_name = "registration/register.html"
 
     @transaction.atomic
     def form_valid(self, form: TerminusgpsRegisterForm) -> HttpResponse:
