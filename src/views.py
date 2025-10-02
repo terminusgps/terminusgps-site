@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.cache import cache_page
+from django.views.decorators.cache import cache_control, cache_page
 from django.views.generic import FormView, RedirectView, TemplateView
 from terminusgps.authorizenet.service import (
     AuthorizenetControllerExecutionError,
@@ -35,6 +35,15 @@ class TerminusgpsHostingView(RedirectView):
     http_method_names = ["get"]
     permanent = True
     url = settings.TRACKER_APP_CONFIG.get("HOSTING_URL")
+
+
+@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
+@method_decorator(cache_control(private=True), name="dispatch")
+class TerminusgpsNavbarView(TemplateView):
+    content_type = "text/html"
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps/partials/_navbar.html"
+    template_name = "terminusgps/navbar.html"
 
 
 @method_decorator(cache_page(timeout=60 * 15), name="dispatch")

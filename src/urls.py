@@ -20,6 +20,7 @@ urlpatterns = [
         views.TerminusgpsSourceCodeView.as_view(),
         name="source code",
     ),
+    path("navbar/", views.TerminusgpsNavbarView.as_view(), name="navbar"),
     path("about/", views.TerminusgpsAboutView.as_view(), name="about"),
     path("contact/", views.TerminusgpsContactView.as_view(), name="contact"),
     path(
