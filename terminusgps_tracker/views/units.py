@@ -39,6 +39,11 @@ class CustomerWialonUnitCreateView(
     success_url = reverse_lazy("terminusgps_tracker:list unit")
     template_name = "terminusgps_tracker/units/create.html"
 
+    def get_form(self, form_class=None) -> forms.ModelForm:
+        form = super().get_form(form_class=form_class)
+        form.fields["tier"].empty_label = None
+        return form
+
     def get_initial(self, **kwargs) -> dict[str, typing.Any]:
         initial: dict[str, typing.Any] = super().get_initial(**kwargs)
         initial["tier"] = SubscriptionTier.objects.first()
