@@ -3,11 +3,11 @@ requires-python = ">=3.12"
 
 [[package]]
 name = "asgiref"
-version = "3.9.2"
+version = "3.10.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/7f/bf/0f3ecda32f1cb3bf1dca480aca08a7a8a3bdc4bed2343a103f30731565c9/asgiref-3.9.2.tar.gz", hash = "sha256:a0249afacb66688ef258ffe503528360443e2b9a8d8c4581b6ebefa58c841ef1", size = 36894 }
+sdist = { url = "https://files.pythonhosted.org/packages/46/08/4dfec9b90758a59acc6be32ac82e98d1fbfc321cb5cfa410436dbacf821c/asgiref-3.10.0.tar.gz", hash = "sha256:d89f2d8cd8b56dada7d52fa7dc8075baa08fb836560710d38c292a7a3f78c04e", size = 37483 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c7/d1/69d02ce34caddb0a7ae088b84c356a625a93cd4ff57b2f97644c03fad905/asgiref-3.9.2-py3-none-any.whl", hash = "sha256:0b61526596219d70396548fc003635056856dba5d0d086f86476f10b33c75960", size = 23788 },
+    { url = "https://files.pythonhosted.org/packages/17/9c/fc2331f538fbf7eedba64b2052e99ccf9ba9d6888e2f41441ee28847004b/asgiref-3.10.0-py3-none-any.whl", hash = "sha256:aef8a81283a34d0ab31630c9b7dfe70c812c95eba78171367ca8745e88124734", size = 24050 },
 ]
 
 [[package]]
@@ -23,39 +23,39 @@ sdist = { url = "https://files.pythonhosted.org/packages/32/7f/0e26284cd5c86c5b4
 
 [[package]]
 name = "boto3"
-version = "1.40.43"
+version = "1.40.47"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1e/43/0ef93cd27a8e753e66d93d7b94f686315384ab6cd63f065a14a4a6c9ee20/boto3-1.40.43.tar.gz", hash = "sha256:9ad9190672ce8736898bec2d94875aea6ae1ead2ac6d158e01d820f3ff9c23e0", size = 111552 }
+sdist = { url = "https://files.pythonhosted.org/packages/af/32/16ffef2a7ca05babd5d36d512b07bd318feb6af87aa83ced29d565f6a6be/boto3-1.40.47.tar.gz", hash = "sha256:c0ea31655c41b3f9bf46bc370520eafc081ba4c3e79fa564b60e976663abf7e7", size = 111607 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f5/86/377e2b9aeddfdb7468223c7b48e29a1697b86c200c44916ddfb8dae05a68/boto3-1.40.43-py3-none-any.whl", hash = "sha256:c5d64ba2fb2d90c33c3969f3751869c45746d5efb5136e4cc619e3630ece89a3", size = 139344 },
+    { url = "https://files.pythonhosted.org/packages/c7/25/a3ad490d4ab04417cf887fc52ce266cacde2f15b8d46ec45cc40583f22cd/boto3-1.40.47-py3-none-any.whl", hash = "sha256:33b291200cbb042ca8faac0b52a5d460850712641930d32335b75bc65e88653c", size = 139346 },
 ]
 
 [[package]]
 name = "botocore"
-version = "1.40.43"
+version = "1.40.47"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jmespath" },
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/49/d0/3888673417202262ddd7e6361cab8e01ee2705e39643af8445e2eb276eab/botocore-1.40.43.tar.gz", hash = "sha256:d87412dc1ea785df156f412627d3417c9f9eb45601fd0846d8fe96fe3c78b630", size = 14389164 }
+sdist = { url = "https://files.pythonhosted.org/packages/5f/9e/65a9507f6f4d7ea1f3050a2b555faac7f4afa074ce9bb1dd12aa6fd19fc3/botocore-1.40.47.tar.gz", hash = "sha256:8eb950046ba8afc99dedb0268282b4f9a61bca2c7a6415036bff2beee5e180ca", size = 14401848 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/79/46/2eb4802e15e38befbea6cab7dafa1ab796722ab6f0833991c2a05e9f8ef0/botocore-1.40.43-py3-none-any.whl", hash = "sha256:1639f38999fc0cf42c92c5c83c5fbe189a4857a86f55b842be868e3283c6d3bb", size = 14057986 },
+    { url = "https://files.pythonhosted.org/packages/a2/16/96226328857ab02123bc7b6dc08e27aa5bd1cfa1c553a922239263014ce8/botocore-1.40.47-py3-none-any.whl", hash = "sha256:0845c5bc49fc9d45938ff3609df7ec1eff0d26c1a4edcd03e16ad2194c3a9a56", size = 14072266 },
 ]
 
 [[package]]
 name = "certifi"
-version = "2025.8.3"
+version = "2025.10.5"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/dc/67/960ebe6bf230a96cda2e0abcf73af550ec4f090005363542f0765df162e0/certifi-2025.8.3.tar.gz", hash = "sha256:e564105f78ded564e3ae7c923924435e1daa7463faeab5bb932bc53ffae63407", size = 162386 }
+sdist = { url = "https://files.pythonhosted.org/packages/4c/5b/b6ce21586237c77ce67d01dc5507039d444b630dd76611bbca2d8e5dcd91/certifi-2025.10.5.tar.gz", hash = "sha256:47c09d31ccf2acf0be3f701ea53595ee7e0b8fa08801c6624be771df09ae7b43", size = 164519 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e5/48/1549795ba7742c948d2ad169c1c8cdbae65bc450d6cd753d124b17c8cd32/certifi-2025.8.3-py3-none-any.whl", hash = "sha256:f6c12493cfb1b06ba2ff328595af9350c65d6644968e5d3a2ffd78699af217a5", size = 161216 },
+    { url = "https://files.pythonhosted.org/packages/e4/37/af0d2ef3967ac0d6113837b44a4f0bfe1328c2b9763bd5b1744520e5cfed/certifi-2025.10.5-py3-none-any.whl", hash = "sha256:0f212c2744a9bb6de0c56639a6f68afe01ecd92d91f14ae897c4fe7bbeeef0de", size = 163286 },
 ]
 
 [[package]]
@@ -133,7 +133,7 @@ s3 = [
 
 [[package]]
 name = "django-stubs"
-version = "5.2.5"
+version = "5.2.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
@@ -141,22 +141,22 @@ dependencies = [
     { name = "types-pyyaml" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e1/8e/286150f593481c33f54d14efb58d72178f159d57d31043529d38bbc98e2f/django_stubs-5.2.5.tar.gz", hash = "sha256:fc78384e28d8c5292d60983075a5934f644f7c304c25ae2793fc57aa66d5018b", size = 247794 }
+sdist = { url = "https://files.pythonhosted.org/packages/0c/ec/ab347204c6a13e6f1bbe1faefe5404a4ca3f2df72f568c53e32da4afc803/django_stubs-5.2.6.tar.gz", hash = "sha256:991dc36c10fefd6bf0cfd163db3dabd15787112f96cfedf6e8388ba1930040fb", size = 257279 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2f/02/cdbf7652ef2c9a7a1fed7c279484b7f3806f15b1bb34aec9fef8e8cfacbf/django_stubs-5.2.5-py3-none-any.whl", hash = "sha256:223c1a3324cd4873b7629dec6e9adbe224a94508284c1926b25fddff7a92252b", size = 490196 },
+    { url = "https://files.pythonhosted.org/packages/90/fd/fa8c7740991599696412d00930641dc35eb047d1d70dc1f924e8ab999db3/django_stubs-5.2.6-py3-none-any.whl", hash = "sha256:bb517a60355474a2c8403a48d16ff906c8bc46d604f419206de10ac018a5f4bc", size = 507711 },
 ]
 
 [[package]]
 name = "django-stubs-ext"
-version = "5.2.5"
+version = "5.2.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/16/94/c9b8f4c47084a0fa666da9066c36771098101932688adf2c17a40fab79c2/django_stubs_ext-5.2.5.tar.gz", hash = "sha256:ecc628df29d36cede638567c4e33ff485dd7a99f1552ad0cece8c60e9c3a8872", size = 6489 }
+sdist = { url = "https://files.pythonhosted.org/packages/4c/13/d9d4fb0a797966b941f51ee2ac60eede308890488149985a91bacfc80ca2/django_stubs_ext-5.2.6.tar.gz", hash = "sha256:1165a596138a54edac12616af126332db03b812c8272ada724b4e89188a3c41f", size = 6524 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e0/fe/a85a105fddffadb4a8d50e500caeee87d836b679d51a19d52dfa0cc6c660/django_stubs_ext-5.2.5-py3-none-any.whl", hash = "sha256:9b4b8ac9d32f7e6c304fd05477f8688fae6ed57f6a0f9f4d074f9e55b5a3da14", size = 9310 },
+    { url = "https://files.pythonhosted.org/packages/67/69/2ce28341493e35b7b182e2c0474288a350edf1cb27220517fb8abd4143c9/django_stubs_ext-5.2.6-py3-none-any.whl", hash = "sha256:c3736dcea49666140c92a1471dda83c31e8d5e71dc364ab3cedc7698dbf01cee", size = 9980 },
 ]
 
 [[package]]
