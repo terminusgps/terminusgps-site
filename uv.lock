@@ -657,6 +657,23 @@ wheels = [
 ]
 
 [[package]]
+name = "terminusgps-notifications"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "django-encrypted-field" },
+    { name = "python-dateutil" },
+    { name = "python-terminusgps" },
+    { name = "redis", extra = ["hiredis"] },
+    { name = "terminusgps-payments" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/97/b0/1a9fa5156ec5d1d70b12f2c9bed5d022f09620532f14f019f6e784685450/terminusgps_notifications-1.0.0.tar.gz", hash = "sha256:bc49ea73afe15f44792ecd982c1082d76bbb7bdf76cf44e1fdd7917a700ca0a3", size = 94805 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3c/0d/adf2bf3e8a5403e4e94daeef94974f4ca435804c8edcdbe8e0355b8cfa2e/terminusgps_notifications-1.0.0-py3-none-any.whl", hash = "sha256:e33f1b3528cfefd1a3bd2c90e65adaf4b5e4dce0f078160b56825d49d7ad6629", size = 85904 },
+]
+
+[[package]]
 name = "terminusgps-payments"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -687,6 +704,7 @@ dependencies = [
     { name = "psycopg2-binary" },
     { name = "python-terminusgps" },
     { name = "redis", extra = ["hiredis"] },
+    { name = "terminusgps-notifications" },
     { name = "terminusgps-payments" },
 ]
 
@@ -709,6 +727,7 @@ requires-dist = [
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
     { name = "python-terminusgps", specifier = "==47.2.0" },
     { name = "redis", extras = ["hiredis"], specifier = ">=6.4.0" },
+    { name = "terminusgps-notifications", specifier = ">=1.0.0" },
     { name = "terminusgps-payments", specifier = ">=2.0.0" },
 ]
 

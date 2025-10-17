@@ -22,6 +22,7 @@ dependencies = [
     "psycopg2-binary>=2.9.10",
     "redis[hiredis]>=6.4.0",
     "terminusgps-payments>=2.0.0",
+    "terminusgps-notifications>=1.0.0",
 ]
 
 [tool.pyright]
