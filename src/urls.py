@@ -59,7 +59,7 @@ urlpatterns = [
         name="faq",
     ),
     path("payments/", include("terminusgps_payments.urls")),
-    path("", include("terminusgps_tracker.urls", namespace="tracker")),
+    path("notifications/", include("terminusgps_notifications.urls")),
 ]
 
 if settings.DEBUG:

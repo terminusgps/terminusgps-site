@@ -1,5 +1,0 @@
-{% if customer.subscription != None %}
-<section id="subscription" hx-target="this" hx-trigger="load" hx-get="{{ customer.subscription.get_absolute_url }}" class="flex flex-col gap-4"></section>
-{% else %}
-<section id="subscription" hx-target="this" hx-trigger="load" hx-get="{% url 'terminusgps_tracker:create subscription' %}" class="flex flex-col gap-4"></section>
-{% endif %}

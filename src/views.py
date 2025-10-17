@@ -1,44 +1,24 @@
-from django.conf import settings
-from django.contrib.auth.models import User
-from django.core.exceptions import ImproperlyConfigured, ValidationError
-from django.db import transaction
-from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_control, cache_page
 from django.views.generic import FormView, RedirectView, TemplateView
-from terminusgps.authorizenet.service import (
-    AuthorizenetControllerExecutionError,
-)
 from terminusgps.mixins import HtmxTemplateResponseMixin
-from terminusgps.wialon.items import WialonObjectFactory
-from terminusgps.wialon.session import WialonAPIError, WialonSession
-from terminusgps_payments.models import CustomerProfile
-from terminusgps_payments.services import AuthorizenetService
-
-from terminusgps_tracker.models import Customer
 
 from .forms import TerminusgpsRegisterForm
-
-if settings.configured and not hasattr(settings, "TRACKER_APP_CONFIG"):
-    raise ImproperlyConfigured("'TRACKER_APP_CONFIG' setting is required.")
 
 
 class TerminusgpsSourceCodeView(RedirectView):
     http_method_names = ["get"]
     permanent = True
-    url = settings.TRACKER_APP_CONFIG.get("REPOSITORY_URL")
+    url = "https://github.com/terminusgps/terminusgps-site/"
 
 
 class TerminusgpsHostingView(RedirectView):
     http_method_names = ["get"]
     permanent = True
-    url = settings.TRACKER_APP_CONFIG.get("HOSTING_URL")
+    url = "https://hosting.terminusgps.com/"
 
 
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
-@method_decorator(cache_control(private=True), name="dispatch")
 class TerminusgpsNavbarView(TemplateView):
     content_type = "text/html"
     http_method_names = ["get"]
@@ -158,6 +138,8 @@ class TerminusgpsPrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps/privacy.html"
 
 
+@method_decorator(cache_page(timeout=60 * 15), name="get")
+@method_decorator(cache_control(private=True), name="get")
 class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     content_type = "text/html"
     extra_context = {
@@ -167,84 +149,5 @@ class TerminusgpsRegisterView(HtmxTemplateResponseMixin, FormView):
     form_class = TerminusgpsRegisterForm
     http_method_names = ["get", "post"]
     partial_template_name = "registration/partials/_register.html"
-    success_url = reverse_lazy("terminusgps_tracker:dashboard")
+    success_url = reverse_lazy("dashboard")
     template_name = "registration/register.html"
-
-    @transaction.atomic
-    def form_valid(self, form: TerminusgpsRegisterForm) -> HttpResponse:
-        try:
-            username = form.cleaned_data["username"]
-            password = form.cleaned_data["password1"]
-
-            user = form.save(commit=True)
-            user.email = username
-            user.first_name = form.cleaned_data["first_name"]
-            user.last_name = form.cleaned_data["last_name"]
-
-            with WialonSession(token=settings.WIALON_TOKEN) as session:
-                customer = self.wialon_registration_flow(
-                    username, password, session
-                )
-            customer.user = user
-            customer.save()
-            customer_profile = self.authorizenet_registration_flow(
-                user, AuthorizenetService()
-            )
-            customer_profile.save()
-            return super().form_valid(form=form)
-        except WialonAPIError as e:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("%(e)s"), code="invalid", params={"e": str(e)}
-                ),
-            )
-            return self.form_invalid(form=form)
-        except AuthorizenetControllerExecutionError as e:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("%(code)s: %(message)s"),
-                    code="invalid",
-                    params={"code": e.code, "message": e.message},
-                ),
-            )
-            return self.form_invalid(form=form)
-
-    @transaction.atomic
-    def wialon_registration_flow(
-        self, username: str, password: str, session: WialonSession
-    ) -> Customer:
-        factory = WialonObjectFactory(session)
-        user = factory.create(
-            "user",
-            creator_id=settings.WIALON_ADMIN_ID,
-            name=username,
-            password=password,
-        )
-        resource = factory.create(
-            "avl_resource",
-            creator_id=user.id,
-            name=f"account_{username}",
-            skip_creator_check=True,
-        )
-        account = factory.create(
-            "account",
-            resource_id=resource.id,
-            billing_plan="terminusgps_ext_hist",
-        )
-        account.deactivate()
-
-        customer = Customer()
-        customer.wialon_resource_id = resource.id
-        customer.wialon_user_id = user.id
-        return customer
-
-    @transaction.atomic
-    def authorizenet_registration_flow(
-        self, user: User, service: AuthorizenetService
-    ) -> CustomerProfile:
-        customer_profile = CustomerProfile(user=user)
-        anet_response = service.create_customer_profile(customer_profile)
-        customer_profile.pk = int(anet_response.customerProfileId)
-        return customer_profile

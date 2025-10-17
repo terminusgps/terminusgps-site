@@ -5,6 +5,7 @@ from pathlib import Path
 
 from authorizenet.constants import constants
 from django.contrib.messages import constants as messages
+from terminusgps.wialon.flags import TokenFlag
 
 os.umask(0)
 decimal.getcontext().prec = 4
@@ -46,6 +47,11 @@ USE_TZ = True
 WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID")
 WIALON_DEFAULT_PLAN = os.getenv("WIALON_DEFAULT_PLAN")
 WIALON_TOKEN = os.getenv("WIALON_TOKEN")
+WIALON_TOKEN_ACCESS_TYPE = (
+    TokenFlag.VIEW_ACCESS
+    | TokenFlag.MANAGE_NONSENSITIVE
+    | TokenFlag.MANAGE_SENSITIVE
+)
 WSGI_APPLICATION = "src.wsgi.application"
 
 ADMINS = [
@@ -117,13 +123,6 @@ STORAGES = {
 CACHES = {
     "default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}
 }
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-#         "LOCATION": "redis://127.0.0.1:6379",
-#         "TIMEOUT": 60 * 15,
-#     }
-# }
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -135,7 +134,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.forms",
     "terminusgps_payments.apps.TerminusgpsPaymentsConfig",
-    "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
+    "terminusgps_notifications.apps.TerminusgpsNotificationsConfig",
 ]
 
 MIDDLEWARE = [
