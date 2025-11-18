@@ -36,6 +36,7 @@ urlpatterns = [
     path("privacy/", views.PrivacyPolicyView.as_view(), name="privacy"),
     path("terms/", views.TermsAndConditionsView.as_view(), name="terms"),
     path("faq/", views.FrequentlyAskedQuestionsView.as_view(), name="faq"),
+    path("django-rq/", include("django_rq.urls")),
     path("payments/", include("terminusgps_payments.urls")),
 ]
 

@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[.errorlist]:text-red-800 group-has-[.errorlist]:bg-red-100"
-DEFAULT_FROM_EMAIL = "support@terminusgps.com"
+DEFAULT_FROM_EMAIL = "noreply@terminusgps.com"
 DEFAULT_TAX_RATE = decimal.Decimal(os.getenv("DEFAULT_TAX_RATE", "0.0825")) * 1
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
@@ -27,7 +27,7 @@ EMAIL_USE_TLS = True
 INTERNAL_IPS = ["127.0.0.1"]
 LANGUAGE_CODE = "en-us"
 LOGIN_REDIRECT_URL = "/dashboard/"
-LOGIN_URL = "/accounts/login/"
+LOGIN_URL = "/login/"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
 MERCHANT_AUTH_ENVIRONMENT = constants.SANDBOX
@@ -125,7 +125,20 @@ STORAGES = {
 }
 
 CACHES = {
-    "default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379",
+        "TIMEOUT": 60 * 15,
+    }
+}
+
+RQ_QUEUES = {"default": {"HOST": "127.0.0.1", "PORT": 6379}}
+
+TASKS = {
+    "default": {
+        "BACKEND": "django_tasks.backends.rq.RQBackend",
+        "QUEUES": ["default"],
+    }
 }
 
 INSTALLED_APPS = [
@@ -137,6 +150,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
+    "django_rq",
+    "django_tasks",
     "terminusgps_payments.apps.TerminusgpsPaymentsConfig",
 ]
 
