@@ -88,9 +88,6 @@ class TerminusgpsRegisterForm(BaseUserCreationForm):
             }
         ),
     )
-    captcha = forms.BooleanField(
-        initial=False, widget=forms.widgets.HiddenInput()
-    )
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
