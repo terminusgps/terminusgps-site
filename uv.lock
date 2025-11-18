@@ -148,30 +148,30 @@ sdist = { url = "https://files.pythonhosted.org/packages/32/7f/0e26284cd5c86c5b4
 
 [[package]]
 name = "boto3"
-version = "1.40.74"
+version = "1.40.75"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a2/37/0db5fc46548b347255310893f1a47971a1d8eb0dbc46dfb5ace8a1e7d45e/boto3-1.40.74.tar.gz", hash = "sha256:484e46bf394b03a7c31b34f90945ebe1390cb1e2ac61980d128a9079beac87d4", size = 111592 }
+sdist = { url = "https://files.pythonhosted.org/packages/8f/2c/0a6e49612ef9868382ef76292da2dd1dee7c74a0f1ec95323e76f6e2ef4b/boto3-1.40.75.tar.gz", hash = "sha256:a5219a2f397f8616462d7908e696c281f120aa2d8458280ff24f7ddeb2108faf", size = 111629 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d2/08/c52751748762901c0ca3c3019e3aa950010217f0fdf9940ebe68e6bb2f5a/boto3-1.40.74-py3-none-any.whl", hash = "sha256:41fc8844b37ae27b24bcabf8369769df246cc12c09453988d0696ad06d6aa9ef", size = 139360 },
+    { url = "https://files.pythonhosted.org/packages/65/85/2b0ea3ca19447d3a681b59b712a8f7861bfd0bc0129efd8a2da09d272837/boto3-1.40.75-py3-none-any.whl", hash = "sha256:c246fb35d9978b285c5b827a20b81c9e77d52f99c9d175fbd91f14396432953f", size = 139360 },
 ]
 
 [[package]]
 name = "botocore"
-version = "1.40.74"
+version = "1.40.75"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jmespath" },
     { name = "python-dateutil" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/81/dc/0412505f05286f282a75bb0c650e525ddcfaf3f6f1a05cd8e99d32a2db06/botocore-1.40.74.tar.gz", hash = "sha256:57de0b9ffeada06015b3c7e5186c77d0692b210d9e5efa294f3214df97e2f8ee", size = 14452479 }
+sdist = { url = "https://files.pythonhosted.org/packages/d7/11/a6a07cbe12e0161063f2dac82bb7a8f48f649b394863315cd6f3149b82ac/botocore-1.40.75.tar.gz", hash = "sha256:bf8b067209fee5a9738800d41852e113b8ebdb01bd7f1e8b4541d55ecdbdb8f3", size = 14475952 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7d/a2/306dec16e3c84f3ca7aaead0084358c1c7fbe6501f6160844cbc93bc871e/botocore-1.40.74-py3-none-any.whl", hash = "sha256:f39f5763e35e75f0bd91212b7b36120b1536203e8003cd952ef527db79702b15", size = 14117911 },
+    { url = "https://files.pythonhosted.org/packages/5a/29/15627031629f27230ee38bc7f55328b310794010c3039f0ecd353c06dc63/botocore-1.40.75-py3-none-any.whl", hash = "sha256:e822004688ca8035c518108e27d5b450d3ab0e0b3a73bcb8b87b80a8e5bd1910", size = 14141572 },
 ]
 
 [[package]]
@@ -242,16 +242,16 @@ wheels = [
 
 [[package]]
 name = "django"
-version = "5.2.7"
+version = "5.2.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "asgiref" },
     { name = "sqlparse" },
     { name = "tzdata", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b1/96/bd84e2bb997994de8bcda47ae4560991084e86536541d7214393880f01a8/django-5.2.7.tar.gz", hash = "sha256:e0f6f12e2551b1716a95a63a1366ca91bbcd7be059862c1b18f989b1da356cdd", size = 10865812 }
+sdist = { url = "https://files.pythonhosted.org/packages/05/a2/933dbbb3dd9990494960f6e64aca2af4c0745b63b7113f59a822df92329e/django-5.2.8.tar.gz", hash = "sha256:23254866a5bb9a2cfa6004e8b809ec6246eba4b58a7589bc2772f1bcc8456c7f", size = 10849032 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8f/ef/81f3372b5dd35d8d354321155d1a38894b2b766f576d0abffac4d8ae78d9/django-5.2.7-py3-none-any.whl", hash = "sha256:59a13a6515f787dec9d97a0438cd2efac78c8aca1c80025244b0fe507fe0754b", size = 8307145 },
+    { url = "https://files.pythonhosted.org/packages/5e/3d/a035a4ee9b1d4d4beee2ae6e8e12fe6dee5514b21f62504e22efcbd9fb46/django-5.2.8-py3-none-any.whl", hash = "sha256:37e687f7bd73ddf043e2b6b97cfe02fcbb11f2dbb3adccc6a2b18c6daa054d7f", size = 8289692 },
 ]
 
 [[package]]
@@ -935,7 +935,7 @@ wheels = [
 
 [[package]]
 name = "python-terminusgps"
-version = "49.1.0"
+version = "49.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "authorizenet" },
@@ -943,9 +943,9 @@ dependencies = [
     { name = "py-aiowialon" },
     { name = "python-wialon" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2d/8b/9e9a81e0c237bc7a76959d327460ff1a199c51320efd315eee76025752c3/python_terminusgps-49.1.0.tar.gz", hash = "sha256:dfa0b78b358d92a84b4146fad4475200444d0b314f50ef610f46bae4530daaf0", size = 101962 }
+sdist = { url = "https://files.pythonhosted.org/packages/15/50/683bdeae5b9024d9db7dcd33606ae82618678ea77e45357f4f2b9d34e133/python_terminusgps-49.2.0.tar.gz", hash = "sha256:69e3fee4e8866879de94495a00a7191ad6b8a30bdd7f2b3eaf60639548a3bbab", size = 101990 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d8/e8/7fb5b97fb9d3a03c5fbc29011be83a4baa971d79a8a3a1effa5a456d6859/python_terminusgps-49.1.0-py3-none-any.whl", hash = "sha256:f6d076aeb81b2db34cbf23e5befa628721ba56df9554a7fabeb21c167752768f", size = 49906 },
+    { url = "https://files.pythonhosted.org/packages/b7/ec/ae2bb19eb11d74beed50384d9c64afbc875df724c6570f4ccc6de47bcaa7/python_terminusgps-49.2.0-py3-none-any.whl", hash = "sha256:b75cfe7c30a16aa98eda0c15a2bb835af9a1a4e060785cbe4b55c6ac5380096d", size = 49937 },
 ]
 
 [[package]]
@@ -1118,11 +1118,11 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "django", specifier = "==5.2.7" },
+    { name = "django", specifier = "==5.2.8" },
     { name = "numpy", specifier = "==2.0.1" },
     { name = "pandas", specifier = "==2.2.3" },
     { name = "pillow", specifier = "==11.3.0" },
-    { name = "python-terminusgps", specifier = "==49.1.0" },
+    { name = "python-terminusgps", specifier = "==49.2.0" },
     { name = "terminusgps-payments", specifier = ">=2.8.0" },
 ]
 
