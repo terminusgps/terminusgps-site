@@ -10,6 +10,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpResponse
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_control, cache_page
@@ -19,17 +20,18 @@ from terminusgps.wialon.flags import DataFlag
 from terminusgps.wialon.session import WialonAPIError, WialonSession
 from terminusgps.wialon.utils import generate_wialon_password
 
+from .. import tasks
 from ..forms import TerminusgpsRegisterForm
 
 logger = logging.getLogger(__name__)
 
 
-def create_wialon_account(user: AbstractBaseUser, password: str) -> int:
-    """Creates a Wialon account in Wialon for the user and returns its id."""
+def create_wialon_account(user: AbstractBaseUser, password: str) -> None:
+    """Creates a Wialon account in Wialon for the user."""
     with WialonSession(token=settings.WIALON_TOKEN) as session:
         account_user = session.wialon_api.core_create_user(
             **{
-                "creatorId": session.uid,
+                "creatorId": settings.WIALON_ADMIN_ID,
                 "name": f"super_{user.username}",
                 "password": generate_wialon_password(),
                 "dataFlags": DataFlag.USER_BASE,
@@ -37,7 +39,7 @@ def create_wialon_account(user: AbstractBaseUser, password: str) -> int:
         )["item"]
         resource = session.wialon_api.core_create_resource(
             **{
-                "creatorId": session.uid,
+                "creatorId": settings.WIALON_ADMIN_ID,
                 "name": f"account_{user.username}",
                 "dataFlags": DataFlag.RESOURCE_BASE,
                 "skipCreatorCheck": int(True),
@@ -46,7 +48,7 @@ def create_wialon_account(user: AbstractBaseUser, password: str) -> int:
         session.wialon_api.account_create_account(
             **{"itemId": resource["id"], "plan": "terminusgps_ext_hist"}
         )
-        end_user = session.wialon_api.core_create_user(
+        session.wialon_api.core_create_user(
             **{
                 "creatorId": account_user["id"],
                 "name": user.username,
@@ -54,7 +56,6 @@ def create_wialon_account(user: AbstractBaseUser, password: str) -> int:
                 "dataFlags": DataFlag.USER_BASE,
             }
         )["item"]
-        return int(end_user["id"])
 
 
 @method_decorator(cache_page(timeout=60 * 15), name="get")
@@ -74,6 +75,7 @@ class RegisterView(HtmxTemplateResponseMixin, FormView):
     @transaction.atomic
     def form_valid(self, form: TerminusgpsRegisterForm) -> HttpResponse:
         try:
+            now = timezone.now()
             user = get_user_model().objects.create_user(
                 username=form.cleaned_data["username"],
                 email=form.cleaned_data["username"],
@@ -82,6 +84,11 @@ class RegisterView(HtmxTemplateResponseMixin, FormView):
                 last_name=form.cleaned_data["last_name"],
             )
             create_wialon_account(user, form.cleaned_data["password1"])
+            tasks.send_account_created_email.enqueue(
+                email_address=user.username,
+                first_name=form.cleaned_data["first_name"],
+                create_date=now,
+            )
             return super().form_valid(form=form)
         except WialonAPIError as e:
             form.add_error(

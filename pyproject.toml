@@ -17,6 +17,8 @@ dependencies = [
     "pillow==11.3.0",
     "python-terminusgps==49.2.0",
     "terminusgps-payments>=2.8.0",
+    "redis[hiredis]>=6.4.0",
+    "django-tasks[rq]>=0.9.0",
 ]
 
 [tool.pyright]
@@ -73,5 +75,4 @@ deploy = [
     "gunicorn>=23.0.0",
     "psycopg>=3.2.6",
     "psycopg2-binary>=2.9.10",
-    "redis[hiredis]>=6.4.0",
 ]

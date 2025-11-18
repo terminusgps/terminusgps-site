@@ -42,9 +42,9 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "static/"
 TIME_ZONE = "US/Central"
-USE_I18N = True
+USE_I18N = False
 USE_TZ = True
-WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID")
+WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID", "27881459")
 WIALON_DEFAULT_PLAN = os.getenv("WIALON_DEFAULT_PLAN")
 WIALON_TOKEN = os.getenv("WIALON_TOKEN")
 WIALON_TOKEN_ACCESS_TYPE = (
@@ -65,6 +65,10 @@ MESSAGE_TAGS = {
     messages.INFO: "text-gray-800 dark:text-gray-100 px-2 py-4 border-2 border-current rounded bg-gray-100 dark:bg-gray-600 flex items-center gap-2",
     messages.SUCCESS: "text-green-800 dark:text-green-100 px-2 py-4 border-2 border-current rounded bg-green-100 dark:bg-green-600 flex items-center gap-2",
     messages.WARNING: "text-yellow-800 dark:text-yellow-100 px-2 py-4 border-2 border-current rounded bg-yellow-100 dark:bg-yellow-300 flex items-center gap-2",
+}
+
+TASKS = {
+    "default": {"BACKEND": "django_tasks.backends.immediate.ImmediateBackend"}
 }
 
 
