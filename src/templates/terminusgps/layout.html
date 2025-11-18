@@ -10,7 +10,12 @@
         <script src="{% static 'terminusgps/js/htmx.min.js' %}" defer></script>
     </head>
     <body class="h-fit text-gray-800 dark:text-gray-200" style='background-image: url("{% static 'terminusgps/img/background-light.png' %}");'>
-        <nav class="flex justify-between bg-stone-100 text-gray-800 drop-shadow dark:bg-zinc-600" hx-get="{% url 'navbar' %}" hx-target="this" hx-swap="outerHTML" hx-trigger="load"></nav>
+        <nav class="flex justify-between bg-stone-100 text-gray-800 drop-shadow dark:bg-zinc-600" hx-get="{% url 'navbar' %}" hx-target="this" hx-swap="outerHTML" hx-trigger="load">
+            <a href="{% url 'home' %}" class="group flex items-center space-x-1">
+                <img src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="size-16 animate-coin-slow group-hover:animate-none">
+                <img src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24">
+            </a>
+        </nav>
         <div class="container mx-auto -mt-2">
             <main class="border-lr mx-8 border-gray-600 bg-stone-100 dark:bg-zinc-600">
                     {% if title %}

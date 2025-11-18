@@ -1,9 +1,0 @@
-Hello, {{ first_name }}!
-
-Thanks for subscribing on {{ create_date|date:'l, F jS, Y' }}!
-
-You have full access to Terminus GPS services until you cancel your subscription.
-
-Best,
-
-Terminus GPS

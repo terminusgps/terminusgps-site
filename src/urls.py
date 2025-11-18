@@ -7,59 +7,36 @@ from . import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("accounts/", include("django.contrib.auth.urls")),
-    path(
-        "accounts/register/",
-        views.TerminusgpsRegisterView.as_view(),
-        name="register",
-    ),
-    path("", views.TerminusgpsHomeView.as_view(), name="home"),
-    path("hosting/", views.TerminusgpsHostingView.as_view(), name="hosting"),
-    path(
-        "source/",
-        views.TerminusgpsSourceCodeView.as_view(),
-        name="source code",
-    ),
-    path("navbar/", views.TerminusgpsNavbarView.as_view(), name="navbar"),
-    path("about/", views.TerminusgpsAboutView.as_view(), name="about"),
-    path("contact/", views.TerminusgpsContactView.as_view(), name="contact"),
+    path("", views.HomeView.as_view(), name="home"),
+    path("navbar/", views.NavbarView.as_view(), name="navbar"),
+    path("register/", views.RegisterView.as_view(), name="register"),
+    path("login/", views.LoginView.as_view(), name="login"),
+    path("logout/", views.LogoutView.as_view(), name="logout"),
+    path("hosting/", views.HostingView.as_view(), name="hosting"),
+    path("source/", views.SourceCodeView.as_view(), name="source code"),
+    path("dashboard/", views.DashboardView.as_view(), name="dashboard"),
+    path("about/", views.AboutView.as_view(), name="about"),
+    path("contact/", views.ContactView.as_view(), name="contact"),
     path(
         "commercial-use/",
-        views.TerminusgpsCommercialUseView.as_view(),
+        views.CommercialUseView.as_view(),
         name="commercial use",
     ),
     path(
         "individual-use/",
-        views.TerminusgpsIndividualUseView.as_view(),
+        views.IndividualUseView.as_view(),
         name="individual use",
     ),
-    path(
-        "teen-safety/",
-        views.TerminusgpsTeenSafetyView.as_view(),
-        name="teen safety",
-    ),
+    path("teen-safety/", views.TeenSafetyView.as_view(), name="teen safety"),
     path(
         "senior-safety/",
-        views.TerminusgpsSeniorSafetyView.as_view(),
+        views.SeniorSafetyView.as_view(),
         name="senior safety",
     ),
-    path(
-        "privacy/",
-        views.TerminusgpsPrivacyPolicyView.as_view(),
-        name="privacy",
-    ),
-    path(
-        "terms/",
-        views.TerminusgpsTermsAndConditionsView.as_view(),
-        name="terms",
-    ),
-    path(
-        "faq/",
-        views.TerminusgpsFrequentlyAskedQuestionsView.as_view(),
-        name="faq",
-    ),
+    path("privacy/", views.PrivacyPolicyView.as_view(), name="privacy"),
+    path("terms/", views.TermsAndConditionsView.as_view(), name="terms"),
+    path("faq/", views.FrequentlyAskedQuestionsView.as_view(), name="faq"),
     path("payments/", include("terminusgps_payments.urls")),
-    path("notifications/", include("terminusgps_notifications.urls")),
 ]
 
 if settings.DEBUG:

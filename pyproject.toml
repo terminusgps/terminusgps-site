@@ -11,18 +11,12 @@ authors = [
     { name = "Peter Speckman", email = "pspeckman@terminusgps.com" },
 ]
 dependencies = [
-    "django-storages[s3]>=1.14.4",
     "django==5.2.7",
-    "gunicorn>=23.0.0",
     "numpy==2.0.1",
     "pandas==2.2.3",
     "pillow==11.3.0",
-    "python-terminusgps==47.2.0",
-    "psycopg>=3.2.6",
-    "psycopg2-binary>=2.9.10",
-    "redis[hiredis]>=6.4.0",
-    "terminusgps-payments>=2.0.0",
-    "terminusgps-notifications>=1.0.0",
+    "python-terminusgps==49.1.0",
+    "terminusgps-payments>=2.8.0",
 ]
 
 [tool.pyright]
@@ -73,4 +67,11 @@ dev = [
     "certifi>=2025.1.31",
     "django-stubs>=5.2.2",
     "django-stubs-ext>=5.2.2",
+]
+deploy = [
+    "django-storages[s3]>=1.14.4",
+    "gunicorn>=23.0.0",
+    "psycopg>=3.2.6",
+    "psycopg2-binary>=2.9.10",
+    "redis[hiredis]>=6.4.0",
 ]

@@ -1,0 +1,13 @@
+Hey, {{ first_name|default_if_none:'there' }}!
+
+Thanks for registering an account with Terminus GPS.
+
+We created your account on {{ create_date|date:'m jS' }}.
+
+To explore available Terminus GPS services, [head to your dashboard]({{ link_dashboard }}).
+
+We're looking forward to working with you!
+
+See you around,
+
+The Terminus GPS Team
