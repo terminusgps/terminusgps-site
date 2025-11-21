@@ -2,7 +2,7 @@ from string import ascii_lowercase, ascii_uppercase, digits, punctuation
 
 from django import forms
 from django.conf import settings
-from django.contrib.auth.forms import BaseUserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, BaseUserCreationForm
 from django.contrib.auth.password_validation import (
     password_validators_help_texts,
 )
@@ -60,7 +60,7 @@ def validate_wialon_password(value: str) -> None:
         )
 
 
-class TerminusgpsRegisterForm(BaseUserCreationForm):
+class TerminusgpsRegistrationForm(BaseUserCreationForm):
     first_name = forms.CharField(
         max_length=64,
         help_text="Required. Please enter your first name.",
@@ -126,3 +126,26 @@ class TerminusgpsRegisterForm(BaseUserCreationForm):
         ].help_text = "Required. Please enter a valid email address."
         self.fields["username"].label = "Email Address"
         self.password_help_texts = password_validators_help_texts()
+
+
+class TerminusgpsAuthenticationForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields["username"].widget.attrs.update(
+            {
+                "class": WIDGET_CSS_CLASS,
+                "placeholder": "email@terminusgps.com",
+                "inputmode": "email",
+                "enterkeyhint": "next",
+                "autocomplete": True,
+                "autofocus": True,
+            }
+        )
+        self.fields["password"].widget.attrs.update(
+            {
+                "class": WIDGET_CSS_CLASS,
+                "placeholder": "••••••••••••••••",
+                "inputmode": "text",
+                "enterkeyhint": "done",
+            }
+        )

@@ -5,6 +5,7 @@ from django.urls import include, path
 
 from . import views
 
+# fmt: off
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", views.HomeView.as_view(), name="home"),
@@ -12,32 +13,20 @@ urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),
     path("login/", views.LoginView.as_view(), name="login"),
     path("logout/", views.LogoutView.as_view(), name="logout"),
-    path("hosting/", views.HostingView.as_view(), name="hosting"),
+    path("platform/", views.PlatformView.as_view(), name="platform"),
     path("source/", views.SourceCodeView.as_view(), name="source code"),
-    path("dashboard/", views.DashboardView.as_view(), name="dashboard"),
     path("about/", views.AboutView.as_view(), name="about"),
     path("contact/", views.ContactView.as_view(), name="contact"),
-    path(
-        "commercial-use/",
-        views.CommercialUseView.as_view(),
-        name="commercial use",
-    ),
-    path(
-        "individual-use/",
-        views.IndividualUseView.as_view(),
-        name="individual use",
-    ),
-    path("teen-safety/", views.TeenSafetyView.as_view(), name="teen safety"),
-    path(
-        "senior-safety/",
-        views.SeniorSafetyView.as_view(),
-        name="senior safety",
-    ),
     path("privacy/", views.PrivacyPolicyView.as_view(), name="privacy"),
     path("terms/", views.TermsAndConditionsView.as_view(), name="terms"),
     path("faq/", views.FrequentlyAskedQuestionsView.as_view(), name="faq"),
+    path("teen-safety/", views.TeenSafetyView.as_view(), name="teen safety"),
+    path("senior-safety/", views.SeniorSafetyView.as_view(), name="senior safety"),
+    path("commercial-use/", views.CommercialUseView.as_view(), name="commercial use"),
+    path("individual-use/", views.IndividualUseView.as_view(), name="individual use"),
     path("django-rq/", include("django_rq.urls")),
     path("payments/", include("terminusgps_payments.urls")),
+    path("", include("terminusgps_manager.urls")),
 ]
 
 if settings.DEBUG:

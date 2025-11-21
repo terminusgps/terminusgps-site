@@ -10,7 +10,7 @@ class SourceCodeView(RedirectView):
     url = "https://github.com/terminusgps/terminusgps-site/"
 
 
-class HostingView(RedirectView):
+class PlatformView(RedirectView):
     http_method_names = ["get"]
     permanent = True
     url = "https://hosting.terminusgps.com/"
