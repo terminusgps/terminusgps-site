@@ -7,5 +7,4 @@ app_name = "terminusgps_manager"
 urlpatterns = [
     path("dashboard/", views.DashboardView.as_view(), name="dashboard"),
     path("account/", views.AccountView.as_view(), name="account"),
-    path("subscription/", views.SubscriptionView.as_view(), name="subscription"),
 ]
