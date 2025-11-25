@@ -2,7 +2,13 @@ from string import ascii_lowercase, ascii_uppercase, digits, punctuation
 
 from django import forms
 from django.conf import settings
-from django.contrib.auth.forms import AuthenticationForm, BaseUserCreationForm
+from django.contrib.auth.forms import (
+    AuthenticationForm,
+    BaseUserCreationForm,
+    PasswordChangeForm,
+    PasswordResetForm,
+    SetPasswordForm,
+)
 from django.contrib.auth.password_validation import (
     password_validators_help_texts,
 )
@@ -149,3 +155,75 @@ class TerminusgpsAuthenticationForm(AuthenticationForm):
                 "enterkeyhint": "done",
             }
         )
+
+
+class TerminusgpsPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields["old_password"].widget.attrs.update(
+            {
+                "class": WIDGET_CSS_CLASS,
+                "placeholder": "••••••••••••••••",
+                "inputmode": "text",
+                "enterkeyhint": "next",
+                "autocomplete": False,
+            }
+        )
+        self.fields["new_password1"].widget.attrs.update(
+            {
+                "class": WIDGET_CSS_CLASS,
+                "placeholder": "••••••••••••••••",
+                "inputmode": "text",
+                "enterkeyhint": "next",
+                "autocomplete": False,
+            }
+        )
+        self.fields["new_password2"].widget.attrs.update(
+            {
+                "class": WIDGET_CSS_CLASS,
+                "placeholder": "••••••••••••••••",
+                "inputmode": "text",
+                "enterkeyhint": "done",
+                "autocomplete": False,
+            }
+        )
+        self.password_help_texts = password_validators_help_texts()
+
+
+class TerminusgpsPasswordResetForm(PasswordResetForm):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields["email"].label = _("Email Address")
+        self.fields["email"].widget.attrs.update(
+            {
+                "class": WIDGET_CSS_CLASS,
+                "placeholder": "email@terminusgps.com",
+                "inputmode": "email",
+                "enterkeyhint": "done",
+                "autocomplete": True,
+                "autofocus": True,
+            }
+        )
+
+
+class TerminusgpsPasswordSetForm(SetPasswordForm):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.fields["new_password1"].widget.attrs.update(
+            {
+                "class": WIDGET_CSS_CLASS,
+                "placeholder": "••••••••••••••••",
+                "inputmode": "text",
+                "enterkeyhint": "next",
+                "autofocus": True,
+            }
+        )
+        self.fields["new_password2"].widget.attrs.update(
+            {
+                "class": WIDGET_CSS_CLASS,
+                "placeholder": "••••••••••••••••",
+                "inputmode": "text",
+                "enterkeyhint": "done",
+            }
+        )
+        self.password_help_texts = password_validators_help_texts()

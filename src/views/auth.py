@@ -1,8 +1,25 @@
 import logging
 
 from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as LoginViewBase
 from django.contrib.auth.views import LogoutView as LogoutViewBase
+from django.contrib.auth.views import PasswordChangeDoneView
+from django.contrib.auth.views import (
+    PasswordChangeView as PasswordChangeViewBase,
+)
+from django.contrib.auth.views import (
+    PasswordResetCompleteView as PasswordResetCompleteViewBase,
+)
+from django.contrib.auth.views import (
+    PasswordResetConfirmView as PasswordResetConfirmViewBase,
+)
+from django.contrib.auth.views import (
+    PasswordResetDoneView as PasswordResetDoneViewBase,
+)
+from django.contrib.auth.views import (
+    PasswordResetView as PasswordResetViewBase,
+)
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpResponse
@@ -12,7 +29,13 @@ from django.views.generic import FormView
 from terminusgps.mixins import HtmxTemplateResponseMixin
 from terminusgps.wialon.session import WialonAPIError, WialonSession
 
-from ..forms import TerminusgpsAuthenticationForm, TerminusgpsRegistrationForm
+from ..forms import (
+    TerminusgpsAuthenticationForm,
+    TerminusgpsPasswordChangeForm,
+    TerminusgpsPasswordResetForm,
+    TerminusgpsPasswordSetForm,
+    TerminusgpsRegistrationForm,
+)
 from ..utils import wialon_account_registration_flow
 
 logger = logging.getLogger(__name__)
@@ -72,3 +95,71 @@ class RegisterView(HtmxTemplateResponseMixin, FormView):
                 ),
             )
             return self.form_invalid(form=form)
+
+
+class PasswordChangeView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, PasswordChangeViewBase
+):
+    content_type = "text/html"
+    extra_context = {"title": "Password Change"}
+    form_class = TerminusgpsPasswordChangeForm
+    http_method_names = ["get", "post"]
+    partial_template_name = "terminusgps/partials/_password_change.html"
+    success_url = reverse_lazy("password change success")
+    template_name = "terminusgps/password_change.html"
+
+
+class PasswordChangeSuccessView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, PasswordChangeDoneView
+):
+    content_type = "text/html"
+    extra_context = {"title": "Password Change Success"}
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps/partials/_password_change_done.html"
+    template_name = "terminusgps/password_change_done.html"
+
+
+class PasswordResetView(HtmxTemplateResponseMixin, PasswordResetViewBase):
+    content_type = "text/html"
+    extra_context = {"title": "Password Reset"}
+    http_method_names = ["get", "post"]
+    partial_template_name = "terminusgps/partials/_password_reset.html"
+    template_name = "terminusgps/password_reset.html"
+    form_class = TerminusgpsPasswordResetForm
+    success_url = reverse_lazy("password reset done")
+    email_template_name = "terminusgps/emails/password_reset.txt"
+    subject_template_name = "terminusgps/emails/password_reset_subject.txt"
+
+
+class PasswordResetDoneView(
+    HtmxTemplateResponseMixin, PasswordResetDoneViewBase
+):
+    content_type = "text/html"
+    extra_context = {"title": "Password Reset Done"}
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps/partials/_password_reset_done.html"
+    template_name = "terminusgps/password_reset_done.html"
+
+
+class PasswordResetConfirmView(
+    HtmxTemplateResponseMixin, PasswordResetConfirmViewBase
+):
+    content_type = "text/html"
+    extra_context = {"title": "Password Reset Confirm"}
+    http_method_names = ["get", "post"]
+    partial_template_name = "terminusgps/partials/_password_reset_confirm.html"
+    template_name = "terminusgps/password_reset_confirm.html"
+    form_class = TerminusgpsPasswordSetForm
+    success_url = reverse_lazy("password reset complete")
+
+
+class PasswordResetCompleteView(
+    HtmxTemplateResponseMixin, PasswordResetCompleteViewBase
+):
+    content_type = "text/html"
+    extra_context = {"title": "Password Reset Complete"}
+    http_method_names = ["get"]
+    partial_template_name = (
+        "terminusgps/partials/_password_reset_complete.html"
+    )
+    template_name = "terminusgps/password_reset_complete.html"
