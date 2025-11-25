@@ -1,5 +1,3 @@
-import logging
-
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as LoginViewBase
@@ -37,8 +35,6 @@ from ..forms import (
     TerminusgpsRegistrationForm,
 )
 from ..utils import wialon_account_registration_flow
-
-logger = logging.getLogger(__name__)
 
 
 class LoginView(HtmxTemplateResponseMixin, LoginViewBase):
