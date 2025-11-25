@@ -1,9 +1,0 @@
-Hello, {{ first_name }}!
-
-You canceled your subscription on {{ cancel_date|date:'l, F jS, Y' }}.
-
-You'll be able to access Terminus GPS services for {{ remaining_days }} more day{{ remaining_days|pluralize }}.
-
-Best,
-
-Terminus GPS

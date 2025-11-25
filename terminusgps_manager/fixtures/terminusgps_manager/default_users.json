@@ -1,0 +1,9 @@
+[
+    {
+        "model": "terminusgps_manager.wialonuser",
+        "pk": 27881459,
+        "fields": {
+            "name": "Terminus-1000"
+        }
+    }
+]

@@ -2,7 +2,7 @@
     <h2 class="-mx-4 text-lg font-semibold text-terminus-red-600 dark:text-terminus-red-100">How does it work?</h2>
     <p>The device is a <a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="https://en.wikipedia.org/wiki/Mobile_broadband_modem">cellular modem</a> with a GPS receiver.  The device transmits the location of your vehicle as it moves around on Earth's surface.</p>
     <p>These transmissions are recieved by our software then presented to you.</p>
-    <p>Typically, device location data is updated in <a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'hosting' %}">the platform</a> every 5 minutes while the vehicle is in motion and every 12 hours while motionless.</p>
+    <p>Typically, device location data is updated in <a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'platform' %}">the platform</a> every 5 minutes while the vehicle is in motion and every 12 hours while motionless.</p>
 </section>
 <section id="2" class="mx-4 flex flex-col gap-2 text-pretty">
     <h2 class="-mx-4 text-lg font-semibold text-terminus-red-600 dark:text-terminus-red-100">What is "GPS"?</h2>
@@ -11,7 +11,7 @@
 </section>
 <section id="3" class="mx-4 flex flex-col gap-2 text-pretty">
     <h2 class="-mx-4 text-lg font-semibold text-terminus-red-600 dark:text-terminus-red-100">How reliable is the system?</h2>
-    <p>We have a <a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="https://status.wialon.com/">99% reliability</a> of <a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'hosting' %}">the platform</a> using multiple servers to keep you up-to-date with immediate location data.</p>
+    <p>We have a <a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="https://status.wialon.com/">99% reliability</a> of <a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'platform' %}">the platform</a> using multiple servers to keep you up-to-date with immediate location data.</p>
     <p>Occasionally the device may lose cellular signal (similar to your mobile phone losing signal) but the device's on-board memory will hold the plotted information until it can reconnect. When the device is without a signal, it constantly searches for the nearest cell signal.</p>
     <p>Sometimes when a vehicle is driven into a large underground parking structure or a metal building with few or no windows, the device may lose signal. Once the vehicle exits the "dead-zone" location, it immediately attempts to regain a cellular signal and continue operating normally.</p>
 </section>
@@ -63,11 +63,11 @@
 </section>
 <section id="5" class="mx-4 flex flex-col gap-2 text-pretty">
     <h2 class="-mx-4 text-lg font-semibold text-terminus-red-600 dark:text-terminus-red-100">Will it tell me the history of where the vehicle has been?</h2>
-    <p><a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'hosting' %}">The platform</a> holds the last 90 days of device history. You may view your device's history at any time in the platform.</p>
+    <p><a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'platform' %}">The platform</a> holds the last 90 days of device history. You may view your device's history at any time in the platform.</p>
 </section>
 <section id="6" class="mx-4 flex flex-col gap-2 text-pretty">
     <h2 class="-mx-4 text-lg font-semibold text-terminus-red-600 dark:text-terminus-red-100">Is the reported mileage on the platform accurate?</h2>
-    <p>Yes, <a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'hosting' %}">the platform</a> records mileage post install and adds it to your vehicle's original mileage.</p>
+    <p>Yes, <a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'platform' %}">the platform</a> records mileage post install and adds it to your vehicle's original mileage.</p>
     <p>If you didn't input your vehicle's starting mileage post install, then the reported mileage will <em>only count miles driven post install</em>. This can be updated at any time.</p>
 </section>
 <section id="7" class="mx-4 flex flex-col gap-2 text-pretty">
@@ -77,12 +77,12 @@
 </section>
 <section id="8" class="mx-4 flex flex-col gap-2 text-pretty">
     <h2 class="-mx-4 text-lg font-semibold text-terminus-red-600 dark:text-terminus-red-100">What is a geofence area?</h2>
-    <p>A <a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="https://help.wialon.com/en/wialon-hosting/user-guide/monitoring-system/geofences">geofence</a> area is a section of Earth's surface you designate as a place or point of interest, e.g., school, home, work, friend's house.</p>
-    <p>You may create geofence areas in <a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'hosting' %}">the platform</a>.</p>
+    <p>A <a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="https://help.wialon.com/en/wialon-platform/user-guide/monitoring-system/geofences">geofence</a> area is a section of Earth's surface you designate as a place or point of interest, e.g., school, home, work, friend's house.</p>
+    <p>You may create geofence areas in <a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'platform' %}">the platform</a>.</p>
 </section>
 <section id="9" class="mx-4 flex flex-col gap-2 text-pretty">
     <h2 class="-mx-4 text-lg font-semibold text-terminus-red-600 dark:text-terminus-red-100">When will it tell me that the vehicle has reached a geofence area?</h2>
-    <p><a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'hosting' %}">The platform</a> saves the alert in history as soon as the device reports it.</p>
+    <p><a class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'platform' %}">The platform</a> saves the alert in history as soon as the device reports it.</p>
     <p>When the vehicle exits or enters geofence area, an alert may be dispatched to your mobile phone.</p>
     <p>Mobile phone notifications are only dispatched according to your configuration in the platform. <a href="{% url 'terms' %}#23.3" class="decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">Additional rates may apply</a> for live notifications.</p>
 </section>

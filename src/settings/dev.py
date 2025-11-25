@@ -5,6 +5,7 @@ from pathlib import Path
 
 from authorizenet.constants import constants
 from django.contrib.messages import constants as messages
+from terminusgps.wialon.flags import TokenFlag
 
 os.umask(0)
 decimal.getcontext().prec = 4
@@ -15,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[.errorlist]:text-red-800 group-has-[.errorlist]:bg-red-100"
-DEFAULT_FROM_EMAIL = "support@terminusgps.com"
+DEFAULT_FROM_EMAIL = "noreply@terminusgps.com"
 DEFAULT_TAX_RATE = decimal.Decimal(os.getenv("DEFAULT_TAX_RATE", "0.0825")) * 1
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
@@ -26,7 +27,7 @@ EMAIL_USE_TLS = True
 INTERNAL_IPS = ["127.0.0.1"]
 LANGUAGE_CODE = "en-us"
 LOGIN_REDIRECT_URL = "/dashboard/"
-LOGIN_URL = "/accounts/login/"
+LOGIN_URL = "/login/"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
 MERCHANT_AUTH_ENVIRONMENT = constants.SANDBOX
@@ -41,11 +42,16 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "static/"
 TIME_ZONE = "US/Central"
-USE_I18N = True
+USE_I18N = False
 USE_TZ = True
-WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID")
+WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID", "27881459")
 WIALON_DEFAULT_PLAN = os.getenv("WIALON_DEFAULT_PLAN")
 WIALON_TOKEN = os.getenv("WIALON_TOKEN")
+WIALON_TOKEN_ACCESS_TYPE = (
+    TokenFlag.VIEW_ACCESS
+    | TokenFlag.MANAGE_NONSENSITIVE
+    | TokenFlag.MANAGE_SENSITIVE
+)
 WSGI_APPLICATION = "src.wsgi.application"
 
 ADMINS = [
@@ -59,6 +65,10 @@ MESSAGE_TAGS = {
     messages.INFO: "text-gray-800 dark:text-gray-100 px-2 py-4 border-2 border-current rounded bg-gray-100 dark:bg-gray-600 flex items-center gap-2",
     messages.SUCCESS: "text-green-800 dark:text-green-100 px-2 py-4 border-2 border-current rounded bg-green-100 dark:bg-green-600 flex items-center gap-2",
     messages.WARNING: "text-yellow-800 dark:text-yellow-100 px-2 py-4 border-2 border-current rounded bg-yellow-100 dark:bg-yellow-300 flex items-center gap-2",
+}
+
+TASKS = {
+    "default": {"BACKEND": "django_tasks.backends.immediate.ImmediateBackend"}
 }
 
 
@@ -115,15 +125,21 @@ STORAGES = {
 }
 
 CACHES = {
-    "default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379",
+        "TIMEOUT": 60 * 15,
+    }
 }
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-#         "LOCATION": "redis://127.0.0.1:6379",
-#         "TIMEOUT": 60 * 15,
-#     }
-# }
+
+RQ_QUEUES = {"default": {"HOST": "127.0.0.1", "PORT": 6379}}
+
+TASKS = {
+    "default": {
+        "BACKEND": "django_tasks.backends.rq.RQBackend",
+        "QUEUES": ["default"],
+    }
+}
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -134,8 +150,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
+    "django_rq",
+    "django_tasks",
+    "terminusgps_manager.apps.TerminusgpsManagerConfig",
     "terminusgps_payments.apps.TerminusgpsPaymentsConfig",
-    "terminusgps_tracker.apps.TerminusgpsTrackerConfig",
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,10 @@
+<form class="flex flex-col gap-4" action="{% url 'terminusgps_manager:update unit' wialonunit.pk %}" method="post" hx-boost="true">
+    {% csrf_token %}
+    <section class="flex flex-col gap-2 w-full">
+        {{ form.name }}
+        <label class="order-first font-semibold peer-user-invalid:text-red-600" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+        <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.name.id_for_label }}_helptext">{{ form.name.help_text }}</p>
+        {% if form.name.errors %}<div class="animate-jiggle font-italic">{{ form.name.errors }}</div>{% endif %}
+    </section>
+    <button class="flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-terminus-red-900 bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit">Login</button>
+</form>

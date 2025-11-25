@@ -1,7 +1,0 @@
-Hello, {{ first_name }}!
-
-Your subscription is going to expire in {{ remaining_days }} day{{ remaining_days|pluralize }}.
-
-Best,
-
-Terminus GPS

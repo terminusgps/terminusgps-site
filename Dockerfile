@@ -14,7 +14,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY . /usr/local/terminusgps-site
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked
+    uv sync --locked --all-groups
 
 ENV PATH="/usr/local/terminusgps-site/.venv/bin:$PATH"
 

@@ -1,5 +1,4 @@
 @import "tailwindcss" source("../../../../**/*.{html,python,js}");
-@plugin "@tailwindcss/forms";
 @source "../../../../.venv/lib/python3.12/site-packages/terminusgps_payments";
 
 @theme {
