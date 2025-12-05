@@ -11,6 +11,7 @@ urlpatterns = [
     path("", views.HomeView.as_view(), name="home"),
     path("navbar/", views.NavbarView.as_view(), name="navbar"),
     path("platform/", views.PlatformView.as_view(), name="platform"),
+    path("socials/", views.SocialMediaView.as_view(), name="socials"),
     path("source/", views.SourceCodeView.as_view(), name="source code"),
     path("about/", views.AboutView.as_view(), name="about"),
     path("contact/", views.ContactView.as_view(), name="contact"),
@@ -30,11 +31,12 @@ urlpatterns = [
     path("password-reset/done/", views.PasswordResetDoneView.as_view(), name="password reset done"),
     path("password-reset/<uidb64>/<token>/confirm/", views.PasswordResetConfirmView.as_view(), name="password reset confirm"),
     path("password-reset/complete/", views.PasswordResetCompleteView.as_view(), name="password reset complete"),
-    path("django-rq/", include("django_rq.urls")),
     path("payments/", include("terminusgps_payments.urls")),
     path("", include("terminusgps_manager.urls")),
 ]
 
+if not settings.DEBUG:
+    urlpatterns.insert(-2, path("django-rq/", include("django_rq.urls")))
 if settings.DEBUG:
     urlpatterns += static(
         settings.MEDIA_URL, document_root=settings.MEDIA_ROOT

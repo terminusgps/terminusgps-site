@@ -15,44 +15,47 @@ class TerminusgpsCustomer(models.Model):
     """Django user."""
     account = models.ForeignKey(
         "terminusgps_manager.WialonResource",
-        on_delete=models.PROTECT,
-        related_name="account",
+        blank=True,
+        default=None,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="wialon_account",
     )
     """Associated Wialon account."""
     tax_rate = models.DecimalField(
-        max_digits=9,
         decimal_places=4,
         default=0.0825,
         help_text="Enter a tax rate as a decimal.",
+        max_digits=9,
     )
     """Tax rate."""
     subtotal = models.DecimalField(
-        max_digits=9,
         decimal_places=2,
         default=24.99,
         help_text="Enter an amount to charge the customer every payment period.",
+        max_digits=9,
     )
     """Subtotal."""
     tax = models.GeneratedField(
-        expression=(F("subtotal") * (F("tax_rate") + 1)) - F("subtotal"),
-        output_field=models.DecimalField(max_digits=9, decimal_places=2),
         db_persist=True,
+        expression=(F("subtotal") * (F("tax_rate") + 1)) - F("subtotal"),
         help_text="Automatically generated tax amount.",
+        output_field=models.DecimalField(max_digits=9, decimal_places=2),
     )
     """Tax total."""
     grand_total = models.GeneratedField(
-        expression=F("subtotal") * (F("tax_rate") + 1),
-        output_field=models.DecimalField(max_digits=9, decimal_places=2),
         db_persist=True,
+        expression=F("subtotal") * (F("tax_rate") + 1),
         help_text="Automatically generated grand total amount (subtotal+tax).",
+        output_field=models.DecimalField(max_digits=9, decimal_places=2),
     )
     """Grand total (subtotal + tax)."""
     subscription = models.ForeignKey(
         "terminusgps_payments.Subscription",
-        on_delete=models.SET_NULL,
+        blank=True,
         default=None,
         null=True,
-        blank=True,
+        on_delete=models.SET_NULL,
         related_name="terminusgps_customer",
     )
     """Subscription."""

@@ -131,3 +131,40 @@ class SeniorSafetyView(HtmxTemplateResponseMixin, TemplateView):
     http_method_names = ["get"]
     partial_template_name = "terminusgps/partials/_senior_safety.html"
     template_name = "terminusgps/senior_safety.html"
+
+
+@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
+class SocialMediaView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {
+        "title": "Social Media",
+        "socials": [
+            {
+                "link": "https://www.facebook.com/TerminusGPSllc",
+                "username": "TerminusGPSllc",
+                "display_name": "Terminus GPS",
+                "icon": "terminusgps/icon/facebook.svg",
+            },
+            {
+                "link": "https://www.tiktok.com/@terminusgps",
+                "username": "terminusgps",
+                "display_name": "TerminusGps",
+                "icon": "terminusgps/icon/tiktok.svg",
+            },
+            {
+                "link": "https://nextdoor.com/pages/terminusgps-cypress-tx",
+                "username": "TerminusGPS",
+                "display_name": "TerminusGPS",
+                "icon": "terminusgps/icon/nextdoor.svg",
+            },
+            {
+                "link": "https://x.com/TERMINUSGPS",
+                "username": "TERMINUSGPS",
+                "display_name": "TERMINUSGPS",
+                "icon": "terminusgps/icon/twitter.svg",
+            },
+        ],
+    }
+    http_method_names = ["get"]
+    partial_template_name = "terminusgps/partials/_social_media.html"
+    template_name = "terminusgps/social_media.html"

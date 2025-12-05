@@ -1,0 +1,8 @@
+<section id="subscription" class="p-4 flex flex-col gap-4 border-2 border-current rounded bg-gray-50 dark:bg-gray-800">
+    <h2 class="font-semibold text-lg text-terminus-red-500 dark:text-terminus-red-100">Your Subscription</h2>
+    {% if customer.subscription is None %}
+    <form id="subscription-form" hx-get="{% url 'terminusgps_manager:create subscription' %}" hx-target="this" hx-trigger="load once" hx-swap="outerHTML"></form>
+    {% else %}
+    <p>You are subscribed.</p>
+    {% endif %}
+</section>

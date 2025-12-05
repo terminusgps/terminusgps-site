@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 
 from authorizenet.constants import constants
-from django.contrib.messages import constants as messages
 from terminusgps.wialon.flags import TokenFlag
 
 os.umask(0)
@@ -15,7 +14,6 @@ ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-DEFAULT_FIELD_CLASS = "p-2 w-full bg-white dark:bg-gray-700 dark:text-white rounded border dark:border-terminus-gray-300 group-has-[.errorlist]:text-red-800 group-has-[.errorlist]:bg-red-100"
 DEFAULT_FROM_EMAIL = "noreply@terminusgps.com"
 DEFAULT_TAX_RATE = decimal.Decimal(os.getenv("DEFAULT_TAX_RATE", "0.0825")) * 1
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -60,63 +58,6 @@ ADMINS = [
     ("Lili", "lili@terminusgps.com"),
 ]
 
-MESSAGE_TAGS = {
-    messages.ERROR: "text-red-800 dark:text-red-100 px-2 py-4 border-2 border-current rounded bg-red-100 dark:bg-red-600 flex items-center gap-2",
-    messages.INFO: "text-gray-800 dark:text-gray-100 px-2 py-4 border-2 border-current rounded bg-gray-100 dark:bg-gray-600 flex items-center gap-2",
-    messages.SUCCESS: "text-green-800 dark:text-green-100 px-2 py-4 border-2 border-current rounded bg-green-100 dark:bg-green-600 flex items-center gap-2",
-    messages.WARNING: "text-yellow-800 dark:text-yellow-100 px-2 py-4 border-2 border-current rounded bg-yellow-100 dark:bg-yellow-300 flex items-center gap-2",
-}
-
-TASKS = {
-    "default": {"BACKEND": "django_tasks.backends.immediate.ImmediateBackend"}
-}
-
-
-TRACKER_APP_CONFIG = {
-    "DISPLAY_NAME": "Terminus GPS",
-    "LEGAL_NAME": "Terminus GPS, LLC",
-    "MOTD": "We know where ours are... do you?",
-    "REPOSITORY_URL": "https://github.com/terminusgps/terminusgps-site/",
-    "HOSTING_URL": "https://hosting.terminusgps.com/",
-    "MOBILE_APPS": {
-        "IOS": {
-            "url": "https://apps.apple.com/us/app/terminus-gps-mobile/id1419439009?ls=1",
-            "badge": "terminusgps/img/App_Store_Badge_Black.svg",
-        },
-        "ANDROID": {
-            "url": "https://play.google.com/store/apps/details?id=com.terminusgps.track&hl=en",
-            "badge": "terminusgps/img/Play_Store_Badge_White.png",
-        },
-    },
-    "SOCIALS": {
-        "FACEBOOK": {
-            "display_name": "Terminus GPS",
-            "link": "https://www.facebook.com/TerminusGPSllc",
-            "username": "TerminusGPSllc",
-            "icon": "terminusgps/icon/facebook.svg",
-        },
-        "TIKTOK": {
-            "display_name": "TerminusGps",
-            "link": "https://www.tiktok.com/@terminusgps",
-            "username": "terminusgps",
-            "icon": "terminusgps/icon/tiktok.svg",
-        },
-        "NEXTDOOR": {
-            "display_name": "TerminusGPS",
-            "link": "https://nextdoor.com/pages/terminusgps-cypress-tx/",
-            "username": "TerminusGPS",
-            "icon": "terminusgps/icon/nextdoor.svg",
-        },
-        "TWITTER": {
-            "display_name": "TERMINUSGPS",
-            "link": "https://x.com/TERMINUSGPS",
-            "username": "TERMINUSGPS",
-            "icon": "terminusgps/icon/twitter.svg",
-        },
-    },
-}
-
-
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {
@@ -125,18 +66,12 @@ STORAGES = {
 }
 
 CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379",
-        "TIMEOUT": 60 * 15,
-    }
+    "default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}
 }
-
-RQ_QUEUES = {"default": {"HOST": "127.0.0.1", "PORT": 6379}}
 
 TASKS = {
     "default": {
-        "BACKEND": "django_tasks.backends.rq.RQBackend",
+        "BACKEND": "django.tasks.backends.immediate.ImmediateBackend",
         "QUEUES": ["default"],
     }
 }
@@ -151,10 +86,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
-    "django_rq",
-    "django_tasks",
-    "terminusgps_manager.apps.TerminusgpsManagerConfig",
     "terminusgps_payments.apps.TerminusgpsPaymentsConfig",
+    "terminusgps_manager.apps.TerminusgpsManagerConfig",
 ]
 
 MIDDLEWARE = [

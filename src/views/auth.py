@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as LoginViewBase
 from django.contrib.auth.views import LogoutView as LogoutViewBase
@@ -18,14 +17,11 @@ from django.contrib.auth.views import (
 from django.contrib.auth.views import (
     PasswordResetView as PasswordResetViewBase,
 )
-from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView
 from terminusgps.mixins import HtmxTemplateResponseMixin
-from terminusgps.wialon.session import WialonAPIError, WialonSession
 
 from ..forms import (
     TerminusgpsAuthenticationForm,
@@ -34,7 +30,6 @@ from ..forms import (
     TerminusgpsPasswordSetForm,
     TerminusgpsRegistrationForm,
 )
-from ..utils import wialon_account_registration_flow
 
 
 class LoginView(HtmxTemplateResponseMixin, LoginViewBase):
@@ -74,23 +69,12 @@ class RegisterView(HtmxTemplateResponseMixin, FormView):
 
     @transaction.atomic
     def form_valid(self, form: TerminusgpsRegistrationForm) -> HttpResponse:
-        try:
-            with WialonSession(token=settings.WIALON_TOKEN) as session:
-                user = form.save(commit=True)
-                user.email = form.cleaned_data["username"]
-                user.first_name = form.cleaned_data["first_name"]
-                user.last_name = form.cleaned_data["last_name"]
-                user.save(update_fields=["email", "first_name", "last_name"])
-                wialon_account_registration_flow(user, form, session)
-                return super().form_valid(form=form)
-        except (ValueError, WialonAPIError) as e:
-            form.add_error(
-                None,
-                ValidationError(
-                    _("Whoops! %(e)s"), code="invalid", params={"e": str(e)}
-                ),
-            )
-            return self.form_invalid(form=form)
+        user = form.save(commit=True)
+        user.email = form.cleaned_data["username"]
+        user.first_name = form.cleaned_data["first_name"]
+        user.last_name = form.cleaned_data["last_name"]
+        user.save(update_fields=["email", "first_name", "last_name"])
+        return super().form_valid(form=form)
 
 
 class PasswordChangeView(

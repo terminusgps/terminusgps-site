@@ -1,0 +1,12 @@
+{% load static %}
+{% for social in socials %}
+<a class="group p-4" href="{{ social.link }}">
+    <div class="flex flex-col gap-4 items-center">
+        <img class="size-16 fill-red-500" src="{% static social.icon %}">
+        <div class="flex flex-col gap-2 items-center">
+            <p class="font-light">@{{ social.username }}</p>
+            <p class="font-semibold">{{ social.display_name }}</p>
+        </div>
+    </div>
+</a>
+{% endfor %}
