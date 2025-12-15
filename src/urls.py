@@ -9,7 +9,6 @@ from . import views
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", views.HomeView.as_view(), name="home"),
-    path("navbar/", views.NavbarView.as_view(), name="navbar"),
     path("platform/", views.PlatformView.as_view(), name="platform"),
     path("socials/", views.SocialMediaView.as_view(), name="socials"),
     path("source/", views.SourceCodeView.as_view(), name="source code"),

@@ -1,5 +1,5 @@
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_control, cache_page
+from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView, TemplateView
 from terminusgps.mixins import HtmxTemplateResponseMixin
 
@@ -17,19 +17,10 @@ class PlatformView(RedirectView):
 
 
 @method_decorator(cache_page(timeout=60 * 15), name="dispatch")
-@method_decorator(cache_control(private=True), name="dispatch")
-class NavbarView(TemplateView):
-    content_type = "text/html"
-    http_method_names = ["get"]
-    partial_template_name = "terminusgps/partials/_navbar.html"
-    template_name = "terminusgps/navbar.html"
-
-
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class HomeView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {
-        "title": "Terminus GPS",
+        "title": "Home",
         "subtitle": "Industry-leading GPS monitoring hardware and software",
     }
     http_method_names = ["get"]

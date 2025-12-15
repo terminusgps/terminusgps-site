@@ -36,10 +36,17 @@ class DashboardView(
     http_method_names = ["get"]
     partial_template_name = "terminusgps_manager/partials/_dashboard.html"
     template_name = "terminusgps_manager/dashboard.html"
+    raise_exception = False
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        self.customer, _ = models.TerminusgpsCustomer.objects.get_or_create(
-            user=request.user
+        self.customer, _ = (
+            (
+                models.TerminusgpsCustomer.objects.get_or_create(
+                    django_user=request.user
+                )
+            )
+            if request.user.is_authenticated
+            else (None, None)
         )
         return super().setup(request, *args, **kwargs)
 
@@ -59,8 +66,14 @@ class AccountView(LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps_manager/account.html"
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        self.customer, _ = models.TerminusgpsCustomer.objects.get_or_create(
-            user=request.user
+        self.customer, _ = (
+            (
+                models.TerminusgpsCustomer.objects.get_or_create(
+                    django_user=request.user
+                )
+            )
+            if request.user.is_authenticated
+            else (None, None)
         )
         return super().setup(request, *args, **kwargs)
 
@@ -83,7 +96,7 @@ class SubscriptionView(
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         self.customer, _ = models.TerminusgpsCustomer.objects.get_or_create(
-            user=request.user
+            django_user=request.user
         )
         return super().setup(request, *args, **kwargs)
 
@@ -119,7 +132,7 @@ class SubscriptionCreateView(
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         self.customer, _ = models.TerminusgpsCustomer.objects.get_or_create(
-            user=request.user
+            django_user=request.user
         )
         return super().setup(request, *args, **kwargs)
 

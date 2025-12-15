@@ -14,18 +14,3 @@ class TerminusgpsCustomerAdmin(admin.ModelAdmin):
             {"fields": ["tax_rate", "subtotal", "tax", "grand_total"]},
         ),
     ]
-
-
-@admin.register(models.WialonResource)
-class WialonResourceAdmin(admin.ModelAdmin):
-    list_display = ["name", "id"]
-
-
-@admin.register(models.WialonUnit)
-class WialonUnitAdmin(admin.ModelAdmin):
-    list_display = ["name", "id"]
-
-
-@admin.register(models.WialonUser)
-class WialonUserAdmin(admin.ModelAdmin):
-    list_display = ["name", "id"]
