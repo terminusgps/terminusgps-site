@@ -1,0 +1,56 @@
+{% extends "terminusgps/layout.html" %}
+{% block content %}
+{% partialdef partial inline %}
+<div class="flex justify-between">
+    <h3 class="font-semibold text-lg">{{ subscription.name }}</h3>
+    <p>${{ subscription.amount|floatformat:2 }}/mo</p>
+</div>
+<form class="flex flex-col gap-4" hx-post="{% url 'terminusgps_manager:update subscriptions' subscription_pk=subscription.pk %}">
+    {% if form.non_field_errors %}
+    <div class="p-2 bg-red-200 text-red-700 animate-jiggle border border-current rounded">
+        <div class="flex gap-2 items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-red-700 fill-red-50 animate-pulse">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+            </svg>
+            {{ form.non_field_errors }}
+        </div>
+    </div>
+    {% endif %}
+    {% csrf_token %}
+    <section class="flex flex-col gap-2 w-full">
+        <div class="*:border *:rounded *:p-2">{{ form.pprofile }}</div>
+        <label class="order-first font-semibold peer-user-invalid:text-red-600" for="{{ form.pprofile.id_for_label }}">{{ form.pprofile.label }}</label>
+        <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.pprofile.id_for_label }}_helptext">{{ form.pprofile.help_text }}</p>
+        {% if form.pprofile.errors %}<div class="animate-jiggle font-italic">{{ form.pprofile.errors }}</div>{% endif %}
+    </section>
+    <section class="flex flex-col gap-2 w-full">
+        <div class="*:border *:rounded *:p-2">{{ form.aprofile }}</div>
+        <label class="order-first font-semibold peer-user-invalid:text-red-600" for="{{ form.aprofile.id_for_label }}">{{ form.aprofile.label }}</label>
+        <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.aprofile.id_for_label }}_helptext">{{ form.aprofile.help_text }}</p>
+        {% if form.aprofile.errors %}<div class="animate-jiggle font-italic">{{ form.aprofile.errors }}</div>{% endif %}
+    </section>
+    <div id="buttons" class="flex flex-col gap-2">
+        <button
+            type="submit"
+            class="flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-terminus-red-900 bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+            </svg>
+            <p>Submit</p>
+        </button>
+        <button
+            type="button"
+            class="flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-current bg-stone-50 p-2 text-center text-red-700 transition-colors duration-300 ease-in-out hover:bg-red-200"
+            hx-get="{% url 'terminusgps_manager:detail subscriptions' subscription_pk=subscription.pk %}"
+            hx-trigger="click"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+            <p>Back</p>
+        </button>
+    </div>
+</form>
+{% endpartialdef partial %}
+{% endblock content %}

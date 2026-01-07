@@ -51,6 +51,8 @@ WIALON_TOKEN_ACCESS_TYPE = (
     | TokenFlag.MANAGE_SENSITIVE
 )
 WSGI_APPLICATION = "src.wsgi.application"
+SUBSCRIPTION_AMOUNT = decimal.Decimal("24.95")
+SUBSCRIPTION_NAME = "Terminus GPS Subscription"
 
 ADMINS = [
     ("Peter", "pspeckman@terminusgps.com"),

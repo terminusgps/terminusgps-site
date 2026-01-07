@@ -1,4 +1,49 @@
 {% extends "terminusgps/layout.html" %}
 {% block content %}
-{% include "terminusgps/partials/_register.html" %}
+{% partialdef partial inline %}
+<form id="registration-form" class="flex flex-col gap-4" hx-post="{% url 'register' %}" hx-target="this" hx-swap="outerHTML">
+    {% if form.non_field_errors %}<div class="animate-jiggle">{{ form.non_field_errors }}</div>{% endif %}
+    {% csrf_token %}
+    <section class="flex-none gap-4 md:flex">
+        <section class="flex flex-col gap-2 w-full">
+            {{ form.first_name }}
+            <label class="order-first font-semibold peer-user-invalid:text-red-600" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+            <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.first_name.id_for_label }}_helptext">{{ form.first_name.help_text }}</p>
+            {% if form.first_name.errors %}<div class="animate-jiggle font-italic">{{ form.first_name.errors }}</div>{% endif %}
+        </section>
+        <section class="flex flex-col gap-2 w-full">
+            {{ form.last_name }}
+            <label class="order-first font-semibold peer-user-invalid:text-red-600" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+            <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.last_name.id_for_label }}_helptext">{{ form.last_name.help_text }}</p>
+            {% if form.last_name.errors %}<div class="animate-jiggle font-italic">{{ form.last_name.errors }}</div>{% endif %}
+        </section>
+    </section>
+    <section class="flex flex-col gap-2">
+        {{ form.username }}
+        <label class="order-first font-semibold peer-user-invalid:text-red-600" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+        <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.username.id_for_label }}_helptext">{{ form.username.help_text }}</p>
+        {% if form.username.errors %}<div class="animate-jiggle font-italic">{{ form.username.errors }}</div>{% endif %}
+    </section>
+    <section class="flex flex-col gap-2">
+        {{ form.password1 }}
+        <label class="order-first font-semibold peer-user-invalid:text-red-600" for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+        <ul class="text-sm peer-user-invalid:text-red-800" id="{{ form.password1.id_for_label }}_helptext">
+            {% for help_text in form.password_help_texts %}
+            <li>{{ help_text }}</li>
+            {% endfor %}
+        </ul>
+        {% if form.password1.errors %}<div class="animate-jiggle font-italic">{{ form.password1.errors }}</div>{% endif %}
+    </section>
+    <section class="flex flex-col gap-2">
+        {{ form.password2 }}
+        <label class="order-first font-semibold peer-user-invalid:text-red-600" for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+        <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.password2.id_for_label }}_helptext">{{ form.password2.help_text }}</p>
+        {% if form.password2.errors %}<div class="animate-jiggle font-italic">{{ form.password2.errors }}</div>{% endif %}
+    </section>
+    <button class="flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-terminus-red-900 bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit">Register</button>
+    <section id="links" class="flex-none items-center justify-evenly w-full text-sm md:flex">
+        <p>Already have an account? <a href="{% url 'login' %}" class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">Login</a>.</p>
+    </section>
+</form>
+{% endpartialdef partial %}
 {% endblock content %}

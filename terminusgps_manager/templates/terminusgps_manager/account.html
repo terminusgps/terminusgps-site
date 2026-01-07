@@ -1,4 +1,25 @@
 {% extends "terminusgps/layout.html" %}
 {% block content %}
-{% include "terminusgps_manager/partials/_account.html" %}
+{% partialdef partial inline %}
+<section id="password-change" class="p-4 rounded border-2 bg-gray-50 flex flex-col gap-4 dark:bg-gray-800">
+    <h3 class="font-semibold text-lg text-terminus-red-500 dark:text-terminus-red-100">Password Change</h3>
+    <form id="password-change-form" hx-get="{% url 'password change' %}" hx-target="this" hx-trigger="load" hx-swap="outerHTML"></form>
+</section>
+<section
+    id="payment-profiles"
+    class="flex flex-col gap-4 border-2 border-current p-4 rounded bg-gray-50 dark:bg-gray-900 [&_button]:border [&_button]:p-2 [&_button]:rounded [&_button]:bg-terminus-red-800 [&_button]:hover:bg-terminus-red-400 [&_button]:text-center [&_button]:align-middle [&_button]:transition-colors [&_button]:ease-in-out [&_button]:duration-300 [&_button]:text-gray-100 [&_button]:border-terminus-red-900 [&_button]:cursor-pointer [&_button]:w-full [&_form]:flex [&_form]:flex-col [&_form]:gap-4"
+    hx-get="{% url 'terminusgps_payments:list payment profiles' customerprofile_pk=customerprofile.pk %}"
+    hx-target="this"
+    hx-trigger="load once"
+>
+</section>
+<section
+    id="address-profiles"
+    class="flex flex-col gap-4 border-2 border-current p-4 rounded bg-gray-50 dark:bg-gray-900 [&_button]:border [&_button]:p-2 [&_button]:rounded [&_button]:bg-terminus-red-800 [&_button]:hover:bg-terminus-red-400 [&_button]:text-center [&_button]:align-middle [&_button]:transition-colors [&_button]:ease-in-out [&_button]:duration-300 [&_button]:text-gray-100 [&_button]:border-terminus-red-900 [&_button]:cursor-pointer [&_button]:w-full [&_form]:flex [&_form]:flex-col [&_form]:gap-4"
+    hx-get="{% url 'terminusgps_payments:list address profiles' customerprofile_pk=customerprofile.pk %}"
+    hx-target="this"
+    hx-trigger="load once"
+>
+</section>
+{% endpartialdef partial %}
 {% endblock content %}
