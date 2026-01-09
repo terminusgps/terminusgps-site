@@ -10,6 +10,7 @@ urlpatterns = [
     path("", views.HomeView.as_view(), name="home"),
     path("platform/", views.PlatformView.as_view(), name="platform"),
     path("source/", views.SourceCodeView.as_view(), name="source code"),
+    path("features/", views.FeaturesView.as_view(), name="features"),
     path("about/", views.AboutView.as_view(), name="about"),
     path("contact/", views.ContactView.as_view(), name="contact"),
     path("privacy/", views.PrivacyPolicyView.as_view(), name="privacy"),
@@ -66,7 +67,6 @@ urlpatterns = [
         views.PasswordResetCompleteView.as_view(),
         name="password reset complete",
     ),
-    path("payments/", include("terminusgps_payments.urls")),
     path("", include("terminusgps_manager.urls")),
 ]
 

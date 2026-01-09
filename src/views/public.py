@@ -34,35 +34,17 @@ class HomeView(HtmxTemplateResponseMixin, TemplateView):
     extra_context = {
         "title": "Home",
         "subtitle": "In God we trust, all others we track",
-        "socials": [
-            {
-                "link": "https://www.facebook.com/TerminusGPSllc",
-                "username": "TerminusGPSllc",
-                "display_name": "Terminus GPS",
-                "icon": "terminusgps/icon/facebook.svg",
-            },
-            {
-                "link": "https://www.tiktok.com/@terminusgps",
-                "username": "terminusgps",
-                "display_name": "TerminusGps",
-                "icon": "terminusgps/icon/tiktok.svg",
-            },
-            {
-                "link": "https://nextdoor.com/pages/terminusgps-cypress-tx",
-                "username": "TerminusGPS",
-                "display_name": "TerminusGPS",
-                "icon": "terminusgps/icon/nextdoor.svg",
-            },
-            {
-                "link": "https://x.com/TERMINUSGPS",
-                "username": "TERMINUSGPS",
-                "display_name": "TERMINUSGPS",
-                "icon": "terminusgps/icon/twitter.svg",
-            },
-        ],
     }
     http_method_names = ["get"]
     template_name = "terminusgps/home.html"
+
+
+@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
+class FeaturesView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {"title": "Features", "subtitle": "What's in the box?"}
+    http_method_names = ["get"]
+    template_name = "terminusgps/features.html"
 
 
 @method_decorator(cache_page(timeout=60 * 15), name="dispatch")

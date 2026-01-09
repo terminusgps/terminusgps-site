@@ -40,7 +40,6 @@ class LoginView(HtmxTemplateResponseMixin, LoginViewBase):
     }
     form_class = TerminusgpsAuthenticationForm
     http_method_names = ["get", "post"]
-    partial_template_name = "terminusgps/partials/_login.html"
     template_name = "terminusgps/login.html"
 
 
@@ -51,7 +50,6 @@ class LogoutView(HtmxTemplateResponseMixin, LogoutViewBase):
         "subtitle": "We know where ours are... do you?",
     }
     http_method_names = ["get", "post"]
-    partial_template_name = "terminusgps/partials/_logged_out.html"
     template_name = "terminusgps/logged_out.html"
 
 
@@ -63,7 +61,6 @@ class RegisterView(HtmxTemplateResponseMixin, FormView):
     }
     form_class = TerminusgpsRegistrationForm
     http_method_names = ["get", "post"]
-    partial_template_name = "terminusgps/partials/_register.html"
     success_url = reverse_lazy("login")
     template_name = "terminusgps/register.html"
 
@@ -84,7 +81,6 @@ class PasswordChangeView(
     extra_context = {"title": "Password Change"}
     form_class = TerminusgpsPasswordChangeForm
     http_method_names = ["get", "post"]
-    partial_template_name = "terminusgps/partials/_password_change.html"
     success_url = reverse_lazy("password change success")
     template_name = "terminusgps/password_change.html"
 
@@ -95,7 +91,6 @@ class PasswordChangeSuccessView(
     content_type = "text/html"
     extra_context = {"title": "Password Change Success"}
     http_method_names = ["get"]
-    partial_template_name = "terminusgps/partials/_password_change_done.html"
     template_name = "terminusgps/password_change_done.html"
 
 
@@ -105,7 +100,6 @@ class PasswordResetView(HtmxTemplateResponseMixin, PasswordResetViewBase):
     extra_context = {"title": "Password Reset"}
     form_class = TerminusgpsPasswordResetForm
     http_method_names = ["get", "post"]
-    partial_template_name = "terminusgps/partials/_password_reset.html"
     subject_template_name = "terminusgps/emails/password_reset_subject.txt"
     success_url = reverse_lazy("password reset done")
     template_name = "terminusgps/password_reset.html"
@@ -117,7 +111,6 @@ class PasswordResetDoneView(
     content_type = "text/html"
     extra_context = {"title": "Password Reset Done"}
     http_method_names = ["get"]
-    partial_template_name = "terminusgps/partials/_password_reset_done.html"
     template_name = "terminusgps/password_reset_done.html"
 
 
@@ -128,7 +121,6 @@ class PasswordResetConfirmView(
     extra_context = {"title": "Password Reset Confirm"}
     form_class = TerminusgpsPasswordSetForm
     http_method_names = ["get", "post"]
-    partial_template_name = "terminusgps/partials/_password_reset_confirm.html"
     post_reset_login = True
     success_url = reverse_lazy("password reset complete")
     template_name = "terminusgps/password_reset_confirm.html"
@@ -140,7 +132,4 @@ class PasswordResetCompleteView(
     content_type = "text/html"
     extra_context = {"title": "Password Reset Complete"}
     http_method_names = ["get"]
-    partial_template_name = (
-        "terminusgps/partials/_password_reset_complete.html"
-    )
     template_name = "terminusgps/password_reset_complete.html"

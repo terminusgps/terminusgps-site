@@ -1,27 +1,7 @@
 {% extends "terminusgps/layout.html" %}
 {% block content %}
 {% partialdef partial inline %}
-<div class="p-4 rounded bg-stone-50 flex flex-col gap-4">
-    <div class="text-lg flex flex-col gap-2 items-center">
-        <p>You're about to subscribe to Terminus GPS!</p>
-        <p>Today you'll pay <span class="font-semibold">${{ customer.grand_total|floatformat:2 }}</span>.</p>
-    </div>
-    <div class="flex flex-col gap-4">
-        <div class="flex justify-between border-b p-2">
-            <p>Sub total:</p>
-            <p class="font-semibold">${{ customer.sub_total }}</p>
-        </div>
-        <div class="flex justify-between border-b p-2">
-            <p>Tax total:</p>
-            <p class="font-semibold">${{ customer.tax_total }}</p>
-        </div>
-        <div class="flex justify-between border-b p-2">
-            <p>Grand total:</p>
-            <p class="font-semibold">${{ customer.grand_total }}</p>
-        </div>
-    </div>
-</div>
-<form class="flex flex-col gap-4" hx-post="{% url 'terminusgps_manager:create subscriptions' %}">
+<form class="@container flex flex-col gap-4" hx-post="{% url 'terminusgps_manager:create subscriptions' %}">
     {% if form.non_field_errors %}
     <div class="p-2 bg-red-200 text-red-700 animate-jiggle border border-current rounded">
         <div class="flex gap-2 items-center">
@@ -33,19 +13,56 @@
     </div>
     {% endif %}
     {% csrf_token %}
-    <section class="flex flex-col gap-2 w-full">
-        <div class="*:border *:rounded *:p-2">{{ form.pprofile }}</div>
-        <label class="order-first font-semibold peer-user-invalid:text-red-600" for="{{ form.pprofile.id_for_label }}">{{ form.pprofile.label }}</label>
-        <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.pprofile.id_for_label }}_helptext">{{ form.pprofile.help_text }}</p>
-        {% if form.pprofile.errors %}<div class="animate-jiggle font-italic">{{ form.pprofile.errors }}</div>{% endif %}
-    </section>
-    <section class="flex flex-col gap-2 w-full">
-        <div class="*:border *:rounded *:p-2">{{ form.aprofile }}</div>
-        <label class="order-first font-semibold peer-user-invalid:text-red-600" for="{{ form.aprofile.id_for_label }}">{{ form.aprofile.label }}</label>
-        <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.aprofile.id_for_label }}_helptext">{{ form.aprofile.help_text }}</p>
-        {% if form.aprofile.errors %}<div class="animate-jiggle font-italic">{{ form.aprofile.errors }}</div>{% endif %}
-    </section>
-    <button type="submit" class="flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-terminus-red-900 bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" hx-confirm="Are you sure you want to subscribe? This action will charge your selected payment method ${{ customer.grand_total|floatformat:2 }}.">
+    <div class="flex flex-col gap-4 p-4 bg-stone-200 rounded">
+        <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
+            <div class="flex flex-col gap-2 w-full group">
+                {{ form.pprofile }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600" for="{{ form.pprofile.id_for_label }}">{{ form.pprofile.label }}</label>
+                <p class="text-sm peer-user-invalid:text-red-800 group-has-[ul]:text-red-800" id="{{ form.pprofile.id_for_label }}_helptext">{{ form.pprofile.help_text }}</p>
+                {{ form.pprofile.errors }}
+            </div>
+        </div>
+        <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
+            <div class="flex flex-col gap-2 w-full">
+                {{ form.aprofile }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.aprofile.id_for_label }}">{{ form.aprofile.label }}</label>
+                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.aprofile.id_for_label }}_helptext">{{ form.aprofile.help_text }}</p>
+                {{ form.aprofile.errors }}
+            </div>
+        </div>
+    </div>
+    <div class="flex flex-col gap-4 p-4 bg-stone-200 rounded">
+        <div class="flex flex-col gap-4 p-4">
+            <h4 class="font-semibold">Pricing</h4>
+            <div class="flex flex-col gap-4">
+                <div class="flex justify-between border-b p-2">
+                    <p>Subtotal:</p>
+                    <p class="font-semibold">${{ customer.sub_total }}</p>
+                </div>
+                <div class="flex justify-between border-b p-2">
+                    <p>Tax:</p>
+                    <p class="font-semibold">${{ customer.tax_total }}</p>
+                </div>
+                <div class="flex justify-between border-b p-2">
+                    <p>Grand total:</p>
+                    <p class="font-semibold">${{ customer.grand_total }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="flex items-center gap-2">
+        {{ form.consent }}
+        <label class="peer-user-invalid:text-red-600 peer-aria-required:font-semibold text-sm @md:text-md" for="{{ form.consent.id_for_label }}">By checking this box, you consent to being charged <span class="font-semibold">${{ customer.grand_total|floatformat:'2g' }}</span> now and every <span class="font-semibold">{% now 'jS' %}</span> (or last) day of the month hereafter.</label>
+        <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.consent.id_for_label }}_helptext">{{ form.consent.help_text }}</p>
+        {{ form.consent.errors }}
+    </div>
+    <button
+        type="submit"
+        class="flex w-full cursor-pointer items-center gap-2 rounded border border-terminus-red-900 bg-terminus-red-800 p-2 text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+        </svg>
         <p>Subscribe</p>
     </button>
 </form>

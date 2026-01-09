@@ -1,0 +1,26 @@
+{% extends "terminusgps/layout.html" %}
+{% load static %}
+{% block content %}
+{% partialdef partial inline %}
+<div class="flex flex-col gap-4 p-2">
+    <img src="{% static 'terminusgps/img/geofencing-square.jpg' %}" alt="" class="rounded"/>
+    <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Draw Custom Geofence Zones</h4>
+</div>
+<div class="flex flex-col gap-4 p-2">
+    <img src="{% static 'terminusgps/img/notifications-square.jpg' %}" alt="" class="rounded"/>
+    <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Live Notifications Straight to Your Phone</h4>
+</div>
+<div class="flex flex-col gap-4 p-2">
+    <img src="{% static 'terminusgps/img/online-tracking-square.jpg' %}" alt="" class="rounded"/>
+    <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Fully Interactive Map</h4>
+</div>
+<div class="flex flex-col gap-4 p-2">
+    <img src="{% static 'terminusgps/img/video-telematics-square.jpg' %}" alt="" class="rounded"/>
+    <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Video Telematics</h4>
+</div>
+<div class="flex flex-col gap-4 p-2">
+    <img src="{% static 'terminusgps/img/route-optimization-square.jpg' %}" alt="" class="rounded"/>
+    <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Route Optimization</h4>
+</div>
+{% endpartialdef partial %}
+{% endblock content %}
