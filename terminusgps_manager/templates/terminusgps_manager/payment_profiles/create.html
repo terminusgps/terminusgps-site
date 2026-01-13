@@ -23,65 +23,65 @@
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full group">
                 {{ form.first_name }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
-                <p class="text-sm peer-user-invalid:text-red-800 group-has-[ul]:text-red-800" id="{{ form.first_name.id_for_label }}_helptext">{{ form.first_name.help_text }}</p>
-                {{ form.first_name.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                <p class="text-sm" id="{{ form.first_name.id_for_label }}_helptext">{{ form.first_name.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.first_name.errors }}</div>
             </div>
             <div class="flex flex-col gap-2 w-full">
                 {{ form.last_name }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.last_name.id_for_label }}_helptext">{{ form.last_name.help_text }}</p>
-                {{ form.last_name.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                <p class="text-sm" id="{{ form.last_name.id_for_label }}_helptext">{{ form.last_name.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.last_name.errors }}</div>
             </div>
         </div>
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full">
                 {{ form.address }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.address.id_for_label }}">Street</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.address.id_for_label }}_helptext">{{ form.address.help_text }}</p>
-                {{ form.address.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.address.id_for_label }}">Street</label>
+                <p class="text-sm" id="{{ form.address.id_for_label }}_helptext">{{ form.address.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.address.errors }}</div>
             </div>
         </div>
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full">
                 {{ form.city }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.city.id_for_label }}">{{ form.city.label }}</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.city.id_for_label }}_helptext">{{ form.city.help_text }}</p>
-                {{ form.city.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.city.id_for_label }}">{{ form.city.label }}</label>
+                <p class="text-sm" id="{{ form.city.id_for_label }}_helptext">{{ form.city.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.city.errors }}</div>
             </div>
             <div class="flex flex-col gap-2 w-full">
                 {{ form.state }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.state.id_for_label }}">{{ form.state.label }}</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.state.id_for_label }}_helptext">{{ form.state.help_text }}</p>
-                {{ form.state.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.state.id_for_label }}">{{ form.state.label }}</label>
+                <p class="text-sm" id="{{ form.state.id_for_label }}_helptext">{{ form.state.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.state.errors }}</div>
             </div>
         </div>
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full">
                 {{ form.country }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.country.id_for_label }}">{{ form.country.label }}</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.country.id_for_label }}_helptext">{{ form.country.help_text }}</p>
-                {{ form.country.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.country.id_for_label }}">{{ form.country.label }}</label>
+                <p class="text-sm" id="{{ form.country.id_for_label }}_helptext">{{ form.country.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.country.errors }}</div>
             </div>
             <div class="flex flex-col gap-2 w-full">
                 {{ form.zip }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.zip.id_for_label }}">{{ form.zip.label }}</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.zip.id_for_label }}_helptext">{{ form.zip.help_text }}</p>
-                {{ form.zip.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.zip.id_for_label }}">{{ form.zip.label }}</label>
+                <p class="text-sm" id="{{ form.zip.id_for_label }}_helptext">{{ form.zip.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.zip.errors }}</div>
             </div>
         </div>
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full">
                 {{ form.phone_number }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.phone_number.id_for_label }}">{{ form.phone_number.label }}</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.phone_number.id_for_label }}_helptext">{{ form.phone_number.help_text }}</p>
-                {{ form.phone_number.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.phone_number.id_for_label }}">{{ form.phone_number.label }}</label>
+                <p class="text-sm" id="{{ form.phone_number.id_for_label }}_helptext">{{ form.phone_number.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.phone_number.errors }}</div>
             </div>
             <div class="flex flex-col gap-2 w-full">
                 {{ form.company_name }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.company_name.id_for_label }}">{{ form.company_name.label }}</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.company_name.id_for_label }}_helptext">{{ form.company_name.help_text }}</p>
-                {{ form.company_name.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.company_name.id_for_label }}">{{ form.company_name.label }}</label>
+                <p class="text-sm" id="{{ form.company_name.id_for_label }}_helptext">{{ form.company_name.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.company_name.errors }}</div>
             </div>
         </div>
     </div>
@@ -90,21 +90,21 @@
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full">
                 {{ form.card_number }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.card_number.id_for_label }}">Card Number</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.card_number.id_for_label }}_helptext">{{ form.card_number.help_text }}</p>
-                {{ form.card_number.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.card_number.id_for_label }}">Card Number</label>
+                <p class="text-sm" id="{{ form.card_number.id_for_label }}_helptext">{{ form.card_number.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.card_number.errors }}</div>
             </div>
             <div class="flex flex-col gap-2 w-full">
                 <div class="peer flex flex-col gap-2 @md:flex-row" aria-required="true">{{ form.expiry_date }}</div>
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.expiry_date.id_for_label }}">Expiration Date</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.expiry_date.id_for_label }}_helptext">{{ form.expiry_date.help_text }}</p>
-                {{ form.expiry_date.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.expiry_date.id_for_label }}">Expiration Date</label>
+                <p class="text-sm" id="{{ form.expiry_date.id_for_label }}_helptext">{{ form.expiry_date.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.expiry_date.errors }}</div>
             </div>
             <div class="flex flex-col gap-2 w-full">
                 {{ form.card_code }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.card_code.id_for_label }}">CCV Code</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.card_code.id_for_label }}_helptext">{{ form.card_code.help_text }}</p>
-                {{ form.card_code.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.card_code.id_for_label }}">CCV Code</label>
+                <p class="text-sm" id="{{ form.card_code.id_for_label }}_helptext">{{ form.card_code.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.card_code.errors }}</div>
             </div>
         </div>
     </div>
@@ -113,44 +113,44 @@
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full">
                 {{ form.account_number }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.account_number.id_for_label }}">{{ form.account_number.label }}</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.account_number.id_for_label }}_helptext">{{ form.account_number.help_text }}</p>
-                {{ form.account_number.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.account_number.id_for_label }}">{{ form.account_number.label }}</label>
+                <p class="text-sm" id="{{ form.account_number.id_for_label }}_helptext">{{ form.account_number.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.account_number.errors }}</div>
             </div>
             <div class="flex flex-col gap-2 w-full">
                 {{ form.routing_number }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.routing_number.id_for_label }}">{{ form.routing_number.label }}</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.routing_number.id_for_label }}_helptext">{{ form.routing_number.help_text }}</p>
-                {{ form.routing_number.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.routing_number.id_for_label }}">{{ form.routing_number.label }}</label>
+                <p class="text-sm" id="{{ form.routing_number.id_for_label }}_helptext">{{ form.routing_number.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.routing_number.errors }}</div>
             </div>
         </div>
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full">
                 {{ form.account_name }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.account_name.id_for_label }}">{{ form.account_name.label }}</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.account_name.id_for_label }}_helptext">{{ form.account_name.help_text }}</p>
-                {{ form.account_name.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.account_name.id_for_label }}">{{ form.account_name.label }}</label>
+                <p class="text-sm" id="{{ form.account_name.id_for_label }}_helptext">{{ form.account_name.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.account_name.errors }}</div>
             </div>
             <div class="flex flex-col gap-2 w-full">
                 {{ form.bank_name }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.bank_name.id_for_label }}">{{ form.bank_name.label }}</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.bank_name.id_for_label }}_helptext">{{ form.bank_name.help_text }}</p>
-                {{ form.bank_name.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.bank_name.id_for_label }}">{{ form.bank_name.label }}</label>
+                <p class="text-sm" id="{{ form.bank_name.id_for_label }}_helptext">{{ form.bank_name.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.bank_name.errors }}</div>
             </div>
         </div>
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full">
                 {{ form.account_type }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.account_type.id_for_label }}">{{ form.account_type.label }}</label>
-                <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.account_type.id_for_label }}_helptext">{{ form.account_type.help_text }}</p>
-                {{ form.account_type.errors }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.account_type.id_for_label }}">{{ form.account_type.label }}</label>
+                <p class="text-sm" id="{{ form.account_type.id_for_label }}_helptext">{{ form.account_type.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.account_type.errors }}</div>
             </div>
         </div>
     </div>
     <div class="flex flex-col gap-2">
         <button
             type="submit"
-            class="flex w-full cursor-pointer items-center gap-2 rounded border border-terminus-red-900 bg-terminus-red-800 p-2 text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400"
+            class="flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-terminus-red-900 bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400"
         >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
@@ -159,15 +159,15 @@
         </button>
         <button
             type="button"
-            class="flex w-full cursor-pointer items-center gap-2 rounded border border-gray-900 bg-gray-800 p-2 text-white transition-colors duration-300 ease-in-out hover:bg-gray-400"
+            class="flex w-full cursor-pointer items-center gap-2 rounded border border-gray-900 bg-gray-800 p-2 text-white transition-colors duration-300 ease-in-out justify-center hover:bg-gray-400"
             hx-target="#payment-profiles"
             hx-trigger="click"
             hx-get="{% url 'terminusgps_manager:list payment profiles' customerprofile.pk %}"
         >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
             </svg>
-            <p>Cancel</p>
+            <p>Back</p>
         </button>
     </div>
 </form>

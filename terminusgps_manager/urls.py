@@ -52,7 +52,7 @@ urlpatterns = [
         name="delete payment profiles",
     ),
     path(
-        "address-profiles/<int:customerprofile_pk>/create/bank-account/",
+        "address-profiles/<int:customerprofile_pk>/create/",
         views.CustomerAddressProfileCreateView.as_view(),
         name="create address profiles",
     ),

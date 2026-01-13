@@ -1,5 +1,4 @@
-@import "tailwindcss" source("../../../../**/*.{html,python,js}");
-@source "../../../../.venv/lib/python3.12/site-packages/terminusgps_payments";
+@import "tailwindcss";
 
 @theme {
     --color-terminus-black: oklch(14.29% 0.0041 345.44);

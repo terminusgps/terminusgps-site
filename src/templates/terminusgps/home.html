@@ -39,19 +39,19 @@
         </div>
     </a>
 </div>
-{% endpartialdef partial %}
 <h3 class="my-4 text-terminus-red-600 dark:text-terminus-red-100 text-2xl font-bold text-center md:text-left md:text-4xl">Data-Driven GPS Tracking Online Platform</h3>
 <img src="{% static 'terminusgps/img/dashboard.png' %}" alt="Terminus GPS web application dashboard">
 <h3 class="my-4 text-terminus-red-600 dark:text-terminus-red-100 text-2xl font-bold text-center md:text-left md:text-4xl">Digitalize Everything From Delivery Spots to Work Zones</h3>
 <img src="{% static 'terminusgps/img/mockup-1.png' %}" alt="Terminus GPS web application geofence creation">
 <h3 class="my-4 text-terminus-red-600 dark:text-terminus-red-100 text-2xl font-bold text-center md:text-left md:text-4xl">Native, Fully-Featured Mobile Applications</h3>
 <img src="{% static 'terminusgps/img/mockup.png' %}" alt="Terminus GPS mobile mock-up">
-<div class="flex flex-col gap-2 justify-evenly md:flex-row mb-4">
+<div class="flex flex-col gap-2 justify-evenly md:flex-row mb-4 items-center">
     <a href="{% url 'ios app' %}">
         <img src="{% static 'terminusgps/img/App_Store_Badge_Black.svg' %}" class="h-36">
     </a>
     <a href="{% url 'android app' %}">
-        <img src="{% static 'terminusgps/img/Play_Store_Badge_White.png' %}" class="h-24 md:h-36">
+        <img src="{% static 'terminusgps/img/GetItOnGooglePlay_Badge_Web_color_English.svg' %}" class="h-48">
     </a>
 </div>
+{% endpartialdef partial %}
 {% endblock content %}

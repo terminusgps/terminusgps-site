@@ -17,7 +17,7 @@
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full group">
                 {{ form.pprofile }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600" for="{{ form.pprofile.id_for_label }}">{{ form.pprofile.label }}</label>
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.pprofile.id_for_label }}">{{ form.pprofile.label }}</label>
                 <p class="text-sm peer-user-invalid:text-red-800 group-has-[ul]:text-red-800" id="{{ form.pprofile.id_for_label }}_helptext">{{ form.pprofile.help_text }}</p>
                 {{ form.pprofile.errors }}
             </div>
@@ -25,7 +25,7 @@
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full">
                 {{ form.aprofile }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.aprofile.id_for_label }}">{{ form.aprofile.label }}</label>
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.aprofile.id_for_label }}">{{ form.aprofile.label }}</label>
                 <p class="text-sm peer-user-invalid:text-red-800" id="{{ form.aprofile.id_for_label }}_helptext">{{ form.aprofile.help_text }}</p>
                 {{ form.aprofile.errors }}
             </div>

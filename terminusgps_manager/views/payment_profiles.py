@@ -54,16 +54,12 @@ class CustomerPaymentProfileCreateView(HtmxTemplateResponseMixin, CreateView):
             obj.save(push=False)
             return HttpResponseRedirect(self.get_success_url())
         except AuthorizenetControllerExecutionError as error:
-            match error.code:
-                case _:
-                    form.add_error(
-                        None,
-                        ValidationError(
-                            "%(error)s",
-                            code="invalid",
-                            params={"error": error},
-                        ),
-                    )
+            form.add_error(
+                None,
+                ValidationError(
+                    "%(error)s", code="invalid", params={"error": str(error)}
+                ),
+            )
             return self.form_invalid(form=form)
 
 
