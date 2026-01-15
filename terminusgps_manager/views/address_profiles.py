@@ -5,13 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
-from django.views.generic import (
-    CreateView,
-    DeleteView,
-    DetailView,
-    ListView,
-    UpdateView,
-)
+from django.views.generic import CreateView, DeleteView, DetailView, ListView
 from terminusgps.authorizenet.service import (
     AuthorizenetControllerExecutionError,
 )
@@ -69,22 +63,8 @@ class CustomerAddressProfileDetailView(HtmxTemplateResponseMixin, DetailView):
     content_type = "text/html"
     http_method_names = ["get"]
     model = CustomerAddressProfile
+    pk_url_kwarg = "addressprofile_pk"
     template_name = "terminusgps_manager/address_profiles/detail.html"
-    pk_url_kwarg = "addressprofile_pk"
-
-    def get_queryset(self) -> QuerySet:
-        return self.model.objects.filter(
-            cprofile__pk=self.kwargs["customerprofile_pk"]
-        )
-
-
-class CustomerAddressProfileUpdateView(HtmxTemplateResponseMixin, UpdateView):
-    content_type = "text/html"
-    http_method_names = ["get"]
-    fields = ["first_name", "last_name", "address"]
-    model = CustomerAddressProfile
-    template_name = "terminusgps_manager/address_profiles/update.html"
-    pk_url_kwarg = "addressprofile_pk"
 
     def get_queryset(self) -> QuerySet:
         return self.model.objects.filter(

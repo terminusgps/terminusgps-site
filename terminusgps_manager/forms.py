@@ -10,11 +10,23 @@ from terminusgps_payments.models import (
     Subscription,
 )
 
+from .models import WialonUnit
+
 WIDGET_CSS_CLASS = getattr(
     settings,
     "WIDGET_CSS_CLASS",
     "peer p-2 rounded border border-current bg-gray-50 dark:bg-gray-600 user-valid:bg-green-50 user-valid:text-green-700 user-invalid:bg-red-50 user-invalid:text-red-600 group-has-[ul]:text-red-600 group-has-[ul]:bg-red-50",
 )
+
+
+class WialonUnitCreateForm(forms.ModelForm):
+    class Meta:
+        model = WialonUnit
+        fields = ["imei", "name"]
+        widgets = {
+            "imei": forms.widgets.TextInput(attrs={"class": WIDGET_CSS_CLASS}),
+            "name": forms.widgets.TextInput(attrs={"class": WIDGET_CSS_CLASS}),
+        }
 
 
 class ExpirationDateWidget(forms.widgets.MultiWidget):

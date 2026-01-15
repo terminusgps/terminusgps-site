@@ -16,10 +16,10 @@ from django.core.validators import validate_email
 from django.forms import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-WIDGET_CSS_CLASS = (
-    settings.WIDGET_CSS_CLASS
-    if hasattr(settings, "WIDGET_CSS_CLASS")
-    else "peer p-2 rounded border border-current bg-gray-50 dark:bg-gray-600 user-invalid:bg-red-50 user-invalid:text-red-600"
+WIDGET_CSS_CLASS = getattr(
+    settings,
+    "WIDGET_CSS_CLASS",
+    "peer p-2 rounded border border-current bg-gray-50 dark:bg-gray-600 user-valid:bg-green-50 user-valid:text-green-700 user-invalid:bg-red-50 user-invalid:text-red-600 group-has-[ul]:text-red-600 group-has-[ul]:bg-red-50",
 )
 
 
@@ -69,7 +69,7 @@ def validate_wialon_password(value: str) -> None:
 class TerminusgpsRegistrationForm(BaseUserCreationForm):
     first_name = forms.CharField(
         max_length=64,
-        help_text="Required. Please enter your first name.",
+        help_text=_("Enter your first name."),
         widget=forms.widgets.TextInput(
             attrs={
                 "class": WIDGET_CSS_CLASS,
@@ -83,7 +83,7 @@ class TerminusgpsRegistrationForm(BaseUserCreationForm):
     )
     last_name = forms.CharField(
         max_length=64,
-        help_text="Required. Please enter your last name.",
+        help_text=_("Enter your last name."),
         widget=forms.widgets.TextInput(
             attrs={
                 "class": WIDGET_CSS_CLASS,
@@ -97,6 +97,9 @@ class TerminusgpsRegistrationForm(BaseUserCreationForm):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        self.password_help_texts = password_validators_help_texts()
+        self.fields["username"].help_text = "Enter an email address."
+        self.fields["username"].label = "Email Address"
         self.fields["username"].validators.append(validate_email)
         self.fields["password1"].validators.append(validate_wialon_password)
         self.fields["password2"].validators.append(validate_wialon_password)
@@ -127,12 +130,6 @@ class TerminusgpsRegistrationForm(BaseUserCreationForm):
             }
         )
 
-        self.fields[
-            "username"
-        ].help_text = "Required. Please enter a valid email address."
-        self.fields["username"].label = "Email Address"
-        self.password_help_texts = password_validators_help_texts()
-
 
 class TerminusgpsAuthenticationForm(AuthenticationForm):
     def __init__(self, *args, **kwargs) -> None:
@@ -143,8 +140,9 @@ class TerminusgpsAuthenticationForm(AuthenticationForm):
                 "placeholder": "email@terminusgps.com",
                 "inputmode": "email",
                 "enterkeyhint": "next",
-                "autocomplete": True,
+                "autocomplete": "username email",
                 "autofocus": True,
+                "aria-required": "true",
             }
         )
         self.fields["password"].widget.attrs.update(
@@ -153,6 +151,8 @@ class TerminusgpsAuthenticationForm(AuthenticationForm):
                 "placeholder": "••••••••••••••••",
                 "inputmode": "text",
                 "enterkeyhint": "done",
+                "aria-required": "true",
+                "autocomplete": "current-password",
             }
         )
 
@@ -166,7 +166,7 @@ class TerminusgpsPasswordChangeForm(PasswordChangeForm):
                 "placeholder": "••••••••••••••••",
                 "inputmode": "text",
                 "enterkeyhint": "next",
-                "autocomplete": False,
+                "autocomplete": "current-password",
             }
         )
         self.fields["new_password1"].widget.attrs.update(
@@ -175,7 +175,7 @@ class TerminusgpsPasswordChangeForm(PasswordChangeForm):
                 "placeholder": "••••••••••••••••",
                 "inputmode": "text",
                 "enterkeyhint": "next",
-                "autocomplete": False,
+                "autocomplete": "new-password",
             }
         )
         self.fields["new_password2"].widget.attrs.update(
@@ -184,7 +184,7 @@ class TerminusgpsPasswordChangeForm(PasswordChangeForm):
                 "placeholder": "••••••••••••••••",
                 "inputmode": "text",
                 "enterkeyhint": "done",
-                "autocomplete": False,
+                "autocomplete": "new-password",
             }
         )
         self.password_help_texts = password_validators_help_texts()

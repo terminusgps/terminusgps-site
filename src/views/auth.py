@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView as LoginViewBase
 from django.contrib.auth.views import LogoutView as LogoutViewBase
@@ -17,11 +18,19 @@ from django.contrib.auth.views import (
 from django.contrib.auth.views import (
     PasswordResetView as PasswordResetViewBase,
 )
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import FormView
 from terminusgps.mixins import HtmxTemplateResponseMixin
+from terminusgps.wialon.session import WialonAPIError
+
+from terminusgps_manager.models import (
+    TerminusGPSCustomer,
+    WialonResource,
+    WialonUser,
+)
 
 from ..forms import (
     TerminusgpsAuthenticationForm,
@@ -66,12 +75,46 @@ class RegisterView(HtmxTemplateResponseMixin, FormView):
 
     @transaction.atomic
     def form_valid(self, form: TerminusgpsRegistrationForm) -> HttpResponse:
-        user = form.save(commit=True)
-        user.email = form.cleaned_data["username"]
-        user.first_name = form.cleaned_data["first_name"]
-        user.last_name = form.cleaned_data["last_name"]
-        user.save(update_fields=["email", "first_name", "last_name"])
-        return super().form_valid(form=form)
+        try:
+            user = form.save(commit=True)
+            user.email = form.cleaned_data["username"]
+            user.first_name = form.cleaned_data["first_name"]
+            user.last_name = form.cleaned_data["last_name"]
+            user.save(update_fields=["email", "first_name", "last_name"])
+            customer = TerminusGPSCustomer()
+            customer.user = user
+            customer.save(update_fields=["user"])
+            self.wialon_registration_flow(form, customer)
+            return super().form_valid(form=form)
+        except WialonAPIError as error:
+            form.add_error(None, ValidationError(str(error), code="invalid"))
+            return self.form_invalid(form=form)
+
+    @staticmethod
+    @transaction.atomic
+    def wialon_registration_flow(
+        form: TerminusgpsRegistrationForm, customer: TerminusGPSCustomer
+    ) -> None:
+        # Create resource/account
+        super_user = WialonUser()
+        super_user.crt = settings.WIALON_ADMIN_ID
+        super_user.name = f"super_{form.cleaned_data['username']}"
+        super_user.save(push=False)
+        resource = WialonResource()
+        resource.crt = super_user.pk
+        resource.name = f"account_{form.cleaned_data['username']}"
+        resource.save(push=False)
+
+        # Create user
+        end_user = WialonUser()
+        end_user.crt = settings.WIALON_ADMIN_ID
+        end_user.name = form.cleaned_data["username"]
+        end_user.save(push=False)
+
+        # Assign to customer
+        customer.wialon_user = end_user
+        customer.wialon_resource = resource
+        customer.save(update_fields=["wialon_user", "wialon_resource"])
 
 
 class PasswordChangeView(

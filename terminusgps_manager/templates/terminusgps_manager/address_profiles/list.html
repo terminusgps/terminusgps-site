@@ -2,7 +2,12 @@
 {% block content %}
 {% partialdef partial inline %}
 {% for aprofile in object_list %}
-<div class="p-4 border rounded" id="address-profile-{{ aprofile.pk }}">{{ aprofile }}</div>
+<div id="address-profile-{{ aprofile.pk }}" class="@container p-4 flex flex-col gap-4 rounded bg-stone-200 dark:bg-stone-900">
+    <div class="flex flex-col justify-between @md:flex-row">
+        <p class="font-semibold">{{ aprofile.first_name }} {{ aprofile.last_name }}</p>
+        <p>{{ aprofile.address }}</p>
+    </div>
+</div>
 {% empty %}
 <p>You don't have any address profiles yet.</p>
 {% endfor %}

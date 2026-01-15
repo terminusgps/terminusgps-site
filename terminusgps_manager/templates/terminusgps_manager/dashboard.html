@@ -1,24 +1,6 @@
 {% extends "terminusgps/layout.html" %}
 {% block content %}
 {% partialdef partial inline %}
-<section id="stats" class="bg-linear-to-tr from-terminus-red-800 to-terminus-red-400 w-full rounded p-8 border-2 border-terminus-red-600">
-    <div class="p-4 bg-stone-100 rounded drop-shadow border border-current">
-        <div class="flex gap-2 items-center">
-            {% if customer.subscription != None %}
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-green-700 fill-green-100">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-            </svg>
-            {% else %}
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-red-700 fill-red-100">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-            </svg>
-            {% endif %}
-            <p>You're <span class="font-semibold">{{ customer.subscription|yesno:'subscribed,not subscribed... yet' }}</span>!</p>
-        </div>
-        <div class="flex gap-2 items-center">
-        </div>
-    </div>
-</section>
 <section id="links" class="flex flex-col gap-4" hx-boost="true">
     <a href="{% url 'terminusgps_manager:account' %}" class="flex items-center justify-between gap-2 rounded border-2 border-terminus-red-800 bg-terminus-red-500 p-4 text-gray-100 transition-colors duration-300 ease-in-out hover:bg-terminus-red-200">
         <div class="flex items-center gap-4">

@@ -42,8 +42,8 @@ STATIC_URL = "static/"
 TIME_ZONE = "US/Central"
 USE_I18N = False
 USE_TZ = True
-WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID", "27881459")
-WIALON_DEFAULT_PLAN = os.getenv("WIALON_DEFAULT_PLAN")
+WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID", "29971406")
+WIALON_DEFAULT_PLAN = os.getenv("WIALON_DEFAULT_PLAN", "terminusgps_ext_hist")
 WIALON_TOKEN = os.getenv("WIALON_TOKEN")
 WIALON_TOKEN_ACCESS_TYPE = (
     TokenFlag.VIEW_ACCESS
@@ -51,8 +51,6 @@ WIALON_TOKEN_ACCESS_TYPE = (
     | TokenFlag.MANAGE_SENSITIVE
 )
 WSGI_APPLICATION = "src.wsgi.application"
-SUBSCRIPTION_AMOUNT = decimal.Decimal("24.95")
-SUBSCRIPTION_NAME = "Terminus GPS Subscription"
 
 ADMINS = [
     ("Peter", "pspeckman@terminusgps.com"),

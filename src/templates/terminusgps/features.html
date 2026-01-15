@@ -2,25 +2,55 @@
 {% load static %}
 {% block content %}
 {% partialdef partial inline %}
-<div class="flex flex-col gap-4 p-2">
-    <img src="{% static 'terminusgps/img/geofencing-square.jpg' %}" alt="" class="rounded"/>
-    <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Draw Custom Geofence Zones</h4>
-</div>
-<div class="flex flex-col gap-4 p-2">
-    <img src="{% static 'terminusgps/img/notifications-square.jpg' %}" alt="" class="rounded"/>
-    <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Live Notifications Straight to Your Phone</h4>
-</div>
-<div class="flex flex-col gap-4 p-2">
-    <img src="{% static 'terminusgps/img/online-tracking-square.jpg' %}" alt="" class="rounded"/>
-    <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Fully Interactive Map</h4>
-</div>
-<div class="flex flex-col gap-4 p-2">
-    <img src="{% static 'terminusgps/img/video-telematics-square.jpg' %}" alt="" class="rounded"/>
-    <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Video Telematics</h4>
-</div>
-<div class="flex flex-col gap-4 p-2">
-    <img src="{% static 'terminusgps/img/route-optimization-square.jpg' %}" alt="" class="rounded"/>
-    <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Route Optimization</h4>
-</div>
+<section class="border border-stone-400 rounded bg-stone-50 drop-shadow-sm dark:bg-stone-800 dark:border-stone-900">
+    <img class="rounded-t" src="{% static 'terminusgps/img/wialon/fleet-digitalization-notifications.jpg' %}" alt="A white 18-wheeler with a digital overlay specifying the truck's fuel level, coordinates, speed and driver status">
+    <div class="flex flex-col gap-4 p-8">
+        <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Digital Planes, Trains And Automobiles</h4>
+        <div class="flex flex-col gap-2 text-balance">
+            <p>It's time to go paperless.</p>
+            <p>We work with you <span class="italic">directly</span> to <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'faq' %}#11" hx-boost="true">digitalize your fleet</a> to get you up-and-running as fast as possible.</p>
+        </div>
+    </div>
+</section>
+<section class="border border-stone-400 rounded bg-stone-50 drop-shadow-sm dark:bg-stone-800 dark:border-stone-900">
+    <img class="rounded-t" src="{% static 'terminusgps/img/wialon/online-tracking.jpg' %}" alt="todo">
+    <div class="flex flex-col gap-4 p-8">
+        <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Permanently Online, Permanently Reliable</h4>
+        <div class="flex flex-col gap-2 text-balance">
+            <p>Never miss a beat when it comes to your fleet.</p>
+            <p>On and off the clock, <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'faq' %}#3">Terminus GPS is available</a> no matter <span class="italic">when</span> you are.</p>
+        </div>
+    </div>
+</section>
+<section class="border border-stone-400 rounded bg-stone-50 drop-shadow-sm dark:bg-stone-800 dark:border-stone-900">
+    <img class="rounded-t" src="{% static 'terminusgps/img/wialon/fuel-management.jpg' %}" alt="todo">
+    <div class="flex flex-col gap-4 p-8">
+        <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Fuel Micro, Managed</h4>
+        <div class="flex flex-col gap-2 text-balance">
+            <p>Sneaky fuel drains are a thing of the past.</p>
+            <p>Monitor your fleets' fuel levels, track fuel usage and prevent theft all from <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'platform' %}" hx-boost="false">our platform</a>.</p>
+        </div>
+    </div>
+</section>
+<section class="border border-stone-400 rounded bg-stone-50 drop-shadow-sm dark:bg-stone-800 dark:border-stone-900">
+    <img class="rounded-t" src="{% static 'terminusgps/img/wialon/route-optimization.jpg' %}" alt="todo">
+    <div class="flex flex-col gap-4 p-8">
+        <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Algorithmic Route Optimization</h4>
+        <div class="flex flex-col gap-2 text-balance">
+            <p>Optimal routing can help reduce fleet operating costs with the click of a button.</p>
+            <p>Advanced geo-spatial algorithms find the most efficient routes for <span class="italic">your</span> fleet using <span class="italic">your</span> metrics.</p>
+        </div>
+    </div>
+</section>
+<section class="border border-stone-400 rounded bg-stone-50 drop-shadow-sm dark:bg-stone-800 dark:border-stone-900">
+    <img class="rounded-t" src="{% static 'terminusgps/img/wialon/geofencing.jpg' %}" alt="todo">
+    <div class="flex flex-col gap-4 p-8">
+        <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Geo-Divide And Conquer</h4>
+        <div class="flex flex-col gap-2 text-balance">
+            <p>Draw <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'faq' %}#8" hx-boost="true">custom geofence zones</a> in <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'platform' %}" hx-boost="false">our platform</a>, areas of Earth's surface relevant to your fleet activites.</p>
+            <p>Prevent unauthorized access, ensure compliance, promote safe driving, coordinate deliveries and more using a collection of custom geofence zones.</p>
+        </div>
+    </div>
+</section>
 {% endpartialdef partial %}
 {% endblock content %}

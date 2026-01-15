@@ -2,7 +2,16 @@
 {% block content %}
 {% partialdef partial inline %}
 {% for pprofile in object_list %}
-<div class="p-4 border rounded" id="payment-profile-{{ pprofile.pk }}">{{ pprofile }}</div>
+<div id="payment-profile-{{ pprofile.pk }}" class="@container p-4 flex flex-col gap-4 rounded bg-stone-200 dark:bg-stone-900">
+    <div class="flex flex-col justify-between @md:flex-row">
+        <p class="font-semibold">{{ pprofile.first_name }} {{ pprofile.last_name }}</p>
+        {% if pprofile.card_number %}
+        <p>{{ pprofile.card_type }} {{ pprofile.card_number }}</p>
+        {% elif pprofile.account_number %}
+        <p>{{ pprofile.account_number }} {{ pprofile.account_name }}</p>
+        {% endif %}
+    </div>
+</div>
 {% empty %}
 <p>You don't have any payment profiles yet.</p>
 {% endfor %}

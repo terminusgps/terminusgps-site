@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 
 class AccountView(LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
-    extra_context = {"title": "Account", "subtitle": "Update your preferences"}
     http_method_names = ["get"]
     template_name = "terminusgps_manager/account.html"
+    extra_context = {"title": "Account"}
 
     def setup(self, request: HttpRequest, *args, **kwargs) -> None:
         self.cprofile, _ = CustomerProfile.objects.get_or_create(
@@ -38,17 +38,17 @@ class DashboardView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView
 ):
     content_type = "text/html"
-    extra_context = {"title": "Dashboard"}
     http_method_names = ["get"]
     template_name = "terminusgps_manager/dashboard.html"
-
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        self.customer, _ = TerminusGPSCustomer.objects.get_or_create(
-            user=request.user
-        )
-        return super().setup(request, *args, **kwargs)
+    extra_context = {"title": "Dashboard"}
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["customer"] = self.customer
-        return context
+        try:
+            context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+            context["customer"] = TerminusGPSCustomer.objects.get(
+                user=self.request.user
+            )
+            return context
+        except TerminusGPSCustomer.DoesNotExist:
+            context["customer"] = None
+            return context

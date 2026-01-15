@@ -40,14 +40,6 @@ class HomeView(HtmxTemplateResponseMixin, TemplateView):
 
 
 @method_decorator(cache_page(timeout=60 * 15), name="dispatch")
-class FeaturesView(HtmxTemplateResponseMixin, TemplateView):
-    content_type = "text/html"
-    extra_context = {"title": "Features", "subtitle": "What's in the box?"}
-    http_method_names = ["get"]
-    template_name = "terminusgps/features.html"
-
-
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class AboutView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "About", "subtitle": "Why we do what we do"}
@@ -97,44 +89,11 @@ class PrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
 
 
 @method_decorator(cache_page(timeout=60 * 15), name="dispatch")
-class CommercialUseView(HtmxTemplateResponseMixin, TemplateView):
+class FeaturesView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {
-        "title": "Commercial Use",
+        "title": "Features",
         "subtitle": "Your entire fleet, at your fingertips",
     }
     http_method_names = ["get"]
-    template_name = "terminusgps/commercial_use.html"
-
-
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
-class IndividualUseView(HtmxTemplateResponseMixin, TemplateView):
-    content_type = "text/html"
-    extra_context = {
-        "title": "Individual Use",
-        "subtitle": "Always know where yours are",
-    }
-    http_method_names = ["get"]
-    template_name = "terminusgps/individual_use.html"
-
-
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
-class TeenSafetyView(HtmxTemplateResponseMixin, TemplateView):
-    content_type = "text/html"
-    extra_context = {
-        "title": "Teen Safety",
-        "subtitle": "Tips and Tricks for Teen Drivers",
-    }
-    http_method_names = ["get"]
-    template_name = "terminusgps/teen_safety.html"
-
-
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
-class SeniorSafetyView(HtmxTemplateResponseMixin, TemplateView):
-    content_type = "text/html"
-    extra_context = {
-        "title": "Senior Safety",
-        "subtitle": "Tips and Tricks for Senior Drivers",
-    }
-    http_method_names = ["get"]
-    template_name = "terminusgps/senior_safety.html"
+    template_name = "terminusgps/features.html"

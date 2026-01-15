@@ -1,0 +1,19 @@
+<section
+    id="header"
+    class="-mx-8 rounded bg-stone-200 px-4 py-8 drop-shadow-sm md:rounded-none md:shadow-inner md:drop-shadow-none dark:bg-stone-700 print:shadow-none"
+>
+    <div class="mx-8 flex flex-col gap-2">
+        <h2
+            class="text-terminus-red-600 dark:text-terminus-red-100 text-2xl font-semibold"
+        >
+            {{ title }}
+        </h2>
+        {% if subtitle %}
+        <h3
+            class="text-terminus-red-500 dark:text-terminus-red-200 text-lg italic"
+        >
+            {{ subtitle }}
+        </h3>
+        {% endif %}
+    </div>
+</section>

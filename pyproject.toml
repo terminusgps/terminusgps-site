@@ -15,12 +15,13 @@ dependencies = [
     "numpy==2.0.1",
     "pandas==2.2.3",
     "pillow==11.3.0",
-    "python-terminusgps==50.3.0",
+    "python-terminusgps==50.3.1",
     "terminusgps-payments>=4.1.0",
     "redis[hiredis]>=6.4.0",
     "django-tasks[rq]>=0.9.0",
     "django-rq>=3.1",
     "prettier>=0.0.7",
+    "markdown>=3.10",
 ]
 
 [tool.pyright]

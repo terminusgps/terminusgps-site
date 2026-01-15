@@ -14,6 +14,7 @@
         <a href="#8" class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">8. What is a geofence area?</a>
         <a href="#9" class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">9. When will the platform tell me my vehicle has entered a geofence area?</a>
         <a href="#10" class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">10. Can I install this myself?</a>
+        <a href="#11" class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">11. Which vehicles can Terminus GPS track?</a>
     </div>
 </section>
 <section id="1" class="flex flex-col gap-4 p-4">
@@ -34,7 +35,7 @@
 <section id="3" class="flex flex-col gap-4 p-4">
     <h2 class="text-xl font-semibold text-terminus-red-600 dark:text-terminus-red-100">How reliable is the system?</h2>
     <div class="text-pretty flex flex-col gap-2 mx-4">
-        <p>We have a <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="https://status.wialon.com/">99% reliability</a> of <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'platform' %}">the platform</a> using multiple servers to keep you up-to-date with immediate location data.</p>
+        <p>We have a <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="https://status.wialon.com/" rel="nofollow" hx-boost="false">99.7% reliability</a> of <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'platform' %}">the platform</a> using multiple servers to keep you up-to-date with immediate location data.</p>
         <p>Occasionally the device may lose cellular signal (similar to your mobile phone losing signal) but the device's on-board memory will hold the plotted information until it can reconnect. When the device is without a signal, it constantly searches for the nearest cell signal.</p>
         <p>Sometimes when a vehicle is driven into a large underground parking structure or a metal building with few or no windows, the device may lose signal. Once the vehicle exits the "dead-zone" location, it immediately attempts to regain a cellular signal and continue operating normally.</p>
     </div>
@@ -127,6 +128,29 @@
     <div class="text-pretty flex flex-col gap-2 mx-4">
         <p>While we offer <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="https://www.terminusgps.com/product-page/obdii-tracking-plug-and-play-device">plug-and-play devices</a>, we <em>always</em> recommend our customers opt for a professionally installed device first.</p>
         <p>Remember: an easy install is a trivial uninstall!</p>
+    </div>
+</section>
+<section id="11" class="flex flex-col gap-4 p-4">
+    <h2 class="text-xl font-semibold text-terminus-red-600 dark:text-terminus-red-100">Which vehicles can Terminus GPS track?</h2>
+    <div class="text-pretty flex flex-col gap-2 mx-4">
+        <p>Our expert team of installers have experience with a slew of vehicles ranging from motor carriages to watercrafts.</p>
+        <p>Here's just some of the assets we've already digitalized in <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'platform' %}" hx-boost="false">our platform</a>:</p>
+        <ul class="list-disc list-inside">
+            <li>ATVs and UTVs</li>
+            <li>Automobiles</li>
+            <li>Boats</li>
+            <li>Campers</li>
+            <li>Dirt Bikes</li>
+            <li>Heavy Equipment</li>
+            <li>Motor Coaches</li>
+            <li>Motorcycles</li>
+            <li>Personal Watercrafts</li>
+            <li>Recreational Vehicles</li>
+            <li>Tractors</li>
+            <li>Trailers</li>
+            <li>Trucks</li>
+            <li>Vans</li>
+        </ul>
     </div>
 </section>
 {% endpartialdef partial %}

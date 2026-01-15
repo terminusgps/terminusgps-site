@@ -42,11 +42,6 @@ urlpatterns = [
         name="detail payment profiles",
     ),
     path(
-        "payment-profiles/<int:customerprofile_pk>/<int:paymentprofile_pk>/update/",
-        views.CustomerPaymentProfileUpdateView.as_view(),
-        name="update payment profiles",
-    ),
-    path(
         "payment-profiles/<int:customerprofile_pk>/<int:paymentprofile_pk>/delete/",
         views.CustomerPaymentProfileDeleteView.as_view(),
         name="delete payment profiles",
@@ -65,11 +60,6 @@ urlpatterns = [
         "address-profiles/<int:customerprofile_pk>/<int:addressprofile_pk>/detail/",
         views.CustomerAddressProfileDetailView.as_view(),
         name="detail address profiles",
-    ),
-    path(
-        "address-profiles/<int:customerprofile_pk>/<int:addressprofile_pk>/update/",
-        views.CustomerAddressProfileUpdateView.as_view(),
-        name="update address profiles",
     ),
     path(
         "address-profiles/<int:customerprofile_pk>/<int:addressprofile_pk>/delete/",

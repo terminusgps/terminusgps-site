@@ -18,22 +18,7 @@ urlpatterns = [
     path("faq/", views.FrequentlyAskedQuestionsView.as_view(), name="faq"),
     path("apps/ios/", views.IOSAppView.as_view(), name="ios app"),
     path("apps/android/", views.AndroidAppView.as_view(), name="android app"),
-    path("teen-safety/", views.TeenSafetyView.as_view(), name="teen safety"),
-    path(
-        "senior-safety/",
-        views.SeniorSafetyView.as_view(),
-        name="senior safety",
-    ),
-    path(
-        "commercial-use/",
-        views.CommercialUseView.as_view(),
-        name="commercial use",
-    ),
-    path(
-        "individual-use/",
-        views.IndividualUseView.as_view(),
-        name="individual use",
-    ),
+    path("features/", views.FeaturesView.as_view(), name="features"),
     path("register/", views.RegisterView.as_view(), name="register"),
     path("login/", views.LoginView.as_view(), name="login"),
     path("logout/", views.LogoutView.as_view(), name="logout"),

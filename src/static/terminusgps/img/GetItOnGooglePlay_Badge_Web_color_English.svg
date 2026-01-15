@@ -1,7 +1,6 @@
 <svg
    version="1.1"
    id="svg1"
-   class="{{ class|default:'size-8' }}"
    viewBox="0 0 206.66667 80"
    sodipodi:docname="e5dcdd9b-a5bf-4d2f-933c-93f75cfb045c.ai"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
