@@ -6,6 +6,7 @@ app_name = "terminusgps_manager"
 urlpatterns = [
     path("dashboard/", views.DashboardView.as_view(), name="dashboard"),
     path("account/", views.AccountView.as_view(), name="account"),
+    path("units/", views.UnitsView.as_view(), name="units"),
     path(
         "subscriptions/create/",
         views.SubscriptionCreateView.as_view(),
@@ -65,5 +66,21 @@ urlpatterns = [
         "address-profiles/<int:customerprofile_pk>/<int:addressprofile_pk>/delete/",
         views.CustomerAddressProfileDeleteView.as_view(),
         name="delete address profiles",
+    ),
+    path("units/list/", views.WialonUnitListView.as_view(), name="list units"),
+    path(
+        "units/create/",
+        views.WialonUnitCreateView.as_view(),
+        name="create units",
+    ),
+    path(
+        "units/<int:unit_pk>/detail/",
+        views.WialonUnitDetailView.as_view(),
+        name="detail units",
+    ),
+    path(
+        "units/<int:unit_pk>/update/",
+        views.WialonUnitUpdateView.as_view(),
+        name="update units",
     ),
 ]

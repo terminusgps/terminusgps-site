@@ -1,5 +1,6 @@
 import abc
 import decimal
+import logging
 import typing
 from collections.abc import Sequence
 
@@ -11,6 +12,8 @@ from django.utils.translation import gettext_lazy as _
 from terminusgps.wialon.flags import DataFlag
 from terminusgps.wialon.session import WialonSession
 from terminusgps.wialon.utils import generate_wialon_password
+
+logger = logging.getLogger(__name__)
 
 
 class TerminusGPSCustomer(models.Model):
@@ -68,6 +71,7 @@ class TerminusGPSCustomer(models.Model):
         blank=True,
         null=True,
         default=None,
+        help_text=_("Select a Wialon user from the list."),
     )
     """Associated Wialon user."""
     wialon_resource = models.ForeignKey(
@@ -77,8 +81,18 @@ class TerminusGPSCustomer(models.Model):
         blank=True,
         null=True,
         default=None,
+        help_text=_("Select a Wialon resource from the list."),
     )
     """Associated Wialon resource."""
+    wialon_units = models.ManyToManyField(
+        "terminusgps_manager.WialonUnit",
+        blank=True,
+        related_name="customers",
+        help_text=_("Select Wialon unit(s) from the list."),
+    )
+    """Associated Wialon units."""
+    end_date = models.DateField(blank=True, null=True, default=None)
+    """Subscription end date."""
 
     class Meta:
         verbose_name = _("customer")
@@ -112,18 +126,14 @@ class WialonObject(models.Model):
         """Syncs the object's local data with Wialon before saving."""
         with WialonSession(token=settings.WIALON_TOKEN) as session:
             if not self.pk:
+                logger.debug("Creating object in Wialon...")
                 self.pk = self.create(session)
             elif kwargs.pop("push", False):
+                logger.debug(f"Pushing #{self.pk} to Wialon...")
                 self.push(session, kwargs.get("update_fields"))
-            else:
-                self.sync(session)
+            logger.debug(f"Syncing #{self.pk} with Wialon...")
+            self.sync(session)
         return super().save(**kwargs)
-
-    def delete(self, *args, **kwargs):
-        """Deletes the unit in Wialon before deleting it locally."""
-        with WialonSession() as session:
-            session.wialon_api.item_delete_item(**{"itemId": self.pk})
-        return super().delete(*args, **kwargs)
 
     @abc.abstractmethod
     def create(self, session: WialonSession) -> int:
@@ -142,7 +152,7 @@ class WialonObject(models.Model):
         :param flags: `core/search_item` response flags.
         :type flags: int
         :raises WialonAPIError: If something went wrong during a Wialon API call.
-        :returns: A dictionary of remote Wialon object data.
+        :returns: A Wialon object data dictionary.
         :rtype: dict[str, ~typing.Any]
 
         """
@@ -215,6 +225,7 @@ class WialonUser(WialonObject):
 
 class WialonUnit(WialonObject):
     imei = models.CharField(blank=True, max_length=64)
+    """Wialon unit IMEI (sys_unique_id) number."""
 
     class Meta:
         verbose_name = _("wialon unit")
@@ -226,7 +237,6 @@ class WialonUnit(WialonObject):
 
     @transaction.atomic
     def sync(self, session: WialonSession) -> None:
-        """Syncs remote Wialon data with local data."""
         super().sync(session)
         mask = DataFlag.UNIT_ADVANCED_PROPERTIES
         data = self.pull(session, flags=mask)
@@ -235,28 +245,14 @@ class WialonUnit(WialonObject):
 
 
 class WialonResource(WialonObject):
-    bpact = models.IntegerField(
-        blank=True, editable=False, verbose_name=_("parent account id")
-    )
     plan = models.CharField(blank=True, default="terminusgps_ext_hist")
+    """Billing plan."""
     is_account = models.BooleanField(default=False)
+    """Whether the resource is an account."""
 
     class Meta:
         verbose_name = _("wialon resource")
         verbose_name_plural = _("wialon resources")
-
-    @typing.override
-    def delete(self, *args, **kwargs):
-        """Deletes the resource/account in Wialon before deleting it locally."""
-        with WialonSession() as session:
-            if not self.is_account:
-                session.wialon_api.item_delete_item(**{"itemId": self.pk})
-            else:
-                params = {"itemId": self.pk}
-                if reasons := kwargs.get("reasons"):
-                    params["reasons"] = reasons
-                session.wialon_api.account_delete_account(**params)
-        return super().delete(*args, **kwargs)
 
     @typing.override
     def create(self, session: WialonSession) -> int:
@@ -280,13 +276,6 @@ class WialonResource(WialonObject):
             )
         return resource_id
 
-    @transaction.atomic
-    def sync(self, session: WialonSession) -> None:
-        """Syncs remote Wialon data with local data."""
-        data = self.pull(session)
-        self.bpact = int(data["item"]["bpact"])
-        return super().sync(session)
-
     def migrate(self, session: WialonSession, *, id: int) -> None:
         """Migrates a Wialon object into the account."""
         if not self.is_account:
@@ -296,6 +285,31 @@ class WialonResource(WialonObject):
         session.wialon_api.account_change_account(
             **{"resourceId": self.pk, "itemId": id}
         )
+        return
+
+    def update_flags(
+        self,
+        session: WialonSession,
+        *,
+        flags: int,
+        block_bal: decimal.Decimal | None = None,
+        deny_bal: decimal.Decimal | None = None,
+    ) -> None:
+        if not self.is_account:
+            raise ValueError(
+                f"Can't update flags, '{self.name}' isn't an account."
+            )
+
+        spec = {
+            "itemId": self.pk,
+            "flags": flags,
+            "blockBalance": block_bal,
+            "denyBalance": deny_bal,
+        }
+        session.wialon_api.account_update_flags(
+            **{k: v for k, v in spec.items() if v is not None}
+        )
+        return
 
     def do_payment(
         self,
@@ -314,11 +328,13 @@ class WialonResource(WialonObject):
             raise ValueError(
                 "One of 'bal' or 'days' is required, got neither."
             )
-        params = {"itemId": self.pk}
-        if bal is not None:
-            params["balanceUpdate"] = bal
-        if days is not None:
-            params["daysUpdate"] = days
-        if desc is not None:
-            params["description"] = desc
-        session.wialon_api.account_do_payment(**params)
+
+        spec = {
+            "itemId": self.pk,
+            "balanceUpdate": bal,
+            "daysUpdate": days,
+            "description": desc,
+        }
+        session.wialon_api.account_do_payment(
+            **{k: v for k, v in spec.items() if v is not None}
+        )

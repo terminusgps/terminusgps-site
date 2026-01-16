@@ -13,6 +13,7 @@ class SourceCodeView(RedirectView):
 class PlatformView(RedirectView):
     http_method_names = ["get"]
     permanent = True
+    query_string = True
     url = "https://hosting.terminusgps.com/"
 
 

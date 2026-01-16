@@ -3,21 +3,24 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <title>{% if title %}{{ title }} | {% endif %}Terminus GPS</title>
-        <link rel="shortcut icon" type="image/x-icon" href="{% static 'terminusgps/favicon.ico' %}"/>
-        <link rel="stylesheet" type="text/css" href="{% static 'terminusgps/css/output.css' %}"/>
-        <script type="text/javascript" src="https://9681add82420.us-east-1.captcha-sdk.awswaf.com/9681add82420/jsapi.js" defer></script>
+        <link rel="preload" href="{% static 'terminusgps/css/output.css' %}" as="style" type="text/css"/>
+        <link rel="preload" href="{% static 'terminusgps/js/htmx.min.js' %}" as="script" type="text/javascript"/>
+        <link rel="preload" href="{% static "terminusgps/img/background.jpg" %}" as="image" type="image/jpg"/>
+        <link rel="shortcut icon" href="{% static 'terminusgps/favicon.ico' %}"/>
+        <link rel="stylesheet" href="{% static 'terminusgps/css/output.css' %}"/>
         <script src="{% static 'terminusgps/js/htmx.min.js' %}" defer></script>
+        <script src="https://9681add82420.us-east-1.captcha-sdk.awswaf.com/9681add82420/jsapi.js" defer></script>
     </head>
-    <body class="h-dvh text-gray-800 dark:text-gray-100" style='background-image: url({% static "terminusgps/img/background.jpg" %});color-scheme: light;'>
+    <body class="h-dvh text-gray-800 bg-repeat-round dark:text-gray-100" style="background-image: url({% static 'terminusgps/img/background.jpg' %});">
         {% include "terminusgps/navbar.html" %}
-        <main class="p-8 md:p-16">
-            <div class="flex flex-col gap-8 rounded border border-stone-300 bg-stone-100 p-4 drop-shadow-lg md:p-8 dark:border-stone-700 dark:bg-stone-900 print:border-none print:drop-shadow-none">
+        <div class="p-8 md:p-16">
+            <main class="flex flex-col gap-8 rounded border border-stone-300 bg-stone-100 p-4 drop-shadow-lg md:p-8 dark:border-stone-700 dark:bg-stone-900 print:border-none print:drop-shadow-none">
                 {% include "terminusgps/header.html" %}
                 {% block content %}{% endblock content %}
-            </div>
-        </main>
+            </main>
+        </div>
         {% include "terminusgps/footer.html" %}
     </body>
 </html>

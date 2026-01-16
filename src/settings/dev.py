@@ -34,6 +34,7 @@ MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
 MERCHANT_AUTH_VALIDATION_MODE = "testMode"
 MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
 ROOT_URLCONF = "src.urls"
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "unsafe-none"
 SECRET_KEY = "3ow7#%v3y*o&1wr6%!rt4%c7^^wlx%f8hkhn!#-gf%mk!_tf=^"
 SESSION_COOKIE_HTTPONLY = True
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"

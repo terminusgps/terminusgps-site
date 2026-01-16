@@ -22,11 +22,42 @@ WIDGET_CSS_CLASS = getattr(
 class WialonUnitCreateForm(forms.ModelForm):
     class Meta:
         model = WialonUnit
-        fields = ["imei", "name"]
+        fields = ["name", "imei"]
         widgets = {
-            "imei": forms.widgets.TextInput(attrs={"class": WIDGET_CSS_CLASS}),
-            "name": forms.widgets.TextInput(attrs={"class": WIDGET_CSS_CLASS}),
+            "name": forms.widgets.TextInput(
+                attrs={
+                    "class": WIDGET_CSS_CLASS,
+                    "minlength": "4",
+                    "maxlength": "50",
+                    "placeholder": "New Ride",
+                    "enterkeyhint": "next",
+                    "inputmode": "text",
+                    "aria-required": "true",
+                    "autocapitalize": "words",
+                    "autocorrect": "on",
+                }
+            ),
+            "imei": forms.widgets.TextInput(
+                attrs={
+                    "class": WIDGET_CSS_CLASS,
+                    "maxlength": "25",
+                    "placeholder": "4111111111111111",
+                    "enterkeyhint": "done",
+                    "inputmode": "numeric",
+                    "aria-required": "true",
+                    "autocapitalize": "off",
+                    "autocorrect": "off",
+                }
+            ),
         }
+
+    def clean(self):
+        super().clean()
+        err = ValidationError(_("This field is required."), code="invalid")
+        if not self.cleaned_data.get("name"):
+            self.add_error("name", err)
+        if not self.cleaned_data.get("imei"):
+            self.add_error("imei", err)
 
 
 class ExpirationDateWidget(forms.widgets.MultiWidget):
@@ -131,7 +162,7 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
                     "inputmode": "text",
                     "aria-required": "true",
                     "autocapitalize": "words",
-                    "autocomplete": "name",
+                    "autocomplete": "shipping given-name",
                     "autocorrect": "off",
                     "autofocus": True,
                 }
@@ -145,7 +176,7 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
                     "inputmode": "text",
                     "aria-required": "true",
                     "autocapitalize": "words",
-                    "autocomplete": "name",
+                    "autocomplete": "shipping family-name",
                     "autocorrect": "off",
                 }
             ),
@@ -158,7 +189,7 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
                     "inputmode": "text",
                     "aria-required": "false",
                     "autocapitalize": "words",
-                    "autocomplete": "organization",
+                    "autocomplete": "shipping organization",
                     "autocorrect": "off",
                 }
             ),
@@ -170,7 +201,7 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
                     "enterkeyhint": "next",
                     "inputmode": "text",
                     "aria-required": "true",
-                    "autocomplete": "street-address",
+                    "autocomplete": "shipping street-address",
                     "autocorrect": "off",
                 }
             ),
@@ -182,7 +213,7 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
                     "enterkeyhint": "next",
                     "inputmode": "text",
                     "aria-required": "true",
-                    "autocomplete": "address-level2",
+                    "autocomplete": "shipping address-level2",
                     "autocorrect": "off",
                 }
             ),
@@ -194,7 +225,7 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
                     "enterkeyhint": "next",
                     "inputmode": "text",
                     "aria-required": "true",
-                    "autocomplete": "address-level1",
+                    "autocomplete": "shipping address-level1",
                     "autocorrect": "off",
                 }
             ),
@@ -206,7 +237,7 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
                     "enterkeyhint": "next",
                     "inputmode": "text",
                     "aria-required": "true",
-                    "autocomplete": "country",
+                    "autocomplete": "shipping country",
                     "autocorrect": "off",
                 }
             ),
@@ -218,7 +249,7 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
                     "enterkeyhint": "next",
                     "inputmode": "numeric",
                     "aria-required": "true",
-                    "autocomplete": "postal-code",
+                    "autocomplete": "shipping postal-code",
                     "autocorrect": "off",
                 }
             ),
@@ -230,7 +261,7 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
                     "enterkeyhint": "next",
                     "inputmode": "numeric",
                     "aria-required": "false",
-                    "autocomplete": "tel",
+                    "autocomplete": "shipping tel",
                     "autocorrect": "off",
                     "pattern": "[0-9]{0,20}",
                 }
@@ -314,7 +345,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
                     "inputmode": "text",
                     "aria-required": "true",
                     "autocapitalize": "words",
-                    "autocomplete": "name",
+                    "autocomplete": "billing given-name",
                     "autocorrect": "off",
                     "autofocus": True,
                 }
@@ -327,7 +358,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
                     "inputmode": "text",
                     "aria-required": "true",
                     "autocapitalize": "words",
-                    "autocomplete": "name",
+                    "autocomplete": "billing family-name",
                     "autocorrect": "off",
                 }
             ),
@@ -339,7 +370,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
                     "inputmode": "text",
                     "aria-required": "false",
                     "autocapitalize": "words",
-                    "autocomplete": "organization",
+                    "autocomplete": "billing organization",
                     "autocorrect": "off",
                 }
             ),
@@ -351,7 +382,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
                     "inputmode": "text",
                     "aria-required": "true",
                     "autocapitalize": "words",
-                    "autocomplete": "street-address",
+                    "autocomplete": "billing street-address",
                     "autocorrect": "off",
                 }
             ),
@@ -363,7 +394,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
                     "inputmode": "text",
                     "aria-required": "true",
                     "autocapitalize": "words",
-                    "autocomplete": "address-level2",
+                    "autocomplete": "billing address-level2",
                     "autocorrect": "off",
                 }
             ),
@@ -375,7 +406,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
                     "inputmode": "text",
                     "aria-required": "true",
                     "autocapitalize": "characters",
-                    "autocomplete": "address-level1",
+                    "autocomplete": "billing address-level1",
                     "autocorrect": "off",
                 }
             ),
@@ -388,7 +419,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
                     "inputmode": "text",
                     "aria-required": "true",
                     "autocapitalize": "words",
-                    "autocomplete": "country",
+                    "autocomplete": "billing country",
                     "autocorrect": "off",
                 }
             ),
@@ -401,7 +432,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
                     "inputmode": "numeric",
                     "aria-required": "true",
                     "autocapitalize": "none",
-                    "autocomplete": "postal-code",
+                    "autocomplete": "billing postal-code",
                     "autocorrect": "off",
                 }
             ),
@@ -414,7 +445,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
                     "inputmode": "numeric",
                     "aria-required": "false",
                     "autocapitalize": "none",
-                    "autocomplete": "tel",
+                    "autocomplete": "billing tel",
                     "autocorrect": "off",
                     "pattern": "[0-9]{0,20}",
                 }
@@ -520,7 +551,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
                     "inputmode": "text",
                     "aria-required": "true",
                     "autocapitalize": "words",
-                    "autocomplete": "organization",
+                    "autocomplete": "cc-name",
                     "autocorrect": "off",
                 }
             ),

@@ -1,6 +1,9 @@
+import logging
 import typing
 
+from dateutil.relativedelta import relativedelta
 from django import forms
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
@@ -10,10 +13,13 @@ from terminusgps.authorizenet.service import (
     AuthorizenetControllerExecutionError,
 )
 from terminusgps.mixins import HtmxTemplateResponseMixin
+from terminusgps.wialon.session import WialonAPIError, WialonSession
 from terminusgps_payments.models import CustomerProfile, Subscription
 
 from ..forms import SubscriptionCreateForm
-from ..models import TerminusGPSCustomer
+from ..models import TerminusGPSCustomer, WialonResource
+
+logger = logging.getLogger(__name__)
 
 
 class SubscriptionCreateView(HtmxTemplateResponseMixin, CreateView):
@@ -78,6 +84,14 @@ class SubscriptionDetailView(HtmxTemplateResponseMixin, DetailView):
     pk_url_kwarg = "subscription_pk"
     template_name = "terminusgps_manager/subscriptions/detail.html"
 
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        try:
+            super().setup(request, *args, **kwargs)
+            obj = self.get_object()
+            obj.save(push=False)
+        except AuthorizenetControllerExecutionError as error:
+            logger.warning(error)
+
 
 class SubscriptionUpdateView(HtmxTemplateResponseMixin, UpdateView):
     content_type = "text/html"
@@ -117,6 +131,18 @@ class SubscriptionDeleteView(HtmxTemplateResponseMixin, DeleteView):
 
     def form_valid(self, form: forms.ModelForm) -> HttpResponse:
         try:
+            start_date = self.object.start_date
+            end_date = start_date + relativedelta(months=1)
+            num_days = (start_date - end_date).days
+
+            customer = TerminusGPSCustomer.objects.get(user=self.request.user)
+            customer.end_date = end_date
+            customer.save(update_fields=["end_date"])
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                resource = WialonResource.objects.get(customer=customer)
+                desc = _("Terminus GPS Subscription canceled.")
+                resource.do_payment(session, days=num_days, desc=desc)
+                resource.update_flags(session, flags=0x20)
             return super().form_valid(form=form)
-        except AuthorizenetControllerExecutionError as error:
+        except (AuthorizenetControllerExecutionError, WialonAPIError) as error:
             return HttpResponse(str(error).encode("utf-8"), status=406)

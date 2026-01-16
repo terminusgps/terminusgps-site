@@ -2,7 +2,6 @@ import logging
 import typing
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpRequest
 from django.views.generic import TemplateView
 from terminusgps.mixins import HtmxTemplateResponseMixin
 from terminusgps_payments.models import CustomerProfile
@@ -18,19 +17,14 @@ class AccountView(LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps_manager/account.html"
     extra_context = {"title": "Account"}
 
-    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
-        self.cprofile, _ = CustomerProfile.objects.get_or_create(
-            user=request.user
-        )
-        self.customer, _ = TerminusGPSCustomer.objects.get_or_create(
-            user=request.user
-        )
-        return super().setup(request, *args, **kwargs)
-
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["customer"] = self.customer
-        context["customerprofile"] = self.cprofile
+        context["customer"], _ = TerminusGPSCustomer.objects.get_or_create(
+            user=self.request.user
+        )
+        context["customerprofile"], _ = CustomerProfile.objects.get_or_create(
+            user=self.request.user
+        )
         return context
 
 
@@ -39,16 +33,38 @@ class DashboardView(
 ):
     content_type = "text/html"
     http_method_names = ["get"]
+    extra_context = {
+        "title": "Dashboard",
+        "subtitle": "Your Terminus GPS account at a glance",
+    }
     template_name = "terminusgps_manager/dashboard.html"
-    extra_context = {"title": "Dashboard"}
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
-        try:
-            context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-            context["customer"] = TerminusGPSCustomer.objects.get(
-                user=self.request.user
-            )
-            return context
-        except TerminusGPSCustomer.DoesNotExist:
-            context["customer"] = None
-            return context
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["customer"], _ = TerminusGPSCustomer.objects.get_or_create(
+            user=self.request.user
+        )
+        context["customerprofile"], _ = CustomerProfile.objects.get_or_create(
+            user=self.request.user
+        )
+        return context
+
+
+class UnitsView(LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    http_method_names = ["get"]
+    extra_context = {
+        "title": "Units",
+        "subtitle": "Your Terminus GPS units at a glance",
+    }
+    template_name = "terminusgps_manager/units.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
+        context: dict[str, typing.Any] = super().get_context_data(**kwargs)
+        context["customer"], _ = TerminusGPSCustomer.objects.get_or_create(
+            user=self.request.user
+        )
+        context["customerprofile"], _ = CustomerProfile.objects.get_or_create(
+            user=self.request.user
+        )
+        return context
