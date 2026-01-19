@@ -1,6 +1,11 @@
 <div id="header" class="-mx-8 rounded bg-stone-200 px-4 py-8 drop-shadow-sm md:rounded-none md:shadow-inner md:drop-shadow-none dark:bg-stone-700 print:shadow-none">
     <div class="mx-8 flex flex-col gap-2">
-        <h2 class="text-terminus-red-600 dark:text-terminus-red-100 text-2xl font-semibold">{{ title }}</h2>
+        <div class="flex gap-2 items-center">
+            <h2 class="text-terminus-red-600 dark:text-terminus-red-100 text-2xl font-semibold">{{ title }}</h2>
+            <svg id="loading" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="htmx-indicator size-6 animate-spin">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+        </div>
         {% if subtitle %}<h3 class="text-terminus-red-500 dark:text-terminus-red-200 text-lg italic">{{ subtitle }}</h3>{% endif %}
     </div>
 </div>

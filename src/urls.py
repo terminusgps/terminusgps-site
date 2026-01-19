@@ -22,36 +22,6 @@ urlpatterns = [
     path("register/", views.RegisterView.as_view(), name="register"),
     path("login/", views.LoginView.as_view(), name="login"),
     path("logout/", views.LogoutView.as_view(), name="logout"),
-    path(
-        "password-change/",
-        views.PasswordChangeView.as_view(),
-        name="password change",
-    ),
-    path(
-        "password-change/success/",
-        views.PasswordChangeSuccessView.as_view(),
-        name="password change success",
-    ),
-    path(
-        "password-reset/",
-        views.PasswordResetView.as_view(),
-        name="password reset",
-    ),
-    path(
-        "password-reset/done/",
-        views.PasswordResetDoneView.as_view(),
-        name="password reset done",
-    ),
-    path(
-        "password-reset/<uidb64>/<token>/confirm/",
-        views.PasswordResetConfirmView.as_view(),
-        name="password reset confirm",
-    ),
-    path(
-        "password-reset/complete/",
-        views.PasswordResetCompleteView.as_view(),
-        name="password reset complete",
-    ),
     path("", include("terminusgps_manager.urls")),
 ]
 

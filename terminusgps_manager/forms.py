@@ -20,9 +20,24 @@ WIDGET_CSS_CLASS = getattr(
 
 
 class WialonUnitCreateForm(forms.ModelForm):
+    imei = forms.CharField(
+        max_length=25,
+        widget=forms.widgets.TextInput(
+            attrs={
+                "class": WIDGET_CSS_CLASS,
+                "placeholder": "4111111111111111",
+                "enterkeyhint": "done",
+                "inputmode": "numeric",
+                "aria-required": "true",
+                "autocapitalize": "off",
+                "autocorrect": "off",
+            }
+        ),
+    )
+
     class Meta:
         model = WialonUnit
-        fields = ["name", "imei"]
+        fields = ["name"]
         widgets = {
             "name": forms.widgets.TextInput(
                 attrs={
@@ -36,19 +51,7 @@ class WialonUnitCreateForm(forms.ModelForm):
                     "autocapitalize": "words",
                     "autocorrect": "on",
                 }
-            ),
-            "imei": forms.widgets.TextInput(
-                attrs={
-                    "class": WIDGET_CSS_CLASS,
-                    "maxlength": "25",
-                    "placeholder": "4111111111111111",
-                    "enterkeyhint": "done",
-                    "inputmode": "numeric",
-                    "aria-required": "true",
-                    "autocapitalize": "off",
-                    "autocorrect": "off",
-                }
-            ),
+            )
         }
 
     def clean(self):

@@ -1,0 +1,10 @@
+{% extends "terminusgps/layout.html" %}
+{% block content %}
+{% partialdef partial inline %}
+{% for t in arbTransactions %}
+<div id="{{ t.transId }}">{{ t.transId }}</div>
+{% empty %}
+<p>There aren't any transactions yet.</p>
+{% endfor %}
+{% endpartialdef partial %}
+{% endblock content %}

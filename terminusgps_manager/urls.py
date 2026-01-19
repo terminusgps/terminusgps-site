@@ -8,9 +8,17 @@ urlpatterns = [
     path("account/", views.AccountView.as_view(), name="account"),
     path("units/", views.UnitsView.as_view(), name="units"),
     path(
+        "subscriptions/", views.SubscriptionView.as_view(), name="subscription"
+    ),
+    path(
         "subscriptions/create/",
         views.SubscriptionCreateView.as_view(),
         name="create subscriptions",
+    ),
+    path(
+        "subscriptions/<int:subscription_pk>/transactions/",
+        views.SubscriptionTransactionsView.as_view(),
+        name="subscription transactions",
     ),
     path(
         "subscriptions/<int:subscription_pk>/detail/",
@@ -66,21 +74,5 @@ urlpatterns = [
         "address-profiles/<int:customerprofile_pk>/<int:addressprofile_pk>/delete/",
         views.CustomerAddressProfileDeleteView.as_view(),
         name="delete address profiles",
-    ),
-    path("units/list/", views.WialonUnitListView.as_view(), name="list units"),
-    path(
-        "units/create/",
-        views.WialonUnitCreateView.as_view(),
-        name="create units",
-    ),
-    path(
-        "units/<int:unit_pk>/detail/",
-        views.WialonUnitDetailView.as_view(),
-        name="detail units",
-    ),
-    path(
-        "units/<int:unit_pk>/update/",
-        views.WialonUnitUpdateView.as_view(),
-        name="update units",
     ),
 ]

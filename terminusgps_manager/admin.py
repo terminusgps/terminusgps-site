@@ -8,8 +8,8 @@ class TerminusGPSCustomerAdmin(admin.ModelAdmin):
     list_display = ["user"]
 
 
-@admin.register(models.WialonResource)
-class WialonResourceAdmin(admin.ModelAdmin):
+@admin.register(models.WialonAccount)
+class WialonAccountAdmin(admin.ModelAdmin):
     list_display = ["name"]
 
 
