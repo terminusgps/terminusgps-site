@@ -53,6 +53,7 @@ class WialonUnitCreateForm(forms.ModelForm):
                     "aria-required": "true",
                     "autocapitalize": "words",
                     "autocorrect": "on",
+                    "required": True,
                 }
             )
         }

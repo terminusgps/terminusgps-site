@@ -95,7 +95,7 @@ class WialonUnitCreateView(
                         "You can't add units while your account is disabled."
                     )
                     field = None
-                    params = {}
+                    params = None
                 case 2008:
                     msg = _(
                         "Unit with IMEI #%(imei)s has already been registered."
@@ -105,10 +105,13 @@ class WialonUnitCreateView(
                 case _:
                     msg = str(error)
                     field = None
-                    params = {}
+                    params = None
 
             form.add_error(
-                field, ValidationError(msg, code="invalid", params=params)
+                field,
+                ValidationError(
+                    f"{error.code}: {msg}", code="invalid", params=params
+                ),
             )
             return self.form_invalid(form=form)
 
