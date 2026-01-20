@@ -1,6 +1,8 @@
+import logging
 import typing
 
 from django import forms
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
@@ -14,8 +16,12 @@ from terminusgps_payments.models import CustomerAddressProfile, CustomerProfile
 
 from ..forms import CustomerAddressProfileCreateForm
 
+logger = logging.getLogger(__name__)
 
-class CustomerAddressProfileCreateView(HtmxTemplateResponseMixin, CreateView):
+
+class CustomerAddressProfileCreateView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, CreateView
+):
     content_type = "text/html"
     http_method_names = ["get", "post"]
     model = CustomerAddressProfile
@@ -59,7 +65,9 @@ class CustomerAddressProfileCreateView(HtmxTemplateResponseMixin, CreateView):
             return self.form_invalid(form=form)
 
 
-class CustomerAddressProfileDetailView(HtmxTemplateResponseMixin, DetailView):
+class CustomerAddressProfileDetailView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
+):
     content_type = "text/html"
     http_method_names = ["get"]
     model = CustomerAddressProfile
@@ -72,7 +80,7 @@ class CustomerAddressProfileDetailView(HtmxTemplateResponseMixin, DetailView):
         )
 
 
-class CustomerAddressProfileDeleteView(DeleteView):
+class CustomerAddressProfileDeleteView(LoginRequiredMixin, DeleteView):
     content_type = "text/html"
     http_method_names = ["post"]
     model = CustomerAddressProfile
@@ -86,13 +94,15 @@ class CustomerAddressProfileDeleteView(DeleteView):
 
     def form_valid(self, form: forms.Form) -> HttpResponse:
         try:
-            response = super().form_valid(form=form)
-            response.headers["HX-Retarget"] = "#address-profiles"
-            return response
+            return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as error:
-            return HttpResponse(
-                bytes(str(error), encoding="utf-8"), status=406
-            )
+            match error.code:
+                case "E00107":
+                    logger.warning(error)
+                    return HttpResponseRedirect(self.get_success_url())
+                case _:
+                    logger.critical(error)
+                    raise
 
     def get_queryset(self) -> QuerySet:
         return self.model.objects.filter(
@@ -100,7 +110,9 @@ class CustomerAddressProfileDeleteView(DeleteView):
         )
 
 
-class CustomerAddressProfileListView(HtmxTemplateResponseMixin, ListView):
+class CustomerAddressProfileListView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, ListView
+):
     content_type = "text/html"
     http_method_names = ["get"]
     model = CustomerAddressProfile

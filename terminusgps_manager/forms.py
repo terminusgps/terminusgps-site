@@ -21,6 +21,8 @@ WIDGET_CSS_CLASS = getattr(
 
 class WialonUnitCreateForm(forms.ModelForm):
     imei = forms.CharField(
+        label=_("IMEI #"),
+        help_text=_("Enter the IMEI number found on your installed device."),
         max_length=25,
         widget=forms.widgets.TextInput(
             attrs={
@@ -38,6 +40,7 @@ class WialonUnitCreateForm(forms.ModelForm):
     class Meta:
         model = WialonUnit
         fields = ["name"]
+        help_texts = {"name": _("Enter a name for your GPS-tracked asset.")}
         widgets = {
             "name": forms.widgets.TextInput(
                 attrs={

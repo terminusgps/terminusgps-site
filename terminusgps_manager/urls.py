@@ -75,4 +75,10 @@ urlpatterns = [
         views.CustomerAddressProfileDeleteView.as_view(),
         name="delete address profiles",
     ),
+    path(
+        "units/create/",
+        views.WialonUnitCreateView.as_view(),
+        name="create units",
+    ),
+    path("units/list/", views.WialonUnitListView.as_view(), name="list units"),
 ]

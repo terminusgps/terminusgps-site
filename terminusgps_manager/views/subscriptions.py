@@ -4,6 +4,7 @@ import typing
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -24,7 +25,9 @@ from ..models import TerminusGPSCustomer
 logger = logging.getLogger(__name__)
 
 
-class SubscriptionCreateView(HtmxTemplateResponseMixin, CreateView):
+class SubscriptionCreateView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, CreateView
+):
     content_type = "text/html"
     form_class = SubscriptionCreateForm
     http_method_names = ["get", "post"]
@@ -92,7 +95,9 @@ class SubscriptionCreateView(HtmxTemplateResponseMixin, CreateView):
             return self.form_invalid(form=form)
 
 
-class SubscriptionDetailView(HtmxTemplateResponseMixin, DetailView):
+class SubscriptionDetailView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
+):
     content_type = "text/html"
     http_method_names = ["get"]
     model = Subscription
@@ -111,7 +116,9 @@ class SubscriptionDetailView(HtmxTemplateResponseMixin, DetailView):
             return super().get(request, *args, **kwargs)
 
 
-class SubscriptionUpdateView(HtmxTemplateResponseMixin, UpdateView):
+class SubscriptionUpdateView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, UpdateView
+):
     content_type = "text/html"
     fields = ["aprofile", "pprofile"]
     http_method_names = ["get", "post"]
@@ -137,7 +144,9 @@ class SubscriptionUpdateView(HtmxTemplateResponseMixin, UpdateView):
         )
 
 
-class SubscriptionDeleteView(HtmxTemplateResponseMixin, DeleteView):
+class SubscriptionDeleteView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DeleteView
+):
     content_type = "text/html"
     http_method_names = ["post"]
     model = Subscription
@@ -170,7 +179,9 @@ class SubscriptionDeleteView(HtmxTemplateResponseMixin, DeleteView):
             return HttpResponse(status=406)
 
 
-class SubscriptionTransactionsView(HtmxTemplateResponseMixin, DetailView):
+class SubscriptionTransactionsView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
+):
     content_type = "text/html"
     http_method_names = ["get"]
     model = Subscription

@@ -217,3 +217,20 @@ class WialonUser(WialonObject):
         """Grants Wialon object access to the user."""
         params = {"itemId": id, "userId": self.pk, "accessMask": access_mask}
         return session.wialon_api.user_update_item_access(**params)
+
+    def get_items(
+        self,
+        session: WialonSession,
+        items_type: str,
+        *,
+        direct: bool = False,
+        flags: int = 0x3,
+    ) -> dict:
+        """Returns a dictionary of Wialon items the user has access to."""
+        params = {
+            "userId": self.pk,
+            "directAccess": int(direct),
+            "itemSuperclass": items_type,
+            "flags": flags,
+        }
+        return session.wialon_api.user_get_items_access(**params)

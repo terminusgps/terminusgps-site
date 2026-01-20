@@ -18,6 +18,7 @@
         <div class="p-8 md:p-16">
             <main class="flex flex-col gap-8 rounded border border-stone-300 bg-stone-100 p-4 drop-shadow-lg md:p-8 dark:border-stone-700 dark:bg-stone-900 print:border-none print:drop-shadow-none">
                 {% include "terminusgps/header.html" %}
+                {% if messages %}{% include "terminusgps/messages.html" %}{% endif %}
                 {% block content %}{% endblock content %}
             </main>
         </div>

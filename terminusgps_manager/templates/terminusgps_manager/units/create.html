@@ -1,0 +1,50 @@
+{% extends "terminusgps/layout.html" %}
+{% block content %}
+{% partialdef partial inline %}
+<form class="@container flex flex-col gap-4" hx-post="{% url 'terminusgps_manager:create units' %}" hx-target="this" hx-indicator="#loading">
+    {% if form.non_field_errors %}
+    <div class="p-2 bg-red-200 text-red-700 animate-jiggle border border-current rounded">
+        <div class="flex gap-2 items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-red-700 fill-red-50 animate-pulse">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+            </svg>
+            {{ form.non_field_errors }}
+        </div>
+    </div>
+    {% endif %}
+    {% csrf_token %}
+    <div class="flex flex-col gap-2 w-full group">
+        {{ form.name }}
+        <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+        <p class="text-sm" id="{{ form.name.id_for_label }}_helptext">{{ form.name.help_text }}</p>
+        <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.name.errors }}</div>
+    </div>
+    <div class="flex flex-col gap-2 w-full group">
+        {{ form.imei }}
+        <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.imei.id_for_label }}">{{ form.imei.label }}</label>
+        <p class="text-sm" id="{{ form.imei.id_for_label }}_helptext">{{ form.imei.help_text }}</p>
+        <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.imei.errors }}</div>
+    </div>
+    <div class="flex flex-col gap-2">
+        <button class="flex w-full cursor-pointer items-center justify-center gap-2 rounded border border-terminus-red-900 bg-terminus-red-800 p-2 text-center text-white transition-colors duration-300 ease-in-out hover:bg-terminus-red-400" type="submit">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+            </svg>
+            <p>Submit</p>
+        </button>
+        <button
+            type="button"
+            class="flex w-full cursor-pointer items-center gap-2 rounded border border-gray-900 bg-gray-800 p-2 text-white transition-colors duration-300 ease-in-out justify-center hover:bg-gray-400"
+            hx-target="#units-list"
+            hx-trigger="click"
+            hx-get="{% url 'terminusgps_manager:list units' %}"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+            <p>Back</p>
+        </button>
+    </div>
+</form>
+{% endpartialdef partial %}
+{% endblock content %}

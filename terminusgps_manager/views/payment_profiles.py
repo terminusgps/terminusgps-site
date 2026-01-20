@@ -1,6 +1,8 @@
+import logging
 import typing
 
 from django import forms
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
@@ -14,8 +16,12 @@ from terminusgps_payments.models import CustomerPaymentProfile, CustomerProfile
 
 from ..forms import CustomerPaymentProfileCreateForm
 
+logger = logging.getLogger(__name__)
 
-class CustomerPaymentProfileCreateView(HtmxTemplateResponseMixin, CreateView):
+
+class CustomerPaymentProfileCreateView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, CreateView
+):
     content_type = "text/html"
     form_class = CustomerPaymentProfileCreateForm
     http_method_names = ["get", "post"]
@@ -57,7 +63,9 @@ class CustomerPaymentProfileCreateView(HtmxTemplateResponseMixin, CreateView):
             return self.form_invalid(form=form)
 
 
-class CustomerPaymentProfileDetailView(HtmxTemplateResponseMixin, DetailView):
+class CustomerPaymentProfileDetailView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, DetailView
+):
     content_type = "text/html"
     http_method_names = ["get"]
     model = CustomerPaymentProfile
@@ -70,7 +78,7 @@ class CustomerPaymentProfileDetailView(HtmxTemplateResponseMixin, DetailView):
         )
 
 
-class CustomerPaymentProfileDeleteView(DeleteView):
+class CustomerPaymentProfileDeleteView(LoginRequiredMixin, DeleteView):
     content_type = "text/html"
     http_method_names = ["post"]
     model = CustomerPaymentProfile
@@ -84,13 +92,15 @@ class CustomerPaymentProfileDeleteView(DeleteView):
 
     def form_valid(self, form: forms.Form) -> HttpResponse:
         try:
-            response = super().form_valid(form=form)
-            response.headers["HX-Retarget"] = "#payment-profiles"
-            return response
+            return super().form_valid(form=form)
         except AuthorizenetControllerExecutionError as error:
-            return HttpResponse(
-                bytes(str(error), encoding="utf-8"), status=406
-            )
+            match error.code:
+                case "E00105":
+                    logger.warning(error)
+                    return HttpResponseRedirect(self.get_success_url())
+                case _:
+                    logger.critical(error)
+                    raise
 
     def get_queryset(self) -> QuerySet:
         return self.model.objects.filter(
@@ -98,7 +108,9 @@ class CustomerPaymentProfileDeleteView(DeleteView):
         )
 
 
-class CustomerPaymentProfileListView(HtmxTemplateResponseMixin, ListView):
+class CustomerPaymentProfileListView(
+    LoginRequiredMixin, HtmxTemplateResponseMixin, ListView
+):
     content_type = "text/html"
     http_method_names = ["get"]
     model = CustomerPaymentProfile
