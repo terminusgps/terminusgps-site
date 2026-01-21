@@ -1,7 +1,6 @@
 import logging
 import typing
 
-from dateutil.relativedelta import relativedelta
 from django import forms
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -157,10 +156,8 @@ class SubscriptionDeleteView(
     def form_valid(self, form: forms.ModelForm) -> HttpResponse:
         try:
             start_date = self.object.start_date
-            end_date = start_date + relativedelta(months=1)
+            end_date = self.object.get_next_payment_date()
             customer = TerminusGPSCustomer.objects.get(user=self.request.user)
-            customer.end_date = end_date
-            customer.save(update_fields=["end_date"])
             with WialonSession(token=settings.WIALON_TOKEN) as session:
                 curr_days = int(
                     customer.wialon_account.get_account_data(

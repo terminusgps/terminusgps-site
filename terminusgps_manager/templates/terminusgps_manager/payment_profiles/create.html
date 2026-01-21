@@ -5,7 +5,7 @@
     id="create-payment-profile-form"
     class="@container flex flex-col gap-4"
     hx-target="this"
-    hx-post="{% url 'terminusgps_manager:create payment profiles' customerprofile.pk %}"
+    hx-post="{% url 'terminusgps_manager:create payment profiles' customer_profile.pk %}"
 >
     {% if form.non_field_errors %}
     <div class="p-2 bg-red-200 text-red-700 animate-jiggle border border-current rounded">
@@ -78,10 +78,10 @@
                 <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.phone_number.errors }}</div>
             </div>
             <div class="flex flex-col gap-2 w-full">
-                {{ form.company_name }}
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.company_name.id_for_label }}">{{ form.company_name.label }}</label>
-                <p class="text-sm" id="{{ form.company_name.id_for_label }}_helptext">{{ form.company_name.help_text }}</p>
-                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.company_name.errors }}</div>
+                {{ form.company }}
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.company.id_for_label }}">{{ form.company.label }}</label>
+                <p class="text-sm" id="{{ form.company.id_for_label }}_helptext">{{ form.company.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.company.errors }}</div>
             </div>
         </div>
     </div>
@@ -95,10 +95,10 @@
                 <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.card_number.errors }}</div>
             </div>
             <div class="flex flex-col gap-2 w-full">
-                <div class="peer flex flex-col gap-2 @md:flex-row" aria-required="true">{{ form.expiry_date }}</div>
-                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.expiry_date.id_for_label }}">Expiration Date</label>
-                <p class="text-sm" id="{{ form.expiry_date.id_for_label }}_helptext">{{ form.expiry_date.help_text }}</p>
-                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.expiry_date.errors }}</div>
+                <div class="peer flex flex-col gap-2 @md:flex-row" aria-required="true">{{ form.card_expiry }}</div>
+                <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600 peer-user-valid:text-green-800" for="{{ form.card_expiry.id_for_label }}">Expiration Date</label>
+                <p class="text-sm" id="{{ form.card_expiry.id_for_label }}_helptext">{{ form.card_expiry.help_text }}</p>
+                <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.card_expiry.errors }}</div>
             </div>
             <div class="flex flex-col gap-2 w-full">
                 {{ form.card_code }}
@@ -162,7 +162,7 @@
             class="flex w-full cursor-pointer items-center gap-2 rounded border border-gray-900 bg-gray-800 p-2 text-white transition-colors duration-300 ease-in-out justify-center hover:bg-gray-400"
             hx-target="#payment-profiles"
             hx-trigger="click"
-            hx-get="{% url 'terminusgps_manager:list payment profiles' customerprofile.pk %}"
+            hx-get="{% url 'terminusgps_manager:list payment profiles' customer_profile.pk %}"
         >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />

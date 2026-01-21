@@ -108,16 +108,16 @@ class SubscriptionCreateForm(forms.ModelForm):
 
     class Meta:
         model = Subscription
-        fields = ["pprofile", "aprofile"]
+        fields = ["payment_profile", "address_profile"]
         widgets = {
-            "pprofile": forms.widgets.Select(
+            "payment_profile": forms.widgets.Select(
                 attrs={
                     "class": WIDGET_CSS_CLASS,
                     "enterkeyhint": "next",
                     "aria-required": "true",
                 }
             ),
-            "aprofile": forms.widgets.Select(
+            "address_profile": forms.widgets.Select(
                 attrs={
                     "class": WIDGET_CSS_CLASS,
                     "enterkeyhint": "next",
@@ -128,8 +128,8 @@ class SubscriptionCreateForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.fields["pprofile"].empty_label = None
-        self.fields["aprofile"].empty_label = None
+        self.fields["payment_profile"].empty_label = None
+        self.fields["address_profile"].empty_label = None
 
 
 class CustomerAddressProfileCreateForm(forms.ModelForm):
@@ -138,7 +138,7 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
         fields = [
             "first_name",
             "last_name",
-            "company_name",
+            "company",
             "address",
             "city",
             "state",
@@ -149,7 +149,7 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
         help_texts = {
             "first_name": _("Enter a first name."),
             "last_name": _("Enter a last name."),
-            "company_name": _("Optional. Enter a company name."),
+            "company": _("Optional. Enter a company name."),
             "address": _("Enter a house number + street."),
             "city": _("Enter a city."),
             "state": _("Enter a state."),
@@ -187,7 +187,7 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
                     "autocorrect": "off",
                 }
             ),
-            "company_name": forms.widgets.TextInput(
+            "company": forms.widgets.TextInput(
                 attrs={
                     "class": WIDGET_CSS_CLASS,
                     "maxlength": "50",
@@ -280,7 +280,7 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
         address_fields = {
             "first_name": self.cleaned_data.get("first_name"),
             "last_name": self.cleaned_data.get("last_name"),
-            "company_name": self.cleaned_data.get("company_name"),
+            "company": self.cleaned_data.get("company"),
             "address": self.cleaned_data.get("address"),
             "city": self.cleaned_data.get("city"),
             "state": self.cleaned_data.get("state"),
@@ -290,7 +290,7 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
         }
         if not all(address_fields.values()):
             for field, val in address_fields.items():
-                if not val and field not in ("company_name", "phone_number"):
+                if not val and field not in ("company", "phone_number"):
                     self.add_error(
                         field,
                         ValidationError(
@@ -302,11 +302,11 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
 class CustomerPaymentProfileCreateForm(forms.ModelForm):
     class Meta:
         model = CustomerPaymentProfile
-        field_classes = {"expiry_date": ExpirationDateField}
+        field_classes = {"card_expiry": ExpirationDateField}
         fields = [
             "first_name",
             "last_name",
-            "company_name",
+            "company",
             "address",
             "city",
             "state",
@@ -314,18 +314,19 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
             "zip",
             "phone_number",
             "card_number",
-            "expiry_date",
+            "card_expiry",
             "card_code",
             "account_number",
             "routing_number",
             "account_name",
             "bank_name",
             "account_type",
+            "echeck_type",
         ]
         help_texts = {
             "first_name": _("Enter a first name."),
             "last_name": _("Enter a last name."),
-            "company_name": _("Optional. Enter a company name."),
+            "company": _("Optional. Enter a company name."),
             "address": _("Enter a house number + street."),
             "city": _("Enter a city."),
             "state": _("Enter a state."),
@@ -335,7 +336,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
                 "Optional. Enter an E.164-formatted phone number. Ex: 17139045262"
             ),
             "card_number": _("Enter a card number."),
-            "expiry_date": _("Enter an expiration date month and year."),
+            "card_expiry": _("Enter an expiration date month and year."),
             "card_code": _("Enter a 3-4 digit CCV code."),
             "account_number": _("Enter an account number."),
             "routing_number": _("Enter a routing number."),
@@ -369,7 +370,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
                     "autocorrect": "off",
                 }
             ),
-            "company_name": forms.widgets.TextInput(
+            "company": forms.widgets.TextInput(
                 attrs={
                     "class": WIDGET_CSS_CLASS,
                     "placeholder": "Terminus GPS",
@@ -471,7 +472,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
                     "autocorrect": "off",
                 }
             ),
-            "expiry_date": ExpirationDateWidget(
+            "card_expiry": ExpirationDateWidget(
                 attrs={
                     "class": WIDGET_CSS_CLASS,
                     "maxlength": "2",
@@ -573,7 +574,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
         address_fields = {
             "first_name": self.cleaned_data.get("first_name"),
             "last_name": self.cleaned_data.get("last_name"),
-            "company_name": self.cleaned_data.get("company_name"),
+            "company": self.cleaned_data.get("company"),
             "address": self.cleaned_data.get("address"),
             "city": self.cleaned_data.get("city"),
             "state": self.cleaned_data.get("state"),
@@ -583,7 +584,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
         }
         credit_card_fields = {
             "card_number": self.cleaned_data.get("card_number"),
-            "expiry_date": self.cleaned_data.get("expiry_date"),
+            "card_expiry": self.cleaned_data.get("card_expiry"),
             "card_code": self.cleaned_data.get("card_code"),
         }
         bank_account_fields = {
@@ -596,7 +597,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
 
         if not all(address_fields.values()):
             for field, val in address_fields.items():
-                if not val and field not in ("company_name", "phone_number"):
+                if not val and field not in ("company", "phone_number"):
                     self.add_error(
                         field,
                         ValidationError(
@@ -631,7 +632,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
                             _("This field is required."), code="invalid"
                         ),
                     )
-            if expiry := self.cleaned_data.get("expiry_date"):
+            if expiry := self.cleaned_data.get("card_expiry"):
                 if expiry < datetime.date.today():
                     self.add_error(
                         "expiry_date",

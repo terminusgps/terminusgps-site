@@ -52,9 +52,16 @@ class TerminusGPSCustomer(models.Model):
         output_field=models.DecimalField(decimal_places=2, max_digits=9),
     )
     """Automatically generated customer grand total (sub+tax) amount."""
-    end_date = models.DateField(blank=True, null=True, default=None)
-    """Subscription end date."""
 
+    customer_profile = models.ForeignKey(
+        "terminusgps_payments.CustomerProfile",
+        on_delete=models.SET_NULL,
+        related_name="terminusgpscustomer",
+        blank=True,
+        null=True,
+        default=None,
+    )
+    """Associated Authorizenet customer profile."""
     subscription = models.ForeignKey(
         "terminusgps_payments.Subscription",
         on_delete=models.SET_NULL,
@@ -63,7 +70,7 @@ class TerminusGPSCustomer(models.Model):
         blank=True,
         null=True,
     )
-    """Associated subscription."""
+    """Associated Authorizenet subscription."""
     wialon_user = models.ForeignKey(
         "terminusgps_manager.WialonUser",
         on_delete=models.SET_NULL,

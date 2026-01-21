@@ -2,11 +2,11 @@ import logging
 import typing
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpRequest
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control, cache_page
 from django.views.generic import TemplateView
 from terminusgps.mixins import HtmxTemplateResponseMixin
-from terminusgps_payments.models import CustomerProfile
 
 from ..models import TerminusGPSCustomer
 
@@ -21,13 +21,19 @@ class AccountView(LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps_manager/account.html"
     extra_context = {"title": "Account"}
 
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.customer, _ = TerminusGPSCustomer.objects.get_or_create(
+            user=request.user
+        )
+
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["customer"], _ = TerminusGPSCustomer.objects.get_or_create(
-            user=self.request.user
-        )
-        context["customerprofile"], _ = CustomerProfile.objects.get_or_create(
-            user=self.request.user
+        context["customer"] = self.customer
+        context["customerprofile"] = (
+            self.customer.customer_profile
+            if self.customer is not None
+            else None
         )
         return context
 
@@ -40,13 +46,19 @@ class DashboardView(
     extra_context = {"title": "Dashboard"}
     template_name = "terminusgps_manager/dashboard.html"
 
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.customer, _ = TerminusGPSCustomer.objects.get_or_create(
+            user=request.user
+        )
+
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["customer"], _ = TerminusGPSCustomer.objects.get_or_create(
-            user=self.request.user
-        )
-        context["customerprofile"], _ = CustomerProfile.objects.get_or_create(
-            user=self.request.user
+        context["customer"] = self.customer
+        context["customerprofile"] = (
+            self.customer.customer_profile
+            if self.customer is not None
+            else None
         )
         return context
 
@@ -57,13 +69,19 @@ class UnitsView(LoginRequiredMixin, HtmxTemplateResponseMixin, TemplateView):
     extra_context = {"title": "Units"}
     template_name = "terminusgps_manager/units.html"
 
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.customer, _ = TerminusGPSCustomer.objects.get_or_create(
+            user=request.user
+        )
+
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["customer"], _ = TerminusGPSCustomer.objects.get_or_create(
-            user=self.request.user
-        )
-        context["customerprofile"], _ = CustomerProfile.objects.get_or_create(
-            user=self.request.user
+        context["customer"] = self.customer
+        context["customerprofile"] = (
+            self.customer.customer_profile
+            if self.customer is not None
+            else None
         )
         return context
 
@@ -76,12 +94,18 @@ class SubscriptionView(
     extra_context = {"title": "Subscription"}
     template_name = "terminusgps_manager/subscription.html"
 
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.customer, _ = TerminusGPSCustomer.objects.get_or_create(
+            user=request.user
+        )
+
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["customer"], _ = TerminusGPSCustomer.objects.get_or_create(
-            user=self.request.user
-        )
-        context["customerprofile"], _ = CustomerProfile.objects.get_or_create(
-            user=self.request.user
+        context["customer"] = self.customer
+        context["customerprofile"] = (
+            self.customer.customer_profile
+            if self.customer is not None
+            else None
         )
         return context

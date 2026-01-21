@@ -5,7 +5,7 @@ from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, DetailView, ListView
 from terminusgps.authorizenet.service import (
@@ -26,20 +26,23 @@ class CustomerPaymentProfileCreateView(
     form_class = CustomerPaymentProfileCreateForm
     http_method_names = ["get", "post"]
     model = CustomerPaymentProfile
-    pk_url_kwarg = "paymentprofile_pk"
     template_name = "terminusgps_manager/payment_profiles/create.html"
+
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.customer_profile = CustomerProfile.objects.get(
+            pk=self.kwargs["customerprofile_pk"]
+        )
 
     def get_success_url(self) -> str:
         return reverse(
             "terminusgps_manager:list payment profiles",
-            kwargs={"customerprofile_pk": self.kwargs["customerprofile_pk"]},
+            kwargs={"customerprofile_pk": self.customer_profile.pk},
         )
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["customerprofile"] = CustomerProfile.objects.get(
-            pk=self.kwargs["customerprofile_pk"]
-        )
+        context["customer_profile"] = self.customer_profile
         return context
 
     def form_valid(
@@ -47,11 +50,8 @@ class CustomerPaymentProfileCreateView(
     ) -> HttpResponse:
         try:
             obj = form.save(commit=False)
-            obj.cprofile = CustomerProfile.objects.get(
-                pk=self.kwargs["customerprofile_pk"]
-            )
-            obj.save()
-            obj.save(push=False)
+            obj.customer_profile = self.customer_profile
+            obj.save(push=True)
             return HttpResponseRedirect(self.get_success_url())
         except AuthorizenetControllerExecutionError as error:
             form.add_error(
@@ -72,9 +72,15 @@ class CustomerPaymentProfileDetailView(
     pk_url_kwarg = "paymentprofile_pk"
     template_name = "terminusgps_manager/payment_profiles/detail.html"
 
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.customer_profile = CustomerProfile.objects.get(
+            pk=self.kwargs["customerprofile_pk"]
+        )
+
     def get_queryset(self) -> QuerySet:
         return self.model.objects.filter(
-            cprofile__pk=self.kwargs["customerprofile_pk"]
+            customer_profile=self.customer_profile
         )
 
 
@@ -84,10 +90,21 @@ class CustomerPaymentProfileDeleteView(LoginRequiredMixin, DeleteView):
     model = CustomerPaymentProfile
     pk_url_kwarg = "paymentprofile_pk"
 
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.customer_profile = CustomerProfile.objects.get(
+            pk=self.kwargs["customerprofile_pk"]
+        )
+
     def get_success_url(self) -> str:
         return reverse(
             "terminusgps_manager:list payment profiles",
-            kwargs={"customerprofile_pk": self.kwargs["customerprofile_pk"]},
+            kwargs={"customerprofile_pk": self.customer_profile.pk},
+        )
+
+    def get_queryset(self) -> QuerySet:
+        return self.model.objects.filter(
+            customer_profile=self.customer_profile
         )
 
     def form_valid(self, form: forms.Form) -> HttpResponse:
@@ -102,11 +119,6 @@ class CustomerPaymentProfileDeleteView(LoginRequiredMixin, DeleteView):
                     logger.critical(error)
                     raise
 
-    def get_queryset(self) -> QuerySet:
-        return self.model.objects.filter(
-            cprofile__pk=self.kwargs["customerprofile_pk"]
-        )
-
 
 class CustomerPaymentProfileListView(
     LoginRequiredMixin, HtmxTemplateResponseMixin, ListView
@@ -118,14 +130,18 @@ class CustomerPaymentProfileListView(
     pk_url_kwarg = "paymentprofile_pk"
     template_name = "terminusgps_manager/payment_profiles/list.html"
 
+    def setup(self, request: HttpRequest, *args, **kwargs) -> None:
+        super().setup(request, *args, **kwargs)
+        self.customer_profile = CustomerProfile.objects.get(
+            pk=self.kwargs["customerprofile_pk"]
+        )
+
     def get_queryset(self) -> QuerySet:
         return self.model.objects.filter(
-            cprofile__pk=self.kwargs["customerprofile_pk"]
+            customer_profile=self.customer_profile
         ).order_by(self.get_ordering())
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
-        context["customerprofile"] = CustomerProfile.objects.get(
-            pk=self.kwargs["customerprofile_pk"]
-        )
+        context["customer_profile"] = self.customer_profile
         return context
