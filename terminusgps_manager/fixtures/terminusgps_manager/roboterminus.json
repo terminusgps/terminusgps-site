@@ -1,0 +1,1 @@
+[{"model": "terminusgps_manager.wialonaccount", "pk": 29982153, "fields": {"name": "account_RoboTerminusTest", "crt": 29982151, "bact": 29982153, "uacl": 60610577498111}}, {"model": "terminusgps_manager.wialonuser", "pk": 29982160, "fields": {"name": "RoboTerminusTest", "crt": 29982151, "bact": 29982153, "uacl": 32571391}}]
