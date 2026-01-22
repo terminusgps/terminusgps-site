@@ -38,20 +38,21 @@ class SubscriptionCreateView(
         self.customer, _ = TerminusGPSCustomer.objects.get_or_create(
             user=request.user
         )
-        self.cprofile, _ = CustomerProfile.objects.get_or_create(
-            user=self.request.user
-        )
 
     def get_context_data(self, **kwargs) -> dict[str, typing.Any]:
         context: dict[str, typing.Any] = super().get_context_data(**kwargs)
         context["customer"] = self.customer
-        context["customerprofile"] = self.cprofile
+        context["customer_profile"] = self.customer.customer_profile
         return context
 
     def get_form(self, form_class=None) -> forms.ModelForm:
         form = super().get_form(form_class=form_class)
-        form.fields["pprofile"].queryset = self.cprofile.payment_profiles.all()
-        form.fields["aprofile"].queryset = self.cprofile.address_profiles.all()
+        form.fields[
+            "payment_profile"
+        ].queryset = self.customer.customer_profile.payment_profiles.all()
+        form.fields[
+            "address_profile"
+        ].queryset = self.customer.customer_profile.address_profiles.all()
         return form
 
     @transaction.atomic
@@ -60,7 +61,7 @@ class SubscriptionCreateView(
             sub = form.save(commit=False)
             sub.name = "Terminus GPS Subscription"
             sub.amount = self.customer.grand_total
-            sub.cprofile = self.cprofile
+            sub.customer_profile = self.customer.customer_profile
             sub.save()
 
             self.customer.subscription = sub
