@@ -5,7 +5,7 @@
     id="create-address-profile-form"
     class="@container flex flex-col gap-4"
     hx-target="this"
-    hx-post="{% url 'terminusgps_manager:create address profiles' customer_profile.pk %}"
+    hx-post="{% url 'terminusgps_manager:create address profiles' %}"
 >
     {% if form.non_field_errors %}
     <div class="p-2 bg-red-200 text-red-700 animate-jiggle border border-current rounded">
@@ -100,7 +100,7 @@
             class="flex w-full cursor-pointer items-center gap-2 rounded border border-gray-900 bg-gray-800 p-2 text-white transition-colors duration-300 ease-in-out justify-center hover:bg-gray-400"
             hx-target="#address-profiles"
             hx-trigger="click"
-            hx-get="{% url 'terminusgps_manager:list address profiles' customer_profile.pk %}"
+            hx-get="{% url 'terminusgps_manager:list address profiles' %}"
         >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />

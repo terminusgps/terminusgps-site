@@ -1,16 +1,14 @@
 import datetime
 
+import terminusgps_payments.models
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from terminusgps_payments.models import (
-    CustomerAddressProfile,
-    CustomerPaymentProfile,
-    Subscription,
+from terminusgps_payments.forms import (
+    ExpirationDateField,
+    ExpirationDateWidget,
 )
-
-from .models import WialonUnit
 
 WIDGET_CSS_CLASS = getattr(
     settings,
@@ -19,122 +17,9 @@ WIDGET_CSS_CLASS = getattr(
 )
 
 
-class WialonUnitCreateForm(forms.ModelForm):
-    imei = forms.CharField(
-        label=_("IMEI #"),
-        help_text=_("Enter the IMEI number found on your installed device."),
-        max_length=25,
-        widget=forms.widgets.TextInput(
-            attrs={
-                "class": WIDGET_CSS_CLASS,
-                "placeholder": "4111111111111111",
-                "enterkeyhint": "done",
-                "inputmode": "numeric",
-                "aria-required": "true",
-                "autocapitalize": "off",
-                "autocorrect": "off",
-            }
-        ),
-    )
-
+class AddressProfileCreateForm(forms.ModelForm):
     class Meta:
-        model = WialonUnit
-        fields = ["name"]
-        help_texts = {"name": _("Enter a name for your GPS-tracked asset.")}
-        widgets = {
-            "name": forms.widgets.TextInput(
-                attrs={
-                    "class": WIDGET_CSS_CLASS,
-                    "minlength": "4",
-                    "maxlength": "50",
-                    "placeholder": "New Ride",
-                    "enterkeyhint": "next",
-                    "inputmode": "text",
-                    "aria-required": "true",
-                    "autocapitalize": "words",
-                    "autocorrect": "on",
-                    "required": True,
-                }
-            )
-        }
-
-    def clean(self):
-        super().clean()
-        err = ValidationError(_("This field is required."), code="invalid")
-        if not self.cleaned_data.get("name"):
-            self.add_error("name", err)
-        if not self.cleaned_data.get("imei"):
-            self.add_error("imei", err)
-
-
-class ExpirationDateWidget(forms.widgets.MultiWidget):
-    def __init__(self, **kwargs) -> None:
-        return super().__init__(**kwargs)
-
-    def decompress(self, value):
-        if value:
-            return [value.month, value.year]
-        return [None, None]
-
-
-class ExpirationDateField(forms.MultiValueField):
-    def __init__(self, fields=(), widget=None, **kwargs) -> None:
-        return super().__init__(
-            error_messages={},
-            fields=(
-                forms.DateField(input_formats=["%m", "%-m"]),
-                forms.DateField(input_formats=["%y"]),
-            ),
-            widget=widget,
-            require_all_fields=False,
-            **kwargs,
-        )
-
-    def compress(self, data_list):
-        if data_list:
-            return datetime.date(
-                day=1, month=data_list[0].month, year=data_list[1].year
-            )
-        return None
-
-
-class SubscriptionCreateForm(forms.ModelForm):
-    consent = forms.BooleanField(
-        initial=False,
-        widget=forms.widgets.CheckboxInput(
-            attrs={"class": "accent-terminus-red-700"}
-        ),
-    )
-
-    class Meta:
-        model = Subscription
-        fields = ["payment_profile", "address_profile"]
-        widgets = {
-            "payment_profile": forms.widgets.Select(
-                attrs={
-                    "class": WIDGET_CSS_CLASS,
-                    "enterkeyhint": "next",
-                    "aria-required": "true",
-                }
-            ),
-            "address_profile": forms.widgets.Select(
-                attrs={
-                    "class": WIDGET_CSS_CLASS,
-                    "enterkeyhint": "next",
-                    "aria-required": "true",
-                }
-            ),
-        }
-
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.fields["payment_profile"].empty_label = None
-        self.fields["address_profile"].empty_label = None
-
-
-class CustomerAddressProfileCreateForm(forms.ModelForm):
-    class Meta:
-        model = CustomerAddressProfile
+        model = terminusgps_payments.models.CustomerAddressProfile
         fields = [
             "first_name",
             "last_name",
@@ -299,9 +184,9 @@ class CustomerAddressProfileCreateForm(forms.ModelForm):
                     )
 
 
-class CustomerPaymentProfileCreateForm(forms.ModelForm):
+class PaymentProfileCreateForm(forms.ModelForm):
     class Meta:
-        model = CustomerPaymentProfile
+        model = terminusgps_payments.models.CustomerPaymentProfile
         field_classes = {"card_expiry": ExpirationDateField}
         fields = [
             "first_name",
@@ -319,9 +204,8 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
             "account_number",
             "routing_number",
             "account_name",
-            "bank_name",
             "account_type",
-            "echeck_type",
+            "bank_name",
         ]
         help_texts = {
             "first_name": _("Enter a first name."),
@@ -509,7 +393,7 @@ class CustomerPaymentProfileCreateForm(forms.ModelForm):
                     "placeholder": "444",
                     "enterkeyhint": "next",
                     "inputmode": "numeric",
-                    "aria-required": "false",
+                    "aria-required": "true",
                     "autocapitalize": "none",
                     "autocomplete": "cc-csc",
                     "autocorrect": "off",

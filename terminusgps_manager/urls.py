@@ -1,6 +1,7 @@
-from django.urls import path
+import terminusgps_payments.models
+from django.urls import path, reverse_lazy
 
-from . import views
+from . import forms, views
 
 app_name = "terminusgps_manager"
 urlpatterns = [
@@ -11,74 +12,79 @@ urlpatterns = [
         "subscriptions/", views.SubscriptionView.as_view(), name="subscription"
     ),
     path(
-        "subscriptions/create/",
-        views.SubscriptionCreateView.as_view(),
-        name="create subscriptions",
-    ),
-    path(
-        "subscriptions/<int:subscription_pk>/transactions/",
-        views.SubscriptionTransactionsView.as_view(),
-        name="subscription transactions",
-    ),
-    path(
-        "subscriptions/<int:subscription_pk>/detail/",
-        views.SubscriptionDetailView.as_view(),
-        name="detail subscriptions",
-    ),
-    path(
-        "subscriptions/<int:subscription_pk>/delete/",
-        views.SubscriptionDeleteView.as_view(),
-        name="delete subscriptions",
-    ),
-    path(
-        "subscriptions/<int:subscription_pk>/update/",
-        views.SubscriptionUpdateView.as_view(),
-        name="update subscriptions",
-    ),
-    path(
-        "payment-profiles/<int:customerprofile_pk>/create/",
-        views.CustomerPaymentProfileCreateView.as_view(),
+        "payment-profiles/create/",
+        views.AuthorizenetProfileCreateView.as_view(
+            model=terminusgps_payments.models.CustomerPaymentProfile,
+            form_class=forms.PaymentProfileCreateForm,
+            template_name="terminusgps_manager/payment_profiles/create.html",
+            success_url=reverse_lazy(
+                "terminusgps_manager:list payment profiles"
+            ),
+        ),
         name="create payment profiles",
     ),
     path(
-        "payment-profiles/<int:customerprofile_pk>/list/",
-        views.CustomerPaymentProfileListView.as_view(),
+        "payment-profiles/list/",
+        views.AuthorizenetProfileListView.as_view(
+            model=terminusgps_payments.models.CustomerPaymentProfile,
+            template_name="terminusgps_manager/payment_profiles/list.html",
+        ),
         name="list payment profiles",
     ),
     path(
-        "payment-profiles/<int:customerprofile_pk>/<int:paymentprofile_pk>/detail/",
-        views.CustomerPaymentProfileDetailView.as_view(),
-        name="detail payment profiles",
-    ),
-    path(
-        "payment-profiles/<int:customerprofile_pk>/<int:paymentprofile_pk>/delete/",
-        views.CustomerPaymentProfileDeleteView.as_view(),
+        "payment-profiles/<int:pk>/delete/",
+        views.AuthorizenetProfileDeleteView.as_view(
+            model=terminusgps_payments.models.CustomerPaymentProfile,
+            template_name="terminusgps_manager/payment_profiles/delete.html",
+            success_url=reverse_lazy(
+                "terminusgps_manager:delete payment profiles success"
+            ),
+        ),
         name="delete payment profiles",
     ),
     path(
-        "address-profiles/<int:customerprofile_pk>/create/",
-        views.CustomerAddressProfileCreateView.as_view(),
+        "payment-profiles/delete/success/",
+        views.AuthorizenetProfileDeleteSuccessView.as_view(
+            template_name="terminusgps_manager/payment_profiles/delete_success.html"
+        ),
+        name="delete payment profiles success",
+    ),
+    path(
+        "address-profiles/create/",
+        views.AuthorizenetProfileCreateView.as_view(
+            model=terminusgps_payments.models.CustomerAddressProfile,
+            form_class=forms.AddressProfileCreateForm,
+            template_name="terminusgps_manager/address_profiles/create.html",
+            success_url=reverse_lazy(
+                "terminusgps_manager:list address profiles"
+            ),
+        ),
         name="create address profiles",
     ),
     path(
-        "address-profiles/<int:customerprofile_pk>/list/",
-        views.CustomerAddressProfileListView.as_view(),
+        "address-profiles/list/",
+        views.AuthorizenetProfileListView.as_view(
+            model=terminusgps_payments.models.CustomerAddressProfile,
+            template_name="terminusgps_manager/address_profiles/list.html",
+        ),
         name="list address profiles",
     ),
     path(
-        "address-profiles/<int:customerprofile_pk>/<int:addressprofile_pk>/detail/",
-        views.CustomerAddressProfileDetailView.as_view(),
-        name="detail address profiles",
-    ),
-    path(
-        "address-profiles/<int:customerprofile_pk>/<int:addressprofile_pk>/delete/",
-        views.CustomerAddressProfileDeleteView.as_view(),
+        "address-profiles/<int:pk>/delete/",
+        views.AuthorizenetProfileDeleteView.as_view(
+            model=terminusgps_payments.models.CustomerAddressProfile,
+            template_name="terminusgps_manager/address_profiles/delete.html",
+            success_url=reverse_lazy(
+                "terminusgps_manager:delete address profiles success"
+            ),
+        ),
         name="delete address profiles",
     ),
     path(
-        "units/create/",
-        views.WialonUnitCreateView.as_view(),
-        name="create units",
+        "address-profiles/delete/success/",
+        views.AuthorizenetProfileDeleteSuccessView.as_view(
+            template_name="terminusgps_manager/address_profiles/delete_success.html"
+        ),
+        name="delete address profiles success",
     ),
-    path("units/list/", views.WialonUnitListView.as_view(), name="list units"),
 ]

@@ -103,7 +103,7 @@ MIDDLEWARE = [
 
 LOGGING = {
     "version": 1,
-    "disable_existing_loggers": False,
+    "disable_existing_loggers": True,
     "formatters": {
         "verbose": {
             "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
@@ -121,12 +121,17 @@ LOGGING = {
     },
     "root": {"handlers": ["console"], "level": "DEBUG"},
     "loggers": {
-        "django": {
+        "django.request": {
             "handlers": ["console"],
             "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
-            "propagate": True,
+            "propagate": False,
         },
         "authorizenet.sdk": {
+            "handlers": ["console"],
+            "level": "CRITICAL",
+            "propagate": False,
+        },
+        "terminusgps_payments": {
             "handlers": ["console"],
             "level": "DEBUG",
             "propagate": True,

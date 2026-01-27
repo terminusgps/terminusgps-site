@@ -1,0 +1,16 @@
+{% extends "terminusgps/layout.html" %}
+{% block content %}
+{% partialdef partial inline %}
+<div class="@container relative flex gap-2 items-center">
+    <div class="absolute top-0 right-0" hx-get="{% url 'terminusgps_manager:list payment profiles' %}" hx-indicator="#loading" hx-target="#payment-profiles">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 cursor-pointer">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+    </div>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="hidden size-8 text-red-700 fill-red-200 animate-pulse @md:flex">
+        <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    </svg>
+    <p>The payment profile was deleted successfully.</p>
+</div>
+{% endpartialdef partial %}
+{% endblock content %}
