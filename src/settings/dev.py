@@ -1,21 +1,19 @@
 import decimal
 import os
+import pathlib
 import sys
-from pathlib import Path
 
 from authorizenet.constants import constants
-from terminusgps.wialon.flags import TokenFlag
 
 os.umask(0)
 decimal.getcontext().prec = 4
 decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_FROM_EMAIL = "noreply@terminusgps.com"
-DEFAULT_TAX_RATE = decimal.Decimal(os.getenv("DEFAULT_TAX_RATE", "0.0825")) * 1
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
@@ -46,11 +44,6 @@ USE_TZ = True
 WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID", "29971406")
 WIALON_DEFAULT_PLAN = os.getenv("WIALON_DEFAULT_PLAN", "terminusgps_ext_hist")
 WIALON_TOKEN = os.getenv("WIALON_TOKEN")
-WIALON_TOKEN_ACCESS_TYPE = (
-    TokenFlag.VIEW_ACCESS
-    | TokenFlag.MANAGE_NONSENSITIVE
-    | TokenFlag.MANAGE_SENSITIVE
-)
 WSGI_APPLICATION = "src.wsgi.application"
 
 ADMINS = [
@@ -123,12 +116,12 @@ LOGGING = {
     "loggers": {
         "django.request": {
             "handlers": ["console"],
-            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
-            "propagate": False,
+            "level": "INFO",
+            "propagate": True,
         },
         "authorizenet.sdk": {
             "handlers": ["console"],
-            "level": "CRITICAL",
+            "level": "DEBUG",
             "propagate": False,
         },
         "terminusgps_payments": {

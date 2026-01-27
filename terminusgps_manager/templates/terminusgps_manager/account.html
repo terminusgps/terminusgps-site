@@ -3,10 +3,10 @@
 {% partialdef partial inline %}
 <div
     class="group flex flex-col border rounded border-stone-400 dark:border-stone-900 drop-shadow-sm"
-    hx-get="{% url 'terminusgps_manager:list payment profiles' %}"
+    hx-get="{% url 'terminusgps_manager:list payment profiles' %}{% querystring sync="on" %}"
     hx-target="#payment-profiles"
     hx-trigger="load once"
-    hx-indicator="#loading"
+    hx-indicator="#payment-profiles-indicator"
 >
     <div class="flex flex-col gap-4 p-8 bg-stone-50 dark:bg-stone-800 rounded">
         <div
@@ -24,15 +24,20 @@
                 <p>Add Payment Profile</p>
             </button>
         </div>
-        <h3 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Payment Profiles</h3>
+        <div class="flex items-center gap-2">
+            <h3 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Payment Profiles</h3>
+            <svg id="payment-profiles-indicator" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 animate-spin htmx-indicator">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+        </div>
     </div>
 </div>
 <div
     class="flex flex-col border rounded border-stone-400 dark:border-stone-900 drop-shadow-sm"
-    hx-get="{% url 'terminusgps_manager:list address profiles' %}"
+    hx-get="{% url 'terminusgps_manager:list address profiles' %}{% querystring sync="on" %}"
     hx-target="#address-profiles"
     hx-trigger="load once"
-    hx-indicator="#loading"
+    hx-indicator="#address-profiles-indicator"
 >
     <div class="flex flex-col gap-4 p-8 bg-stone-50 dark:bg-stone-800 rounded">
         <div
@@ -50,7 +55,12 @@
                 <p>Add Address Profile</p>
             </button>
         </div>
-        <h3 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Address Profiles</h3>
+        <div class="flex gap-2 items-center">
+            <h3 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Address Profiles</h3>
+            <svg id="address-profiles-indicator" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 animate-spin htmx-indicator">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+        </div>
     </div>
 </div>
 {% endpartialdef partial %}

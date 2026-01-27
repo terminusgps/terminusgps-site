@@ -17,6 +17,27 @@ WIDGET_CSS_CLASS = getattr(
 )
 
 
+class SubscriptionForm(forms.ModelForm):
+    consent = forms.BooleanField(initial=False)
+
+    class Meta:
+        model = terminusgps_payments.models.Subscription
+        fields = ["payment_profile", "address_profile"]
+        widgets = {
+            "payment_profile": forms.widgets.Select(
+                attrs={"class": WIDGET_CSS_CLASS, "aria-required": "true"}
+            ),
+            "address_profile": forms.widgets.Select(
+                attrs={"class": WIDGET_CSS_CLASS, "aria-required": "true"}
+            ),
+        }
+
+    def __init__(self, *args, **kwargs) -> None:
+        self.base_fields["payment_profile"].empty_label = None
+        self.base_fields["address_profile"].empty_label = None
+        super().__init__(*args, **kwargs)
+
+
 class AddressProfileCreateForm(forms.ModelForm):
     class Meta:
         model = terminusgps_payments.models.CustomerAddressProfile
