@@ -45,7 +45,7 @@ class TerminusGPSCustomer(models.Model):
     """Automatically generated customer tax amount."""
     grand_total = models.GeneratedField(
         db_persist=True,
-        expression=F("sub_total") + F("tax_total"),
+        expression=F("sub_total") + (F("sub_total") * (F("tax_rate") * 1)),
         help_text=_(
             "Automatically generated total amount (base+tax) to collect from the customer."
         ),
