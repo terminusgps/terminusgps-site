@@ -17,12 +17,16 @@ ALLOWED_HOSTS = [
     socket.gethostbyname(socket.gethostname()),
 ]
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+CACHE_MIDDLEWARE_ALIAS = "default"
+CACHE_MIDDLEWARE_SECONDS = 60 * 15
+CACHE_MIDDLEWARE_KEY_PREFIX = "terminusgps.com"
 CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = ["https://*.terminusgps.com", "https://terminusgps.com"]
 DEBUG = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 DEFAULT_CHARSET = "utf-8"
-DEFAULT_FROM_EMAIL = "noreply@terminusgps.com"
+DEFAULT_FROM_EMAIL = "support@terminusgps.com"
+DEFAULT_REPLY_TO_EMAIL = "support@terminusgps.com"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.getenv("EMAIL_HOST", "email-smtp.us-east-1.amazonaws.com")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
@@ -51,7 +55,7 @@ TIME_ZONE = "US/Central"
 USE_I18N = False
 USE_TZ = True
 USE_X_FORWARDED_HOST = True
-WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID", "27881459")
+WIALON_ADMIN_ID = os.getenv("WIALON_ADMIN_ID", "29971624")
 WIALON_DEFAULT_PLAN = os.getenv("WIALON_DEFAULT_PLAN", "terminusgps_ext_hist")
 WIALON_TOKEN = os.getenv("WIALON_TOKEN")
 WSGI_APPLICATION = "src.wsgi.application"
@@ -162,7 +166,9 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.cache.UpdateCacheMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "django.middleware.cache.FetchFromCacheMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
