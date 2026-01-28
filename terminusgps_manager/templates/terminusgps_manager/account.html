@@ -3,7 +3,7 @@
 {% partialdef partial inline %}
 <div
     class="group flex flex-col border rounded border-stone-400 dark:border-stone-900 drop-shadow-sm"
-    hx-get="{% url 'terminusgps_manager:list payment profiles' %}{% querystring sync="on" %}"
+    hx-get="{% url 'terminusgps_manager:list payment profiles' %}"
     hx-target="#payment-profiles"
     hx-trigger="load once"
     hx-indicator="#payment-profiles-indicator"
@@ -34,7 +34,7 @@
 </div>
 <div
     class="flex flex-col border rounded border-stone-400 dark:border-stone-900 drop-shadow-sm"
-    hx-get="{% url 'terminusgps_manager:list address profiles' %}{% querystring sync="on" %}"
+    hx-get="{% url 'terminusgps_manager:list address profiles' %}"
     hx-target="#address-profiles"
     hx-trigger="load once"
     hx-indicator="#address-profiles-indicator"

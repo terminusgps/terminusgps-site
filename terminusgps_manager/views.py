@@ -3,6 +3,7 @@ import logging
 import typing
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -11,7 +12,7 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.cache import cache_control, cache_page
+from django.views.decorators.cache import cache_control, never_cache
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -27,10 +28,16 @@ from terminusgps.authorizenet.service import (
     AuthorizenetService,
 )
 from terminusgps.mixins import HtmxTemplateResponseMixin
-from terminusgps_payments.models import CustomerProfile, Subscription
+from terminusgps.wialon.session import WialonAPIError, WialonSession
+from terminusgps_payments.models import (
+    CustomerAddressProfile,
+    CustomerPaymentProfile,
+    CustomerProfile,
+    Subscription,
+)
 from terminusgps_payments.tasks import sync_customer_profile_with_authorizenet
 
-from .forms import SubscriptionForm
+from .forms import SubscriptionCreateForm, SubscriptionUpdateForm
 from .models import TerminusGPSCustomer
 
 logger = logging.getLogger(__name__)
@@ -50,7 +57,6 @@ class TerminusGPSCustomerContextMixin(ContextMixin):
         return context
 
 
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 @method_decorator(cache_control(private=True), name="dispatch")
 class AccountView(
     LoginRequiredMixin,
@@ -64,7 +70,6 @@ class AccountView(
     template_name = "terminusgps_manager/account.html"
 
 
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 @method_decorator(cache_control(private=True), name="dispatch")
 class DashboardView(
     LoginRequiredMixin,
@@ -78,8 +83,7 @@ class DashboardView(
     template_name = "terminusgps_manager/dashboard.html"
 
 
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
-@method_decorator(cache_control(private=True), name="dispatch")
+@method_decorator(never_cache, name="dispatch")
 class UnitsView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -92,8 +96,7 @@ class UnitsView(
     template_name = "terminusgps_manager/units.html"
 
 
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
-@method_decorator(cache_control(private=True), name="dispatch")
+@method_decorator(never_cache, name="dispatch")
 class SubscriptionView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -106,6 +109,7 @@ class SubscriptionView(
     template_name = "terminusgps_manager/subscription.html"
 
 
+@method_decorator(never_cache, name="dispatch")
 class AuthorizenetProfileCreateView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -123,9 +127,10 @@ class AuthorizenetProfileCreateView(
 
     def form_valid(self, form: forms.ModelForm) -> HttpResponse:
         try:
-            customer = TerminusGPSCustomer.objects.get(user=self.request.user)
             obj = form.save(commit=False)
-            obj.customer_profile = customer.customer_profile
+            obj.customer_profile = CustomerProfile.objects.get(
+                user=self.request.user
+            )
             obj.save()
             return HttpResponseRedirect(self.get_success_url())
         except (
@@ -144,6 +149,7 @@ class AuthorizenetProfileCreateView(
             return self.form_invalid(form=form)
 
 
+@method_decorator(never_cache, name="dispatch")
 class AuthorizenetProfileListView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -156,18 +162,13 @@ class AuthorizenetProfileListView(
     model = None
     ordering = "pk"
 
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        if request.GET.get("sync", "off") == "on":
-            pk = CustomerProfile.objects.get(user=request.user).pk
-            sync_customer_profile_with_authorizenet.enqueue(pk)
-        return super().get(request, *args, **kwargs)
-
     def get_queryset(self) -> QuerySet:
         return self.model.objects.filter(
             customer_profile__user=self.request.user
         ).order_by(self.get_ordering())
 
 
+@method_decorator(never_cache, name="dispatch")
 class AuthorizenetProfileDeleteView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -206,6 +207,7 @@ class AuthorizenetProfileDeleteSuccessView(
     http_method_names = ["get"]
 
 
+@method_decorator(never_cache, name="dispatch")
 class SubscriptionCreateView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -215,23 +217,42 @@ class SubscriptionCreateView(
     content_type = "text/html"
     model = Subscription
     template_name = "terminusgps_manager/subscriptions/create.html"
-    form_class = SubscriptionForm
+    form_class = SubscriptionCreateForm
 
-    def form_valid(self, form: SubscriptionForm) -> HttpResponse:
+    def get_form(self, form_class=None) -> forms.ModelForm:
+        form = super().get_form(form_class=form_class)
+        payment_qs = CustomerPaymentProfile.objects.filter(
+            customer_profile__user=self.request.user
+        )
+        address_qs = CustomerAddressProfile.objects.filter(
+            customer_profile__user=self.request.user
+        )
+        form.fields["payment_profile"].queryset = payment_qs
+        form.fields["address_profile"].queryset = address_qs
+        return form
+
+    def form_valid(self, form: SubscriptionCreateForm) -> HttpResponse:
         try:
             customer = TerminusGPSCustomer.objects.get(user=self.request.user)
-            obj = form.save(commit=False)
-            obj.start_date = datetime.date.today()
-            obj.customer_profile = customer.customer_profile
-            obj.amount = customer.grand_total
-            obj.name = "Terminus GPS Subscription"
-            obj.save()
-            customer.subscription = obj
+            customer_profile = CustomerProfile.objects.get(
+                user=self.request.user
+            )
+
+            subscription = form.save(commit=False)
+            subscription.start_date = datetime.date.today()
+            subscription.customer_profile = customer_profile
+            subscription.amount = customer.grand_total
+            subscription.name = "Terminus GPS Subscription"
+            subscription.save()
+            customer.subscription = subscription
             customer.save(update_fields=["subscription"])
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                customer.wialon_account.enable(session)
+                customer.wialon_account.update_flags(session, flags=-0x20)
             return HttpResponseRedirect(
                 reverse(
                     "terminusgps_manager:detail subscriptions",
-                    kwargs={"pk": obj.pk},
+                    kwargs={"pk": subscription.pk},
                 )
             )
         except (
@@ -273,6 +294,7 @@ class SubscriptionDetailView(
         )
 
 
+@method_decorator(never_cache, name="dispatch")
 class SubscriptionUpdateView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -283,12 +305,29 @@ class SubscriptionUpdateView(
     http_method_names = ["get", "post"]
     model = Subscription
     template_name = "terminusgps_manager/subscriptions/update.html"
-    form_class = SubscriptionForm
+    form_class = SubscriptionUpdateForm
 
-    def form_valid(self, form: SubscriptionForm) -> HttpResponse:
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        customer_profile = CustomerProfile.objects.get(user=request.user)
+        sync_customer_profile_with_authorizenet.enqueue(customer_profile.pk)
+        return super().get(request, *args, **kwargs)
+
+    def get_success_url(self) -> str:
+        return reverse(
+            "terminusgps_manager:detail subscriptions",
+            kwargs={"pk": self.object.pk},
+        )
+
+    def form_valid(self, form: SubscriptionUpdateForm) -> HttpResponse:
         try:
-            print(f"{form.errors = }")
-            return super().form_valid(form=form)
+            if any(
+                [
+                    "payment_profile" in form.changed_data,
+                    "address_profile" in form.changed_data,
+                ]
+            ):
+                return super().form_valid(form=form)
+            return HttpResponseRedirect(self.get_success_url())
         except AuthorizenetControllerExecutionError as error:
             form.add_error(
                 None,
@@ -298,12 +337,25 @@ class SubscriptionUpdateView(
             )
             return self.form_invalid(form=form)
 
+    def get_form(self, form_class=None) -> forms.ModelForm:
+        form = super().get_form(form_class=form_class)
+        payment_qs = CustomerPaymentProfile.objects.filter(
+            customer_profile__user=self.request.user
+        )
+        address_qs = CustomerAddressProfile.objects.filter(
+            customer_profile__user=self.request.user
+        )
+        form.fields["payment_profile"].queryset = payment_qs
+        form.fields["address_profile"].queryset = address_qs
+        return form
+
     def get_queryset(self) -> QuerySet:
         return self.model.objects.filter(
             customer_profile__user=self.request.user
         )
 
 
+@method_decorator(never_cache, name="dispatch")
 class SubscriptionDeleteView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -318,15 +370,39 @@ class SubscriptionDeleteView(
     )
     template_name = "terminusgps_manager/subscriptions/delete.html"
 
+    def get_queryset(self) -> QuerySet:
+        return self.model.objects.filter(
+            customer_profile__user=self.request.user
+        )
+
     @transaction.atomic
     def form_valid(self, form: forms.ModelForm) -> HttpResponse:
+        subscription = self.get_object()
+        start_date = subscription.start_date
+        end_date = datetime.date.today()
+        customer = TerminusGPSCustomer.objects.get(user=self.request.user)
+        service = AuthorizenetService()
+
         try:
-            service = AuthorizenetService()
             service.execute(
                 api.cancel_subscription(subscription_id=self.get_object().pk)
             )
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                current_days = int(
+                    session.wialon_api.account_get_account_data(
+                        **{"itemId": customer.wialon_account.pk, "type": 2}
+                    )["daysCounter"]
+                )
+                remaining_days = (end_date - start_date).days - current_days
+                customer.wialon_account.enable(session)
+                customer.wialon_account.do_payment(
+                    session,
+                    days=remaining_days,
+                    desc=f"Canceled '{subscription.name}'. Added {remaining_days} days.",
+                )
+                customer.wialon_account.update_flags(session, flags=0x20)
             return super().form_valid(form=form)
-        except AuthorizenetControllerExecutionError as error:
+        except (AuthorizenetControllerExecutionError, WialonAPIError) as error:
             form.add_error(
                 None,
                 ValidationError(
@@ -334,11 +410,6 @@ class SubscriptionDeleteView(
                 ),
             )
             return self.form_invalid(form=form)
-
-    def get_queryset(self) -> QuerySet:
-        return self.model.objects.filter(
-            customer_profile__user=self.request.user
-        )
 
 
 class SubscriptionDeleteSuccessView(

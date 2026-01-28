@@ -1,5 +1,3 @@
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView, TemplateView
 from terminusgps.mixins import HtmxTemplateResponseMixin
 
@@ -29,7 +27,6 @@ class AndroidAppView(RedirectView):
     url = "https://play.google.com/store/apps/details?id=com.terminusgps.track&pcampaignid=web_share"
 
 
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class HomeView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {
@@ -40,7 +37,6 @@ class HomeView(HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps/home.html"
 
 
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class AboutView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "About", "subtitle": "Why we do what we do"}
@@ -48,7 +44,6 @@ class AboutView(HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps/about.html"
 
 
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class ContactView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {"title": "Contact", "subtitle": "Get in touch with us"}
@@ -56,7 +51,6 @@ class ContactView(HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps/contact.html"
 
 
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class TermsAndConditionsView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {
@@ -67,7 +61,6 @@ class TermsAndConditionsView(HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps/terms.html"
 
 
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class FrequentlyAskedQuestionsView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {
@@ -78,7 +71,6 @@ class FrequentlyAskedQuestionsView(HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps/faq.html"
 
 
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class PrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {
@@ -89,7 +81,6 @@ class PrivacyPolicyView(HtmxTemplateResponseMixin, TemplateView):
     template_name = "terminusgps/privacy.html"
 
 
-@method_decorator(cache_page(timeout=60 * 15), name="dispatch")
 class FeaturesView(HtmxTemplateResponseMixin, TemplateView):
     content_type = "text/html"
     extra_context = {

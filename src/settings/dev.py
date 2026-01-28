@@ -11,10 +11,14 @@ decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+CACHE_MIDDLEWARE_ALIAS = "default"
+CACHE_MIDDLEWARE_SECONDS = 60 * 15
+CACHE_MIDDLEWARE_KEY_PREFIX = "terminusgps.com"
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-DEFAULT_FROM_EMAIL = "noreply@terminusgps.com"
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "support@terminusgps.com"
+DEFAULT_REPLY_TO_EMAIL = "support@terminusgps.com"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "email-smtp.us-east-1.amazonaws.com"
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
@@ -63,6 +67,14 @@ CACHES = {
     "default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}
 }
 
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django.core.cache.backends.redis.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379",
+#         "TIMEOUT": 60 * 15,
+#     }
+# }
+
 TASKS = {
     "default": {
         "BACKEND": "django.tasks.backends.immediate.ImmediateBackend",
@@ -87,7 +99,9 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.cache.UpdateCacheMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "django.middleware.cache.FetchFromCacheMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -96,7 +110,7 @@ MIDDLEWARE = [
 
 LOGGING = {
     "version": 1,
-    "disable_existing_loggers": True,
+    "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
             "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
@@ -119,15 +133,15 @@ LOGGING = {
             "level": "INFO",
             "propagate": True,
         },
-        "authorizenet.sdk": {
+        "authorizenet": {
+            "handlers": ["console"],
+            "level": "CRITICAL",
+            "propagate": False,
+        },
+        "terminusgps_payments.models": {
             "handlers": ["console"],
             "level": "DEBUG",
             "propagate": False,
-        },
-        "terminusgps_payments": {
-            "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": True,
         },
     },
 }

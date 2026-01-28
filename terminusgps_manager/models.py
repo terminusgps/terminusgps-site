@@ -200,7 +200,7 @@ class WialonAccount(WialonObject):
         """Does an account payment in Wialon."""
         params = {
             "itemId": self.pk,
-            "balanceUpdate": bal,
+            "balanceUpdate": str(bal),
             "daysUpdate": days,
             "description": desc,
         }

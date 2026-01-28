@@ -1,13 +1,15 @@
-Hey, {{ first_name|default_if_none:'there' }}!
+Hey {{ fn|default_if_none:'there' }}!
 
-Thanks for registering an account with Terminus GPS.
+Thanks for signing up on {{ date }}.
 
-We created your account on {{ create_date|date:'m jS' }}.
+After subscribing, you'll have full access to the Terminus GPS platform.
 
-To explore available Terminus GPS services, [head to your dashboard]({{ dashboard_link }}).
+Please don't hesitate to reach out to our support team with further questions.
 
-We're looking forward to working with you!
+We look forward to working with you,
 
-See you around,
+Terminus GPS Team
 
-The Terminus GPS Team
+Terminus GPS Platform: {{ platform_link }}
+Terminus GPS Subscription: {{ subscribing_link }}
+Terminus GPS Support: {{ support_link }}

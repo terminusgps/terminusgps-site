@@ -1,5 +1,4 @@
 from collections.abc import Sequence
-from typing import Any
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -14,7 +13,7 @@ def send_email(
     template_name: str,
     reply_to: Sequence[str] = ("support@terminusgps.com",),
     from_email: str | None = None,
-    context: dict[str, Any] | None = None,
+    context: dict | None = None,
     html_template_name: str | None = None,
 ) -> bool:
     """
@@ -36,15 +35,18 @@ def send_email(
     :type html_template_name: str | None
 
     """
-    msg = EmailMultiAlternatives(
+    context = context if context is not None else {}
+    context["subject"] = subject
+
+    message = EmailMultiAlternatives(
         subject=subject,
         body=render_to_string(template_name, context=context),
-        from_email=from_email,
+        from_email=from_email if from_email else settings.DEFAULT_FROM_EMAIL,
         to=to,
         bcc=[admin[1] for admin in settings.ADMINS],
         reply_to=reply_to,
     )
     if html_template_name is not None:
         html_content = render_to_string(html_template_name, context=context)
-        msg.attach_alternative(html_content, "text/html")
-    return bool(msg.send(fail_silently=True))
+        message.attach_alternative(html_content, "text/html")
+    return bool(message.send())
