@@ -80,13 +80,13 @@ logging.config.dictConfig(
         },
         "handlers": {
             "console": {
-                "level": "DEBUG",
+                "level": "INFO",
                 "class": "logging.StreamHandler",
                 "stream": sys.stdout,
                 "formatter": "generic",
             }
         },
-        "root": {"handlers": ["console"], "level": "DEBUG"},
+        "root": {"handlers": ["console"], "level": "INFO"},
         "loggers": {
             "django.request": {
                 "handlers": ["console"],
