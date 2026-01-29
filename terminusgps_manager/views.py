@@ -28,9 +28,7 @@ from terminusgps.authorizenet.service import (
     AuthorizenetService,
 )
 from terminusgps.mixins import HtmxTemplateResponseMixin
-from terminusgps.wialon.constants import ACCESSMASK_UNIT_BASIC
 from terminusgps.wialon.session import WialonAPIError, WialonSession
-from terminusgps.wialon.utils import get_unit_from_imei
 from terminusgps_payments.models import (
     CustomerAddressProfile,
     CustomerPaymentProfile,
@@ -39,12 +37,10 @@ from terminusgps_payments.models import (
 )
 from terminusgps_payments.tasks import sync_customer_profile
 
-from .forms import (
-    SubscriptionCreateForm,
-    SubscriptionUpdateForm,
-    WialonUnitCreateForm,
-)
-from .models import TerminusGPSCustomer, WialonUnit
+from src.tasks import send_email
+
+from .forms import SubscriptionCreateForm, SubscriptionUpdateForm
+from .models import TerminusGPSCustomer
 
 logger = logging.getLogger(__name__)
 
@@ -262,6 +258,16 @@ class SubscriptionCreateView(
             with WialonSession(token=settings.WIALON_TOKEN) as session:
                 customer.wialon_account.enable(session)
                 customer.wialon_account.update_flags(session, flags=-0x20)
+            send_email.enqueue(
+                to=[customer.user.email],
+                subject="Terminus GPS - Subscription Created",
+                template_name="terminusgps/emails/subscription_created.txt",
+                html_template_name="terminusgps/emails/subscription_created.html",
+                context={
+                    "fn": customer.user.first_name,
+                    "date": subscription.start_date.strftime("%Y-%m-%d"),
+                },
+            )
             return HttpResponseRedirect(
                 reverse(
                     "terminusgps_manager:detail subscriptions",
@@ -414,71 +420,19 @@ class SubscriptionDeleteView(
                     desc=f"Canceled '{subscription.name}'. Added {remaining_days} days.",
                 )
                 customer.wialon_account.update_flags(session, flags=0x20)
+                send_email.enqueue(
+                    to=[customer.user.email],
+                    subject="Terminus GPS - Subscription Canceled",
+                    template_name="terminusgps/emails/subscription_canceled.txt",
+                    html_template_name="terminusgps/emails/subscription_canceled.html",
+                    context={
+                        "fn": customer.user.first_name,
+                        "date": end_date.strftime("%Y-%m-%d"),
+                        "days": remaining_days,
+                    },
+                )
             return super().form_valid(form=form)
         except (AuthorizenetControllerExecutionError, WialonAPIError) as error:
-            form.add_error(
-                None,
-                ValidationError(
-                    "%(error)s", code="invalid", params={"error": str(error)}
-                ),
-            )
-            return self.form_invalid(form=form)
-
-
-@method_decorator(never_cache, name="dispatch")
-class WialonUnitListView(
-    LoginRequiredMixin,
-    TerminusGPSCustomerContextMixin,
-    HtmxTemplateResponseMixin,
-    ListView,
-):
-    allow_empty = True
-    content_type = "text/html"
-    http_method_names = ["get"]
-    model = WialonUnit
-    ordering = "pk"
-    paginate_by = 8
-    template_name = "terminusgps_manager/units/list.html"
-
-    def get_queryset(self) -> QuerySet:
-        customer = TerminusGPSCustomer.objects.get(user=self.request.user)
-        return customer.wialon_units.all().order_by(self.get_ordering())
-
-
-@method_decorator(never_cache, name="dispatch")
-class WialonUnitCreateView(
-    LoginRequiredMixin,
-    TerminusGPSCustomerContextMixin,
-    HtmxTemplateResponseMixin,
-    CreateView,
-):
-    content_type = "text/html"
-    form_class = WialonUnitCreateForm
-    http_method_names = ["get", "post"]
-    model = WialonUnit
-    template_name = "terminusgps_manager/units/create.html"
-    success_url = reverse_lazy("terminusgps_manager:list units")
-
-    @transaction.atomic
-    def form_valid(self, form: WialonUnitCreateForm) -> HttpResponse:
-        try:
-            customer = TerminusGPSCustomer.objects.get(user=self.request.user)
-            unit = WialonUnit()
-            with WialonSession(token=settings.WIALON_TOKEN) as session:
-                data = get_unit_from_imei(form.cleaned_data["imei"], session)
-                unit.pk = int(data["id"])
-                unit.save()
-
-                session.wialon_api.item_update_name(
-                    **{"itemId": unit.pk, "name": form.cleaned_data["name"]}
-                )
-                customer.wialon_units.add(unit)
-                customer.wialon_user.grant_access(
-                    session, id=unit.pk, access_mask=ACCESSMASK_UNIT_BASIC
-                )
-                customer.save()
-            return super().form_valid(form=form)
-        except WialonAPIError as error:
             form.add_error(
                 None,
                 ValidationError(

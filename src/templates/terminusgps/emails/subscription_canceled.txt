@@ -4,6 +4,8 @@ Your subscription was canceled on {{ date }}.
 
 You will lose access to the Terminus GPS platform in {{ days }} day{{ days|pluralize }}!
 
+If you change your mind and wish to re-subscribe, please do so on our website.
+
 Please don't hesitate to reach out to our support team with further questions.
 
 We hope to see you again soon,
@@ -12,3 +14,4 @@ Terminus GPS Team
 
 Terminus GPS Platform: {{ platform_link }}
 Terminus GPS Support: {{ support_link }}
+Terminus GPS Subscription: {{ subscription_link }}

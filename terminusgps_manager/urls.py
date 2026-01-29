@@ -22,14 +22,6 @@ urlpatterns = [
         name="account",
     ),
     path(
-        "units/",
-        views.TerminusGPSManagerTemplateView.as_view(
-            template_name="terminusgps_manager/units.html",
-            extra_context={"title": "Units"},
-        ),
-        name="units",
-    ),
-    path(
         "subscriptions/",
         views.TerminusGPSManagerTemplateView.as_view(
             template_name="terminusgps_manager/subscription.html",
@@ -139,11 +131,5 @@ urlpatterns = [
             template_name="terminusgps_manager/subscriptions/delete_success.html"
         ),
         name="delete subscriptions success",
-    ),
-    path("units/list/", views.WialonUnitListView.as_view(), name="list units"),
-    path(
-        "units/create/",
-        views.WialonUnitCreateView.as_view(),
-        name="create units",
     ),
 ]

@@ -16,8 +16,3 @@ class WialonAccountAdmin(admin.ModelAdmin):
 @admin.register(models.WialonUser)
 class WialonUserAdmin(admin.ModelAdmin):
     list_display = ["name"]
-
-
-@admin.register(models.WialonUnit)
-class WialonUnitAdmin(admin.ModelAdmin):
-    list_display = ["name"]

@@ -91,13 +91,6 @@ class TerminusGPSCustomer(models.Model):
         help_text=_("Select a Wialon account from the list."),
     )
     """Associated Wialon resource."""
-    wialon_units = models.ManyToManyField(
-        "terminusgps_manager.WialonUnit",
-        blank=True,
-        related_name="customers",
-        help_text=_("Select Wialon unit(s) from the list."),
-    )
-    """Associated Wialon units."""
 
     class Meta:
         verbose_name = _("customer")
@@ -205,12 +198,6 @@ class WialonAccount(WialonObject):
             "description": desc,
         }
         return session.wialon_api.account_do_payment(**params)
-
-
-class WialonUnit(WialonObject):
-    class Meta:
-        verbose_name = _("wialon unit")
-        verbose_name_plural = _("wialon units")
 
 
 class WialonUser(WialonObject):
