@@ -5,16 +5,70 @@ from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from terminusgps.wialon.session import WialonSession
+from terminusgps.wialon.utils import get_unit_from_imei
 from terminusgps_payments.forms import (
     ExpirationDateField,
     ExpirationDateWidget,
 )
+
+from .models import WialonUnit
 
 WIDGET_CSS_CLASS = getattr(
     settings,
     "WIDGET_CSS_CLASS",
     "peer p-2 rounded border border-current bg-gray-50 dark:bg-gray-600 user-valid:bg-green-50 user-valid:text-green-700 user-invalid:bg-red-50 user-invalid:text-red-600 group-has-[ul]:text-red-600 group-has-[ul]:bg-red-50",
 )
+
+
+class WialonUnitCreateForm(forms.ModelForm):
+    imei = forms.CharField(
+        label=_("IMEI #"),
+        max_length=25,
+        help_text=_(
+            "Enter the IMEI number printed on your installed GPS tracking device."
+        ),
+        widget=forms.widgets.TextInput(
+            attrs={
+                "class": WIDGET_CSS_CLASS,
+                "aria-required": "true",
+                "placeholder": "4111111111111111",
+            }
+        ),
+    )
+
+    class Meta:
+        model = WialonUnit
+        fields = ["name"]
+        help_texts = {
+            "name": _(
+                "Enter a memorable name for your asset/vehicle in the Terminus GPS platform."
+            )
+        }
+        widgets = {
+            "name": forms.widgets.TextInput(
+                attrs={
+                    "class": WIDGET_CSS_CLASS,
+                    "aria-required": "true",
+                    "placeholder": "My Vehicle",
+                }
+            )
+        }
+
+    def clean(self):
+        super().clean()
+        try:
+            with WialonSession(token=settings.WIALON_TOKEN) as session:
+                get_unit_from_imei(self.cleaned_data["imei"], session=session)
+        except ValueError:
+            self.add_error(
+                "imei",
+                ValidationError(
+                    _("Whoops! Couldn't find a unit with IMEI #%(imei)s."),
+                    code="invalid",
+                    params={"imei": self.cleaned_data["imei"]},
+                ),
+            )
 
 
 class SubscriptionCreateForm(forms.ModelForm):

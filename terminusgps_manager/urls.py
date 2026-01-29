@@ -135,7 +135,15 @@ urlpatterns = [
     ),
     path(
         "subscriptions/delete/success/",
-        views.SubscriptionDeleteSuccessView.as_view(),
+        views.TerminusGPSManagerTemplateView.as_view(
+            template_name="terminusgps_manager/subscriptions/delete_success.html"
+        ),
         name="delete subscriptions success",
+    ),
+    path("units/list/", views.WialonUnitListView.as_view(), name="list units"),
+    path(
+        "units/create/",
+        views.WialonUnitCreateView.as_view(),
+        name="create units",
     ),
 ]
