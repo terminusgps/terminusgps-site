@@ -7,18 +7,109 @@ from . import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", views.HomeView.as_view(), name="home"),
-    path("platform/", views.PlatformView.as_view(), name="platform"),
-    path("source/", views.SourceCodeView.as_view(), name="source code"),
-    path("features/", views.FeaturesView.as_view(), name="features"),
-    path("about/", views.AboutView.as_view(), name="about"),
-    path("contact/", views.ContactView.as_view(), name="contact"),
-    path("privacy/", views.PrivacyPolicyView.as_view(), name="privacy"),
-    path("terms/", views.TermsAndConditionsView.as_view(), name="terms"),
-    path("faq/", views.FrequentlyAskedQuestionsView.as_view(), name="faq"),
-    path("apps/ios/", views.IOSAppView.as_view(), name="ios app"),
-    path("apps/android/", views.AndroidAppView.as_view(), name="android app"),
-    path("features/", views.FeaturesView.as_view(), name="features"),
+    path("navbar/", views.NavbarView.as_view(), name="navbar"),
+    path(
+        "platform/",
+        views.TerminusGPSRedirectView.as_view(
+            url="https://hosting.terminusgps.com/", query_string=True
+        ),
+        name="platform",
+    ),
+    path(
+        "source/",
+        views.TerminusGPSRedirectView.as_view(
+            url="https://github.com/terminusgps/terminusgps-site/"
+        ),
+        name="source code",
+    ),
+    path(
+        "apps/ios/",
+        views.TerminusGPSRedirectView.as_view(
+            url="https://apps.apple.com/us/app/terminus-gps-mobile/id1419439009"
+        ),
+        name="ios app",
+    ),
+    path(
+        "apps/android/",
+        views.TerminusGPSRedirectView.as_view(
+            url="https://play.google.com/store/apps/details?id=com.terminusgps.track&pcampaignid=web_share"
+        ),
+        name="android app",
+    ),
+    path(
+        "",
+        views.HtmxTemplateView.as_view(
+            template_name="terminusgps/home.html",
+            extra_context={
+                "title": "Home",
+                "subtitle": "In God we trust, all others we track",
+            },
+        ),
+        name="home",
+    ),
+    path(
+        "features/",
+        views.HtmxTemplateView.as_view(
+            template_name="terminusgps/features.html",
+            extra_context={
+                "title": "Features",
+                "subtitle": "Your entire fleet, at your fingertips",
+            },
+        ),
+        name="features",
+    ),
+    path(
+        "about/",
+        views.HtmxTemplateView.as_view(
+            template_name="terminusgps/about.html",
+            extra_context={
+                "title": "About",
+                "subtitle": "Why we do what we do",
+            },
+        ),
+        name="about",
+    ),
+    path(
+        "contact/",
+        views.HtmxTemplateView.as_view(
+            template_name="terminusgps/contact.html",
+            extra_context={"title": "Contact", "subtitle": "Drop us a line"},
+        ),
+        name="contact",
+    ),
+    path(
+        "privacy/",
+        views.HtmxTemplateView.as_view(
+            template_name="terminusgps/privacy.html",
+            extra_context={
+                "title": "Privacy Policy",
+                "subtitle": "How we use your data",
+            },
+        ),
+        name="privacy",
+    ),
+    path(
+        "terms/",
+        views.HtmxTemplateView.as_view(
+            template_name="terminusgps/terms.html",
+            extra_context={
+                "title": "Terms & Conditions",
+                "subtitle": "You agree to these by using Terminus GPS services",
+            },
+        ),
+        name="terms",
+    ),
+    path(
+        "faq/",
+        views.HtmxTemplateView.as_view(
+            template_name="terminusgps/faq.html",
+            extra_context={
+                "title": "Frequently Asked Questions",
+                "subtitle": "With frequently cited answers",
+            },
+        ),
+        name="faq",
+    ),
     path("register/", views.RegisterView.as_view(), name="register"),
     path("login/", views.LoginView.as_view(), name="login"),
     path("logout/", views.LogoutView.as_view(), name="logout"),

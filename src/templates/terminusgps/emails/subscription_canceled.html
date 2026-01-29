@@ -1,0 +1,13 @@
+{% extends "terminusgps/emails/layout.html" %}
+{% block content %}
+<h3 class="text-xl font-semibold">Hey {{ fn|default_if_none:'there' }}!</h3>
+<div class="flex flex-col items-center gap-2 text-pretty">
+    <p>Your subscription was canceled on {{ date }}.</p>
+    <p>You will lose access to the Terminus GPS platform in {{ days }} day{{ days|pluralize }}!</p>
+    <p>Please don't hesitate to reach out to our support team with further questions.</p>
+    <p>We hope to see you again soon,</p>
+    <a href="{{ contact_link|default:'https://app.terminusgps.com/contact/' }}" class="decoration text-terminus-red-200 decoration-terminus-black hover:text-terminus-red-100 w-fit underline underline-offset-4 hover:decoration-dotted dark:decoration-white">
+        <p>Terminus GPS Team</p>
+    </a>
+</div>
+{% endblock content %}

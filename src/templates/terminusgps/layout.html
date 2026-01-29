@@ -1,4 +1,4 @@
-{% load static %}
+{% load cache static %}
 <!doctype html>
 <html lang="en">
     <head>
@@ -16,11 +16,29 @@
         <script src="https://9681add82420.us-east-1.captcha-sdk.awswaf.com/9681add82420/jsapi.js" defer></script>
     </head>
     <body class="h-dvh text-gray-800 bg-repeat-round dark:text-gray-100" style="background-image: url({% static 'terminusgps/img/background.jpg' %});">
-        {% include "terminusgps/navbar.html" %}
+        <nav class="flex justify-between border-b border-stone-400 bg-stone-200 drop-shadow dark:bg-stone-800 print:border-none print:drop-shadow-none" hx-get="{% url 'navbar' %}" hx-trigger="load once">
+            <a href="{% url 'home' %}" class="group flex items-center space-x-1">
+                <img src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="animate-coin-slow size-16 group-hover:animate-none print:animate-none"/>
+                <img src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24"/>
+            </a>
+            <div class="mx-4 flex items-center gap-2 print:hidden">
+                <div class="flex items-center gap-2 rounded border border-stone-600 bg-stone-300 px-4 py-2 transition-colors duration-300 ease-in-out animate-pulse hover:bg-stone-100 dark:bg-stone-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 invisible">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/>
+                    </svg>
+                    <p class="invisible">Loading</p>
+                </div>
+                <div class="flex items-center gap-2 rounded border border-stone-600 bg-stone-300 px-4 py-2 transition-colors duration-300 ease-in-out animate-pulse hover:bg-stone-100 dark:bg-stone-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 invisible">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/>
+                    </svg>
+                    <p class="invisible">Loading</p>
+                </div>
+            </div>
+        </nav>
         <div class="p-8 md:p-16">
             <main class="flex flex-col gap-8 rounded border border-stone-300 bg-stone-100 p-4 drop-shadow-lg md:p-8 dark:border-stone-700 dark:bg-stone-900 print:border-none print:drop-shadow-none">
                 {% include "terminusgps/header.html" %}
-                {% if messages %}{% include "terminusgps/messages.html" %}{% endif %}
                 {% block content %}{% endblock content %}
             </main>
         </div>

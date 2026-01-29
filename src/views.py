@@ -1,6 +1,5 @@
 import datetime
 
-from django.conf import settings
 from django.contrib.auth.views import LoginView as LoginViewBase
 from django.contrib.auth.views import LogoutView as LogoutViewBase
 from django.core.exceptions import ValidationError
@@ -8,88 +7,46 @@ from django.db import transaction
 from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.decorators.cache import never_cache
-from django.views.generic import FormView
+from django.views.decorators.cache import cache_control, never_cache
+from django.views.generic import FormView, RedirectView, TemplateView
 from terminusgps.authorizenet.service import (
     AuthorizenetControllerExecutionError,
 )
 from terminusgps.mixins import HtmxTemplateResponseMixin
-from terminusgps.wialon.session import WialonAPIError, WialonSession
-from terminusgps.wialon.utils import generate_wialon_password
+from terminusgps.wialon.session import WialonAPIError
 from terminusgps_payments.models import CustomerProfile
 
-from terminusgps_manager.models import (
-    TerminusGPSCustomer,
-    WialonAccount,
-    WialonUser,
-)
+from terminusgps_manager.models import TerminusGPSCustomer
 
-from ..forms import TerminusgpsAuthenticationForm, TerminusgpsRegistrationForm
-from ..tasks import send_email
+from .forms import TerminusgpsAuthenticationForm, TerminusgpsRegistrationForm
+from .services import wialon_registration_flow
+from .tasks import send_email
 
 
-@transaction.atomic
-def wialon_registration_flow(
-    form: TerminusgpsRegistrationForm, customer: TerminusGPSCustomer
-) -> None:
-    with WialonSession(token=settings.WIALON_TOKEN) as session:
-        # Create account user
-        super_user_data = session.wialon_api.core_create_user(
-            **{
-                "creatorId": settings.WIALON_ADMIN_ID,
-                "name": f"super_{form.cleaned_data['username']}",
-                "password": generate_wialon_password(),
-                "dataFlags": 1,
-            }
-        )
-        super_user = WialonUser()
-        super_user.pk = int(super_user_data["item"]["id"])
-        super_user.save()
+class TerminusGPSRedirectView(RedirectView):
+    """Permanent redirect view."""
 
-        # Create resource
-        resource_data = session.wialon_api.core_create_resource(
-            **{
-                "creatorId": super_user.pk,
-                "name": f"account_{form.cleaned_data['username']}",
-                "skipCreatorCheck": int(True),
-                "dataFlags": 1,
-            }
-        )
-        # Create account from resource
-        session.wialon_api.account_create_account(
-            **{
-                "itemId": int(resource_data["item"]["id"]),
-                "plan": "terminusgps_ext_hist",
-            }
-        )
-        account = WialonAccount()
-        account.pk = int(resource_data["item"]["id"])
-        account.save()
+    http_method_names = ["get"]
+    permanent = True
 
-        # Enable account and clear flags
-        account.enable(session)
-        account.update_flags(session, flags=-0x20)
 
-        # Create end user
-        end_user_data = session.wialon_api.core_create_user(
-            **{
-                "creatorId": super_user.pk,
-                "name": form.cleaned_data["username"],
-                "password": form.cleaned_data["password1"],
-                "dataFlags": 1,
-            }
-        )
-        end_user = WialonUser()
-        end_user.pk = int(end_user_data["item"]["id"])
-        end_user.save()
+class HtmxTemplateView(HtmxTemplateResponseMixin, TemplateView):
+    """Renders a template partial instead of the full template on htmx request."""
 
-        # Disable account, enabled by subscribing
-        account.disable(session)
+    content_type = "text/html"
+    http_method_names = ["get"]
 
-        # Assign to objects to customer
-        customer.wialon_user = end_user
-        customer.wialon_account = account
-        customer.save(update_fields=["wialon_user", "wialon_account"])
+
+@method_decorator(cache_control(private=True), name="dispatch")
+class NavbarView(HtmxTemplateView):
+    template_name = "terminusgps/navbar.html"
+
+
+class LogoutView(HtmxTemplateResponseMixin, LogoutViewBase):
+    content_type = "text/html"
+    extra_context = {"title": "Logged Out"}
+    http_method_names = ["get", "post"]
+    template_name = "terminusgps/logged_out.html"
 
 
 @method_decorator(never_cache, name="dispatch")
@@ -99,13 +56,6 @@ class LoginView(HtmxTemplateResponseMixin, LoginViewBase):
     form_class = TerminusgpsAuthenticationForm
     http_method_names = ["get", "post"]
     template_name = "terminusgps/login.html"
-
-
-class LogoutView(HtmxTemplateResponseMixin, LogoutViewBase):
-    content_type = "text/html"
-    extra_context = {"title": "Logged Out"}
-    http_method_names = ["get", "post"]
-    template_name = "terminusgps/logged_out.html"
 
 
 @method_decorator(never_cache, name="dispatch")

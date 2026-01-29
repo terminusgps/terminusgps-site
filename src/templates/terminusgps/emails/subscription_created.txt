@@ -1,0 +1,14 @@
+Hey {{ fn|default_if_none:'there' }}!
+
+Thanks for subscribing on {{ date }}.
+
+You now have full access to the Terminus GPS platform!
+
+Please don't hesitate to reach out to our support team with further questions.
+
+We look forward to working with you,
+
+Terminus GPS Team
+
+Terminus GPS Platform: {{ platform_link }}
+Terminus GPS Support: {{ support_link }}

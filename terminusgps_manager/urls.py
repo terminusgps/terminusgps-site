@@ -5,11 +5,37 @@ from . import forms, views
 
 app_name = "terminusgps_manager"
 urlpatterns = [
-    path("dashboard/", views.DashboardView.as_view(), name="dashboard"),
-    path("account/", views.AccountView.as_view(), name="account"),
-    path("units/", views.UnitsView.as_view(), name="units"),
     path(
-        "subscriptions/", views.SubscriptionView.as_view(), name="subscription"
+        "dashboard/",
+        views.TerminusGPSManagerTemplateView.as_view(
+            template_name="terminusgps_manager/dashboard.html",
+            extra_context={"title": "Dashboard"},
+        ),
+        name="dashboard",
+    ),
+    path(
+        "account/",
+        views.TerminusGPSManagerTemplateView.as_view(
+            template_name="terminusgps_manager/account.html",
+            extra_context={"title": "Account"},
+        ),
+        name="account",
+    ),
+    path(
+        "units/",
+        views.TerminusGPSManagerTemplateView.as_view(
+            template_name="terminusgps_manager/units.html",
+            extra_context={"title": "Units"},
+        ),
+        name="units",
+    ),
+    path(
+        "subscriptions/",
+        views.TerminusGPSManagerTemplateView.as_view(
+            template_name="terminusgps_manager/subscription.html",
+            extra_context={"title": "Subscription"},
+        ),
+        name="subscription",
     ),
     path(
         "payment-profiles/create/",

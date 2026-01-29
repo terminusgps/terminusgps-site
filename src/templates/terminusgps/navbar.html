@@ -1,105 +1,39 @@
+{% extends "terminusgps/layout.html" %}
 {% load static %}
-<nav
-    class="flex justify-between border-b border-stone-400 bg-stone-200 drop-shadow dark:bg-stone-800 print:border-none print:drop-shadow-none"
->
-    <a href="{% url 'home' %}" class="group flex items-center space-x-1">
-        <img
-            src="{% static 'terminusgps/icon/logo-waypoint.svg' %}"
-            class="animate-coin-slow size-16 group-hover:animate-none print:animate-none"
-        />
-        <img
-            src="{% static 'terminusgps/icon/logo-text.svg' %}"
-            class="size-24"
-        />
+{% block content %}
+{% partialdef partial inline %}
+<a href="{% url 'home' %}" class="group flex items-center space-x-1">
+    <img src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="animate-coin-slow size-16 group-hover:animate-none print:animate-none"/>
+    <img src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24"/>
+</a>
+<div class="mx-4 flex items-center gap-2 print:hidden">
+    {% if request.user and request.user.is_authenticated %}
+    <a href="{% url 'terminusgps_manager:dashboard' %}" class="flex items-center gap-2 rounded border border-stone-600 bg-stone-300 px-4 py-2 transition-colors duration-300 ease-in-out hover:bg-stone-100 dark:bg-stone-600 dark:hover:bg-stone-400">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="group-hover:text-terminus-red-300 relative size-6 transition-colors duration-300 ease-in-out">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+        </svg>
+        <p class="hidden md:flex">{{ user.username }}</p>
     </a>
-    <div class="mx-4 flex items-center gap-2 print:hidden">
-        {% if request.user and request.user.is_authenticated %}
-        <a
-            href="{% url 'terminusgps_manager:dashboard' %}"
-            class="flex items-center gap-2 rounded border border-stone-600 bg-stone-300 px-4 py-2 transition-colors duration-300 ease-in-out hover:bg-stone-100 dark:bg-stone-600 dark:hover:bg-stone-400"
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="group-hover:text-terminus-red-300 relative size-6 transition-colors duration-300 ease-in-out"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                />
-            </svg>
-            <p class="hidden md:flex">{{ user.username }}</p>
-        </a>
-        <button
-            hx-post="{% url 'logout' %}"
-            class="flex items-center gap-2 rounded border border-stone-600 bg-stone-300 px-4 py-2 transition-colors duration-300 ease-in-out cursor-pointer hover:bg-stone-100 dark:bg-stone-600 dark:hover:bg-stone-400"
-            hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'
-            hx-trigger="click"
-            hx-target="body"
-            hx-swap="outerHTML"
-            hx-confirm="Are you sure you want to logout?"
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="size-6"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
-                />
-            </svg>
-            <p class="hidden md:flex">Logout</p>
-        </button>
-        {% else %}
-        <a
-            href="{% url 'register' %}"
-            class="flex items-center gap-2 rounded border border-stone-600 bg-stone-300 px-4 py-2 transition-colors duration-300 ease-in-out hover:bg-stone-100 dark:bg-stone-600 dark:hover:bg-stone-400"
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="size-6"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"
-                />
-            </svg>
-            <p class="hidden md:flex">Register</p>
-        </a>
-        <a
-            href="{% url 'login' %}"
-            class="flex items-center gap-2 rounded border border-stone-600 bg-stone-300 px-4 py-2 transition-colors duration-300 ease-in-out hover:bg-stone-100 dark:bg-stone-600 dark:hover:bg-stone-400"
-        >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="size-6"
-            >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"
-                />
-            </svg>
-            <p class="hidden md:flex">Login</p>
-        </a>
-        {% endif %}
-    </div>
-</nav>
+    <button hx-post="{% url 'logout' %}" class="flex items-center gap-2 rounded border border-stone-600 bg-stone-300 px-4 py-2 transition-colors duration-300 ease-in-out cursor-pointer hover:bg-stone-100 dark:bg-stone-600 dark:hover:bg-stone-400" hx-headers='{"x-csrftoken": "{{ csrf_token }}"}' hx-trigger="click" hx-boost="true" hx-confirm="Are you sure you want to logout?">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"/>
+        </svg>
+        <p class="hidden md:flex">Logout</p>
+    </button>
+    {% else %}
+    <a href="{% url 'register' %}" class="flex items-center gap-2 rounded border border-stone-600 bg-stone-300 px-4 py-2 transition-colors duration-300 ease-in-out hover:bg-stone-100 dark:bg-stone-600 dark:hover:bg-stone-400">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"/>
+        </svg>
+        <p class="hidden md:flex">Register</p>
+    </a>
+    <a href="{% url 'login' %}" class="flex items-center gap-2 rounded border border-stone-600 bg-stone-300 px-4 py-2 transition-colors duration-300 ease-in-out hover:bg-stone-100 dark:bg-stone-600 dark:hover:bg-stone-400">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/>
+        </svg>
+        <p class="hidden md:flex">Login</p>
+    </a>
+    {% endif %}
+</div>
+{% endpartialdef partial %}
+{% endblock content %}

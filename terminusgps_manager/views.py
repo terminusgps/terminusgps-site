@@ -58,6 +58,16 @@ class TerminusGPSCustomerContextMixin(ContextMixin):
 
 
 @method_decorator(cache_control(private=True), name="dispatch")
+class TerminusGPSManagerTemplateView(
+    LoginRequiredMixin,
+    TerminusGPSCustomerContextMixin,
+    HtmxTemplateResponseMixin,
+    TemplateView,
+):
+    content_type = "text/html"
+    http_method_names = ["get"]
+
+
 class AccountView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -70,7 +80,6 @@ class AccountView(
     template_name = "terminusgps_manager/account.html"
 
 
-@method_decorator(cache_control(private=True), name="dispatch")
 class DashboardView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -83,7 +92,6 @@ class DashboardView(
     template_name = "terminusgps_manager/dashboard.html"
 
 
-@method_decorator(never_cache, name="dispatch")
 class UnitsView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -96,7 +104,6 @@ class UnitsView(
     template_name = "terminusgps_manager/units.html"
 
 
-@method_decorator(never_cache, name="dispatch")
 class SubscriptionView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
