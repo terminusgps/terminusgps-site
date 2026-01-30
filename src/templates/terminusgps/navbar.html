@@ -1,6 +1,6 @@
 {% load static %}
 <nav class="flex justify-between border-b border-stone-400 bg-stone-200 drop-shadow dark:bg-stone-800 print:border-none print:drop-shadow-none" hx-boost="true">
-    <a href="{% url 'home' %}" class="group flex items-center space-x-1">
+    <a href="{% url 'home' %}" class="group flex items-center space-x-1" hx-boost="false">
         <img src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="animate-coin-slow size-16 group-hover:animate-none print:animate-none"/>
         <img src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24"/>
     </a>
