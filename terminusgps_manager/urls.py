@@ -62,7 +62,7 @@ urlpatterns = [
     ),
     path(
         "payment-profiles/delete/success/",
-        views.AuthorizenetProfileDeleteSuccessView.as_view(
+        views.TerminusGPSManagerTemplateView.as_view(
             template_name="terminusgps_manager/payment_profiles/delete_success.html"
         ),
         name="delete payment profiles success",
@@ -100,7 +100,7 @@ urlpatterns = [
     ),
     path(
         "address-profiles/delete/success/",
-        views.AuthorizenetProfileDeleteSuccessView.as_view(
+        views.TerminusGPSManagerTemplateView.as_view(
             template_name="terminusgps_manager/address_profiles/delete_success.html"
         ),
         name="delete address profiles success",

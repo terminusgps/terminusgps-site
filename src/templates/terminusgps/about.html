@@ -2,32 +2,50 @@
 {% load static %}
 {% block content %}
 {% partialdef partial inline %}
-<section class="border rounded border-stone-400 drop-shadow-sm dark:border-stone-600">
-    <div class="flex flex-col gap-4 p-8 bg-stone-50 rounded dark:bg-stone-800">
-        <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">Terminus GPS is "need driven" and founded on a parent's need-to-know</h4>
-        <div class="flex flex-col gap-4">
-            <p>We are parents to three teenage children, one who began driving in 2013.</p>
-            <p>Today's driving is challenging even for the most experienced road veterans. Gone are the days of just driving with the radio as our <span class="italic">only</span> distraction.</p>
-            <p>Today's roads are deceptively dangerous; it's a major milestone for any 16-year-old to achieve their driver's license, conversely it's every parents' nightmare once driving begins.</p>
-            <p>When our daughter began driving I was working for a GPS tracking company where it was my responsibility to program devices for specific co-ordinance, speed, distance, gas consumption and other optimization diagnostics for fleet vehicles.</p>
-            <p>My wife asked if I could design a similar device to be installed into the vehicle our daughter was driving, to allow for real time information of driving, duration of destinations and speeds during travel.</p>
-            <p>The peace of mind this simple program offered was <span class="italic">invaluable</span>.</p>
-            <p>Alerts were sent and received on my wife's cell phone each time our daughter turned her vehicle on and could be viewed at anytime while the car was in operation.  The device was also programmed to alert both our daughter and my wife if speed limits were exceeded and for how long.</p>
-            <p>Almost immediately, our neighbors, young parents themselves as well, were asking how they could purchase this device and program. While we very much wanted to share the same peace of mind with other parents of teenage drivers, and children of aging parents, at that time this was not possible.</p>
-            <p>After more than four years and many requests from friends, neighbors and acquaintances, we launched our company Terminus GPS in 2015 to provide the solution.</p>
-            <p>While we can't solve every worry associated with our teens, we can <a href="#" class="decoration w-fit text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-500 hover:decoration-dotted dark:text-terminus-red-400 dark:decoration-white dark:hover:text-terminus-red-200">provide a little peace of mind</a> while they're behind the wheel. We're committed to reducing risk that teens and adults face while on the road.</p>
-        </div>
-        <div class="flex gap-4 items-center mt-4">
-            <img src="{% static 'terminusgps/img/peterheadshot.jpg' %}" class="size-24 rounded-full">
-            <div class="flex flex-col text-lg">
-                <p class="font-semibold text-gray-800 dark:text-gray-100">Peter Speckman</p>
-                <p class="text-gray-600 dark:text-gray-300">President</p>
-            </div>
+<h3 class="my-4 text-terminus-red-600 dark:text-terminus-red-100 text-2xl font-bold text-center md:text-left md:text-4xl">Our Story</h3>
+<div class="flex flex-col gap-4 px-4">
+    <p class="font-semibold">Terminus GPS is "need driven" and founded on a parent's need-to-know.</p>
+    <p>We are parents to three teenage children, one who began driving in 2013.</p>
+    <p>Today's driving is challenging even for the most experienced road veterans. Gone are the days of just driving with the radio as our <span class="italic">only</span> distraction.</p>
+    <p>Today's roads are deceptively dangerous; it's a major milestone for any 16-year-old to achieve their driver's license, conversely it's every parents' nightmare once driving begins.</p>
+    <p>When our daughter began driving I was working for a GPS tracking company where it was my responsibility to program devices for specific co-ordinance, speed, distance, gas consumption and other optimization diagnostics for fleet vehicles.</p>
+    <p>My wife asked if I could design a similar device to be installed into the vehicle our daughter was driving, to allow for real time information of driving, duration of destinations and speeds during travel.</p>
+    <p>The peace of mind this simple program offered was <span class="italic">invaluable</span>.</p>
+    <p>Alerts were sent and received on my wife's cell phone each time our daughter turned her vehicle on and could be viewed at anytime while the car was in operation.  The device was also programmed to alert both our daughter and my wife if speed limits were exceeded and for how long.</p>
+    <p>Almost immediately, our neighbors, young parents themselves as well, were asking how they could purchase this device and program. While we very much wanted to share the same peace of mind with other parents of teenage drivers, and children of aging parents, at that time this was not possible.</p>
+    <p>After more than four years and many requests from friends, neighbors and acquaintances, we launched our company Terminus GPS in 2015 to provide the solution.</p>
+    <p>While we can't solve every worry associated with our teens, we can provide a little peace-of-mind while they're behind the wheel. We're committed to reducing the risk that teens and adults face while on the road.</p>
+</div>
+<h3 class="my-4 text-terminus-red-600 dark:text-terminus-red-100 text-2xl font-bold text-center md:text-left md:text-4xl">Our Team</h3>
+<div class="@container flex flex-col gap-4 px-4">
+    <div class="p-2 flex items-center gap-4 bg-stone-200 rounded-full">
+        <img class="size-16 rounded-full @md:size-24" src="{% static 'terminusgps/img/peterheadshot.jpg' %}">
+        <div class="flex flex-col">
+            <p class="font-semibold text-gray-800 dark:text-gray-100 @md:text-lg">Peter Speckman</p>
+            <p class="text-gray-600 dark:text-gray-300">Founder</p>
         </div>
     </div>
-</section>
-<section class="flex flex-col gap-2 text-pretty">
-    <img class="h-full w-fit drop-shadow-sm" src="{% static 'terminusgps/img/2024_iot_project_finalist_badge.png' %}" alt="2024 IoT Project of the Year Finalist Badge">
-</section>
+    <div class="p-2 flex items-center gap-4 bg-stone-200 rounded-full">
+        <img class="size-16 rounded-full @md:size-24" src="{% static 'terminusgps/img/peterheadshot.jpg' %}">
+        <div class="flex flex-col">
+            <p class="font-semibold text-gray-800 dark:text-gray-100 @md:text-lg">Lili Noack</p>
+            <p class="text-gray-600 dark:text-gray-300">Administrator</p>
+        </div>
+    </div>
+    <div class="p-2 flex items-center gap-4 bg-stone-200 rounded-full">
+        <img class="size-16 rounded-full @md:size-24" src="{% static 'terminusgps/img/peterheadshot.jpg' %}">
+        <div class="flex flex-col">
+            <p class="font-semibold text-gray-800 dark:text-gray-100 @md:text-lg">Saitia Long</p>
+            <p class="text-gray-600 dark:text-gray-300">Installer</p>
+        </div>
+    </div>
+    <div class="p-2 flex items-center gap-4 bg-stone-200 rounded-full">
+        <img class="size-16 rounded-full @md:size-24" src="{% static 'terminusgps/img/peterheadshot.jpg' %}">
+        <div class="flex flex-col">
+            <p class="font-semibold text-gray-800 dark:text-gray-100 @md:text-lg">Blake Nall</p>
+            <p class="text-gray-600 dark:text-gray-300">Developer</p>
+        </div>
+    </div>
+</div>
 {% endpartialdef %}
 {% endblock content %}

@@ -156,16 +156,6 @@ class AuthorizenetProfileDeleteView(
             return self.form_invalid(form=form)
 
 
-class AuthorizenetProfileDeleteSuccessView(
-    LoginRequiredMixin,
-    TerminusGPSCustomerContextMixin,
-    HtmxTemplateResponseMixin,
-    TemplateView,
-):
-    content_type = "text/html"
-    http_method_names = ["get"]
-
-
 @method_decorator(cache_control(private=True), name="dispatch")
 class SubscriptionCreateView(
     LoginRequiredMixin,
