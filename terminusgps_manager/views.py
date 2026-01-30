@@ -8,11 +8,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.cache import cache_control, cache_page
+from django.views.decorators.cache import cache_control
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -35,7 +35,6 @@ from terminusgps_payments.models import (
     CustomerProfile,
     Subscription,
 )
-from terminusgps_payments.tasks import sync_customer_profile
 
 from src.tasks import send_email
 
@@ -110,7 +109,6 @@ class AuthorizenetProfileCreateView(
 
 
 @method_decorator(cache_control(private=True), name="dispatch")
-@method_decorator(cache_page(timeout=60 * 3), name="dispatch")
 class AuthorizenetProfileListView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -168,7 +166,6 @@ class AuthorizenetProfileDeleteSuccessView(
     http_method_names = ["get"]
 
 
-@method_decorator(cache_page(timeout=60 * 3), name="dispatch")
 @method_decorator(cache_control(private=True), name="dispatch")
 class SubscriptionCreateView(
     LoginRequiredMixin,
@@ -249,7 +246,6 @@ class SubscriptionCreateView(
             return self.form_invalid(form=form)
 
 
-@method_decorator(cache_page(timeout=60 * 3), name="dispatch")
 @method_decorator(cache_control(private=True), name="dispatch")
 class SubscriptionDetailView(
     LoginRequiredMixin,
@@ -268,7 +264,6 @@ class SubscriptionDetailView(
         )
 
 
-@method_decorator(cache_page(timeout=60 * 3), name="dispatch")
 @method_decorator(cache_control(private=True), name="dispatch")
 class SubscriptionUpdateView(
     LoginRequiredMixin,
@@ -281,11 +276,6 @@ class SubscriptionUpdateView(
     model = Subscription
     template_name = "terminusgps_manager/subscriptions/update.html"
     form_class = SubscriptionUpdateForm
-
-    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        customer_profile = CustomerProfile.objects.get(user=request.user)
-        sync_customer_profile.enqueue(customer_profile.pk)
-        return super().get(request, *args, **kwargs)
 
     def get_success_url(self) -> str:
         return reverse(
