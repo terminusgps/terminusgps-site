@@ -284,7 +284,7 @@ class SubscriptionUpdateView(
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         customer_profile = CustomerProfile.objects.get(user=request.user)
-        sync_customer_profile(customer_profile.pk)
+        sync_customer_profile.enqueue(customer_profile.pk)
         return super().get(request, *args, **kwargs)
 
     def get_success_url(self) -> str:
