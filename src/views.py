@@ -37,7 +37,9 @@ class HtmxTemplateView(HtmxTemplateResponseMixin, TemplateView):
     http_method_names = ["get"]
 
 
-@method_decorator(cache_control(private=True), name="dispatch")
+@method_decorator(
+    cache_control(private=True, must_revalidate=True), name="dispatch"
+)
 class NavbarView(HtmxTemplateView):
     template_name = "terminusgps/navbar.html"
 

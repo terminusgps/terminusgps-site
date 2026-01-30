@@ -5,27 +5,6 @@
     <h3 class="font-semibold text-gray-900">Hey, {{ request.user.first_name|default:'there' }}!</h3>
     <p class="text-gray-600">It's {% now 'F jS, Y' %}</p>
 </div>
-<div id="subscription" class="flex py-4 px-2 gap-4 items-center bg-stone-50 rounded border border-stone-400 drop-shadow-sm md:p-4">
-    {% if customer.subscription %}
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-green-700 fill-green-50 hidden md:flex">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-    </svg>
-    {% else %}
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8 text-red-700 fill-red-50 hidden md:flex">
-        <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-    </svg>
-    {% endif %}
-    <div class="flex flex-col">
-        <p class="text-gray-900 font-semibold">You <span class="italic">{{ customer.subscription|yesno:"are, aren't" }}</span> subscribed{{ customer.subscription|yesno:"!,." }}</p>
-        <p class="text-gray-700">
-            {% if not customer.subscription %}
-            You cannot access <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'platform' %}">the platform</a>. <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'terminusgps_manager:subscription' %}">Click here</a> to subscribe.
-            {% else %}
-            You have full access to <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{% url 'platform' %}">the platform</a>. Thanks for subscribing!
-            {% endif %}
-        </p>
-    </div>
-</div>
 <div id="links" class="flex flex-col gap-4" hx-boost="true">
     <a href="{% url 'terminusgps_manager:account' %}" class="flex items-center justify-between gap-2 rounded border-2 border-terminus-red-800 bg-terminus-red-500 p-4 text-gray-100 transition-colors duration-300 ease-in-out hover:bg-terminus-red-200">
         <div class="flex items-center gap-4">
