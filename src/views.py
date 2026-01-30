@@ -26,6 +26,7 @@ class PermanentRedirectView(RedirectView):
 
     http_method_names = ["get"]
     permanent = True
+    query_string = False
 
 
 class HtmxTemplateView(HtmxTemplateResponseMixin, TemplateView):
@@ -33,13 +34,6 @@ class HtmxTemplateView(HtmxTemplateResponseMixin, TemplateView):
 
     content_type = "text/html"
     http_method_names = ["get"]
-
-
-class LogoutTemplateView(HtmxTemplateResponseMixin, TemplateView):
-    content_type = "text/html"
-    extra_context = {"title": "Logout"}
-    http_method_names = ["get"]
-    template_name = "terminusgps/logout.html"
 
 
 class LogoutView(HtmxTemplateResponseMixin, LogoutViewBase):
