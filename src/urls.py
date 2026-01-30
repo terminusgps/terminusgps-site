@@ -7,31 +7,30 @@ from . import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("navbar/", views.NavbarView.as_view(), name="navbar"),
     path(
         "platform/",
-        views.TerminusGPSRedirectView.as_view(
+        views.PermanentRedirectView.as_view(
             url="https://hosting.terminusgps.com/", query_string=True
         ),
         name="platform",
     ),
     path(
         "source/",
-        views.TerminusGPSRedirectView.as_view(
+        views.PermanentRedirectView.as_view(
             url="https://github.com/terminusgps/terminusgps-site/"
         ),
         name="source code",
     ),
     path(
         "apps/ios/",
-        views.TerminusGPSRedirectView.as_view(
+        views.PermanentRedirectView.as_view(
             url="https://apps.apple.com/us/app/terminus-gps-mobile/id1419439009"
         ),
         name="ios app",
     ),
     path(
         "apps/android/",
-        views.TerminusGPSRedirectView.as_view(
+        views.PermanentRedirectView.as_view(
             url="https://play.google.com/store/apps/details?id=com.terminusgps.track&pcampaignid=web_share"
         ),
         name="android app",
@@ -112,7 +111,8 @@ urlpatterns = [
     ),
     path("register/", views.RegisterView.as_view(), name="register"),
     path("login/", views.LoginView.as_view(), name="login"),
-    path("logout/", views.LogoutView.as_view(), name="logout"),
+    path("logout/", views.LogoutTemplateView.as_view(), name="logout"),
+    path("logged_out/", views.LogoutView.as_view(), name="logged out"),
     path("", include("terminusgps_manager.urls")),
 ]
 

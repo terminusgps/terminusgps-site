@@ -6,8 +6,6 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import HttpResponse
 from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_control, never_cache
 from django.views.generic import FormView, RedirectView, TemplateView
 from terminusgps.authorizenet.service import (
     AuthorizenetControllerExecutionError,
@@ -23,7 +21,7 @@ from .services import wialon_registration_flow
 from .tasks import send_email
 
 
-class TerminusGPSRedirectView(RedirectView):
+class PermanentRedirectView(RedirectView):
     """Permanent redirect view."""
 
     http_method_names = ["get"]
@@ -37,30 +35,30 @@ class HtmxTemplateView(HtmxTemplateResponseMixin, TemplateView):
     http_method_names = ["get"]
 
 
-@method_decorator(
-    cache_control(private=True, must_revalidate=True), name="dispatch"
-)
-class NavbarView(HtmxTemplateView):
-    template_name = "terminusgps/navbar.html"
+class LogoutTemplateView(HtmxTemplateResponseMixin, TemplateView):
+    content_type = "text/html"
+    extra_context = {"title": "Logout"}
+    http_method_names = ["get"]
+    template_name = "terminusgps/logout.html"
 
 
 class LogoutView(HtmxTemplateResponseMixin, LogoutViewBase):
     content_type = "text/html"
     extra_context = {"title": "Logged Out"}
-    http_method_names = ["get", "post"]
     template_name = "terminusgps/logged_out.html"
 
 
-@method_decorator(never_cache, name="dispatch")
 class LoginView(HtmxTemplateResponseMixin, LoginViewBase):
     content_type = "text/html"
-    extra_context = {"title": "Login"}
+    extra_context = {
+        "title": "Login",
+        "subtitle": "We know where ours are... do you?",
+    }
     form_class = TerminusgpsAuthenticationForm
     http_method_names = ["get", "post"]
     template_name = "terminusgps/login.html"
 
 
-@method_decorator(never_cache, name="dispatch")
 class RegisterView(HtmxTemplateResponseMixin, FormView):
     content_type = "text/html"
     extra_context = {

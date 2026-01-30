@@ -12,7 +12,7 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.cache import cache_control, never_cache
+from django.views.decorators.cache import cache_control, cache_page
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -70,55 +70,6 @@ class TerminusGPSManagerTemplateView(
     http_method_names = ["get"]
 
 
-class AccountView(
-    LoginRequiredMixin,
-    TerminusGPSCustomerContextMixin,
-    HtmxTemplateResponseMixin,
-    TemplateView,
-):
-    content_type = "text/html"
-    extra_context = {"title": "Account"}
-    http_method_names = ["get"]
-    template_name = "terminusgps_manager/account.html"
-
-
-class DashboardView(
-    LoginRequiredMixin,
-    TerminusGPSCustomerContextMixin,
-    HtmxTemplateResponseMixin,
-    TemplateView,
-):
-    content_type = "text/html"
-    http_method_names = ["get"]
-    extra_context = {"title": "Dashboard"}
-    template_name = "terminusgps_manager/dashboard.html"
-
-
-class UnitsView(
-    LoginRequiredMixin,
-    TerminusGPSCustomerContextMixin,
-    HtmxTemplateResponseMixin,
-    TemplateView,
-):
-    content_type = "text/html"
-    http_method_names = ["get"]
-    extra_context = {"title": "Units"}
-    template_name = "terminusgps_manager/units.html"
-
-
-class SubscriptionView(
-    LoginRequiredMixin,
-    TerminusGPSCustomerContextMixin,
-    HtmxTemplateResponseMixin,
-    TemplateView,
-):
-    content_type = "text/html"
-    http_method_names = ["get"]
-    extra_context = {"title": "Subscription"}
-    template_name = "terminusgps_manager/subscription.html"
-
-
-@method_decorator(never_cache, name="dispatch")
 class AuthorizenetProfileCreateView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -158,7 +109,8 @@ class AuthorizenetProfileCreateView(
             return self.form_invalid(form=form)
 
 
-@method_decorator(never_cache, name="dispatch")
+@method_decorator(cache_control(private=True), name="dispatch")
+@method_decorator(cache_page(timeout=60 * 3), name="dispatch")
 class AuthorizenetProfileListView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -177,7 +129,7 @@ class AuthorizenetProfileListView(
         ).order_by(self.get_ordering())
 
 
-@method_decorator(never_cache, name="dispatch")
+@method_decorator(cache_control(private=True), name="dispatch")
 class AuthorizenetProfileDeleteView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -216,7 +168,8 @@ class AuthorizenetProfileDeleteSuccessView(
     http_method_names = ["get"]
 
 
-@method_decorator(never_cache, name="dispatch")
+@method_decorator(cache_page(timeout=60 * 3), name="dispatch")
+@method_decorator(cache_control(private=True), name="dispatch")
 class SubscriptionCreateView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -296,6 +249,8 @@ class SubscriptionCreateView(
             return self.form_invalid(form=form)
 
 
+@method_decorator(cache_page(timeout=60 * 3), name="dispatch")
+@method_decorator(cache_control(private=True), name="dispatch")
 class SubscriptionDetailView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -313,7 +268,8 @@ class SubscriptionDetailView(
         )
 
 
-@method_decorator(never_cache, name="dispatch")
+@method_decorator(cache_page(timeout=60 * 3), name="dispatch")
+@method_decorator(cache_control(private=True), name="dispatch")
 class SubscriptionUpdateView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,
@@ -374,7 +330,7 @@ class SubscriptionUpdateView(
         )
 
 
-@method_decorator(never_cache, name="dispatch")
+@method_decorator(cache_control(private=True), name="dispatch")
 class SubscriptionDeleteView(
     LoginRequiredMixin,
     TerminusGPSCustomerContextMixin,

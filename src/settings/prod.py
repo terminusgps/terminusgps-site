@@ -12,13 +12,15 @@ decimal.getcontext().prec = 4
 decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 
 ALLOWED_HOSTS = [
+    "terminusgps.com",
     ".terminusgps.com",
     ".elb.amazonaws.com",
+    ".awswaf.com",
     socket.gethostbyname(socket.gethostname()),
 ]
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 CACHE_MIDDLEWARE_ALIAS = "default"
-CACHE_MIDDLEWARE_SECONDS = 60 * 15
+CACHE_MIDDLEWARE_SECONDS = 60 * 5
 CACHE_MIDDLEWARE_KEY_PREFIX = "terminusgps.com"
 CSRF_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = ["https://*.terminusgps.com", "https://terminusgps.com"]
@@ -165,14 +167,14 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.cache.UpdateCacheMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.cache.FetchFromCacheMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.cache.FetchFromCacheMiddleware",
 ]
 
 

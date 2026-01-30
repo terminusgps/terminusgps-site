@@ -9,10 +9,10 @@ os.umask(0)
 decimal.getcontext().prec = 4
 decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".awswaf.com"]
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 CACHE_MIDDLEWARE_ALIAS = "default"
-CACHE_MIDDLEWARE_SECONDS = 60 * 15
+CACHE_MIDDLEWARE_SECONDS = 60 * 5
 CACHE_MIDDLEWARE_KEY_PREFIX = "terminusgps.com"
 DEBUG = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -98,14 +98,14 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.cache.UpdateCacheMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.cache.FetchFromCacheMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.cache.FetchFromCacheMiddleware",
 ]
 
 LOGGING = {
@@ -130,7 +130,7 @@ LOGGING = {
     "loggers": {
         "django.request": {
             "handlers": ["console"],
-            "level": "INFO",
+            "level": "DEBUG",
             "propagate": True,
         },
         "authorizenet": {
