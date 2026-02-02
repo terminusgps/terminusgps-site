@@ -144,7 +144,7 @@ RQ_QUEUES = {"default": {"HOST": "127.0.0.1", "PORT": 6379}}
 
 TASKS = {
     "default": {
-        "BACKEND": "django_tasks.backends.rq.RQBackend",
+        "BACKEND": "django.tasks.backends.immediate.ImmediateBackend",
         "QUEUES": ["default"],
     }
 }
