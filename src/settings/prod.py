@@ -159,8 +159,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
-    "django_rq",
-    "django_tasks",
     "terminusgps_payments.apps.TerminusgpsPaymentsConfig",
     "terminusgps_manager.apps.TerminusgpsManagerConfig",
 ]

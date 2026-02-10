@@ -131,8 +131,6 @@ urlpatterns = [
     path("", include("terminusgps_manager.urls")),
 ]
 
-if not settings.DEBUG:
-    urlpatterns.insert(-2, path("django-rq/", include("django_rq.urls")))
 if settings.DEBUG:
     urlpatterns += static(
         settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
