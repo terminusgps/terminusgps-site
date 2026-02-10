@@ -119,7 +119,15 @@ urlpatterns = [
         ),
         name="logout",
     ),
-    path("logged_out/", views.LogoutView.as_view(), name="logged out"),
+    path(
+        "logged_out/",
+        views.LogoutView.as_view(extra_context={"title": "Logged Out"}),
+        name="logged out",
+    ),
+    path(
+        "payments/",
+        include("terminusgps_payments.urls", namespace="terminusgps_payments"),
+    ),
     path("", include("terminusgps_manager.urls")),
 ]
 

@@ -204,8 +204,13 @@ class SubscriptionCreateView(
                 template_name="terminusgps/emails/subscription_created.txt",
                 html_template_name="terminusgps/emails/subscription_created.html",
                 context={
-                    "fn": customer.user.first_name,
+                    "first_name": customer.user.first_name,
                     "date": subscription.start_date.strftime("%Y-%m-%d"),
+                    "links": {
+                        "platform": "https://hosting.terminusgps.com/",
+                        "contact": "https://app.terminusgps.com/contact/",
+                        "subscriptions": "https://app.terminusgps.com/subscriptions/",
+                    },
                 },
             )
             return HttpResponseRedirect(
@@ -362,9 +367,14 @@ class SubscriptionDeleteView(
                     template_name="terminusgps/emails/subscription_canceled.txt",
                     html_template_name="terminusgps/emails/subscription_canceled.html",
                     context={
-                        "fn": customer.user.first_name,
+                        "first_name": customer.user.first_name,
                         "date": end_date.strftime("%Y-%m-%d"),
-                        "days": remaining_days,
+                        "num_days": remaining_days,
+                        "links": {
+                            "platform": "https://hosting.terminusgps.com/",
+                            "contact": "https://app.terminusgps.com/contact/",
+                            "subscriptions": "https://app.terminusgps.com/subscriptions/",
+                        },
                     },
                 )
             return super().form_valid(form=form)

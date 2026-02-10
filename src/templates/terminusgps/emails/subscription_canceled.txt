@@ -1,8 +1,8 @@
-Hey {{ fn|default_if_none:'there' }}!
+Hey {{ first_name }}!
 
 Your subscription was canceled on {{ date }}.
 
-You will lose access to the Terminus GPS platform in {{ days }} day{{ days|pluralize }}!
+You will lose access to the Terminus GPS platform in {{ num_days }} day{{ num_days|pluralize }}!
 
 If you change your mind and wish to re-subscribe, please do so on our website.
 
@@ -12,6 +12,6 @@ We hope to see you again soon,
 
 Terminus GPS Team
 
-Terminus GPS Platform: {{ platform_link }}
-Terminus GPS Support: {{ support_link }}
-Terminus GPS Subscription: {{ subscription_link }}
+Terminus GPS Platform: {{ links.platform }}
+Terminus GPS Support: {{ links.support }}
+Terminus GPS Subscription: {{ links.subscriptions }}

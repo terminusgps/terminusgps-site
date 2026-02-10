@@ -1,0 +1,9 @@
+{% extends "terminusgps/emails/layout.html" %}
+{% block content %}
+<div class="flex flex-col items-center gap-2 text-pretty">
+    <p>{{ wialon_username }}'s subscription was canceled {{ num_days }} day{{ num_days|pluralize }} ago.</p>
+    <p>Wialon User: {{ wialon_username }}</p>
+    <p>Wialon Account: {{ wialon_account }}</p>
+    {% include "terminusgps/emails/signature.html" %}
+</div>
+{% endblock content %}

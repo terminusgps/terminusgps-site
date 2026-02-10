@@ -1,6 +1,6 @@
 {% extends "terminusgps/emails/layout.html" %}
 {% block content %}
-<h3 class="text-xl font-semibold">Hey {{ fn|default_if_none:'there' }}!</h3>
+<h3 class="text-xl font-semibold">Hey {{ first_name }}!</h3>
 <div class="flex flex-col items-center gap-2 text-pretty">
     <p>Thanks for subscribing on {{ date }}.</p>
     <p>You now have full access to the Terminus GPS platform!</p>

@@ -1,5 +1,10 @@
 import terminusgps_payments.models
 from django.urls import path, reverse_lazy
+from terminusgps_payments.views import (
+    AuthorizenetCreateView,
+    AuthorizenetDeleteView,
+    AuthorizenetListView,
+)
 
 from . import forms, views
 
@@ -31,7 +36,7 @@ urlpatterns = [
     ),
     path(
         "payment-profiles/create/",
-        views.AuthorizenetProfileCreateView.as_view(
+        AuthorizenetCreateView.as_view(
             model=terminusgps_payments.models.CustomerPaymentProfile,
             form_class=forms.PaymentProfileCreateForm,
             template_name="terminusgps_manager/payment_profiles/create.html",
@@ -43,7 +48,7 @@ urlpatterns = [
     ),
     path(
         "payment-profiles/list/",
-        views.AuthorizenetProfileListView.as_view(
+        AuthorizenetListView.as_view(
             model=terminusgps_payments.models.CustomerPaymentProfile,
             template_name="terminusgps_manager/payment_profiles/list.html",
         ),
@@ -51,7 +56,7 @@ urlpatterns = [
     ),
     path(
         "payment-profiles/<int:pk>/delete/",
-        views.AuthorizenetProfileDeleteView.as_view(
+        AuthorizenetDeleteView.as_view(
             model=terminusgps_payments.models.CustomerPaymentProfile,
             template_name="terminusgps_manager/payment_profiles/delete.html",
             success_url=reverse_lazy(
@@ -69,7 +74,7 @@ urlpatterns = [
     ),
     path(
         "address-profiles/create/",
-        views.AuthorizenetProfileCreateView.as_view(
+        AuthorizenetCreateView.as_view(
             model=terminusgps_payments.models.CustomerAddressProfile,
             form_class=forms.AddressProfileCreateForm,
             template_name="terminusgps_manager/address_profiles/create.html",
@@ -81,7 +86,7 @@ urlpatterns = [
     ),
     path(
         "address-profiles/list/",
-        views.AuthorizenetProfileListView.as_view(
+        AuthorizenetListView.as_view(
             model=terminusgps_payments.models.CustomerAddressProfile,
             template_name="terminusgps_manager/address_profiles/list.html",
         ),
@@ -89,7 +94,7 @@ urlpatterns = [
     ),
     path(
         "address-profiles/<int:pk>/delete/",
-        views.AuthorizenetProfileDeleteView.as_view(
+        AuthorizenetDeleteView.as_view(
             model=terminusgps_payments.models.CustomerAddressProfile,
             template_name="terminusgps_manager/address_profiles/delete.html",
             success_url=reverse_lazy(

@@ -2,7 +2,7 @@
 {% block content %}
 {% partialdef partial inline %}
 <div class="@container p-4 flex flex-col gap-4" hx-indicator="#loading">
-    <div id="subscription" class="p-4 flex flex-col gap-4 bg-stone-50 border rounded border-stone-400 drop-shadow-sm @md:p-8" hx-get="{% if customer.subscription != None %}{% url 'terminusgps_manager:detail subscriptions' customer.subscription.pk %}{% else %}{% url 'terminusgps_manager:create subscriptions' %}{% endif %}" hx-target="this" hx-trigger="load once"></div>
+    <div id="subscription" class="p-4 flex flex-col gap-4 bg-stone-50 border rounded border-stone-400 drop-shadow-sm @md:p-8" hx-get="{% if customer.subscription != None %}{% url 'terminusgps_payments:detail subscriptions' customer.subscription.pk %}{% else %}{% url 'terminusgps_payments:create subscriptions' %}{% endif %}" hx-target="this" hx-trigger="load once"></div>
 </div>
 {% endpartialdef partial %}
 {% endblock content %}

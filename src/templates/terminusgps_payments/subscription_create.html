@@ -1,7 +1,6 @@
 {% extends "terminusgps/layout.html" %}
-{% block content %}
-{% partialdef partial inline %}
-<form class="@container flex flex-col gap-4" hx-post="{% url 'terminusgps_manager:create subscriptions' %}">
+{% partialdef main %}
+<form class="@container flex flex-col gap-4" hx-post="{% url 'terminusgps_payments:create subscriptions' %}">
     {% if form.non_field_errors %}
     <div class="p-2 bg-red-200 text-red-700 animate-jiggle border border-current rounded">
         <div class="flex gap-2 items-center">
@@ -66,5 +65,7 @@
         <p>Subscribe</p>
     </button>
 </form>
-{% endpartialdef partial %}
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
 {% endblock content %}

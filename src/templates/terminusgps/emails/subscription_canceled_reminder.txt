@@ -1,0 +1,4 @@
+{{ wialon_username }}'s subscription was canceled {{ num_days }} day{{ num_days|pluralize }} ago.
+
+Wialon User: {{ wialon_username }}
+Wialon Account: {{ wialon_account }}

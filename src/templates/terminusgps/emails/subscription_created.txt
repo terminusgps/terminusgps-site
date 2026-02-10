@@ -1,4 +1,4 @@
-Hey {{ fn|default_if_none:'there' }}!
+Hey {{ first_name }}!
 
 Thanks for subscribing on {{ date }}.
 
@@ -10,5 +10,5 @@ We look forward to working with you,
 
 Terminus GPS Team
 
-Terminus GPS Platform: {{ platform_link }}
-Terminus GPS Support: {{ support_link }}
+Terminus GPS Platform: {{ links.platform }}
+Terminus GPS Support: {{ links.support }}

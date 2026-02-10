@@ -38,7 +38,6 @@ class HtmxTemplateView(HtmxTemplateResponseMixin, TemplateView):
 
 class LogoutView(HtmxTemplateResponseMixin, LogoutViewBase):
     content_type = "text/html"
-    extra_context = {"title": "Logged Out"}
     template_name = "terminusgps/logged_out.html"
 
 
@@ -90,12 +89,14 @@ class RegisterView(HtmxTemplateResponseMixin, FormView):
                 template_name="terminusgps/emails/account_created.txt",
                 html_template_name="terminusgps/emails/account_created.html",
                 context={
-                    "fn": user.first_name,
+                    "first_name": user.first_name,
                     "date": datetime.date.today().strftime("%Y-%m-%d"),
-                    "platform_link": "https://hosting.terminusgps.com",
-                    "support_link": "mailto:support@terminusgps.com",
-                    "contact_link": "https://app.terminusgps.com/contact/",
-                    "subscribing_link": "https://app.terminusgps.com/subscriptions/",
+                    "links": {
+                        "platform": "https://hosting.terminusgps.com",
+                        "support": "mailto:support@terminusgps.com",
+                        "contact": "https://app.terminusgps.com/contact/",
+                        "subscriptions": "https://app.terminusgps.com/subscriptions/",
+                    },
                 },
             )
             return super().form_valid(form=form)

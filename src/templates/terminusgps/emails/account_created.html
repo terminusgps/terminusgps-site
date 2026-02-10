@@ -1,10 +1,10 @@
 {% extends "terminusgps/emails/layout.html" %}
 {% block content %}
-<h3 class="text-xl font-semibold">Hey {{ fn|default_if_none:'there' }}!</h3>
+<h3 class="text-xl font-semibold">Hey {{ first_name }}!</h3>
 <div class="text-pretty flex flex-col gap-2 items-center">
     <p>Thanks for signing up on {{ date }}.</p>
-    <p>After <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{{ subscribing_link }}">subscribing</a>, you'll have full access to <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{{ platform_link }}">the Terminus GPS platform</a>.</p>
-    <p>Please don't hesitate to reach out to <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{{ support_link|default:'https://app.terminusgps.com/help/' }}">our support team</a> with further questions.</p>
+    <p>After <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{{ subscribing_link }}">subscribing</a>, you'll have full access to <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{{ links.platform }}">the Terminus GPS platform</a>.</p>
+    <p>Please don't hesitate to reach out to <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{{ links.support }}">our support team</a> with further questions.</p>
     <p>We look forward to working with you,</p>
     {% include "terminusgps/emails/signature.html" %}
 </div>
