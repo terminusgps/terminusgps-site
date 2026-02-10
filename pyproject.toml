@@ -11,7 +11,7 @@ authors = [
     { name = "Peter Speckman", email = "pspeckman@terminusgps.com" },
 ]
 dependencies = [
-    "django==6.0.1",
+    "django==6.0.2",
     "numpy==2.0.1",
     "pandas==2.2.3",
     "pillow==11.3.0",
