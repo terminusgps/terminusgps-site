@@ -1,6 +1,5 @@
 {% extends "terminusgps/layout.html" %}
-{% block content %}
-{% partialdef partial inline %}
+{% partialdef main %}
 <section id="intro" class="flex flex-col gap-4 p-4">
     <p class="text-sm text-gray-400">Last updated: July 08, 2025</p>
     <p>
@@ -1490,5 +1489,7 @@
         </ul>
     </div>
 </section>
-{% endpartialdef partial %}
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
 {% endblock content %}

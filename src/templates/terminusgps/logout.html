@@ -1,6 +1,5 @@
 {% extends "terminusgps/layout.html" %}
-{% block content %}
-{% partialdef partial inline %}
+{% partialdef main %}
 <form class="flex flex-col gap-4" action="{% url 'logged out' %}" method="post">
     {% csrf_token %}
     <p>Are you sure you want to logout?</p>
@@ -11,5 +10,7 @@
         <p>Logout</p>
     </button>
 </form>
-{% endpartialdef partial %}
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
 {% endblock content %}

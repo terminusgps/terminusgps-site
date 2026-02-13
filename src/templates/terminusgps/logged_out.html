@@ -1,6 +1,7 @@
 {% extends "terminusgps/layout.html" %}
-{% block content %}
-{% partialdef partial inline %}
+{% partialdef main %}
 <p>You were logged out successfully.</p>
-{% endpartialdef partial %}
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
 {% endblock content %}

@@ -25,6 +25,8 @@
                 {% block content %}{% endblock content %}
             </main>
         </div>
+        {% cache 1600 footer %}
         {% include "terminusgps/footer.html" %}
+        {% endcache %}
     </body>
 </html>

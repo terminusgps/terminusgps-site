@@ -1,7 +1,6 @@
 {% extends "terminusgps/layout.html" %}
 {% load static %}
-{% block content %}
-{% partialdef partial inline %}
+{% partialdef main %}
 <h3 class="my-4 text-terminus-red-600 dark:text-terminus-red-100 text-2xl font-bold text-center md:text-left md:text-4xl">Terminus GPS: Affordable GPS Tracking for Everyone</h3>
 <div class="flex flex-col border rounded border-stone-400 dark:border-stone-900 drop-shadow-sm">
     <img src="{% static 'terminusgps/img/18wheeler.jpg' %}" class="rounded-t object-cover object-[0%_40%] max-h-96 border-b border-stone-300 dark:border-stone-600">
@@ -43,5 +42,7 @@
     <a href="{% url 'ios app' %}" rel="nofollow"><img src="{% static 'terminusgps/img/App_Store_Badge_Black.svg' %}" class="h-36"></a>
     <a href="{% url 'android app' %}" rel="nofollow"><img src="{% static 'terminusgps/img/GetItOnGooglePlay_Badge_Web_color_English.svg' %}" class="h-56"></a>
 </div>
-{% endpartialdef partial %}
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
 {% endblock content %}

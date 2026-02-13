@@ -1,6 +1,5 @@
 {% extends "terminusgps/layout.html" %}
-{% block content %}
-{% partialdef partial inline %}
+{% partialdef main %}
 <section id="toc" class="flex flex-col gap-4 p-4 print:hidden">
     <h2 class="text-xl font-semibold text-terminus-red-600 dark:text-terminus-red-100">Table of Contents</h2>
     <div class="flex flex-col gap-4">
@@ -153,5 +152,7 @@
         </ul>
     </div>
 </section>
-{% endpartialdef partial %}
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
 {% endblock content %}

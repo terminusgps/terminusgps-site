@@ -1,6 +1,5 @@
 {% extends "terminusgps/layout.html" %}
-{% block content %}
-{% partialdef partial inline %}
+{% partialdef main %}
 <form
     class="@container flex flex-col gap-4"
     action="{% url 'login' %}"
@@ -43,5 +42,7 @@
     </button>
     <p class="text-balance text-center text-sm">Don't have an account? <a href="{% url 'register' %}" class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">Click here</a> to register.</p>
 </form>
-{% endpartialdef partial %}
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
 {% endblock content %}

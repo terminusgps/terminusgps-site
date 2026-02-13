@@ -1,7 +1,6 @@
 {% extends "terminusgps/layout.html" %}
 {% load static %}
-{% block content %}
-{% partialdef partial inline %}
+{% partialdef main %}
 <section class="border border-stone-400 rounded bg-stone-50 drop-shadow-sm dark:bg-stone-800 dark:border-stone-900">
     <img class="rounded-t" src="{% static 'terminusgps/img/wialon/fleet-digitalization-notifications.jpg' %}" alt="A white 18-wheeler with a digital overlay specifying the truck's fuel level, coordinates, speed and driver status">
     <div class="flex flex-col gap-4 p-8">
@@ -52,5 +51,6 @@
         </div>
     </div>
 </section>
-{% endpartialdef partial %}
+{% endpartialdef main %}
+{% block content %}
 {% endblock content %}

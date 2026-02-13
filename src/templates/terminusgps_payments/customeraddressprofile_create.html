@@ -21,13 +21,13 @@
         <h4 class="text-lg text-terminus-red-700 font-semibold dark:text-terminus-red-200 @md:text-xl">Billing Address</h4>
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full group">
-                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer">{{ form.first_name }}</div>
+                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer *:user-invalid:bg-red-50">{{ form.first_name }}</div>
                 <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold group-has-[ul]:text-red-600" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
                 <p class="text-sm" id="{{ form.first_name.id_for_label }}_helptext">{{ form.first_name.help_text }}</p>
                 <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.first_name.errors }}</div>
             </div>
             <div class="flex flex-col gap-2 w-full">
-                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer">{{ form.last_name }}</div>
+                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer *:user-invalid:bg-red-50">{{ form.last_name }}</div>
                 <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
                 <p class="text-sm" id="{{ form.last_name.id_for_label }}_helptext">{{ form.last_name.help_text }}</p>
                 <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.last_name.errors }}</div>
@@ -35,7 +35,7 @@
         </div>
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full">
-                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer">{{ form.address }}</div>
+                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer *:user-invalid:bg-red-50">{{ form.address }}</div>
                 <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.address.id_for_label }}">Street</label>
                 <p class="text-sm" id="{{ form.address.id_for_label }}_helptext">{{ form.address.help_text }}</p>
                 <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.address.errors }}</div>
@@ -43,13 +43,13 @@
         </div>
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full">
-                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer">{{ form.city }}</div>
+                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer *:user-invalid:bg-red-50">{{ form.city }}</div>
                 <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.city.id_for_label }}">{{ form.city.label }}</label>
                 <p class="text-sm" id="{{ form.city.id_for_label }}_helptext">{{ form.city.help_text }}</p>
                 <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.city.errors }}</div>
             </div>
             <div class="flex flex-col gap-2 w-full">
-                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer">{{ form.state }}</div>
+                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer *:user-invalid:bg-red-50">{{ form.state }}</div>
                 <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.state.id_for_label }}">{{ form.state.label }}</label>
                 <p class="text-sm" id="{{ form.state.id_for_label }}_helptext">{{ form.state.help_text }}</p>
                 <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.state.errors }}</div>
@@ -57,13 +57,13 @@
         </div>
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full">
-                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer">{{ form.country }}</div>
+                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer *:user-invalid:bg-red-50">{{ form.country }}</div>
                 <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.country.id_for_label }}">{{ form.country.label }}</label>
                 <p class="text-sm" id="{{ form.country.id_for_label }}_helptext">{{ form.country.help_text }}</p>
                 <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.country.errors }}</div>
             </div>
             <div class="flex flex-col gap-2 w-full">
-                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer">{{ form.zip }}</div>
+                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer *:user-invalid:bg-red-50">{{ form.zip }}</div>
                 <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.zip.id_for_label }}">{{ form.zip.label }}</label>
                 <p class="text-sm" id="{{ form.zip.id_for_label }}_helptext">{{ form.zip.help_text }}</p>
                 <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.zip.errors }}</div>
@@ -71,13 +71,13 @@
         </div>
         <div class="flex flex-col gap-4 @md:justify-between @md:flex-row">
             <div class="flex flex-col gap-2 w-full">
-                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer">{{ form.phone_number }}</div>
+                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer *:user-invalid:bg-red-50">{{ form.phone_number }}</div>
                 <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.phone_number.id_for_label }}">{{ form.phone_number.label }}</label>
                 <p class="text-sm" id="{{ form.phone_number.id_for_label }}_helptext">{{ form.phone_number.help_text }}</p>
                 <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.phone_number.errors }}</div>
             </div>
             <div class="flex flex-col gap-2 w-full">
-                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer">{{ form.company }}</div>
+                <div class="*:p-2 *:border *:rounded *:bg-stone-100 *:w-full *:peer *:user-invalid:bg-red-50">{{ form.company }}</div>
                 <label class="order-first peer-user-invalid:text-red-600 peer-aria-required:font-semibold" for="{{ form.company.id_for_label }}">{{ form.company.label }}</label>
                 <p class="text-sm" id="{{ form.company.id_for_label }}_helptext">{{ form.company.help_text }}</p>
                 <div class="text-red-700 animate-jiggle peer-user-valid:text-green-700">{{ form.company.errors }}</div>
