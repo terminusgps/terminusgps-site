@@ -138,7 +138,7 @@ LOGGING = {
             "level": "CRITICAL",
             "propagate": False,
         },
-        "terminusgps_payments.models": {
+        "terminusgps_payments": {
             "handlers": ["console"],
             "level": "DEBUG",
             "propagate": False,

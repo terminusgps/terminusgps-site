@@ -128,7 +128,10 @@ urlpatterns = [
         "payments/",
         include("terminusgps_payments.urls", namespace="terminusgps_payments"),
     ),
-    path("", include("terminusgps_manager.urls")),
+    path(
+        "",
+        include("terminusgps_manager.urls", namespace="terminusgps_manager"),
+    ),
 ]
 
 if settings.DEBUG:
