@@ -2,24 +2,16 @@
 name = "terminusgps-site"
 description = "Terminus GPS Website"
 readme = "README.md"
-version = "2.0.0"
+version = "3.0.0"
 requires-python = ">=3.12"
 
 authors = [
     { name = "Blake Nall", email = "blake@terminusgps.com" },
-    { name = "Lili Noack", email = "lili@terminusgps.com" },
-    { name = "Peter Speckman", email = "pspeckman@terminusgps.com" },
 ]
 dependencies = [
     "django==6.0.2",
-    "numpy==2.0.1",
-    "pandas==2.2.3",
     "pillow==12.1.1",
     "python-terminusgps==51.0.0",
-    "terminusgps-payments>=8.3.0",
-    "redis[hiredis]>=6.4.0",
-    "prettier>=0.0.7",
-    "django-tasks>=0.12.0",
 ]
 
 [tool.pyright]
@@ -76,5 +68,4 @@ deploy = [
     "gunicorn>=23.0.0",
     "psycopg>=3.2.6",
     "psycopg2-binary>=2.9.10",
-    "django-tasks>=0.12.0",
 ]

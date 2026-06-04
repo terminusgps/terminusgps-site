@@ -1,47 +1,47 @@
 {% extends "terminusgps/layout.html" %}
 {% load static %}
 {% partialdef main %}
-<h3 class="my-4 text-terminus-red-600 dark:text-terminus-red-100 text-2xl font-bold text-center md:text-left md:text-4xl">Terminus GPS: Affordable GPS Tracking for Everyone</h3>
-<div class="flex flex-col border rounded border-stone-400 dark:border-stone-900 drop-shadow-sm">
-    <img src="{% static 'terminusgps/img/18wheeler.jpg' %}" class="rounded-t object-cover object-[0%_40%] max-h-96 border-b border-stone-300 dark:border-stone-600">
-    <div class="flex flex-col gap-4 p-8 shadow-inner bg-stone-50 dark:bg-stone-800">
-        <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">For Your Fleet</h4>
-        <div class="flex flex-col gap-4 text-balance">
-            <p>Modern fleet managers require a reliable and efficient way to keep up with <span class="italic">constantly</span> changing fleet requirements. That's where we come in.</p>
-            <p>Whether you're managing a few service pick-ups or a legion of tractors, we've got the tools you need to stay up-to-date with your fleet's activities.</p>
-        </div>
-    </div>
-    <a href="{% url 'features' %}" hx-boost="true" class="w-full p-4 bg-stone-200 text-terminus-red-400 dark:text-terminus-red-200 dark:bg-stone-700 rounded-b hover:bg-stone-100 dark:hover:bg-stone-400 transition-colors ease-in-out duration-300 border-t border-stone-300 dark:border-stone-700">
-        <div class="flex gap-2 items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-            </svg>
-            <p>Learn More</p>
-        </div>
-    </a>
-</div>
-<div class="flex flex-col border rounded border-stone-400 dark:border-stone-900 drop-shadow-sm">
-    <img src="{% static 'terminusgps/img/sedan.jpg' %}" class="rounded-t object-cover object-[0%_45%] max-h-96 border-b border-stone-300 dark:border-stone-600">
-    <div class="flex flex-col gap-4 p-8 shadow-inner bg-stone-50 dark:bg-stone-800">
-        <h4 class="text-xl md:text-2xl text-terminus-red-700 font-semibold dark:text-terminus-red-200">For Your Family</h4>
-        <div class="flex flex-col gap-4 text-balance">
-            <p>Terminus GPS was founded on a pair of simple principles: <span class="italic">promote safety</span> and <span class="italic">reduce driving risk</span>.</p>
-            <p>We provide the tools to grant you peace-of-mind every time your family members hit the road.</p>
-        </div>
-    </div>
-    <a href="{% url 'features' %}" hx-boost="true" class="w-full p-4 bg-stone-200 text-terminus-red-400 dark:text-terminus-red-200 dark:bg-stone-700 rounded-b hover:bg-stone-100 dark:hover:bg-stone-400 transition-colors ease-in-out duration-300 border-t border-stone-300 dark:border-stone-700">
-        <div class="flex gap-2 items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 0 0 1.5-.189m-1.5.189a6.01 6.01 0 0 1-1.5-.189m3.75 7.478a12.06 12.06 0 0 1-4.5 0m3.75 2.383a14.406 14.406 0 0 1-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 1 0-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-            </svg>
-            <p>Learn More</p>
-        </div>
-    </a>
-</div>
-<div class="flex flex-col items-center md:flex-row md:justify-evenly" hx-boost="false">
-    <a href="{% url 'ios app' %}" rel="nofollow"><img src="{% static 'terminusgps/img/App_Store_Badge_Black.svg' %}" class="h-36"></a>
-    <a href="{% url 'android app' %}" rel="nofollow"><img src="{% static 'terminusgps/img/GetItOnGooglePlay_Badge_Web_color_English.svg' %}" class="h-56"></a>
-</div>
+<p>Terminus GPS</p>
+<p>In God We Trust, All Others We Track</p>
+<img src="{% static 'terminusgps/img/18wheeler.jpg' %}">
+<p>Terminus GPS has been protecting vehicles, fleets and families across the greater Houston area since 2010.</p>
+<p>We're not a call center; we're a friendly, local team that answers the phone, installs the next day and stays with you after the sale.</p>
+<ul>
+    <li>Fast installation - most systems are installed the day after contact</li>
+    <li>Month-to-month - no long-term contracts required</li>
+    <li>Real-time alerts - direct to your phone via sms/text-to-speech, 24&#47;7</li>
+    <li>Local and personal - real support from real people in Houston, Texas</li>
+</ul>
+<img src="{% static 'terminusgps/img/family.jpg' %}">
+<p>Your Fleet. Fully Visible. Fully Accountable.</p>
+<p>Whether you're managing three service trucks or 300, Terminus GPS streamlines fleet management in a single platform.</p>
+<p>See everything at a glance: where your vehicles are, how your drivers are behaving and what maintenance is coming due.</p>
+<p>We serve landscape crews, plumbing companies, electrical contractors, logistics operators and everything in-between.</p>
+<p>The Terminus GPS platform scales with your business and our support team is always available to ensure you get the most out of it.</p>
+<p>Most Used Capabilites:</p>
+<ul>
+    <li>Live location tracking with 60-second ping rates</li>
+    <li>Geofence entry/exit alerts</li>
+    <li>Driver behavior monitoring</li>
+    <li>After-hours usage and unauthorized movement alerts</li>
+    <li>Starter interrupt</li>
+    <li>Daily reports delivered to your email inbox</li>
+</ul>
+<p>Fleet AI Dash Cameras</p>
+<p>Add an extra layer of accountability with our Fleet AI camera solutions.</p>
+<p>Front and dual-facing cameras capture video evidence in real-time, protecting your drivers from false claims, reducing insure liability and giving you visiblity into exactly what happened on every trip.</p>
+<p>Paired with our GPS tracking, you'll always have access to the full picture: location, speed and video, all in one platform.</p>
+<p>Whether you're monitoring a teen or an elderly driver, promoting safety and reducing driving risk is our number one priority.</p>
+<p>We've taken the top-of-the-line industry-standard commercial GPS tracking technology, streamlined and simplified for the individual user.</p>
+<p>Most Used Capabilities:</p>
+<ul>
+    <li>Geographic location</li>
+    <li>Accelerated speed</li>
+    <li>Time & distance traveled</li>
+    <li>Stop & start times</li>
+    <li>Driver behavior</li>
+</ul>
+<p>Terminus GPS can equip all vehicle types with a GPS tracker: cars, trucks, motorcycles, ATVs, watercrafts, tractors, trailers and any transportable, stationary equipment.</p>
 {% endpartialdef main %}
 {% block content %}
 {% partial main %}

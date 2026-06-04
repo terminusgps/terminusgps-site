@@ -1,32 +1,61 @@
-{% load cache static %}
+{% load static %}
 <!doctype html>
 <html lang="en">
     <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1"/>
-        <title>{% if title %}{{ title }} | {% endif %}Terminus GPS</title>
-        <link rel="preload" href="{% static 'terminusgps/css/output.css' %}" as="style" type="text/css"/>
-        <link rel="preload" href="{% static 'terminusgps/js/htmx.min.js' %}" as="script" type="text/javascript"/>
-        <link rel="preload" href="{% static "terminusgps/img/background.jpg" %}" as="image" type="image/jpg"/>
-        <link rel="preload" href="{% static 'terminusgps/icon/logo-waypoint.svg' %}" as="image" type="image/svg+xml">
-        <link rel="preload" href="{% static 'terminusgps/icon/logo-text.svg' %}" as="image" type="image/svg+xml">
-        <link rel="shortcut icon" href="{% static 'terminusgps/favicon.ico' %}"/>
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <link rel="icon" href="{% static 'terminusgps/favicon.ico' %}" />
         <link rel="stylesheet" href="{% static 'terminusgps/css/output.css' %}"/>
-        <script src="{% static 'terminusgps/js/htmx.min.js' %}" defer></script>
-        <script src="https://9681add82420.us-east-1.captcha-sdk.awswaf.com/9681add82420/jsapi.js" defer></script>
+        <script src="{% static 'terminusgps/js/htmx.min.4.0.0.js' %}" defer></script>
+        <title>{% block title %}{% endblock title %} | Terminus GPS</title>
     </head>
-    <body class="h-dvh text-gray-800 bg-repeat-round dark:text-gray-100" style="background-image: url({% static 'terminusgps/img/background.jpg' %});">
-        {% cache 300 navbar request.user %}
-        {% include "terminusgps/navbar.html" %}
-        {% endcache %}
-        <div class="p-8 md:p-16">
-            <main class="flex flex-col gap-8 rounded border border-stone-300 bg-stone-100 p-4 drop-shadow-lg md:p-8 dark:border-stone-700 dark:bg-stone-900 print:border-none print:drop-shadow-none">
-                {% include "terminusgps/header.html" %}
-                {% block content %}{% endblock content %}
-            </main>
-        </div>
-        {% cache 1600 footer %}
-        {% include "terminusgps/footer.html" %}
-        {% endcache %}
+    <body class="text-gray-800 dark:text-gray-100">
+        <nav class="flex justify-between bg-stone-100 text-gray-800 drop-shadow dark:bg-gray-800">
+            <a href="{% url 'home' %}" class="group flex items-center space-x-1">
+                <img src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="animate-coin-slow size-16 group-hover:animate-none"/>
+                <img src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24"/>
+            </a>
+        </nav>
+        <main class="@container bg-stone-200 mx-2">
+            {% block content %}{% endblock content %}
+        </main>
+        <footer class="bottom-0 left-0 z-20 w-full border-t border-stone-300 bg-stone-100 p-4 shadow-sm md:flex md:items-center md:justify-between md:p-6 dark:border-gray-900 dark:bg-gray-800">
+            <span class="text-sm sm:text-center">© 2026 <a href="https://terminusgps.com/" class="hover:underline">Terminus GPS</a>. All Rights Reserved.</span>
+            <ul class="mt-3 flex flex-wrap items-center text-sm sm:mt-0">
+                <li>
+                    <a
+                        hx-boost="true"
+                        href="{% url 'contact' %}"
+                        class="me-4 hover:underline md:me-6"
+                        >Contact</a
+                    >
+                </li>
+                <li>
+                    <a
+                        hx-boost="true"
+                        href="{% url 'privacy' %}"
+                        class="me-4 hover:underline md:me-6"
+                        >Privacy</a
+                    >
+                </li>
+                <li>
+                    <a
+                        hx-boost="true"
+                        href="{% url 'terms' %}"
+                        class="me-4 hover:underline md:me-6"
+                        >Terms</a
+                    >
+                </li>
+                <li>
+                    <a
+                        hx-boost="false"
+                        rel="external"
+                        href="{% url 'source code' %}"
+                        class="me-4 hover:underline md:me-6"
+                        >Source</a
+                    >
+                </li>
+            </ul>
+        </footer>
     </body>
 </html>

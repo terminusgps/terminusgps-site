@@ -18,4 +18,3 @@ venv
 *.p12
 *.log
 *.*.log
-docker-build.sh
