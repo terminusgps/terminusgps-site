@@ -1,9 +1,29 @@
 {% extends "terminusgps/layout.html" %}
 {% load static %}
-{% partialdef main %}
+{% block title %}Home{% endblock title %}
+{% block content %}
 <p>Terminus GPS</p>
 <p>In God We Trust, All Others We Track</p>
-<img src="{% static 'terminusgps/img/18wheeler.jpg' %}">
+<div id="carousel-container">
+    <div id="current-slide"></div>
+    <div id="hidden-slides" class="hidden" _="on load wait 3s then show with *twOpacity">
+        <div id="slide-1">
+            <img class="w-fit h-128" src="{% static 'terminusgps/img/18wheeler-blue.jpg' %}">
+        </div>
+        <div id="slide-2">
+            <img class="w-fit h-128" src="{% static 'terminusgps/img/18wheeler.jpg' %}">
+        </div>
+        <div id="slide-3">
+            <img class="w-fit h-128" src="{% static 'terminusgps/img/happydriver.jpg' %}">
+        </div>
+        <div id="slide-4">
+            <img class="w-fit h-128" src="{% static 'terminusgps/img/newdriver.jpg' %}">
+        </div>
+        <div id="slide-5">
+            <img class="w-fit h-128" src="{% static 'terminusgps/img/family.jpg' %}">
+        </div>
+    </div>
+</div>
 <p>Terminus GPS has been protecting vehicles, fleets and families across the greater Houston area since 2010.</p>
 <p>We're not a call center; we're a friendly, local team that answers the phone, installs the next day and stays with you after the sale.</p>
 <ul>
@@ -12,7 +32,6 @@
     <li>Real-time alerts - direct to your phone via sms/text-to-speech, 24&#47;7</li>
     <li>Local and personal - real support from real people in Houston, Texas</li>
 </ul>
-<img src="{% static 'terminusgps/img/family.jpg' %}">
 <p>Your Fleet. Fully Visible. Fully Accountable.</p>
 <p>Whether you're managing three service trucks or 300, Terminus GPS streamlines fleet management in a single platform.</p>
 <p>See everything at a glance: where your vehicles are, how your drivers are behaving and what maintenance is coming due.</p>
@@ -42,7 +61,4 @@
     <li>Driver behavior</li>
 </ul>
 <p>Terminus GPS can equip all vehicle types with a GPS tracker: cars, trucks, motorcycles, ATVs, watercrafts, tractors, trailers and any transportable, stationary equipment.</p>
-{% endpartialdef main %}
-{% block content %}
-{% partial main %}
 {% endblock content %}

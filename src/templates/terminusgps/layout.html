@@ -6,7 +6,9 @@
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <link rel="icon" href="{% static 'terminusgps/favicon.ico' %}" />
         <link rel="stylesheet" href="{% static 'terminusgps/css/output.css' %}"/>
-        <script src="{% static 'terminusgps/js/htmx.min.4.0.0.js' %}" defer></script>
+        <script src="{% static 'terminusgps/js/htmx.min.js' %}" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/hyperscript.org@0.9.91/dist/_hyperscript.min.js" integrity="sha384-OT9bNmUa5rM34SmxFpRftn2F6GbgM/4xnTmn0z106OE5uvsigkdtUMOpdPKOigyO" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/hyperscript.org@0.9.91/dist/ext/tailwind.min.js"></script>
         <title>{% block title %}{% endblock title %} | Terminus GPS</title>
     </head>
     <body class="text-gray-800 dark:text-gray-100">
@@ -15,8 +17,46 @@
                 <img src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="animate-coin-slow size-16 group-hover:animate-none"/>
                 <img src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24"/>
             </a>
+            <div class="mx-4 flex gap-2 items-center">
+            {% if request.user.is_authenticated %}
+                <a href="#">
+                    <div class="flex font-semibold items-center gap-2 p-2 border-2 rounded bg-stone-200 border-stone-600 transition-colors ease-in-out duration-300 hover:bg-stone-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                        </svg>
+                        <p>Dashboard</p>
+                    </div>
+                </a>
+                <form method="post" action="{% url 'logout' %}" hx-boost="true" hx-confirm="Are you sure you want to logout?">
+                    {% csrf_token %}
+                    <button type="submit" class="flex font-semibold items-center gap-2 p-2 border-2 rounded bg-stone-200 border-stone-600 transition-colors ease-in-out duration-300 cursor-pointer hover:bg-stone-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                        </svg>
+                        <p>Logout</p>
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'register' %}">
+                    <div class="flex font-semibold items-center gap-2 p-2 border-2 rounded bg-stone-200 border-stone-600 transition-colors ease-in-out duration-300 hover:bg-stone-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
+                        </svg>
+                        <p>Register</p>
+                    </div>
+                </a>
+                <a href="{% url 'login' %}">
+                    <div class="flex font-semibold items-center gap-2 p-2 border-2 rounded bg-stone-200 border-stone-600 transition-colors ease-in-out duration-300 hover:bg-stone-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25" />
+                        </svg>
+                        <p>Login</p>
+                    </div>
+                </a>
+            {% endif %}
+            </div>
         </nav>
-        <main class="@container bg-stone-200 mx-2">
+        <main class="@container bg-stone-200 mx-2 p-8">
             {% block content %}{% endblock content %}
         </main>
         <footer class="bottom-0 left-0 z-20 w-full border-t border-stone-300 bg-stone-100 p-4 shadow-sm md:flex md:items-center md:justify-between md:p-6 dark:border-gray-900 dark:bg-gray-800">
