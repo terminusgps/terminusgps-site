@@ -5,23 +5,50 @@
 <p>Terminus GPS</p>
 <p>In God We Trust, All Others We Track</p>
 <div id="carousel-container">
-    <div id="current-slide"></div>
-    <div id="hidden-slides" class="hidden" _="on load wait 3s then show with *twOpacity">
-        <div id="slide-1">
-            <img class="w-fit h-128" src="{% static 'terminusgps/img/18wheeler-blue.jpg' %}">
+    <div id="slide-1" class="flex flex-col gap-8 items-center">
+        <div class="flex items-center gap-4 justify-between">
+            <svg id="slide-1-left-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800" _="">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+            <img id="slide-1-image" class="w-fit h-128 select-none" src="{% static 'terminusgps/img/18wheeler-blue.jpg' %}">
+            <svg id="slide-1-right-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800" _="">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
         </div>
-        <div id="slide-2">
-            <img class="w-fit h-128" src="{% static 'terminusgps/img/18wheeler.jpg' %}">
+        <div id="slide-1-dots" class="flex gap-4 items-center">
+            <div class="w-8 h-8 rounded-full bg-red-800"></div>
+            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
+            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
+            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
+            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
         </div>
-        <div id="slide-3">
-            <img class="w-fit h-128" src="{% static 'terminusgps/img/happydriver.jpg' %}">
+    </div>
+    <div id="slide-2" class="hidden flex-col gap-8 items-center">
+        <div class="flex items-center gap-4 justify-between">
+            <svg id="slide-2-left-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800" _="on click toggle .hidden between me and #slide-1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+            </svg>
+            <img id="slide-2-image" class="w-fit h-128 select-none" src="{% static 'terminusgps/img/18wheeler.jpg' %}">
+            <svg id="slide-2-right-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800" _="on click toggle .hidden between me and #slide-3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
         </div>
-        <div id="slide-4">
-            <img class="w-fit h-128" src="{% static 'terminusgps/img/newdriver.jpg' %}">
+        <div id="slide-2-dots" class="flex gap-4 items-center">
+            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
+            <div class="w-8 h-8 rounded-full bg-red-800"></div>
+            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
+            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
+            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
         </div>
-        <div id="slide-5">
-            <img class="w-fit h-128" src="{% static 'terminusgps/img/family.jpg' %}">
-        </div>
+    </div>
+    <div id="slide-3" class="hidden">
+        <img class="w-fit h-128" src="{% static 'terminusgps/img/happydriver.jpg' %}">
+    </div>
+    <div id="slide-4" class="hidden">
+        <img class="w-fit h-128" src="{% static 'terminusgps/img/newdriver.jpg' %}">
+    </div>
+    <div id="slide-5" class="hidden">
+        <img class="w-fit h-128" src="{% static 'terminusgps/img/family.jpg' %}">
     </div>
 </div>
 <p>Terminus GPS has been protecting vehicles, fleets and families across the greater Houston area since 2010.</p>
