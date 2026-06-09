@@ -1,0 +1,10 @@
+{% extends "terminusgps/layout.html" %}
+{% block title %}Dashboard{% endblock title %}
+{% partialdef main %}
+<div>Dashboard View</div>
+<div>Profile: {{ profile }}</div>
+<div>Created: {{ created }}</div>
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
+{% endblock content %}

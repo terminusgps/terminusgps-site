@@ -4,51 +4,72 @@
 {% block content %}
 <p>Terminus GPS</p>
 <p>In God We Trust, All Others We Track</p>
-<div id="carousel-container">
-    <div id="slide-1" class="flex flex-col gap-8 items-center">
-        <div class="flex items-center gap-4 justify-between">
-            <svg id="slide-1-left-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800" _="">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-            </svg>
-            <img id="slide-1-image" class="w-fit h-128 select-none" src="{% static 'terminusgps/img/18wheeler-blue.jpg' %}">
-            <svg id="slide-1-right-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800" _="">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-            </svg>
+<div id="carousel" _="
+    init set :curr to 1
+    def getPrevSlide()
+        return :curr
+    end
+    def getNextSlide()
+        return :curr
+    end
+    ">
+    <div id="current-slide" class="flex flex-col gap-8 items-center"></div>
+    <div id="hidden-slides" class="hidden">
+        <div id="slide-1">
+            <div class="flex items-center gap-4 justify-between">
+                <svg id="slide-1-left-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800 left-chevron">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+                <img id="slide-1-image" class="w-fit h-128 select-none" src="{% static 'terminusgps/img/18wheeler-blue.jpg' %}">
+                <svg id="slide-1-right-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800 right-chevron">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+            </div>
         </div>
-        <div id="slide-1-dots" class="flex gap-4 items-center">
-            <div class="w-8 h-8 rounded-full bg-red-800"></div>
-            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
-            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
-            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
-            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
+        <div id="slide-2">
+            <div class="flex items-center gap-4 justify-between">
+                <svg id="slide-2-left-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800 left-chevron">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+                <img id="slide-2-image" class="w-fit h-128 select-none" src="{% static 'terminusgps/img/18wheeler.jpg' %}">
+                <svg id="slide-2-right-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800 right-chevron">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+            </div>
         </div>
-    </div>
-    <div id="slide-2" class="hidden flex-col gap-8 items-center">
-        <div class="flex items-center gap-4 justify-between">
-            <svg id="slide-2-left-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800" _="on click toggle .hidden between me and #slide-1">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-            </svg>
-            <img id="slide-2-image" class="w-fit h-128 select-none" src="{% static 'terminusgps/img/18wheeler.jpg' %}">
-            <svg id="slide-2-right-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800" _="on click toggle .hidden between me and #slide-3">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-            </svg>
+        <div id="slide-3">
+            <div class="flex items-center gap-4 justify-between">
+                <svg id="slide-3-left-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+                <img id="slide-3-image" class="w-fit h-128 select-none" src="{% static 'terminusgps/img/happydriver.jpg' %}">
+                <svg id="slide-3-right-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+            </div>
         </div>
-        <div id="slide-2-dots" class="flex gap-4 items-center">
-            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
-            <div class="w-8 h-8 rounded-full bg-red-800"></div>
-            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
-            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
-            <div class="w-8 h-8 rounded-full border-4 border-red-800"></div>
+        <div id="slide-4">
+            <div class="flex items-center gap-4 justify-between">
+                <svg id="slide-4-left-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+                <img id="slide-4-image" class="w-fit h-128 select-none" src="{% static 'terminusgps/img/newdriver.jpg' %}">
+                <svg id="slide-4-right-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+            </div>
         </div>
-    </div>
-    <div id="slide-3" class="hidden">
-        <img class="w-fit h-128" src="{% static 'terminusgps/img/happydriver.jpg' %}">
-    </div>
-    <div id="slide-4" class="hidden">
-        <img class="w-fit h-128" src="{% static 'terminusgps/img/newdriver.jpg' %}">
-    </div>
-    <div id="slide-5" class="hidden">
-        <img class="w-fit h-128" src="{% static 'terminusgps/img/family.jpg' %}">
+        <div id="slide-5">
+            <div class="flex items-center gap-4 justify-between">
+                <svg id="slide-5-left-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                </svg>
+                <img id="slide-5-image" class="w-fit h-128 select-none" src="{% static 'terminusgps/img/family.jpg' %}">
+                <svg id="slide-5-right-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12 text-red-800">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+            </div>
+        </div>
     </div>
 </div>
 <p>Terminus GPS has been protecting vehicles, fleets and families across the greater Houston area since 2010.</p>

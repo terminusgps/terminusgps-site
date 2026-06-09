@@ -15,6 +15,7 @@ urlpatterns = [
     path("terms/", views.terms_view, name="terms"),
     path("privacy/", views.privacy_view, name="privacy"),
     path("source-code/", views.source_code_view, name="source code"),
+    path("manager/", include("manager.urls", namespace="manager")),
 ]
 
 if settings.DEBUG:

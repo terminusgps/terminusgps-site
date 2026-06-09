@@ -27,6 +27,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
 MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
 MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
+MERCHANT_AUTH_ENVIRONMENT = "testMode"
 MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
 ROOT_URLCONF = "src.urls"
 SECRET_KEY = "3ow7#%v3y*o&1wr6%!rt4%c7^^wlx%f8hkhn!#-gf%mk!_tf=^"
@@ -39,6 +40,7 @@ TIME_ZONE = "America/Chicago"
 USE_I18N = False
 USE_TZ = True
 WSGI_APPLICATION = "src.wsgi.application"
+WIALON_TOKEN = os.getenv("WIALON_TOKEN")
 
 ADMINS = [
     ("Peter", "pspeckman@terminusgps.com"),
@@ -73,6 +75,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
+    "manager.apps.ManagerConfig",
 ]
 
 MIDDLEWARE = [
