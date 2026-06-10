@@ -6,10 +6,12 @@ from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_GET
 from django.views.decorators.vary import vary_on_headers
 
-from .decorators import htmx_template
+from src.decorators import htmx_template
+
 from .models import TerminusProfile
 
 
+# For type checkers
 class HttpRequest(HttpRequestBase):
     template_name: str
 
