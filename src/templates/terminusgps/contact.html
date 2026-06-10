@@ -1,5 +1,8 @@
 {% extends "terminusgps/layout.html" %}
 {% block title %}Contact{% endblock title %}
-{% block content %}
+{% partialdef main %}
 <p>Contact</p>
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
 {% endblock content %}

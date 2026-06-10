@@ -21,7 +21,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 INTERNAL_IPS = ["127.0.0.1"]
 LANGUAGE_CODE = "en-us"
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "/manager/dashboard/"
 LOGIN_URL = "/login/"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
+    "phonenumber_field",
     "manager.apps.ManagerConfig",
 ]
 

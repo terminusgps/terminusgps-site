@@ -6,16 +6,16 @@
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <link rel="icon" href="{% static 'terminusgps/favicon.ico' %}" />
         <link rel="stylesheet" href="{% static 'terminusgps/css/output.css' %}"/>
-        <script src="{% static 'terminusgps/js/htmx.min.js' %}" defer></script>
+        <script src="{% static 'terminusgps/js/htmx.min.4.0.0.js' %}" defer></script>
         <script src="https://cdn.jsdelivr.net/npm/hyperscript.org@0.9.91/dist/_hyperscript.min.js" integrity="sha384-OT9bNmUa5rM34SmxFpRftn2F6GbgM/4xnTmn0z106OE5uvsigkdtUMOpdPKOigyO" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/hyperscript.org@0.9.91/dist/ext/tailwind.min.js"></script>
         <title>{% block title %}{% endblock title %} | Terminus GPS</title>
     </head>
-    <body class="text-gray-800 dark:text-gray-100">
+    <body class="text-gray-800 dark:text-gray-100" hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
         <nav class="flex justify-between bg-stone-100 text-gray-800 drop-shadow dark:bg-gray-800">
             <a href="{% url 'home' %}" class="group flex items-center space-x-1">
                 <img src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="animate-coin-slow size-16 group-hover:animate-none"/>
-                <img src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24"/>
+                <img src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24 hidden md:flex"/>
             </a>
             <div class="mx-4 flex gap-2 items-center">
             {% if request.user.is_authenticated %}
@@ -56,7 +56,7 @@
             {% endif %}
             </div>
         </nav>
-        <main class="@container bg-stone-200 mx-2 p-8">
+        <main class="@container bg-stone-200 mx-2">
             {% block content %}{% endblock content %}
         </main>
         <footer class="bottom-0 left-0 z-20 w-full border-t border-stone-300 bg-stone-100 p-4 shadow-sm md:flex md:items-center md:justify-between md:p-6 dark:border-gray-900 dark:bg-gray-800">

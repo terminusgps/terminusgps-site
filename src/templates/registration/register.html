@@ -1,6 +1,6 @@
 {% extends "terminusgps/layout.html" %}
 {% block title %}Register{% endblock title %}
-{% block content %}
+{% partialdef main %}
 <form class="@container flex flex-col gap-4" action="{% url 'register' %}" method="post">
     {% csrf_token %}
     <div id="id_{{ form.username.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
@@ -46,4 +46,7 @@
         </div>
     </div>
 </form>
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
 {% endblock content %}

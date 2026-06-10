@@ -10,6 +10,7 @@ authors = [
 ]
 dependencies = [
     "django==6.0.3",
+    "django-phonenumber-field[phonenumbers]>=8.4.0",
     "pillow==12.1.1",
     "python-terminusgps==55.0.0",
 ]
