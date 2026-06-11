@@ -13,5 +13,8 @@ urlpatterns = [
     path("privacy/", views.privacy_view, name="privacy"),
     path("source-code/", views.source_code_view, name="source code"),
     path("contact/", views.contact_view, name="contact"),
-    path("manager/", include("manager.urls", namespace="manager")),
+    path("platform/", views.platform_view, name="platform"),
+    path("features/", views.features_view, name="features"),
+    path("faq/", views.faq_view, name="faq"),
+    path("", include("terminusgps_manager.urls", namespace="manager")),
 ]

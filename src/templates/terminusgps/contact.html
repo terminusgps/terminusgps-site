@@ -1,7 +1,17 @@
 {% extends "terminusgps/layout.html" %}
 {% block title %}Contact{% endblock title %}
 {% partialdef main %}
-<p>Contact</p>
+<div class="@container p-8 flex flex-col gap-8">
+    <p>Ready to get started? Send us a message!</p>
+    <form class="@container flex flex-col gap-4" method="post" hx-get="{% url 'manager:contact form' %}" hx-target="this" hx-trigger="load once" hx-swap="outerHTML">
+        <div class="py-8 rounded bg-gray-300 animate-pulse"></div>
+        <div class="py-8 rounded bg-gray-300 animate-pulse"></div>
+        <div class="py-8 rounded bg-gray-300 animate-pulse"></div>
+        <div class="py-8 rounded bg-gray-300 animate-pulse"></div>
+        <div class="py-8 rounded bg-gray-300 animate-pulse"></div>
+        <div class="py-4 rounded bg-gray-300 animate-pulse"></div>
+    </form>
+</div>
 {% endpartialdef main %}
 {% block content %}
 {% partial main %}

@@ -3,6 +3,8 @@ import os
 import pathlib
 import sys
 
+from django.contrib.messages import constants as message_constants
+
 os.umask(0)
 decimal.getcontext().prec = 4
 decimal.getcontext().rounding = decimal.ROUND_HALF_UP
@@ -42,6 +44,14 @@ USE_TZ = True
 WSGI_APPLICATION = "src.wsgi.application"
 WIALON_TOKEN = os.getenv("WIALON_TOKEN")
 
+MESSAGE_TAGS = {
+    message_constants.DEBUG: "p-2 bg-gray-50 text-gray-700 border border-current rounded",
+    message_constants.INFO: "p-2 bg-gray-50 text-gray-700 border border-current rounded",
+    message_constants.SUCCESS: "p-2 bg-green-50 text-green-700 border border-current rounded",
+    message_constants.WARNING: "p-2 bg-yellow-50 text-yellow-700 border border-current rounded",
+    message_constants.ERROR: "p-2 bg-red-50 text-red-700 border border-current rounded",
+}
+
 ADMINS = [
     ("Peter", "pspeckman@terminusgps.com"),
     ("Blake", "blake@terminusgps.com"),
@@ -76,7 +86,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.forms",
     "phonenumber_field",
-    "manager.apps.ManagerConfig",
+    "terminusgps_manager.apps.TerminusgpsManagerConfig",
 ]
 
 MIDDLEWARE = [

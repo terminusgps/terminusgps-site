@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class TerminusProfile(models.Model):
@@ -20,3 +21,20 @@ class TerminusProfile(models.Model):
 
     def __str__(self) -> str:
         return str(self.user)
+
+
+class ContactFormResponse(models.Model):
+    full_name = models.CharField(max_length=64)
+    email = models.EmailField(max_length=255)
+    phone = PhoneNumberField(blank=True)
+    city = models.CharField(blank=True)
+    state = models.CharField(blank=True)
+    message = models.TextField(max_length=2048)
+    submit_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("contact form response")
+        verbose_name_plural = _("contact form responses")
+
+    def __str__(self) -> str:
+        return str(self.email)

@@ -1,38 +1,40 @@
 {% extends "terminusgps/layout.html" %}
 {% block title %}Login{% endblock title %}
 {% block content %}
-<form class="@container flex flex-col gap-4" action="{% url 'login' %}" method="post">
-    {% csrf_token %}
-    <div id="id_{{ form.username.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
-        <div class="*:p-2 *:border *:bg-stone-50 *:rounded *:w-full">{{ form.username }}</div>
-        <label for="{{ form.username.id_for_label }}" class="order-first font-semibold">{{ form.username.label }}</label>
-        <div id="id_{{ form.username.id_for_label }}_helptext">
-            <p>{{ form.username.help_text }}</p>
+<div class="@container p-8 flex flex-col gap-8">
+    <form class="@container flex flex-col gap-4" action="{% url 'login' %}" method="post">
+        {% csrf_token %}
+        <div id="id_{{ form.username.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
+            <div class="*:p-2 *:border *:bg-stone-50 *:rounded *:w-full">{{ form.username }}</div>
+            <label for="{{ form.username.id_for_label }}" class="order-first font-semibold">{{ form.username.label }}</label>
+            <div id="id_{{ form.username.id_for_label }}_helptext">
+                <p>{{ form.username.help_text }}</p>
+            </div>
+            {% if form.username.errors %}
+            <div id="id_{{ form.username.id_for_label }}_errors">
+                {{ form.username.errors }}
+            </div>
+            {% endif %}
         </div>
-        {% if form.username.errors %}
-        <div id="id_{{ form.username.id_for_label }}_errors">
-            {{ form.username.errors }}
+        <div id="id_{{ form.password.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
+            <div class="*:p-2 *:border *:bg-stone-50 *:rounded *:w-full">{{ form.password }}</div>
+            <label for="{{ form.password.id_for_label }}" class="order-first font-semibold">{{ form.password.label }}</label>
+            <div id="id_{{ form.password.id_for_label }}_helptext">
+                <p>{{ form.password.help_text }}</p>
+            </div>
+            {% if form.password.errors %}
+            <div id="id_{{ form.password.id_for_label }}_errors">
+                {{ form.password.errors }}
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
-    </div>
-    <div id="id_{{ form.password.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
-        <div class="*:p-2 *:border *:bg-stone-50 *:rounded *:w-full">{{ form.password }}</div>
-        <label for="{{ form.password.id_for_label }}" class="order-first font-semibold">{{ form.password.label }}</label>
-        <div id="id_{{ form.password.id_for_label }}_helptext">
-            <p>{{ form.password.help_text }}</p>
+        <div class="min-w-0 flex flex-col gap-4">
+            <button class="w-full px-4 py-2 border border-current cursor-pointer rounded text-gray-100 bg-terminus-red-800 hover:bg-terminus-red-400 ease-in-out duration-300 transition-colors" type="submit">Login</button>
+            <div class="text-center flex flex-col gap-2 @md:flex-row @md:justify-evenly">
+                <p>Don't have an account? <a href="{% url 'register' %}" class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">Click here</a> to register.</p>
+                <p>Forgot your password? <a href="{% url 'password_reset' %}" class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">Click here</a> to reset it.</p>
+            </div>
         </div>
-        {% if form.password.errors %}
-        <div id="id_{{ form.password.id_for_label }}_errors">
-            {{ form.password.errors }}
-        </div>
-        {% endif %}
-    </div>
-    <div class="min-w-0 flex flex-col gap-4">
-        <button class="w-full px-4 py-2 border border-current cursor-pointer rounded text-gray-100 bg-terminus-red-800 hover:bg-terminus-red-400 ease-in-out duration-300 transition-colors" type="submit">Login</button>
-        <div class="text-center flex flex-col gap-2 @md:flex-row @md:justify-evenly">
-            <p>Don't have an account? <a href="{% url 'register' %}" class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">Click here</a> to register.</p>
-            <p>Forgot your password? <a href="{% url 'password_reset' %}" class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">Click here</a> to reset it.</p>
-        </div>
-    </div>
-</form>
+    </form>
+</div>
 {% endblock content %}

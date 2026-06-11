@@ -72,7 +72,29 @@ def privacy_view(request: HttpRequest) -> HttpResponse:
     return TemplateResponse(request, request.template_name)
 
 
+@vary_on_headers("HX-Request")
+@cache_control(max_age=300)
+@require_GET
+@htmx_template("terminusgps/features.html")
+def features_view(request: HttpRequest) -> HttpResponse:
+    return TemplateResponse(request, request.template_name)
+
+
+@vary_on_headers("HX-Request")
+@cache_control(max_age=300)
+@require_GET
+@htmx_template("terminusgps/faq.html")
+def faq_view(request: HttpRequest) -> HttpResponse:
+    return TemplateResponse(request, request.template_name)
+
+
 @require_GET
 def source_code_view(request: HttpRequest) -> HttpResponsePermanentRedirect:
     url = "https://github.com/terminusgps/terminusgps-site/"
+    return redirect(to=url, permanent=True)
+
+
+@require_GET
+def platform_view(request: HttpRequest) -> HttpResponsePermanentRedirect:
+    url = "https://hosting.terminusgps.com/"
     return redirect(to=url, permanent=True)

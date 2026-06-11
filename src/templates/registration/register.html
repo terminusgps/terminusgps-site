@@ -1,51 +1,53 @@
 {% extends "terminusgps/layout.html" %}
 {% block title %}Register{% endblock title %}
 {% partialdef main %}
-<form class="@container flex flex-col gap-4" action="{% url 'register' %}" method="post">
-    {% csrf_token %}
-    <div id="id_{{ form.username.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
-        <div class="*:p-2 *:border *:bg-stone-50 *:rounded *:w-full">{{ form.username }}</div>
-        <label for="{{ form.username.id_for_label }}" class="order-first font-semibold">{{ form.username.label }}</label>
-        <div id="id_{{ form.username.id_for_label }}_helptext">
-            <p>{{ form.username.help_text }}</p>
+<div class="@container p-8 flex flex-col gap-8">
+    <form class="@container flex flex-col gap-4" action="{% url 'register' %}" method="post">
+        {% csrf_token %}
+        <div id="id_{{ form.username.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
+            <div class="*:p-2 *:border *:bg-stone-50 *:rounded *:w-full">{{ form.username }}</div>
+            <label for="{{ form.username.id_for_label }}" class="order-first font-semibold">{{ form.username.label }}</label>
+            <div id="id_{{ form.username.id_for_label }}_helptext">
+                <p>{{ form.username.help_text }}</p>
+            </div>
+            {% if form.username.errors %}
+            <div id="id_{{ form.username.id_for_label }}_errors">
+                {{ form.username.errors }}
+            </div>
+            {% endif %}
         </div>
-        {% if form.username.errors %}
-        <div id="id_{{ form.username.id_for_label }}_errors">
-            {{ form.username.errors }}
+        <div id="id_{{ form.password1.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
+            <div class="*:p-2 *:border *:bg-stone-50 *:rounded *:w-full">{{ form.password1 }}</div>
+            <label for="{{ form.password1.id_for_label }}" class="order-first font-semibold">{{ form.password1.label }}</label>
+            <div id="id_{{ form.password1.id_for_label }}_helptext">
+                <p>{{ form.password1.help_text }}</p>
+            </div>
+            {% if form.password1.errors %}
+            <div id="id_{{ form.password1.id_for_label }}_errors">
+                {{ form.password1.errors }}
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
-    </div>
-    <div id="id_{{ form.password1.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
-        <div class="*:p-2 *:border *:bg-stone-50 *:rounded *:w-full">{{ form.password1 }}</div>
-        <label for="{{ form.password1.id_for_label }}" class="order-first font-semibold">{{ form.password1.label }}</label>
-        <div id="id_{{ form.password1.id_for_label }}_helptext">
-            <p>{{ form.password1.help_text }}</p>
+        <div id="id_{{ form.password2.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
+            <div class="*:p-2 *:border *:bg-stone-50 *:rounded *:w-full">{{ form.password2 }}</div>
+            <label for="{{ form.password2.id_for_label }}" class="order-first font-semibold">{{ form.password2.label }}</label>
+            <div id="id_{{ form.password2.id_for_label }}_helptext">
+                <p>{{ form.password2.help_text }}</p>
+            </div>
+            {% if form.password2.errors %}
+            <div id="id_{{ form.password2.id_for_label }}_errors">
+                {{ form.password2.errors }}
+            </div>
+            {% endif %}
         </div>
-        {% if form.password1.errors %}
-        <div id="id_{{ form.password1.id_for_label }}_errors">
-            {{ form.password1.errors }}
+        <div class="min-w-0 flex flex-col gap-4">
+            <button class="w-full px-4 py-2 border border-current cursor-pointer rounded text-gray-100 bg-terminus-red-800 hover:bg-terminus-red-400 ease-in-out duration-300 transition-colors" type="submit">Register</button>
+            <div class="text-center">
+                <p>Already have an account? <a href="{% url 'login' %}" class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">Click here</a> to login.</p>
+            </div>
         </div>
-        {% endif %}
-    </div>
-    <div id="id_{{ form.password2.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
-        <div class="*:p-2 *:border *:bg-stone-50 *:rounded *:w-full">{{ form.password2 }}</div>
-        <label for="{{ form.password2.id_for_label }}" class="order-first font-semibold">{{ form.password2.label }}</label>
-        <div id="id_{{ form.password2.id_for_label }}_helptext">
-            <p>{{ form.password2.help_text }}</p>
-        </div>
-        {% if form.password2.errors %}
-        <div id="id_{{ form.password2.id_for_label }}_errors">
-            {{ form.password2.errors }}
-        </div>
-        {% endif %}
-    </div>
-    <div class="min-w-0 flex flex-col gap-4">
-        <button class="w-full px-4 py-2 border border-current cursor-pointer rounded text-gray-100 bg-terminus-red-800 hover:bg-terminus-red-400 ease-in-out duration-300 transition-colors" type="submit">Register</button>
-        <div class="text-center">
-            <p>Already have an account? <a href="{% url 'login' %}" class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">Click here</a> to login.</p>
-        </div>
-    </div>
-</form>
+    </form>
+</div>
 {% endpartialdef main %}
 {% block content %}
 {% partial main %}

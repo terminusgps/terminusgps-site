@@ -1,0 +1,72 @@
+{% extends "terminusgps/layout.html" %}
+{% load static %}
+{% block title %}Features{% endblock title %}
+{% partialdef main %}
+<div class="p-8">
+    <div class="@container">
+        <div class="group flex flex-col @md:grid @md:grid-cols-2">
+            <img class="@md:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/wialon/fleet-digitalization.jpg' %}">
+            <div class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700">
+                <p class="font-semibold text-xl text-gray-800">Fleet Digitalization</p>
+                <div class="flex flex-col gap-2">
+                    <p>Text</p>
+                    <p>Text</p>
+                    <p>Text</p>
+                    <p>Text</p>
+                </div>
+            </div>
+        </div>
+        <div class="group flex flex-col @md:grid @md:grid-cols-2">
+            <img class="@md:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/wialon/fleet-digitalization-notifications.jpg' %}">
+            <div class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700">
+                <p class="font-semibold text-xl text-gray-800">Fleet Notifications</p>
+                <div class="flex flex-col gap-2">
+                    <p>Text</p>
+                    <p>Text</p>
+                    <p>Text</p>
+                    <p>Text</p>
+                </div>
+            </div>
+        </div>
+        <div class="group flex flex-col @md:grid @md:grid-cols-2">
+            <img class="@md:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/wialon/fuel-management.jpg' %}">
+            <div class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700">
+                <p class="font-semibold text-xl text-gray-800">Fuel Management</p>
+                <div class="flex flex-col gap-2">
+                    <p>Text</p>
+                    <p>Text</p>
+                    <p>Text</p>
+                    <p>Text</p>
+                </div>
+            </div>
+        </div>
+        <div class="group flex flex-col @md:grid @md:grid-cols-2">
+            <img class="@md:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/wialon/geofencing.jpg' %}">
+            <div class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700">
+                <p class="font-semibold text-xl text-gray-800">Geofencing</p>
+                <div class="flex flex-col gap-2">
+                    <p>Text</p>
+                    <p>Text</p>
+                    <p>Text</p>
+                    <p>Text</p>
+                </div>
+            </div>
+        </div>
+        <div class="group flex flex-col @md:grid @md:grid-cols-2">
+            <img class="@md:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/wialon/route-optimization.jpg' %}">
+            <div class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700">
+                <p class="font-semibold text-xl text-gray-800">Route Optimization</p>
+                <div class="flex flex-col gap-2">
+                    <p>Text</p>
+                    <p>Text</p>
+                    <p>Text</p>
+                    <p>Text</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
+{% endblock content %}
