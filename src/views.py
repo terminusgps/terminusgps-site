@@ -41,6 +41,14 @@ def home_view(request: HttpRequest) -> HttpResponse:
 
 
 @vary_on_headers("HX-Request")
+@cache_control(max_age=300, private=True)
+@require_GET
+@htmx_template("terminusgps/navbar.html")
+def navbar_view(request: HttpRequest) -> HttpResponse:
+    return TemplateResponse(request, request.template_name)
+
+
+@vary_on_headers("HX-Request")
 @cache_control(max_age=300)
 @require_GET
 @htmx_template("terminusgps/contact.html")
@@ -91,10 +99,10 @@ def faq_view(request: HttpRequest) -> HttpResponse:
 @require_GET
 def source_code_view(request: HttpRequest) -> HttpResponsePermanentRedirect:
     url = "https://github.com/terminusgps/terminusgps-site/"
-    return redirect(to=url, permanent=True)
+    return redirect(url, permanent=True)
 
 
 @require_GET
 def platform_view(request: HttpRequest) -> HttpResponsePermanentRedirect:
     url = "https://hosting.terminusgps.com/"
-    return redirect(to=url, permanent=True)
+    return redirect(url, permanent=True)

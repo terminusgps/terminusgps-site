@@ -2,6 +2,7 @@
 {% block title %}Login{% endblock title %}
 {% block content %}
 <div class="@container p-8 flex flex-col gap-8">
+    {{ form.non_field_errors }}
     <form class="@container flex flex-col gap-4" action="{% url 'login' %}" method="post">
         {% csrf_token %}
         <div id="id_{{ form.username.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">

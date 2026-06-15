@@ -1,0 +1,41 @@
+{% extends "terminusgps/layout.html" %}
+{% load static %}
+{% block title %}Safety{% endblock title %}
+{% partialdef main %}
+<article class="@container p-8 flex flex-col gap-8">
+    <section id="header" class="flex flex-col gap-2">
+        <p class="text-3xl text-gray-800">Promoting Safe Driving Habits</p>
+        <p class="text-lg text-gray-700">TODO: Write this subtitle</p>
+    </section>
+    <div class="@container">
+        <section class="group flex flex-col @md:grid @md:grid-cols-2">
+            <img class="@md:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/newdriver.jpg' %}">
+            <div class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700">
+                <p class="font-semibold text-xl text-gray-800">Terminus GPS For Parents</p>
+                <div class="flex flex-col gap-2">
+                    <p>Congratulations! 🎉</p>
+                    <p>Your teen just received their driver license, an exciting milestone for both teen and parent; or so it should be.</p>
+                    <p>If you're like most parents, your anxiety level just reached a new all-time high.</p>
+                    <p>Contrary to popular belief, teens crash more often because they are <em>inexperienced</em>.</p>
+                    <p>Laws are not enough to keep your teen safe on the road. Parental rules and monitoring <em>do</em> help.</p>
+                    <p>We recommend printing a copy of our <a>Teen-Parent Agreement</a>, a contract between you and your teenaged driver to keep you on the same page.</p>
+                </div>
+            </div>
+        </section>
+        <section class="group flex flex-col @md:grid @md:grid-cols-2">
+            <img class="@md:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/seniordriver.jpg' %}">
+            <div class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700">
+                <p class="font-semibold text-xl text-gray-800">Terminus GPS For Seniors</p>
+                <div class="flex flex-col gap-2">
+                    <p>Promoting safety and reducing driving risk is our first priority; it's the very idea Terminus GPS was founded on.</p>
+                    <p>Whether you're monitoring a teen or an elderly driver, Terminus GPS allows you to <em>always know where yours are</em>.</p>
+                    <p>We work directly with you to make the software fit your needs, providing you top-of-the-line, commercial-grade GPS tracking technology without the headache.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+</article>
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
+{% endblock content %}

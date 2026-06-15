@@ -11,13 +11,17 @@ class ContactForm(forms.ModelForm):
         fields = ["full_name", "email", "phone", "city", "state", "message"]
         widgets = {
             "full_name": TextInput(
-                attrs={"placeholder": "Your Name", "autocomplete": "name"}
+                attrs={
+                    "placeholder": "Your Name",
+                    "autocomplete": "name",
+                    "autofocus": "on",
+                }
             ),
             "email": EmailInput(
                 attrs={"placeholder": "email@domain.com", "autocomplete": "on"}
             ),
             "phone": RegionalPhoneNumberWidget(
-                attrs={"placeholder": "(555) 555-5555", "autocomplete": "tel"}
+                attrs={"placeholder": "+15555555555", "autocomplete": "tel"}
             ),
             "city": TextInput(
                 attrs={

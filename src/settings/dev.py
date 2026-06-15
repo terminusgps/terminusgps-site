@@ -23,13 +23,13 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 INTERNAL_IPS = ["127.0.0.1"]
 LANGUAGE_CODE = "en-us"
-LOGIN_REDIRECT_URL = "/manager/dashboard/"
+LOGIN_REDIRECT_URL = "/dashboard/"
 LOGIN_URL = "/login/"
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
 MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
 MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
-MERCHANT_AUTH_ENVIRONMENT = "testMode"
+MERCHANT_AUTH_ENVIRONMENT = "liveMode"
 MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
 ROOT_URLCONF = "src.urls"
 SECRET_KEY = "3ow7#%v3y*o&1wr6%!rt4%c7^^wlx%f8hkhn!#-gf%mk!_tf=^"
@@ -64,8 +64,15 @@ STORAGES = {
     },
 }
 
+# CACHES = {
+#     "default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}
+# }
+
 CACHES = {
-    "default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+    }
 }
 
 TASKS = {
@@ -130,6 +137,11 @@ LOGGING = {
             "level": "CRITICAL",
             "propagate": False,
         },
+        "terminusgps.authorizenet.service": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
     },
 }
 
@@ -150,10 +162,23 @@ TEMPLATES = [
 ]
 
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("DB_NAME"),
+        "HOST": os.getenv("DB_HOST"),
+        "USER": os.getenv("DB_USERNAME"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "PORT": os.getenv("DB_PORT", 5432),
+        "OPTIONS": {"client_encoding": "UTF8"},
+        "CONN_MAX_AGE": None,
     }
 }
 
