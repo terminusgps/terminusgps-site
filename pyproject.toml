@@ -13,7 +13,7 @@ dependencies = [
     "django-phonenumber-field[phonenumbers]>=8.4.0",
     "django-redis>=7.0.0",
     "pillow==12.2.0",
-    "python-terminusgps==55.3.0",
+    "python-terminusgps==56.0.0",
 ]
 
 [tool.pyright]

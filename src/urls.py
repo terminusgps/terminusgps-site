@@ -15,7 +15,10 @@ urlpatterns = [
     path("source-code/", views.source_code_view, name="source code"),
     path("contact/", views.contact_view, name="contact"),
     path("platform/", views.platform_view, name="platform"),
+    path("cameras/", views.cameras_view, name="cameras"),
     path("features/", views.features_view, name="features"),
     path("faq/", views.faq_view, name="faq"),
+    path("app/ios/", views.ios_app_view, name="ios app"),
+    path("app/android/", views.android_app_view, name="android app"),
     path("", include("terminusgps_manager.urls", namespace="manager")),
 ]

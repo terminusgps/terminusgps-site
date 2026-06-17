@@ -32,7 +32,7 @@
                 </div>
             </div>
         </nav>
-        <main class="@container bg-stone-200 mx-2">
+        <main class="@container bg-stone-200 mx-2 dark:bg-gray-700">
             {% if messages %}
             <ul id="messages">
                 {% for message in messages %}
@@ -67,6 +67,14 @@
                         href="{% url 'faq' %}"
                         class="me-4 hover:underline md:me-6"
                         >FAQ</a
+                    >
+                </li>
+                <li>
+                    <a
+                        hx-boost="true"
+                        href="{% url 'features' %}"
+                        class="me-4 hover:underline md:me-6"
+                        >Features</a
                     >
                 </li>
                 <li>

@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest as HttpRequestBase
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.http import require_GET, require_http_methods
@@ -9,7 +9,6 @@ from django.views.decorators.vary import vary_on_headers
 
 from src.decorators import htmx_template
 
-from .authorizenet import get_hosted_profile_page_url
 from .forms import ContactForm
 from .models import TerminusProfile
 
@@ -27,19 +26,6 @@ class HttpRequest(HttpRequestBase):
 def dashboard_view(request: HttpRequest) -> HttpResponse:
     profile, created = TerminusProfile.objects.get_or_create(user=request.user)
     context = {"profile": profile, "created": created}
-    return TemplateResponse(request, request.template_name, context)
-
-
-@never_cache
-@htmx_template("terminusgps_manager/hosted_profile.html")
-@require_http_methods(["GET", "POST"])
-@login_required
-def authorizenet_hosted_profile_view(request: HttpRequest) -> HttpResponse:
-    profile = get_object_or_404(TerminusProfile, user=request.user)
-    if not profile.authorizenet_customer_profile_id:
-        ...
-    token = None
-    context = {"token": token, "url": get_hosted_profile_page_url()}
     return TemplateResponse(request, request.template_name, context)
 
 
