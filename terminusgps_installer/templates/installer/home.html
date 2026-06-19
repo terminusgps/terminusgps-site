@@ -1,10 +1,10 @@
 {% extends "terminusgps/layout.html" %}
-{% block title %}Start New Job{% endblock title %}
+{% block title %}Home{% endblock title %}
 {% partialdef main %}
 <article class="@container p-8 flex flex-col gap-8">
     <section class="flex flex-col gap-2">
-        <p class="text-3xl text-gray-800 dark:text-gray-100">New Install Job</p>
-        <p class="text-lg text-gray-700 dark:text-gray-200">Click the button below to start a new install job.</p>
+        <p class="text-3xl text-gray-800 dark:text-gray-100">Home</p>
+        <p class="text-lg text-gray-700 dark:text-gray-200">Start new ones or review your current install jobs.</p>
     </section>
     <div class="flex flex-col gap-4">
         <a class="p-4 bg-terminus-red-700 border-terminus-red-900 border-2 rounded transition-colors ease-in-out duration-300 hover:bg-terminus-red-500" href="{% url 'installer:new job form' %}" hx-boost="true">
@@ -20,7 +20,7 @@
                 </svg>
             </div>
         </a>
-        <a class="p-4 bg-terminus-red-700 border-terminus-red-900 border-2 rounded transition-colors ease-in-out duration-300 hover:bg-terminus-red-500" href="{% url 'installer:incomplete jobs' %}" hx-boost="true">
+        <a class="p-4 bg-terminus-red-700 border-terminus-red-900 border-2 rounded transition-colors ease-in-out duration-300 hover:bg-terminus-red-500" href="{% url 'installer:job list' %}" hx-boost="true">
             <div class="flex justify-between gap-4 text-gray-200">
                 <div class="flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">

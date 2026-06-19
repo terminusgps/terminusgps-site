@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.forms",
     "phonenumber_field",
+    "terminusgps_installer.apps.TerminusgpsInstallerConfig",
 ]
 
 MIDDLEWARE = [
@@ -156,25 +157,25 @@ TEMPLATES = [
 ]
 
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME"),
-        "HOST": os.getenv("DB_HOST"),
-        "USER": os.getenv("DB_USERNAME"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "PORT": os.getenv("DB_PORT", 5432),
-        "OPTIONS": {"client_encoding": "UTF8"},
-        "CONN_MAX_AGE": None,
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": os.getenv("DB_NAME"),
+#         "HOST": os.getenv("DB_HOST"),
+#         "USER": os.getenv("DB_USERNAME"),
+#         "PASSWORD": os.getenv("DB_PASSWORD"),
+#         "PORT": os.getenv("DB_PORT", 5432),
+#         "OPTIONS": {"client_encoding": "UTF8"},
+#         "CONN_MAX_AGE": None,
+#     }
+# }
 
 AUTH_PASSWORD_VALIDATORS = [
     {

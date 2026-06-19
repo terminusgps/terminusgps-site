@@ -1,5 +1,16 @@
 {% extends "terminusgps/layout.html" %}
 {% partialdef main %}
+<article class="@container p-8 flex flex-col gap-8">
+    <section class="flex flex-col gap-2">
+        <p class="text-3xl text-gray-800 dark:text-gray-100">Job Created</p>
+        <p class="text-lg text-gray-700 dark:text-gray-200">Everything went right.</p>
+    </section>
+    <section>
+        <p>You may safely navigate away or close this page at any time.</p>
+        <p><a href="{% url 'installer:home' %}" hx-boost="true" class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">Click here</a> to go back home.</p>
+        <p><a href="{% url 'installer:new job form' %}" hx-boost="true" class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">Click here</a> to start a new job.</p>
+    </section>
+</article>
 {% endpartialdef main %}
 {% block content %}
 {% partial main %}

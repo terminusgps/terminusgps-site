@@ -1,9 +1,96 @@
-import wialon.api
+import os
+
 from django.conf import settings
+from wialon.api import Wialon, WialonError
 
 
 class WialonSession:
-    pass
+    def __init__(
+        self,
+        scheme: str = "https",
+        host: str = "hst-api.wialon.com",
+        port: int = 443,
+        sid: str | None = None,
+        token: str | None = None,
+        username: str | None = None,
+    ) -> None:
+        self._uid = None
+        self._wialon_api = Wialon(scheme=scheme, host=host, port=port, sid=sid)
+        self._token = token or os.getenv("WIALON_TOKEN")
+        self._username = username
+
+    def __str__(self) -> str:
+        return f"WialonSession #{self.id}"
+
+    def __repr__(self) -> str:
+        return f"{self.__class__}(sid={self.id})"
+
+    def __enter__(self) -> "WialonSession":
+        if self.id is None:
+            if self._token:
+                self.token_login(token=self._token, username=self._username)
+            else:
+                raise WialonError(-1, "Failed to login to the Wialon API")
+        return self
+
+    def __exit__(self, a, b, c) -> None:
+        if self.id is not None:
+            self.logout()
+
+    def token_login(self, token: str, username: str | None = None) -> None:
+        params = {"token": token, "flags": 0x3 if username else 0x1}
+        if username is not None:
+            params.update({"operateAs": username})
+        response = self.wialon_api.token_login(**params)
+        self.wialon_api.sid = response.get("eid")
+        self._username = response.get("au")
+        self._uid = response.get("user", {}).get("id")
+
+    def logout(self) -> None:
+        sid = self.wialon_api.sid
+        if sid is not None:
+            response = self.wialon_api.core_logout()
+            if not int(response.get("error")) == 0:
+                raise WialonError(
+                    -1, f"Failed to logout of Wialon API session #{sid}"
+                )
+            self.wialon_api.sid = None
+
+    @property
+    def wialon_api(self):
+        return self._wialon_api
+
+    @property
+    def uid(self):
+        return self._uid
+
+    @property
+    def username(self):
+        return self._username
+
+    @property
+    def id(self):
+        return self.wialon_api.sid
+
+
+def session_is_active(session: WialonSession) -> bool:
+    """
+    Returns whether a Wialon session is active.
+
+    :param session: A Wialon API session.
+    :type session: ~terminusgps.wialon.WialonSession
+    :returns: Whether the session is active.
+    :rtype: bool
+
+    """
+    try:
+        session.wialon_api.avl_evts()
+    except WialonError as error:
+        if error._code == 1:
+            return False
+        raise
+    else:
+        return True
 
 
 def get_session(sid: str | None = None) -> WialonSession:
@@ -24,26 +111,6 @@ def get_session(sid: str | None = None) -> WialonSession:
     else:
         session.token_login(token=settings.WIALON_TOKEN)
         return session
-
-
-def session_is_active(session: WialonSession) -> bool:
-    """
-    Returns whether a Wialon session is active.
-
-    :param sid: A Wialon API session.
-    :type sid: WialonSession
-    :returns: Whether the session is active.
-    :rtype: bool
-
-    """
-    try:
-        session.wialon_api.avl_evts()
-    except wialon.api.WialonError as error:
-        if error._code == 1:
-            return False
-        raise
-    else:
-        return True
 
 
 def get_vin_info(session: WialonSession, vin: str) -> dict:

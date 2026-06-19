@@ -20,4 +20,8 @@ urlpatterns = [
     path("faq/", views.faq_view, name="faq"),
     path("app/ios/", views.ios_app_view, name="ios app"),
     path("app/android/", views.android_app_view, name="android app"),
+    path(
+        "install/",
+        include("terminusgps_installer.urls", namespace="installer"),
+    ),
 ]

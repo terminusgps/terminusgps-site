@@ -1,0 +1,28 @@
+{% extends "terminusgps/layout.html" %}
+{% partialdef main %}
+<div class="overflow-x-auto min-w-0">
+    <table class="border border-collapse border-gray-800 w-full">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="px-2 py-4 border border-gray-700">Job #</th>
+                <th class="px-2 py-4 border border-gray-700">Status</th>
+                <th class="px-2 py-4 border border-gray-700">Date Created</th>
+                <th class="px-2 py-4 border border-gray-700">Date Last Modified</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for job in jobs_list %}
+            <tr class="bg-gray-200 even:bg-gray-300">
+                <td class="p-2 border border-gray-700">{{ job.pk }}</td>
+                <td class="p-2 border border-gray-700">{{ job.status }}</td>
+                <td class="p-2 border border-gray-700">{{ job.crt_date|date:'r' }}</td>
+                <td class="p-2 border border-gray-700">{{ job.mod_date|date:'r' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
+{% endblock content %}
