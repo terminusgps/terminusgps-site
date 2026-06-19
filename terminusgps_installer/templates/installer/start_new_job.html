@@ -1,0 +1,41 @@
+{% extends "terminusgps/layout.html" %}
+{% block title %}Start New Job{% endblock title %}
+{% partialdef main %}
+<article class="@container p-8 flex flex-col gap-8">
+    <section class="flex flex-col gap-2">
+        <p class="text-3xl text-gray-800 dark:text-gray-100">New Install Job</p>
+        <p class="text-lg text-gray-700 dark:text-gray-200">Click the button below to start a new install job.</p>
+    </section>
+    <div class="flex flex-col gap-4">
+        <a class="p-4 bg-terminus-red-700 border-terminus-red-900 border-2 rounded transition-colors ease-in-out duration-300 hover:bg-terminus-red-500" href="{% url 'installer:new job form' %}" hx-boost="true">
+            <div class="flex justify-between gap-4 text-gray-200">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5v6m3-3H9m4.06-7.19-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                    </svg>
+                    <p class="font-semibold text-lg">Start New Job</p>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                </svg>
+            </div>
+        </a>
+        <a class="p-4 bg-terminus-red-700 border-terminus-red-900 border-2 rounded transition-colors ease-in-out duration-300 hover:bg-terminus-red-500" href="{% url 'installer:incomplete jobs' %}" hx-boost="true">
+            <div class="flex justify-between gap-4 text-gray-200">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                    </svg>
+                    <p class="font-semibold text-lg">View Incomplete Jobs</p>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+                </svg>
+            </div>
+        </a>
+    </div>
+</article>
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
+{% endblock content %}

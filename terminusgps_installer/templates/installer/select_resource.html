@@ -1,0 +1,9 @@
+{% extends "terminusgps/layout.html" %}
+{% partialdef main %}
+{% for value, label in choices %}
+<option value="{{ value }}">{{ label }}</option>
+{% endfor %}
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
+{% endblock content %}
