@@ -3,6 +3,8 @@ import functools
 from django.http import HttpRequest as HttpRequestBase
 from django.http import HttpResponse
 
+from terminusgps.wialon import get_session
+
 
 # For type checkers
 class HttpRequest(HttpRequestBase):
@@ -30,3 +32,22 @@ def htmx_template(template_name: str):
         return inner_wrapper
 
     return outer_wrapper
+
+
+def persistent_wialon_session(view_func=None):
+    def outer_wrapper(view_func):
+        @functools.wraps(view_func)
+        def inner_wrapper(
+            request: HttpRequest, *args, **kwargs
+        ) -> HttpResponse:
+            sid = request.session.pop("wialon_sid", None)
+            session = get_session(sid=sid)
+            request.session["wialon_sid"] = session.id
+            return view_func(request, *args, **kwargs)
+
+        return inner_wrapper
+
+    if view_func is None:
+        return outer_wrapper
+    else:
+        return outer_wrapper(view_func)

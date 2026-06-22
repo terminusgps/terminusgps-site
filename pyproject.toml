@@ -13,6 +13,7 @@ dependencies = [
     "django-phonenumber-field[phonenumbers]>=8.4.0",
     "pillow==12.2.0",
     "django-redis>=7.0.0",
+    "ipython>=9.14.1",
 ]
 
 [tool.pyright]

@@ -1,4 +1,7 @@
+import datetime
 import os
+import urllib.parse
+from typing import Literal
 
 from django.conf import settings
 from wialon.api import Wialon, WialonError
@@ -15,6 +18,7 @@ class WialonSession:
         username: str | None = None,
     ) -> None:
         self._uid = None
+        self._gis_sid = None
         self._wialon_api = Wialon(scheme=scheme, host=host, port=port, sid=sid)
         self._token = token or os.getenv("WIALON_TOKEN")
         self._username = username
@@ -45,6 +49,7 @@ class WialonSession:
         self.wialon_api.sid = response.get("eid")
         self._username = response.get("au")
         self._uid = response.get("user", {}).get("id")
+        self._gis_sid = response.get("gis_sid")
 
     def logout(self) -> None:
         sid = self.wialon_api.sid
@@ -71,6 +76,10 @@ class WialonSession:
     @property
     def id(self):
         return self.wialon_api.sid
+
+    @property
+    def gis_sid(self):
+        return self._gis_sid
 
 
 def session_is_active(session: WialonSession) -> bool:
@@ -102,7 +111,7 @@ def get_session(sid: str | None = None) -> WialonSession:
     :param sid: A Wialon API session id.
     :type sid: str | None
     :returns: A valid Wialon API session.
-    :rtype: ~terminusgps.wialon.session.WialonSession
+    :rtype: ~terminusgps.wialon.WialonSession
 
     """
     session = WialonSession(sid=sid)
@@ -113,12 +122,159 @@ def get_session(sid: str | None = None) -> WialonSession:
         return session
 
 
+def enable_layer(session: WialonSession, layer_name: str) -> None:
+    session.wialon_api.render_enable_layer(
+        **{"layerName": layer_name, "enable": 1}
+    )
+
+
+def disable_layer(session: WialonSession, layer_name: str) -> None:
+    session.wialon_api.render_enable_layer(
+        **{"layerName": layer_name, "enable": 0}
+    )
+
+
+def get_tile_url(session: WialonSession, x: int, y: int, z: int) -> str:
+    return urllib.parse.urljoin(
+        "http://hst-api.wialon.com/",
+        f"/avl_render/{x}_{y}_{z}/{session.id}.png",
+    )
+
+
+def get_gis_tile_url(session: WialonSession, x: int, y: int, z: int) -> str:
+    query = urllib.parse.urlencode({"gis_sid": session.gis_sid})
+    return urllib.parse.urljoin(
+        "http://hst-api.wialon.com/",
+        f"/gis_render/{x}_{y}_{z}/{session.uid}/gis_tile.png?" + query,
+    )
+
+
+def set_locale(
+    session: WialonSession,
+    timezone: int,
+    language: str = "en",
+    flags: Literal[0, 1, 2] | None = None,
+    date_format: str = "%Y-%m-%E %H:%M:%S",
+    density: Literal[1, 2, 3, 4, 5] = 1,
+) -> None:
+    params = {
+        "tzOffset": timezone,
+        "language": language,
+        "formatDate": date_format,
+        "density": density,
+    }
+    if flags is not None:
+        params.update({"flags": flags})
+    session.wialon_api.render_set_locale(**params)
+
+
+def create_messages_layer(
+    session: WialonSession,
+    layer_name: str,
+    unit_id: int,
+    time_from: datetime.datetime,
+    time_to: datetime.datetime,
+    trip_detector: bool = False,
+    track_color: str = "FFFF0000",
+    track_width: int = 4,
+    arrows: bool = True,
+    points: bool = True,
+    point_color: str = "7FFFFF00",
+    annotations: bool = False,
+    flags: int = 0x0001,
+) -> dict:
+    """
+    Creates a messages layer in the Wialon renderer.
+
+    :param session: A valid Wialon API session.
+    :type session: ~terminusgps.wialon.WialonSession
+    :param unit_id: A Wialon unit id.
+    :type unit_id: int
+    :param time_from: The beginning of the interval.
+    :type time_from: ~datetime.datetime
+    :param time_to: The end of the interval.
+    :type time_to: ~datetime.datetime
+    :param trip_detector: Whether to include trip detector in the layer. Default is :py:obj:`False`.
+    :type trip_detector: bool
+    :param track_color: Color of the track in ARGB format. Default is ``FFFF0000`` (opaque red).
+    :type track_color: str
+    :param track_width: Width of the track in pixels. Default is ``4``.
+    :type track_width: int
+    :param arrows: Whether to include arrows indicating movement direction in the layer. Default is :py:obj:`True`.
+    :type arrows: bool
+    :param points: Whether to include points at the places messages were recieved. Default is :py:obj:`True`.
+    :type points: bool
+    :param point_color: Color of the points. Default is ``7FFFFF00`` (opaque green?).
+    :type point_color: str
+    :param annotations: Whether to include annotations for the points. Default is :py:obj:`False`.
+    :type annotations: bool
+    :param flags: Flags for displaying markers. Default is ``0x0001``.
+    :type flags: int
+    :returns: A dictionary describing the generated layer.
+    :rtype: dict
+
+    """
+    return session.wialon_api.render_create_messages_layer(
+        **{
+            "layerName": layer_name,
+            "itemId": unit_id,
+            "timeFrom": int(time_from.timestamp()),
+            "timeTo": int(time_to.timestamp()),
+            "tripDetector": int(trip_detector),
+            "trackColor": track_color,
+            "trackWidth": track_width,
+            "arrows": int(arrows),
+            "points": int(points),
+            "pointColor": point_color,
+            "annotations": int(annotations),
+            "flags": flags,
+        }
+    )
+
+
+def get_unit_by_imei(
+    session: WialonSession, imei: str, flags: int = 1
+) -> dict:
+    """
+    Returns a Wialon unit dictionary by IMEI # (sys_unique_id).
+
+    :param session: A valid Wialon API session.
+    :type session: ~terminusgps.wialon.WialonSession
+    :param imei: An IMEI number.
+    :type imei: str
+    :param flags: Response flags. Default is ``1``.
+    :type flags: int
+    :raises wialon.api.WialonError: If anything went wrong calling the Wialon API.
+    :returns: A Wialon unit dictionary.
+    :rtype: dict
+
+    """
+    response = session.wialon_api.core_search_items(
+        **{
+            "spec": {
+                "itemsType": "avl_unit",
+                "propName": "sys_unique_id",
+                "propValueMask": f"={imei}",
+                "propType": "property",
+                "sortType": "sys_name",
+            },
+            "from": 0,
+            "to": 0,
+            "force": 0,
+            "flags": flags,
+        }
+    )
+    if response["totalItemsCount"] != 1:
+        raise WialonError(-1, f"Too many items returned for IMEI #: {imei}")
+    return response["items"][0]
+
+
 def get_vin_info(session: WialonSession, vin: str) -> dict:
     """
     Returns VIN # info from Wialon.
 
     :param session: A valid Wialon API session.
-    :type session: ~terminusgps.wialon.session.WialonSession
+    :type session: ~terminusgps.wialon.WialonSession
     :param vin: A VIN number.
     :type vin: str
     :returns: A dictionary of VIN # info.
@@ -134,7 +290,7 @@ def get_resource_choices(session: WialonSession) -> list[tuple]:
     Returns a list of resources from Wialon as choice tuples.
 
     :param session: A valid Wialon API session.
-    :type session: ~terminusgps.wialon.session.WialonSession
+    :type session: ~terminusgps.wialon.WialonSession
     :returns: A list of resource choice tuples.
     :rtype: list[tuple]
 
@@ -167,7 +323,7 @@ def create_resource(
     Creates a resource in Wialon and returns its id.
 
     :param session: A valid Wialon API session.
-    :type session: ~terminusgps.wialon.session.WialonSession
+    :type session: ~terminusgps.wialon.WialonSession
     :param creator_id: A Wialon user id.
     :type creator_id: int
     :param name: New resource name.
@@ -196,7 +352,7 @@ def create_user(
     Creates a user in Wialon and returns its id.
 
     :param session: A valid Wialon API session.
-    :type session: ~terminusgps.wialon.session.WialonSession
+    :type session: ~terminusgps.wialon.WialonSession
     :param creator_id: A Wialon user id.
     :type creator_id: int
     :param name: New user name.
@@ -225,7 +381,7 @@ def create_account(
     Creates an account from a resource in Wialon.
 
     :param session: A valid Wialon API session.
-    :type session: ~terminusgps.wialon.session.WialonSession
+    :type session: ~terminusgps.wialon.WialonSession
     :param resource_id: A Wialon resource id.
     :type resource_id: int
     :param plan: A Wialon billing plan.
@@ -244,7 +400,7 @@ def disable_account(session: WialonSession, resource_id: int) -> None:
     Disables an account in Wialon.
 
     :param session: A valid Wialon API session.
-    :type session: ~terminusgps.wialon.session.WialonSession
+    :type session: ~terminusgps.wialon.WialonSession
     :param resource_id: A Wialon resource (account) id.
     :type resource_id: int
     :returns: Nothing.
@@ -261,7 +417,7 @@ def enable_account(session: WialonSession, resource_id: int) -> None:
     Enables an account in Wialon.
 
     :param session: A valid Wialon API session.
-    :type session: ~terminusgps.wialon.session.WialonSession
+    :type session: ~terminusgps.wialon.WialonSession
     :param resource_id: A Wialon resource (account) id.
     :type resource_id: int
     :returns: Nothing.

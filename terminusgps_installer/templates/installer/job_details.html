@@ -1,0 +1,22 @@
+{% extends "terminusgps/layout.html" %}
+{% block title %}Job #{{ job.pk }}{% endblock title %}
+{% partialdef main %}
+<article class="@container p-8 flex flex-col gap-8">
+    <section class="flex flex-col gap-2">
+        <p class="text-3xl text-gray-800 dark:text-gray-100">Job #{{ job.pk }} - {{ unit.nm }}</p>
+        <p class="text-lg text-gray-700 dark:text-gray-200">Check out this job, buddy.</p>
+    </section>
+    <div id="unit" class="flex flex-col gap-4">
+        <p>{{ unit.nm }}</p>
+        <div id="commands">
+            {% for cmd in unit.cmds %}
+            <p>{{ cmd.n }}</p>
+            {% endfor %}
+        </div>
+        {{ unit|pprint }}
+    </div>
+</article>
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
+{% endblock content %}

@@ -11,7 +11,7 @@
         <div class="grid grid-cols-1 @md:grid-cols-2 gap-8">
             <div id="id_{{ form.employee.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
                 <div class="*:peer *:p-2 *:border *:bg-stone-50 *:rounded *:w-full *:dark:bg-gray-400">{{ form.employee }}</div>
-                <label for="{{ form.employee.id_for_label }}" class="order-first font-semibold">{{ form.employee.label }} <span class="text-terminus-red-700">*</span></label>
+                <label for="{{ form.employee.id_for_label }}" class="order-first font-semibold">{{ form.employee.label }}<span class="text-terminus-red-700">*</span></label>
                 <div id="id_{{ form.employee.id_for_label }}_helptext">
                     <p>{{ form.employee.help_text }}</p>
                 </div>
@@ -23,7 +23,7 @@
             </div>
             <div id="id_{{ form.resource.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
                 <div class="*:peer *:p-2 *:border *:bg-stone-50 *:rounded *:w-full *:dark:bg-gray-400">{{ form.resource }}</div>
-                <label for="{{ form.resource.id_for_label }}" class="order-first font-semibold">{{ form.resource.label }} <span class="text-terminus-red-700">*</span></label>
+                <label for="{{ form.resource.id_for_label }}" class="order-first font-semibold">Company<span class="text-terminus-red-700">*</span></label>
                 <div id="id_{{ form.resource.id_for_label }}_helptext">
                     <p>{{ form.resource.help_text }}</p>
                 </div>
@@ -35,7 +35,7 @@
             </div>
             <div id="id_{{ form.imei.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
                 <div class="*:peer *:p-2 *:border *:bg-stone-50 *:rounded *:w-full *:dark:bg-gray-400">{{ form.imei }}</div>
-                <label for="{{ form.imei.id_for_label }}" class="order-first font-semibold peer-user-invalid:text-red-700">{{ form.imei.label }} <span class="text-terminus-red-700">*</span></label>
+                <label for="{{ form.imei.id_for_label }}" class="order-first font-semibold peer-user-invalid:text-red-700">IMEI Number<span class="text-terminus-red-700">*</span></label>
                 <div id="id_{{ form.imei.id_for_label }}_helptext">
                     <p>{{ form.imei.help_text }}</p>
                 </div>
@@ -47,7 +47,7 @@
             </div>
             <div id="id_{{ form.vin.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
                 <div class="*:peer *:p-2 *:border *:bg-stone-50 *:rounded *:w-full *:dark:bg-gray-400">{{ form.vin }}</div>
-                <label for="{{ form.vin.id_for_label }}" class="order-first">{{ form.vin.label }}</label>
+                <label for="{{ form.vin.id_for_label }}" class="order-first">VIN Number</label>
                 <div id="id_{{ form.vin.id_for_label }}_helptext">
                     <p>{{ form.vin.help_text }}</p>
                 </div>

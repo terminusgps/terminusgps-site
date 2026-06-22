@@ -137,6 +137,7 @@ LOGGING = {
             "level": "CRITICAL",
             "propagate": False,
         },
+        "asyncio": {"level": "CRITICAL"},
     },
 }
 

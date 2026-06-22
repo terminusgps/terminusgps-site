@@ -1,7 +1,12 @@
+from functools import cached_property
+
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+
+from terminusgps.wialon import get_session, get_unit_by_imei
 
 from .validators import validate_imei, validate_vin
 
@@ -80,3 +85,33 @@ class InstallJob(models.Model):
 
     def __str__(self) -> str:
         return f"InstallJob #{self.pk}"
+
+    def get_absolute_url(self) -> str:
+        return reverse("installer:job details", kwargs={"job_pk": self.pk})
+
+
+class WialonMapRenderer(models.Model):
+    sid = models.CharField(blank=True)
+    job = models.ForeignKey(
+        "terminusgps_installer.InstallJob",
+        on_delete=models.CASCADE,
+        related_name="map_renderers",
+    )
+
+    def __str__(self) -> str:
+        return f"Job #{self.job.pk} Map Renderer"
+
+    def save(self, **kwargs) -> None:
+        session = get_session(sid=self.sid)
+        if session.id != self.sid:
+            self.sid = session.id
+        return super().save(**kwargs)
+
+    @cached_property
+    def unit_id(self) -> int:
+        session = get_session(sid=self.sid)
+        if session.id != self.sid:
+            self.sid = session.id
+            self.save(update_fields=["sid"])
+        unit = get_unit_by_imei(session, self.job.imei)
+        return unit["id"]
