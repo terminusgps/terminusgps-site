@@ -502,3 +502,15 @@ def execute_command(
     if param is not None:
         params["param"] = param
     return session.wialon_api.unit_exec_cmd(**params)
+
+
+def enable_layer(session: WialonSession, layer_name: str) -> None:
+    session.wialon_api.render_enable_layer(
+        **{"layerName": layer_name, "enable": 1}
+    )
+
+
+def disable_layer(session: WialonSession, layer_name: str) -> None:
+    session.wialon_api.render_enable_layer(
+        **{"layerName": layer_name, "enable": 0}
+    )

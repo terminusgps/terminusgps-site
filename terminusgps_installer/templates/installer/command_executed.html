@@ -1,6 +1,8 @@
 {% extends "terminusgps/layout.html" %}
 {% partialdef main %}
-{% if queued %}
+{% if not command %}
+<p>Failed to queue the command. Something went wrong with Wialon.</p>
+{% elif queued %}
 <p>Successfully queued '{{ command }}' for execution.</p>
 {% else %}
 <p>Failed to queue '{{ command }}' for execution.</p>
