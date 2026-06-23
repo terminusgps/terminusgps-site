@@ -1,0 +1,11 @@
+{% extends "terminusgps/layout.html" %}
+{% partialdef main %}
+{% if queued %}
+<p>Successfully queued '{{ command }}' for execution.</p>
+{% else %}
+<p>Failed to queue '{{ command }}' for execution.</p>
+{% endif %}
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
+{% endblock content %}

@@ -7,17 +7,22 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.views.decorators.cache import cache_control, never_cache
-from django.views.decorators.http import require_GET, require_http_methods
+from django.views.decorators.http import (
+    require_GET,
+    require_http_methods,
+    require_POST,
+)
 from django.views.decorators.vary import vary_on_headers
 
 from terminusgps.decorators import htmx_template
 from terminusgps.wialon import (
+    execute_command,
     get_resource_choices,
     get_session,
     get_unit_by_imei,
 )
 
-from .forms import NewInstallJobForm
+from .forms import CommandExecutionForm, NewInstallJobForm
 from .models import Employee, InstallJob
 
 logger = logging.getLogger(__name__)
@@ -99,3 +104,26 @@ def select_resource_view(request: HttpRequest) -> HttpResponse:
         choices = []
     context = {"choices": choices}
     return TemplateResponse(request, request.template_name, context)
+
+
+@login_required
+@never_cache
+@htmx_template("installer/command_executed.html")
+@require_POST
+def execute_command_view(request: HttpRequest, unit_id: int) -> HttpResponse:
+    form = CommandExecutionForm(request.POST)
+    if not form.is_valid():
+        context = {"command": None, "queued": False}
+        return TemplateResponse(request, request.template_name, context)
+    else:
+        command = form.cleaned_data["command_name"]
+        session = get_session(sid=None)
+        try:
+            execute_command(session, unit_id, command)
+        except wialon.api.WialonError as error:
+            logger.error(error)
+            queued = False
+        else:
+            queued = True
+        context = {"command": command, "queued": queued}
+        return TemplateResponse(request, request.template_name, context)

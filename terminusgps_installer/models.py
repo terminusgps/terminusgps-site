@@ -90,27 +90,26 @@ class InstallJob(models.Model):
         return reverse("installer:job details", kwargs={"job_pk": self.pk})
 
 
-class WialonMapRenderer(models.Model):
+class WialonMap(models.Model):
     sid = models.CharField(blank=True)
     job = models.ForeignKey(
         "terminusgps_installer.InstallJob",
         on_delete=models.CASCADE,
-        related_name="map_renderers",
+        related_name="maps",
     )
 
     def __str__(self) -> str:
         return f"Job #{self.job.pk} Map Renderer"
 
-    def save(self, **kwargs) -> None:
+    @property
+    def is_active(self) -> bool:
         session = get_session(sid=self.sid)
-        if session.id != self.sid:
-            self.sid = session.id
-        return super().save(**kwargs)
+        return session.id == self.sid
 
     @cached_property
     def unit_id(self) -> int:
         session = get_session(sid=self.sid)
-        if session.id != self.sid:
+        if not self.is_active:
             self.sid = session.id
             self.save(update_fields=["sid"])
         unit = get_unit_by_imei(session, self.job.imei)

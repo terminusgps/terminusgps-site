@@ -15,4 +15,9 @@ urlpatterns = [
     path(
         "select-resource/", views.select_resource_view, name="select resource"
     ),
+    path(
+        "units/<int:unit_id>/exec_cmd/",
+        views.execute_command_view,
+        name="execute command",
+    ),
 ]
