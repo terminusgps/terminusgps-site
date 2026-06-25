@@ -13,6 +13,9 @@ urlpatterns = [
         name="job details",
     ),
     path(
+        "jobs/<int:job_pk>/update/", views.job_update_view, name="job update"
+    ),
+    path(
         "select-resource/", views.select_resource_view, name="select resource"
     ),
     path(

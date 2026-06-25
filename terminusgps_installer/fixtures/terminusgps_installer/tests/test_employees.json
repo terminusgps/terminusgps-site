@@ -1,0 +1,16 @@
+[
+    {
+        "model": "terminusgps_installer.employee",
+        "pk": 1,
+        "fields": {
+            "user": 1
+        }
+    },
+    {
+        "model": "terminusgps_installer.employee",
+        "pk": 2,
+        "fields": {
+            "user": 2
+        }
+    }
+]

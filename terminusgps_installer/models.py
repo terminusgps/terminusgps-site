@@ -1,12 +1,15 @@
-from functools import cached_property
-
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxLengthValidator, MinLengthValidator
-from django.db import models
+from django.db import models, transaction
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from terminusgps.wialon import get_session, get_unit_by_imei
+from terminusgps.wialon import (
+    generate_locator_token,
+    generate_locator_url,
+    get_session,
+    get_unit_by_imei,
+)
 
 from .validators import validate_imei, validate_vin
 
@@ -61,7 +64,7 @@ class InstallJob(models.Model):
             validate_vin,
         ],
     )
-
+    locator_url = models.URLField(blank=True)
     employee = models.ForeignKey(
         "terminusgps_installer.Employee",
         help_text=_("Select the employee responsible for this job."),
@@ -74,7 +77,22 @@ class InstallJob(models.Model):
     )
     crt_date = models.DateTimeField(auto_now_add=True)
     mod_date = models.DateTimeField(auto_now=True)
-
+    license_plate = models.CharField(
+        blank=True,
+        help_text=_("Optional. Provide the vehicle's license plate number."),
+    )
+    mileage = models.IntegerField(
+        blank=True,
+        null=True,
+        default=None,
+        help_text=_("Optional. Provide the vehicle's current mileage."),
+    )
+    vehicle_id = models.CharField(
+        blank=True,
+        help_text=_(
+            "Optional. Provide the vehicle's client-designated identifier. Ex: Truck #13"
+        ),
+    )
     objects = InstallJobQuerySet.as_manager()
 
     class Meta:
@@ -89,28 +107,10 @@ class InstallJob(models.Model):
     def get_absolute_url(self) -> str:
         return reverse("installer:job details", kwargs={"job_pk": self.pk})
 
-
-class WialonMap(models.Model):
-    sid = models.CharField(blank=True)
-    job = models.ForeignKey(
-        "terminusgps_installer.InstallJob",
-        on_delete=models.CASCADE,
-        related_name="maps",
-    )
-
-    def __str__(self) -> str:
-        return f"Job #{self.job.pk} Map Renderer"
-
-    @property
-    def is_active(self) -> bool:
-        session = get_session(sid=self.sid)
-        return session.id == self.sid
-
-    @cached_property
-    def unit_id(self) -> int:
-        session = get_session(sid=self.sid)
-        if not self.is_active:
-            self.sid = session.id
-            self.save(update_fields=["sid"])
-        unit = get_unit_by_imei(session, self.job.imei)
-        return unit["id"]
+    @transaction.atomic
+    def refresh_locator_url(self, sid: str | None = None) -> None:
+        session = get_session(sid=sid)
+        unit = get_unit_by_imei(session, self.imei)
+        token = generate_locator_token(session, [unit["id"]])
+        self.locator_url = generate_locator_url(token)
+        self.save(update_fields=["locator_url"])

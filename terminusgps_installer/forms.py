@@ -9,10 +9,17 @@ class CommandExecutionForm(forms.Form):
     command_name = forms.CharField()
 
 
-class InstallJobStatusForm(forms.ModelForm):
+class UpdateInstallJobForm(forms.ModelForm):
     class Meta:
         model = models.InstallJob
-        fields = ["status"]
+        fields = [
+            "imei",
+            "resource",
+            "vin",
+            "license_plate",
+            "mileage",
+            "vehicle_id",
+        ]
 
 
 class NewInstallJobForm(forms.ModelForm):

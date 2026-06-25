@@ -12,8 +12,8 @@ dependencies = [
     "django==6.0.5",
     "django-phonenumber-field[phonenumbers]>=8.4.0",
     "pillow==12.2.0",
-    "django-redis>=7.0.0",
     "ipython>=9.14.1",
+    "python-wialon>=1.2.4",
 ]
 
 [tool.pyright]
@@ -65,4 +65,5 @@ deploy = [
     "gunicorn>=23.0.0",
     "psycopg>=3.3.4",
     "psycopg2-binary>=2.9.10",
+    "django-redis>=7.0.0",
 ]

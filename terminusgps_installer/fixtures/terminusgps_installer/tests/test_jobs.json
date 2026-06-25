@@ -1,0 +1,31 @@
+[
+    {
+        "model": "terminusgps_installer.installjob",
+        "pk": 1,
+        "fields": {
+            "imei": "0520036106",
+            "resource": "27594819",
+            "vin": "",
+            "locator_url": "",
+            "employee": 2,
+            "status": "done",
+            "crt_date": "2026-06-24T16:50:01.734Z",
+            "mod_date": "2026-06-24T16:51:32.029Z"
+        }
+    },
+    {
+        "model": "terminusgps_installer.installjob",
+        "pk": 2,
+        "fields": {
+            "imei": "869738060092801",
+            "resource": "28911380",
+            "vin": "",
+            "locator_url": "",
+            "employee": 2,
+            "status": "needs_billing",
+            "crt_date": "2026-06-25T17:53:27.141Z",
+            "mod_date": "2026-06-25T17:53:27.141Z"
+        }
+
+    }
+]

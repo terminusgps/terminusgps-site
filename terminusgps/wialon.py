@@ -1,4 +1,6 @@
 import functools
+import json
+import urllib.parse
 from collections.abc import Sequence
 from typing import Any
 
@@ -77,6 +79,34 @@ class WialonSession:
     @property
     def gis_sid(self):
         return self._gis_sid
+
+
+def generate_locator_token(
+    session: WialonSession,
+    unit_ids: Sequence[int],
+    json_params: dict | None = None,
+) -> str:
+    if not json_params:
+        json_params = {}
+    response = session.wialon_api.token_update(
+        **{
+            "callMode": "create",
+            "app": "locator",
+            "at": 0,
+            "dur": 259_200,  # 3 days
+            "fl": 256,
+            "p": json.dumps(json_params),
+            "items": unit_ids,
+        }
+    )
+    return response["h"]
+
+
+def generate_locator_url(token: str) -> str:
+    query = urllib.parse.urlencode({"t": token})
+    base = "https://hosting.terminusgps.com/"
+    url = "/locator/index.html?" + query
+    return urllib.parse.urljoin(base, url)
 
 
 def session_is_active(session: WialonSession) -> bool:
