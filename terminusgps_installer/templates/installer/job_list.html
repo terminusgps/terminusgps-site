@@ -7,6 +7,9 @@
         <p class="text-lg text-gray-700 dark:text-gray-200">Click 'View' to view job details.</p>
     </section>
     <section class="overflow-x-auto min-w-0">
+        {% if jobs_list|length == 0 %}
+        <p>You're all caught up!</p>
+        {% else %}
         <table class="border border-collapse border-gray-800 w-full">
             <thead class="bg-gray-100">
                 <tr>
@@ -31,6 +34,7 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% endif %}
     </section>
 </article>
 {% endpartialdef main %}

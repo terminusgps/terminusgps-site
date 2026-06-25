@@ -19,11 +19,13 @@ from terminusgps.wialon import (
     execute_command,
     get_resource_choices,
     get_session,
+    get_unit_by_id,
     get_unit_by_imei,
 )
 
 from .forms import CommandExecutionForm, NewInstallJobForm
 from .models import Employee, InstallJob
+from .tasks import send_job_created_email
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +59,7 @@ def new_job_form_view(request: HttpRequest) -> HttpResponse:
         form = NewInstallJobForm(request.POST, initial=initial)
         if form.is_valid():
             job = form.save(commit=True)
+            send_job_created_email.enqueue(job.pk)
             return redirect("installer:job details", job_pk=job.pk)
     return TemplateResponse(request, request.template_name, {"form": form})
 
@@ -127,3 +130,20 @@ def execute_command_view(request: HttpRequest, unit_id: int) -> HttpResponse:
             queued = True
         context = {"command": command, "queued": queued}
         return TemplateResponse(request, request.template_name, context)
+
+
+@login_required
+@cache_control(max_age=300)
+@htmx_template("installer/command_list.html")
+@require_GET
+def command_list_view(request: HttpRequest, unit_id: int) -> HttpResponse:
+    session = get_session(sid=None)
+    try:
+        response = get_unit_by_id(session, unit_id, flags=512)
+    except wialon.api.WialonError as error:
+        logger.error(error)
+        commands = []
+    else:
+        commands = response["cmds"]
+    context = {"commands": commands, "unit_id": unit_id}
+    return TemplateResponse(request, request.template_name, context)

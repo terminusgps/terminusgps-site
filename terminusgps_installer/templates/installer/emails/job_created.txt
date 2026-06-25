@@ -1,0 +1,7 @@
+Job #: {{ job_id }} by {{ employee }}
+IMEI #: {{ imei }}
+VIN #: {{ vin }}
+Resource: {{ resource|safe }}
+Unit: {{ unit|safe }}
+Status: {{ status }}
+Created On: {{ date }}

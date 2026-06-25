@@ -20,4 +20,9 @@ urlpatterns = [
         views.execute_command_view,
         name="execute command",
     ),
+    path(
+        "units/<int:unit_id>/cmds/",
+        views.command_list_view,
+        name="command list",
+    ),
 ]

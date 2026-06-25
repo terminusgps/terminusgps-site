@@ -1,4 +1,3 @@
-import datetime
 import functools
 from collections.abc import Sequence
 from typing import Any
@@ -17,13 +16,12 @@ class WialonSession:
         port: int = 443,
         sid: str | None = None,
         token: str | None = None,
-        username: str | None = None,
     ) -> None:
-        self._uid = None
-        self._gis_sid = None
         self._wialon_api = Wialon(scheme=scheme, host=host, port=port, sid=sid)
         self._token = token or settings.WIALON_TOKEN
-        self._username = username
+        self._uid = None
+        self._gis_sid = None
+        self._username = None
 
     def __str__(self) -> str:
         return f"WialonSession #{self.id}"
@@ -33,10 +31,7 @@ class WialonSession:
 
     def __enter__(self) -> "WialonSession":
         if self.id is None:
-            if self._token:
-                self.token_login(token=self._token, username=self._username)
-            else:
-                raise WialonError(-1, "Failed to login to the Wialon API")
+            self.token_login(token=self._token, username=self._username)
         return self
 
     def __exit__(self, a, b, c) -> None:
@@ -124,70 +119,6 @@ def get_session(sid: str | None = None) -> WialonSession:
         return session
 
 
-def create_messages_layer(
-    session: WialonSession,
-    layer_name: str,
-    unit_id: int,
-    time_from: datetime.datetime,
-    time_to: datetime.datetime,
-    trip_detector: bool = False,
-    track_color: str = "FFFF0000",
-    track_width: int = 4,
-    arrows: bool = True,
-    points: bool = True,
-    point_color: str = "7FFFFF00",
-    annotations: bool = False,
-    flags: int = 0x0001,
-) -> dict:
-    """
-    Creates a messages layer in the Wialon renderer.
-
-    :param session: A valid Wialon API session.
-    :type session: ~terminusgps.wialon.WialonSession
-    :param unit_id: A Wialon unit id.
-    :type unit_id: int
-    :param time_from: The beginning of the interval.
-    :type time_from: ~datetime.datetime
-    :param time_to: The end of the interval.
-    :type time_to: ~datetime.datetime
-    :param trip_detector: Whether to include trip detector in the layer. Default is :py:obj:`False`.
-    :type trip_detector: bool
-    :param track_color: Color of the track in ARGB format. Default is ``FFFF0000`` (opaque red).
-    :type track_color: str
-    :param track_width: Width of the track in pixels. Default is ``4``.
-    :type track_width: int
-    :param arrows: Whether to include arrows indicating movement direction in the layer. Default is :py:obj:`True`.
-    :type arrows: bool
-    :param points: Whether to include points at the places messages were recieved. Default is :py:obj:`True`.
-    :type points: bool
-    :param point_color: Color of the points. Default is ``7FFFFF00`` (opaque green?).
-    :type point_color: str
-    :param annotations: Whether to include annotations for the points. Default is :py:obj:`False`.
-    :type annotations: bool
-    :param flags: Flags for displaying markers. Default is ``0x0001``.
-    :type flags: int
-    :returns: A dictionary describing the generated layer.
-    :rtype: dict
-
-    """
-    return session.wialon_api.render_create_messages_layer(
-        **{
-            "layerName": layer_name,
-            "itemId": unit_id,
-            "timeFrom": int(time_from.timestamp()),
-            "timeTo": int(time_to.timestamp()),
-            "tripDetector": int(trip_detector),
-            "trackColor": track_color,
-            "trackWidth": track_width,
-            "arrows": int(arrows),
-            "points": int(points),
-            "pointColor": point_color,
-            "annotations": int(annotations),
-            "flags": flags,
-        }
-    )
-
-
 @functools.lru_cache(maxsize=300)
 def get_unit_by_imei(
     session: WialonSession, imei: str, flags: int = 1
@@ -227,6 +158,40 @@ def get_unit_by_imei(
 
 
 @functools.lru_cache(maxsize=300)
+def get_unit_by_id(
+    session: WialonSession, unit_id: int, flags: int = 1
+) -> dict:
+    """
+    Returns a Wialon unit dictionary by id.
+
+    :param session: A valid Wialon API session.
+    :type session: ~terminusgps.wialon.WialonSession
+    :param unit_id: A Wialon unit id.
+    :type unit_id: int
+    :param flags: Response flags. Default is ``1``.
+    :type flags: int
+    :raises wialon.api.WialonError: If anything went wrong calling the Wialon API.
+    :returns: A Wialon unit dictionary.
+    :rtype: dict
+
+    """
+    response = session.wialon_api.core_search_item(
+        **{"id": unit_id, "flags": flags}
+    )
+    return response["item"]
+
+
+@functools.lru_cache(maxsize=300)
+def get_resource(
+    session: WialonSession, resource_id: int, flags: int = 1
+) -> dict:
+    response = session.wialon_api.core_search_item(
+        **{"id": resource_id, "flags": flags}
+    )
+    return response["item"]
+
+
+@functools.lru_cache(maxsize=300)
 def get_vin_info(session: WialonSession, vin: str) -> dict:
     """
     Returns VIN number info from Wialon.
@@ -243,7 +208,7 @@ def get_vin_info(session: WialonSession, vin: str) -> dict:
     return response["vin_lookup_result"]
 
 
-@functools.lru_cache(maxsize=100)
+@functools.lru_cache(maxsize=300)
 def get_resource_choices(session: WialonSession) -> list[tuple]:
     """
     Returns a list of resources from Wialon as choice tuples.
@@ -410,7 +375,7 @@ def create_new_account_user(username: str) -> int:
     return user_id
 
 
-@functools.lru_cache(maxsize=100)
+@functools.lru_cache(maxsize=300)
 def get_command_definition_data(
     session: WialonSession,
     unit_id: int,
@@ -437,7 +402,7 @@ def get_command_definition_data(
     return session.wialon_api.unit_get_command_definition_data(**params)
 
 
-@functools.lru_cache(maxsize=100)
+@functools.lru_cache(maxsize=300)
 def get_command_name(
     session: WialonSession, unit_id: int, command_id: int
 ) -> str | None:
@@ -492,25 +457,32 @@ def execute_command(
     :rtype: dict
 
     """
-    params: dict[str, Any] = {
-        "itemId": unit_id,
-        "commandName": command_name,
-        "linkType": link_type,
-        "timeout": timeout,
-        "flags": flags,
-    }
-    if param is not None:
-        params["param"] = param
-    return session.wialon_api.unit_exec_cmd(**params)
-
-
-def enable_layer(session: WialonSession, layer_name: str) -> None:
-    session.wialon_api.render_enable_layer(
-        **{"layerName": layer_name, "enable": 1}
+    return session.wialon_api.unit_exec_cmd(
+        **{
+            "itemId": unit_id,
+            "commandName": command_name,
+            "linkType": link_type,
+            "timeout": timeout,
+            "flags": flags,
+            "param": param,
+        }
     )
 
 
-def disable_layer(session: WialonSession, layer_name: str) -> None:
-    session.wialon_api.render_enable_layer(
-        **{"layerName": layer_name, "enable": 0}
+def update_vin(session: WialonSession, unit_id: int, vin: str) -> None:
+    """
+    Updates a unit's VIN number in Wialon.
+
+    :param session: A valid Wialon API session.
+    :type session: ~terminusgps.wialon.WialonSesison
+    :param unit_id: A Wialon unit id.
+    :type unit_id: int
+    :param vin: A VIN number.
+    :type vin: str
+    :returns: Nothing.
+    :rtype: None
+
+    """
+    session.wialon_api.item_update_profile_field(
+        **{"itemId": unit_id, "n": "vin", "v": vin}
     )

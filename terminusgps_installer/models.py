@@ -41,7 +41,7 @@ class InstallJob(models.Model):
         ),
         unique=True,
         validators=[
-            MinLengthValidator(15),
+            MinLengthValidator(10),
             MaxLengthValidator(15),
             validate_imei,
         ],
