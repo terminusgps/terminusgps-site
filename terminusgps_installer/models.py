@@ -114,3 +114,20 @@ class InstallJob(models.Model):
         token = generate_locator_token(session, [unit["id"]])
         self.locator_url = generate_locator_url(token)
         self.save(update_fields=["locator_url"])
+
+
+class InstallJobAttachment(models.Model):
+    file = models.FileField(upload_to="attachments/")
+    note = models.CharField(max_length=256)
+    job = models.ForeignKey(
+        "terminusgps_installer.InstallJob",
+        on_delete=models.CASCADE,
+        related_name="attachments",
+    )
+
+    class Meta:
+        verbose_name = _("attachment")
+        verbose_name_plural = _("attachments")
+
+    def __str__(self) -> str:
+        return f"Job #{self.job.pk} Attachment #{self.pk}"

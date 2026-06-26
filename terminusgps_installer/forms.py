@@ -9,6 +9,11 @@ class CommandExecutionForm(forms.Form):
     command_name = forms.CharField()
 
 
+AttachmentFormSet = forms.modelformset_factory(
+    models.InstallJobAttachment, fields=["job", "file", "note"]
+)
+
+
 class UpdateInstallJobForm(forms.ModelForm):
     class Meta:
         model = models.InstallJob
