@@ -1,7 +1,10 @@
-Job #: {{ job_id }} by {{ employee }}
-IMEI #: {{ imei }}
-VIN #: {{ vin }}
+Job #{{ job.pk }} by {{ job.employee }}
+{{ job.crt_date }}
+
+IMEI #: {{ job.imei }}
+VIN #: {{ job.vin|default:'N/A' }}
 Resource: {{ resource|safe }}
 Unit: {{ unit|safe }}
-Status: {{ status }}
-Created On: {{ date }}
+License: {{ job.license|default:'N/A' }}
+Vehicle #: {{ job.vehicle_id|default:'N/A' }}
+Mileage: {{ job.mileage|default:'N/A' }}

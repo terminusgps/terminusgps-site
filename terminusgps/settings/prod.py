@@ -1,62 +1,98 @@
-import decimal
 import logging.config
 import os
 import pathlib
 import socket
 import sys
 
-os.umask(0)
-decimal.getcontext().prec = 4
-decimal.getcontext().rounding = decimal.ROUND_HALF_UP
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = [
+    "localhost",
     "terminusgps.com",
     ".terminusgps.com",
     ".elb.amazonaws.com",
     ".awswaf.com",
     socket.gethostbyname(socket.gethostname()),
 ]
-BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
-CSRF_COOKIE_SECURE = True
-CSRF_TRUSTED_ORIGINS = ["https://*.terminusgps.com", "https://terminusgps.com"]
-DEBUG = False
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-DEFAULT_CHARSET = "utf-8"
-DEFAULT_FROM_EMAIL = "noreply@terminusgps.com"
-DEFAULT_REPLY_TO_EMAIL = "support@terminusgps.com"
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.getenv("EMAIL_HOST", "email-smtp.us-east-1.amazonaws.com")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-FILE_CHARSET = "utf-8"
-LANGUAGE_CODE = "en-us"
-LOGIN_REDIRECT_URL = "/dashboard/"
-LOGIN_URL = "/login/"
-MEDIA_ROOT = BASE_DIR / "media"
-MEDIA_URL = "media/"
-MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
-MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
-ROOT_URLCONF = "src.urls"
-SECRET_KEY = os.getenv("SECRET_KEY")
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_SSL_REDIRECT = False
-SESSION_COOKIE_SECURE = True
-SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_URL = "static/"
-TIME_ZONE = "America/Chicago"
-USE_I18N = False
-USE_TZ = True
-USE_X_FORWARDED_HOST = True
-WIALON_TOKEN = os.getenv("WIALON_TOKEN")
-WSGI_APPLICATION = "src.wsgi.application"
 
 ADMINS = [
     ("Peter", "pspeckman@terminusgps.com"),
     ("Blake", "blake@terminusgps.com"),
 ]
+
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+
+CSRF_COOKIE_SECURE = True
+
+CSRF_TRUSTED_ORIGINS = ["https://*.terminusgps.com", "https://terminusgps.com"]
+
+DEBUG = False
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+DEFAULT_CHARSET = "utf-8"
+
+DEFAULT_FROM_EMAIL = "noreply@terminusgps.com"
+
+DEFAULT_REPLY_TO_EMAIL = "support@terminusgps.com"
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = os.getenv("EMAIL_HOST", "email-smtp.us-east-1.amazonaws.com")
+
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+
+EMAIL_PORT = 587
+
+EMAIL_USE_TLS = True
+
+FILE_CHARSET = "utf-8"
+
+LANGUAGE_CODE = "en-us"
+
+LOGIN_REDIRECT_URL = "/"
+
+LOGIN_URL = "/accounts/login/"
+
+MEDIA_ROOT = BASE_DIR / "media"
+
+MEDIA_URL = "media/"
+
+MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
+
+MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
+
+ROOT_URLCONF = "terminusgps.urls"
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+SECURE_SSL_REDIRECT = False
+
+SESSION_COOKIE_SECURE = True
+
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+STATIC_URL = "static/"
+
+TIME_ZONE = "America/Chicago"
+
+USE_I18N = False
+
+USE_TZ = True
+
+USE_X_FORWARDED_HOST = True
+
+WIALON_TOKEN = os.getenv("WIALON_TOKEN")
+
+WSGI_APPLICATION = "terminusgps.wsgi.application"
 
 LOGGING_CONFIG = None
 logging.config.dictConfig(
@@ -109,20 +145,9 @@ STORAGES = {
             ),
             "location": os.getenv("AWS_S3_BUCKET_LOCATION", "static/"),
             "region_name": os.getenv("AWS_S3_BUCKET_REGION", "us-east-1"),
-            "verify": os.getenv(
-                "AWS_S3_CERT_PATH",
-                ".venv/lib/python3.12/site-packages/certifi/cacert.pem",
-            ),
+            "verify": os.getenv("AWS_S3_CERT_PATH", False),
         },
     },
-}
-
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379",
-        "TIMEOUT": 60 * 15,
-    }
 }
 
 TASKS = {
@@ -142,6 +167,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
+    "phonenumber_field",
+    "terminusgps_installer.apps.TerminusgpsInstallerConfig",
 ]
 
 MIDDLEWARE = [
@@ -153,8 +180,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.cache.FetchFromCacheMiddleware",
 ]
-
 
 TEMPLATES = [
     {
@@ -170,7 +197,6 @@ TEMPLATES = [
         },
     }
 ]
-
 
 DATABASES = {
     "default": {
