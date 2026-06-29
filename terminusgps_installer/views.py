@@ -23,11 +23,7 @@ from terminusgps.wialon import (
     get_unit_by_imei,
 )
 
-from .forms import (
-    CommandExecutionForm,
-    NewInstallJobForm,
-    UpdateInstallJobForm,
-)
+from .forms import CommandExecutionForm, NewInstallJobForm
 from .models import Employee, InstallJob
 from .tasks import send_job_created_email
 
@@ -97,19 +93,6 @@ def job_details_view(request: HttpRequest, job_pk: int) -> HttpResponse:
         unit = None
     context = {"job": job, "unit": unit}
     return TemplateResponse(request, request.template_name, context)
-
-
-@login_required
-@require_http_methods(["GET", "POST"])
-@never_cache
-@htmx_template("installer/job_update.html")
-def job_update_view(request: HttpRequest, job_pk: int) -> HttpResponse:
-    form = UpdateInstallJobForm(request.POST)
-    if form.is_valid():
-        form.save(commit=True)
-        return redirect("installer:job details", job_pk=job_pk)
-    else:
-        return TemplateResponse(request, request.template_name, {"form": form})
 
 
 @login_required
