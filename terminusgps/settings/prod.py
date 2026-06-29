@@ -7,7 +7,6 @@ import sys
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = [
-    "localhost",
     "terminusgps.com",
     ".terminusgps.com",
     ".elb.amazonaws.com",

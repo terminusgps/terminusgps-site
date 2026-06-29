@@ -32,7 +32,7 @@ def send_job_created_email(pk: int) -> None:
             subject=f"Job #{pk} created",
             body=render_to_string(email_template_name, email_context),
             to=["pspeckman3@terminusgps.com"],
-            bcc=["support@terminusgps.com"],
+            bcc=["blake@terminusgps.com"],
         )
         email.send()
 
@@ -58,6 +58,6 @@ def send_job_updated_email(pk: int) -> None:
             subject=f"Job #{pk} updated",
             body=render_to_string(email_template_name, email_context),
             to=["pspeckman3@terminusgps.com"],
-            bcc=["support@terminusgps.com"],
+            bcc=["blake@terminusgps.com"],
         )
         email.send()

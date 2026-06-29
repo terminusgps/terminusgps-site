@@ -13,6 +13,10 @@ def validate_vin(value: str) -> None:
 
 
 def validate_imei(value: str) -> None:
+    return
+
+
+def validate_is_digit(value: str) -> None:
     if not value.isdigit():
         raise ValidationError(
             _("This value cannot contain non-digits, got '%(value)s'."),

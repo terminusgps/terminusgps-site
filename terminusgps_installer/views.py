@@ -2,7 +2,6 @@ import logging
 
 import wialon.api
 from django.contrib.auth.decorators import login_required
-from django.forms import modelformset_factory
 from django.http import HttpRequest as HttpRequestBase
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -29,7 +28,7 @@ from .forms import (
     NewInstallJobForm,
     UpdateInstallJobForm,
 )
-from .models import Employee, InstallJob, InstallJobAttachment
+from .models import Employee, InstallJob
 from .tasks import send_job_created_email
 
 logger = logging.getLogger(__name__)
@@ -98,26 +97,6 @@ def job_details_view(request: HttpRequest, job_pk: int) -> HttpResponse:
         unit = None
     context = {"job": job, "unit": unit}
     return TemplateResponse(request, request.template_name, context)
-
-
-@login_required
-@vary_on_headers("HX-Request")
-@never_cache
-@htmx_template("installer/manage_attachments.html")
-@require_http_methods(["GET", "POST"])
-def manage_attachments(request: HttpRequest) -> HttpResponse:
-    AttachmentFormSet = modelformset_factory(
-        InstallJobAttachment, fields=["job", "file", "note"]
-    )
-    if request.method == "POST":
-        formset = AttachmentFormSet(request.POST, request.FILES)
-        if formset.is_valid():
-            formset.save()
-    else:
-        formset = AttachmentFormSet()
-    return TemplateResponse(
-        request, request.template_name, {"formset": formset}
-    )
 
 
 @login_required

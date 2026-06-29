@@ -11,7 +11,7 @@ from terminusgps.wialon import (
     get_unit_by_imei,
 )
 
-from .validators import validate_imei, validate_vin
+from .validators import validate_is_digit, validate_vin
 
 
 class InstallJobStatus(models.TextChoices):
@@ -38,25 +38,35 @@ class Employee(models.Model):
 
 
 class InstallJob(models.Model):
+    resource = models.CharField(
+        help_text=_("Select a Wialon resource from the list."),
+        validators=[
+            MinLengthValidator(8),
+            MaxLengthValidator(8),
+            validate_is_digit,
+        ],
+    )
     imei = models.CharField(
         help_text=_(
-            "Provide the 15-digit IMEI number present on the tracking device. Ex: 869738060092801"
+            "Provide the 5-20 digit IMEI number present on the tracking device. Ex: 869738060092801"
         ),
         unique=True,
         validators=[
-            MinLengthValidator(10),
-            MaxLengthValidator(15),
-            validate_imei,
+            MinLengthValidator(5),
+            MaxLengthValidator(20),
+            validate_is_digit,
         ],
     )
-    resource = models.CharField(
-        help_text=_("Select a Wialon resource from the list."),
-        validators=[MinLengthValidator(8), MaxLengthValidator(8)],
+    employee = models.ForeignKey(
+        "terminusgps_installer.Employee",
+        help_text=_("Select the employee responsible for this job."),
+        on_delete=models.CASCADE,
+        related_name="jobs",
     )
     vin = models.CharField(
         blank=True,
         help_text=_(
-            "Optional. Provide the vehicle's 17-character VIN number. Ex: JTHBA30G065155212"
+            "Optional. Provide the vehicle's 17 character VIN number. Ex: JTHBA30G065155212"
         ),
         validators=[
             MinLengthValidator(17),
@@ -64,19 +74,6 @@ class InstallJob(models.Model):
             validate_vin,
         ],
     )
-    locator_url = models.URLField(blank=True)
-    employee = models.ForeignKey(
-        "terminusgps_installer.Employee",
-        help_text=_("Select the employee responsible for this job."),
-        on_delete=models.CASCADE,
-        related_name="jobs",
-    )
-    status = models.CharField(
-        choices=InstallJobStatus.choices,
-        default=InstallJobStatus.NEEDS_BILLING,
-    )
-    crt_date = models.DateTimeField(auto_now_add=True)
-    mod_date = models.DateTimeField(auto_now=True)
     license_plate = models.CharField(
         blank=True,
         help_text=_("Optional. Provide the vehicle's license plate number."),
@@ -93,6 +90,13 @@ class InstallJob(models.Model):
             "Optional. Provide the vehicle's client-designated identifier. Ex: Truck #13"
         ),
     )
+    status = models.CharField(
+        choices=InstallJobStatus.choices,
+        default=InstallJobStatus.NEEDS_BILLING,
+    )
+    crt_date = models.DateTimeField(auto_now_add=True)
+    mod_date = models.DateTimeField(auto_now=True)
+    locator_url = models.URLField(blank=True)
     objects = InstallJobQuerySet.as_manager()
 
     class Meta:
@@ -114,20 +118,3 @@ class InstallJob(models.Model):
         token = generate_locator_token(session, [unit["id"]])
         self.locator_url = generate_locator_url(token)
         self.save(update_fields=["locator_url"])
-
-
-class InstallJobAttachment(models.Model):
-    file = models.FileField(upload_to="attachments/")
-    note = models.CharField(max_length=256)
-    job = models.ForeignKey(
-        "terminusgps_installer.InstallJob",
-        on_delete=models.CASCADE,
-        related_name="attachments",
-    )
-
-    class Meta:
-        verbose_name = _("attachment")
-        verbose_name_plural = _("attachments")
-
-    def __str__(self) -> str:
-        return f"Job #{self.job.pk} Attachment #{self.pk}"

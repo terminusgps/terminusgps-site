@@ -9,11 +9,6 @@ class CommandExecutionForm(forms.Form):
     command_name = forms.CharField()
 
 
-AttachmentFormSet = forms.modelformset_factory(
-    models.InstallJobAttachment, fields=["job", "file", "note"]
-)
-
-
 class UpdateInstallJobForm(forms.ModelForm):
     class Meta:
         model = models.InstallJob
@@ -41,5 +36,11 @@ class NewInstallJobForm(forms.ModelForm):
                     "hx-target": "this",
                     "hx-trigger": "load once",
                 }
-            )
+            ),
+            "imei": forms.widgets.TextInput(
+                attrs={"placeholder": "869738060092801"}
+            ),
+            "vin": forms.widgets.TextInput(
+                attrs={"placeholder": "JTHBA30G065155212"}
+            ),
         }

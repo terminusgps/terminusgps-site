@@ -9,11 +9,6 @@ class EmployeeModelAdmin(admin.ModelAdmin):
     list_display = ["user"]
 
 
-@admin.register(models.InstallJobAttachment)
-class InstallJobAttachmentModelAdmin(admin.ModelAdmin):
-    list_display = ["job", "file", "note"]
-
-
 @admin.register(models.InstallJob)
 class InstallJobModelAdmin(admin.ModelAdmin):
     actions = ["refresh_locator_links"]

@@ -1,42 +1,70 @@
-import decimal
 import os
 import pathlib
 import sys
 
 from django.contrib.messages import constants as message_constants
 
-os.umask(0)
-decimal.getcontext().prec = 4
-decimal.getcontext().rounding = decimal.ROUND_HALF_UP
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".awswaf.com"]
-BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+
+ADMINS = [
+    ("Peter", "pspeckman@terminusgps.com"),
+    ("Blake", "blake@terminusgps.com"),
+]
+
 DEBUG = True
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 DEFAULT_FROM_EMAIL = "noreply@terminusgps.com"
+
 DEFAULT_REPLY_TO_EMAIL = "support@terminusgps.com"
+
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 INTERNAL_IPS = ["127.0.0.1"]
+
 LANGUAGE_CODE = "en-us"
+
 LOGIN_REDIRECT_URL = "/"
+
 LOGIN_URL = "/accounts/login/"
+
 MEDIA_ROOT = BASE_DIR / "media"
+
 MEDIA_URL = "media/"
+
 MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
+
 MERCHANT_AUTH_TRANSACTION_KEY = os.getenv("MERCHANT_AUTH_TRANSACTION_KEY")
+
 MERCHANT_AUTH_ENVIRONMENT = "liveMode"
+
 MESSAGE_STORAGE = "django.contrib.messages.storage.cookie.CookieStorage"
+
 ROOT_URLCONF = "terminusgps.urls"
+
 SECRET_KEY = "3ow7#%v3y*o&1wr6%!rt4%c7^^wlx%f8hkhn!#-gf%mk!_tf=^"
+
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "unsafe-none"
+
 SESSION_COOKIE_HTTPONLY = True
+
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+
 STATICFILES_DIRS = [BASE_DIR / "static"]
+
 STATIC_URL = "static/"
+
 TIME_ZONE = "America/Chicago"
+
 USE_I18N = False
+
 USE_TZ = True
+
 WSGI_APPLICATION = "terminusgps.wsgi.application"
+
 WIALON_TOKEN = os.getenv("WIALON_TOKEN")
 
 MESSAGE_TAGS = {
@@ -47,10 +75,6 @@ MESSAGE_TAGS = {
     message_constants.ERROR: "p-2 bg-red-50 text-red-700 border border-current rounded",
 }
 
-ADMINS = [
-    ("Peter", "pspeckman@terminusgps.com"),
-    ("Blake", "blake@terminusgps.com"),
-]
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
