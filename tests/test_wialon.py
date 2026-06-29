@@ -52,7 +52,7 @@ class GetUnitByImeiTestCase(TestCase):
     def test_multiple_units_found_raises_wialonerror(self):
         """Fails if :py:exec:`~wialon.api.WialonError` wasn't raised when the imei pointed to multiple units."""
         mock_session = MagicMock(WialonSession)
-        mock_response = {"totalItemsCount": 2}
+        mock_response = {"totalItemsCount": 2, "items": [{"id": 1}, {"id": 2}]}
         mock_session.wialon_api.core_search_items.return_value = mock_response
         with self.assertRaises(WialonError):
             get_unit_by_imei(mock_session, 12345678)
