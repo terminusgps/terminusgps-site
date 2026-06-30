@@ -11,7 +11,7 @@
         <script src="https://cdn.jsdelivr.net/npm/hyperscript.org@0.9.91/dist/ext/tailwind.min.js"></script>
         <title>{% block title %}{% endblock title %} | Terminus GPS</title>
     </head>
-    <body class="text-gray-800 dark:text-gray-100">
+    <body class="text-gray-800 dark:text-gray-100 bg-stone-200 dark:bg-gray-700">
         <nav class="flex justify-between bg-stone-100 text-gray-800 drop-shadow dark:bg-gray-800 print:hidden" hx-get="{% url 'navbar' %}" hx-target="this" hx-trigger="load once" hx-swap="outerHTML">
             <a href="{% url 'home' %}" class="group flex items-center space-x-1">
                 <img src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="animate-coin-slow size-16 group-hover:animate-none"/>
@@ -32,7 +32,7 @@
                 </div>
             </div>
         </nav>
-        <main class="@container bg-stone-200 mx-2 dark:bg-gray-700">
+        <main class="@container">
             {% if messages %}
             <ul id="messages">
                 {% for message in messages %}
