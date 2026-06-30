@@ -8,7 +8,7 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = [
     "terminusgps.com",
-    ".terminusgps.com",
+    "app.terminusgps.com",
     ".elb.amazonaws.com",
     ".awswaf.com",
     socket.gethostbyname(socket.gethostname()),
