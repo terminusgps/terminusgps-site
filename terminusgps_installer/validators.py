@@ -1,5 +1,8 @@
+import wialon.api
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+
+from terminusgps.wialon import get_session, get_unit_by_imei
 
 
 def validate_vin(value: str) -> None:
@@ -13,7 +16,20 @@ def validate_vin(value: str) -> None:
 
 
 def validate_imei(value: str) -> None:
-    return
+    session = get_session(sid=None)
+    try:
+        get_unit_by_imei(session, value)
+    except wialon.api.WialonError as error:
+        if error._code == -1:
+            raise ValidationError(
+                _("Failed to find a unit with this IMEI. It may not exist."),
+                code="invalid",
+                params={"value": value},
+            )
+        else:
+            raise ValidationError(
+                _("%(error)s"), code="invalid", params={"error": error}
+            )
 
 
 def validate_is_digit(value: str) -> None:
