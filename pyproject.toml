@@ -64,10 +64,7 @@ deploy = [
     "gunicorn>=23.0.0",
     "psycopg>=3.3.4",
     "psycopg2-binary>=2.9.10",
-    "django-redis>=7.0.0",
     "certifi>=2026.6.17",
-    "aws-secretsmanager-caching>=1.1.3",
-    "botocore>=1.43.36",
 ]
 dev = [
     "ipython>=9.14.1",
