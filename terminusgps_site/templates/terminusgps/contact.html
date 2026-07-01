@@ -7,13 +7,11 @@
         <p class="text-lg text-gray-700 dark:text-gray-200">Drop a note and we'll get back to you as soon as possible.</p>
     </section>
     <section class="p-8 bg-stone-100 border-gray-600 border rounded drop-shadow-sm dark:bg-gray-600 dark:border-gray-400">
-        <form class="@container flex flex-col gap-4" method="post" hx-get="#" hx-target="this" hx-trigger="none" hx-swap="outerHTML">
+        <form class="@container flex flex-col gap-4" hx-get="{% url 'contact form' %}" hx-target="this" hx-trigger="load once" hx-swap="outerHTML">
+            <div class="py-16 rounded bg-gray-300 animate-pulse"></div>
+            <div class="py-16 rounded bg-gray-300 animate-pulse"></div>
+            <div class="py-24 rounded bg-gray-300 animate-pulse"></div>
             <div class="py-8 rounded bg-gray-300 animate-pulse"></div>
-            <div class="py-8 rounded bg-gray-300 animate-pulse"></div>
-            <div class="py-8 rounded bg-gray-300 animate-pulse"></div>
-            <div class="py-8 rounded bg-gray-300 animate-pulse"></div>
-            <div class="py-8 rounded bg-gray-300 animate-pulse"></div>
-            <div class="py-4 rounded bg-gray-300 animate-pulse"></div>
         </form>
     </section>
 </article>

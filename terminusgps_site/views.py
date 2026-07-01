@@ -1,7 +1,10 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import redirect_to_login
-from django.http import HttpRequest as HttpRequestBase
-from django.http import HttpResponse, HttpResponsePermanentRedirect
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponsePermanentRedirect,
+)
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -9,14 +12,12 @@ from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.http import require_GET, require_http_methods
 from django.views.decorators.vary import vary_on_headers
 
-from .decorators import htmx_template
+from terminusgps.decorators import htmx_template
+
+from .forms import ContactForm
 
 
-# For type checkers
-class HttpRequest(HttpRequestBase):
-    template_name: str
-
-
+@vary_on_headers("HX-Request")
 @never_cache
 @require_http_methods(["GET", "POST"])
 @htmx_template("registration/register.html")
@@ -53,6 +54,29 @@ def navbar_view(request: HttpRequest) -> HttpResponse:
 @require_GET
 @htmx_template("terminusgps/contact.html")
 def contact_view(request: HttpRequest) -> HttpResponse:
+    return TemplateResponse(request, request.template_name)
+
+
+@vary_on_headers("HX-Request")
+@never_cache
+@require_http_methods(["GET", "POST"])
+@htmx_template("terminusgps/contact_form.html")
+def contact_form_view(request: HttpRequest) -> HttpResponse:
+    form = ContactForm()
+    if request.method == "POST":
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            contact_form_response = form.save(commit=True)
+            contact_form_response.email_to_admins()
+            return redirect("contact form success")
+    return TemplateResponse(request, request.template_name, {"form": form})
+
+
+@vary_on_headers("HX-Request")
+@cache_control(max_age=300)
+@require_GET
+@htmx_template("terminusgps/contact_form_success.html")
+def contact_form_success_view(request: HttpRequest) -> HttpResponse:
     return TemplateResponse(request, request.template_name)
 
 

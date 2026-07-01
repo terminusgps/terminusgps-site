@@ -112,6 +112,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.forms",
     "phonenumber_field",
+    "terminusgps_site.apps.TerminusgpsSiteConfig",
     "terminusgps_installer.apps.TerminusgpsInstallerConfig",
 ]
 
