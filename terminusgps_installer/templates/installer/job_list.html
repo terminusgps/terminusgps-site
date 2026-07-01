@@ -10,24 +10,24 @@
         {% if jobs_list|length == 0 %}
         <p>You're all caught up!</p>
         {% else %}
-        <table class="border border-collapse border-gray-800 w-full">
-            <thead class="bg-gray-100">
+        <table class="border border-collapse border-gray-800 w-full dark:border-gray-200">
+            <thead class="bg-gray-100 dark:bg-gray-600">
                 <tr>
-                    <th class="px-2 py-4 border border-gray-700">Job #</th>
-                    <th class="px-2 py-4 border border-gray-700">Status</th>
-                    <th class="px-2 py-4 border border-gray-700">Date Created</th>
-                    <th class="px-2 py-4 border border-gray-700">Date Last Modified</th>
-                    <th class="px-2 py-4 border border-gray-700">Details</th>
+                    <th class="px-2 py-4 border border-gray-700 dark:border-gray-100">Job #</th>
+                    <th class="px-2 py-4 border border-gray-700 dark:border-gray-100">Status</th>
+                    <th class="px-2 py-4 border border-gray-700 dark:border-gray-100">Date Created</th>
+                    <th class="px-2 py-4 border border-gray-700 dark:border-gray-100">Date Last Modified</th>
+                    <th class="px-2 py-4 border border-gray-700 dark:border-gray-100">Details</th>
                 </tr>
             </thead>
             <tbody>
                 {% for job in jobs_list %}
-                <tr class="bg-gray-200 even:bg-gray-300">
-                    <td class="p-2 border border-gray-700">{{ job.pk }}</td>
-                    <td class="p-2 border border-gray-700">{{ job.status }}</td>
-                    <td class="p-2 border border-gray-700">{{ job.crt_date|date:'m-d-Y g:i a' }}</td>
-                    <td class="p-2 border border-gray-700">{{ job.mod_date|date:'m-d-Y g:i a' }}</td>
-                    <td class="p-2 border border-gray-700">
+                <tr class="bg-gray-200 even:bg-gray-300 dark:bg-gray-400 dark:even:bg-gray-500">
+                    <td class="p-2 border border-gray-700 dark:border-gray-100">{{ job.pk }}</td>
+                    <td class="p-2 border border-gray-700 dark:border-gray-100">{{ job.status }}</td>
+                    <td class="p-2 border border-gray-700 dark:border-gray-100">{{ job.crt_date|date:'m-d-Y g:i a' }}</td>
+                    <td class="p-2 border border-gray-700 dark:border-gray-100">{{ job.mod_date|date:'m-d-Y g:i a' }}</td>
+                    <td class="p-2 border border-gray-700 dark:border-gray-100">
                         <a class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white" href="{{ job.get_absolute_url }}" hx-boost="true">View</a>
                     </td>
                 </tr>

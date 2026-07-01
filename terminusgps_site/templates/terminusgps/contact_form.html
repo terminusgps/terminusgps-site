@@ -3,7 +3,7 @@
 <form method="post" class="@container flex flex-col gap-4" hx-post="{% url 'contact form' %}" hx-target="this">
     {% csrf_token %}
     <div id="id_{{ form.name.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
-        <div class="*:p-2 *:border *:bg-stone-50 *:rounded *:w-full">{{ form.name }}</div>
+        <div class="*:peer *:p-2 *:border *:bg-stone-50 *:rounded *:w-full *:dark:bg-gray-500">{{ form.name }}</div>
         <label for="{{ form.name.id_for_label }}" class="order-first font-semibold">{{ form.name.label }}<span class="text-terminus-red-700">*</span></label>
         <div id="id_{{ form.name.id_for_label }}_helptext">
             <p>{{ form.name.help_text }}</p>
@@ -15,7 +15,7 @@
         {% endif %}
     </div>
     <div id="id_{{ form.email.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
-        <div class="*:p-2 *:border *:bg-stone-50 *:rounded *:w-full">{{ form.email }}</div>
+        <div class="*:peer *:p-2 *:border *:bg-stone-50 *:rounded *:w-full *:dark:bg-gray-500">{{ form.email }}</div>
         <label for="{{ form.email.id_for_label }}" class="order-first font-semibold">{{ form.email.label }}<span class="text-terminus-red-700">*</span></label>
         <div id="id_{{ form.email.id_for_label }}_helptext">
             <p>{{ form.email.help_text }}</p>
@@ -27,7 +27,7 @@
         {% endif %}
     </div>
     <div id="id_{{ form.message.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
-        <div class="*:p-2 *:border *:bg-stone-50 *:rounded *:w-full">{{ form.message }}</div>
+        <div class="*:peer *:p-2 *:border *:bg-stone-50 *:rounded *:w-full *:dark:bg-gray-500">{{ form.message }}</div>
         <label for="{{ form.message.id_for_label }}" class="order-first font-semibold">{{ form.message.label }}<span class="text-terminus-red-700">*</span></label>
         <div id="id_{{ form.message.id_for_label }}_helptext">
             <p>{{ form.message.help_text }}</p>
