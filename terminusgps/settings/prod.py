@@ -73,6 +73,8 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 SECURE_SSL_REDIRECT = False
 
+SERVER_EMAIL = "noreply@terminusgps.com"
+
 SESSION_COOKIE_SECURE = True
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
@@ -167,6 +169,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.forms",
     "phonenumber_field",
+    "terminusgps_site.apps.TerminusgpsSiteConfig",
     "terminusgps_installer.apps.TerminusgpsInstallerConfig",
 ]
 

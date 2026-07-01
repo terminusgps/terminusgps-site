@@ -49,6 +49,8 @@ SECRET_KEY = "3ow7#%v3y*o&1wr6%!rt4%c7^^wlx%f8hkhn!#-gf%mk!_tf=^"
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "unsafe-none"
 
+SERVER_EMAIL = "noreply@terminusgps.com"
+
 SESSION_COOKIE_HTTPONLY = True
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
