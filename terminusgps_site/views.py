@@ -1,5 +1,3 @@
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.views import redirect_to_login
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -7,7 +5,6 @@ from django.http import (
 )
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
-from django.urls import reverse
 from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.http import require_GET, require_http_methods
 from django.views.decorators.vary import vary_on_headers
@@ -15,22 +12,6 @@ from django.views.decorators.vary import vary_on_headers
 from terminusgps.decorators import htmx_template
 
 from .forms import ContactForm
-
-
-@vary_on_headers("HX-Request")
-@never_cache
-@require_http_methods(["GET", "POST"])
-@htmx_template("registration/register.html")
-def register_view(request: HttpRequest) -> HttpResponse:
-    form = UserCreationForm()
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save(commit=True)
-            return redirect_to_login(
-                next=reverse("home"), login_url=reverse("login")
-            )
-    return TemplateResponse(request, request.template_name, {"form": form})
 
 
 @vary_on_headers("HX-Request")
