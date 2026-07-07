@@ -2,16 +2,17 @@
 {% load static %}
 {% block title %}Home{% endblock title %}
 {% block content %}
-<div class="w-full items-center py-16 px-12 mb-4 flex flex-col gap-8">
-    <img class="rounded" src="{% static 'terminusgps/img/18wheeler.jpg' %}">
-    <div class="flex flex-col text-center gap-2">
-        <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">Terminus GPS</p>
-        <p class="text-lg font-semibold text-gray-600 dark:text-gray-300">In God We Trust, All Others We Track</p>
-        <p class="text-balance text-gray-500 dark:text-gray-400"><em>Protecting vehicles, fleets and families across the greater Houston area since 2010</em></p>
+<div class="py-8 px-4">
+    <div class="flex items-center justify-center relative text-center w-full">
+        <img class="size-128" src="{% static 'terminusgps/icon/logo-waypoint.svg' %}">
+        <div class="flex flex-col gap-2 absolute w-full bottom-0 py-16 bg-linear-to-t from-stone-200 from-80% to-invisible dark:from-gray-700">
+            <p class="text-4xl @2xl:text-8xl font-bold text-gray-800 dark:text-gray-100">Terminus GPS</p>
+            <p class="text-2xl @2xl:text-4xl font-semibold text-gray-600 dark:text-gray-300">In God We Trust, All Others We Track</p>
+        </div>
     </div>
 </div>
 <div class="p-2 flex flex-col gap-4 bg-stone-300 dark:bg-gray-600">
-    <div class="@container flex flex-col gap-2 @md:justify-evenly @md:flex-row">
+    <div class="@container flex flex-col gap-2 @4xl:justify-evenly @4xl:flex-row">
         <div class="p-4 flex flex-col items-center text-center">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-12">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" />
@@ -44,11 +45,11 @@
     </div>
 </div>
 <div class="@container">
-    <div class="group flex flex-col @md:grid @md:grid-cols-2">
-        <img class="@md:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/online-tracking.jpg' %}">
+    <div class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
+        <img class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/online-tracking.jpg' %}">
         <div class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700 dark:text-gray-200">
-            <p class="font-semibold text-xl text-gray-800 dark:text-gray-100">For Your Fleet</p>
-            <div class="flex flex-col gap-2">
+            <p class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">For Your Fleet</p>
+            <div class="flex flex-col gap-2 @md:text-lg">
                 <p>Terminus GPS scales alongside your company, streamlining fleet management in a single, convenient, always-online platform.</p>
                 <p>See where your vehicles are, how your drivers are behaving and what maintenance is upcoming, all at a glance.</p>
                 <p>We serve landscape crews, plumbing companies, electrical contractors, logistics operators and everything in between.</p>
@@ -56,22 +57,22 @@
             </div>
         </div>
     </div>
-    <div class="group flex flex-col @md:grid @md:grid-cols-2">
-        <img class="@md:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/sedan.jpg' %}">
+    <div class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
+        <img class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/sedan.jpg' %}">
         <div class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700 dark:text-gray-200">
-            <p class="font-semibold text-xl text-gray-800 dark:text-gray-100">For Your Family</p>
-            <div class="flex flex-col gap-2">
+            <p class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">For Your Family</p>
+            <div class="flex flex-col gap-2 @md:text-lg">
                 <p>Promoting safety and reducing driving risk is our first priority; it's the very idea Terminus GPS was founded on.</p>
                 <p>Whether you're monitoring a teen or an elderly driver, Terminus GPS allows you to <em>always know where yours are</em>.</p>
                 <p>We work directly with you to make the software fit your needs, providing you top-of-the-line, commercial-grade GPS tracking technology without the headache.</p>
             </div>
         </div>
     </div>
-    <div class="group flex flex-col @md:grid @md:grid-cols-2">
-        <img class="@md:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/video-telematics-square.jpg' %}">
+    <div class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
+        <img class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/video-telematics-square.jpg' %}">
         <div class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700 dark:text-gray-200">
-            <p class="font-semibold text-xl text-gray-800 dark:text-gray-100">Fleet AI Dash Cameras</p>
-            <div class="flex flex-col gap-2">
+            <p class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">Fleet AI Dash Cameras</p>
+            <div class="flex flex-col gap-2 @md:text-lg">
                 <p>Add an extra layer of accountability with our Fleet AI camera solutions.</p>
                 <p>Front and dual-facing cameras capture video evidence in real-time, protecting your drivers from false claims, reducing insurance liability and giving you visibility into exactly what happened on every trip.</p>
                 <p>Paired with our GPS tracking, you'll always see the full picture: location, speed and video, all in one platform.</p>

@@ -6,9 +6,9 @@
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <link rel="icon" href="{% static 'terminusgps/favicon.ico' %}" />
         <link rel="stylesheet" href="{% static 'terminusgps/css/output.css' %}"/>
+        <link rel="preload" href="{% static 'terminusgps/icon/logo-waypoint.svg' %}" as="image">
+        <link rel="preload" href="{% static 'terminusgps/icon/logo-text.svg' %}" as="image">
         <script src="{% static 'terminusgps/js/htmx.min.4.0.0.js' %}" defer></script>
-        <script src="https://cdn.jsdelivr.net/npm/hyperscript.org@0.9.91/dist/_hyperscript.min.js" integrity="sha384-OT9bNmUa5rM34SmxFpRftn2F6GbgM/4xnTmn0z106OE5uvsigkdtUMOpdPKOigyO" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/hyperscript.org@0.9.91/dist/ext/tailwind.min.js"></script>
         <title>{% block title %}{% endblock title %} | Terminus GPS</title>
     </head>
     <body class="text-gray-800 dark:text-gray-100 bg-stone-200 dark:bg-gray-700">
