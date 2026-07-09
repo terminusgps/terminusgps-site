@@ -1,3 +1,5 @@
+import functools
+
 from django.core.mail import mail_admins
 from django.db import models
 from django.template.loader import render_to_string
@@ -17,8 +19,20 @@ class ContactFormResponse(models.Model):
     def __str__(self) -> str:
         return str(self.name)
 
-    def email_to_admins(self) -> None:
+    @functools.cached_property
+    def admin_email_message(self) -> str:
+        # TODO: Refactor this template name... maybe to a setting
         template_name = "terminusgps/emails/contact_form_response.txt"
-        subject = f"Contact Form Response - {self.name}"
         message = render_to_string(template_name, {"response": self})
-        mail_admins(subject, message, fail_silently=True)
+        return message
+
+    @functools.cached_property
+    def admin_email_subject(self) -> str:
+        return f"Contact Form Response - {self}"
+
+    def email_to_admins(self) -> None:
+        mail_admins(
+            self.admin_email_subject,
+            self.admin_email_message,
+            fail_silently=True,
+        )

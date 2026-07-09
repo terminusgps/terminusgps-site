@@ -14,16 +14,20 @@ class ContactForm(forms.ModelForm):
                     "autofocus": "on",
                     "autocomplete": "name",
                     "placeholder": "Your Name",
+                    "class": "peer p-2 border border-current bg-stone-50 rounded w-full user-valid:text-green-700 user-invalid:text-red-700 dark:bg-gray-500 dark:user-valid:text-green-300 dark:user-invalid:text-red-300",
                 }
             ),
             "email": forms.widgets.EmailInput(
                 attrs={
                     "autocomplete": "email",
                     "placeholder": "email@domain.com",
+                    "class": "peer p-2 border border-current bg-stone-50 rounded w-full user-valid:text-green-700 user-invalid:text-red-700 dark:bg-gray-500 dark:user-valid:text-green-300 dark:user-invalid:text-red-300",
                 }
             ),
             "message": forms.widgets.Textarea(
-                attrs={"placeholder": "What's crackin', Terminus GPS?"}
+                attrs={
+                    "class": "peer p-2 border border-current bg-stone-50 rounded w-full user-valid:text-green-700 user-invalid:text-red-700 dark:bg-gray-500 dark:user-valid:text-green-300 dark:user-invalid:text-red-300"
+                }
             ),
         }
         help_texts = {

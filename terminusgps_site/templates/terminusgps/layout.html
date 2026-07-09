@@ -1,37 +1,51 @@
-{% load static %}
+{% load cache static %}
 <!doctype html>
 <html lang="en">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <link rel="icon" href="{% static 'terminusgps/favicon.ico' %}" />
-        <link rel="stylesheet" href="{% static 'terminusgps/css/output.css' %}"/>
+        <link rel="preload" href="{% static 'terminusgps/js/htmx.min.4.0.0.js' %}" as="script">
+        <link rel="preload" href="{% static 'terminusgps/css/output.css' %}" as="style"/>
         <link rel="preload" href="{% static 'terminusgps/icon/logo-waypoint.svg' %}" as="image">
         <link rel="preload" href="{% static 'terminusgps/icon/logo-text.svg' %}" as="image">
+        <link rel="stylesheet" href="{% static 'terminusgps/css/output.css' %}"/>
         <script src="{% static 'terminusgps/js/htmx.min.4.0.0.js' %}" defer></script>
         <title>{% block title %}{% endblock title %} | Terminus GPS</title>
     </head>
-    <body class="text-gray-800 dark:text-gray-100 bg-stone-200 dark:bg-gray-700">
-        <nav class="flex justify-between bg-stone-100 text-gray-800 drop-shadow dark:bg-gray-800 print:hidden" hx-get="{% url 'navbar' %}" hx-target="this" hx-trigger="load once" hx-swap="outerHTML">
-            <a href="{% url 'home' %}" class="group flex items-center space-x-1">
-                <img src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="animate-coin-slow size-16 group-hover:animate-none"/>
-                <img src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24 hidden md:flex"/>
-            </a>
-            <div class="mx-4 flex gap-2 items-center">
-                <div class="flex font-semibold items-center gap-2 p-2 border-2 rounded bg-stone-300 border-stone-600 animate-pulse cursor-not-allowed">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
-                    </svg>
-                    <p>Loading</p>
-                </div>
-                <div class="flex font-semibold items-center gap-2 p-2 border-2 rounded bg-stone-300 border-stone-600 animate-pulse cursor-not-allowed">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
-                    </svg>
-                    <p>Loading</p>
-                </div>
+    <body class="text-gray-800 bg-stone-200 dark:text-gray-100 dark:bg-gray-700">
+        {% cache 200 navbar request.user %}
+        <nav class="bg-stone-100 border-b border-stone-200 drop-shadow dark:border-gray-500 dark:bg-gray-600 print:hidden">
+            <div class="flex justify-between items-center">
+                <a href="{% url 'home' %}" class="group flex items-center space-x-1 w-fit">
+                    <img src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="animate-coin-slow size-16 group-hover:animate-none"/>
+                    <img src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24"/>
+                </a>
+                {% if request.user.is_authenticated %}
+                <form method="post" action="{% url 'logout' %}" hx-boost="true" hx-confirm="Are you sure you want to logout?">
+                    {% csrf_token %}
+                    <button type="submit" class="mx-4 p-2 border-2 rounded bg-stone-200 transition-colors ease-in-out duration-300 cursor-pointer dark:bg-gray-700 hover:bg-stone-50 dark:hover:bg-gray-500">
+                        <div class="flex items-center gap-2 font-semibold">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+                            </svg>
+                            <p>Logout</p>
+                        </div>
+                    </button>
+                </form>
+                {% else %}
+                <a class="mx-4 p-2 border-2 rounded bg-stone-200 transition-colors ease-in-out duration-300 dark:bg-gray-700 hover:bg-stone-50 dark:hover:bg-gray-500" href="{% url 'login' %}" hx-boost="true">
+                    <div class="flex items-center gap-2 font-semibold">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25" />
+                        </svg>
+                        <p>Login</p>
+                    </div>
+                </a>
+                {% endif %}
             </div>
         </nav>
+        {% endcache %}
         <main class="@container">
             {% if messages %}
             <ul id="messages">
@@ -42,7 +56,7 @@
             {% endif %}
             {% block content %}{% endblock content %}
         </main>
-        <footer class="bottom-0 left-0 z-20 w-full border-t border-stone-300 bg-stone-100 p-4 shadow-sm md:flex md:items-center md:justify-between md:p-6 dark:border-gray-900 dark:bg-gray-800 print:hidden">
+        <footer class="bottom-0 left-0 z-20 w-full drop-shadow border-t border-stone-200 bg-stone-100 p-4 shadow-sm md:flex md:items-center md:justify-between md:p-6 dark:bg-gray-600 dark:border-gray-500 print:hidden">
             <span class="text-sm sm:text-center">© 2026 <a href="https://terminusgps.com/" class="hover:underline">Terminus GPS</a>. All Rights Reserved.</span>
             <ul class="mt-3 flex flex-wrap items-center text-sm sm:mt-0">
                 <li>

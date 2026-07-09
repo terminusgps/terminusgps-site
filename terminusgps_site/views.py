@@ -35,7 +35,9 @@ def navbar_view(request: HttpRequest) -> HttpResponse:
 @require_GET
 @htmx_template("terminusgps/contact.html")
 def contact_view(request: HttpRequest) -> HttpResponse:
-    return TemplateResponse(request, request.template_name)
+    return TemplateResponse(
+        request, request.template_name, {"form": ContactForm()}
+    )
 
 
 @vary_on_headers("HX-Request")

@@ -65,6 +65,7 @@ deploy = [
     "psycopg>=3.3.4",
     "psycopg2-binary>=2.9.10",
     "certifi>=2026.6.17",
+    "django-redis>=7.0.0",
 ]
 dev = [
     "ipython>=9.14.1",
