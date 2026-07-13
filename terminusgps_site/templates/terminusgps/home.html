@@ -1,7 +1,7 @@
 {% extends "terminusgps/layout.html" %}
 {% load static %}
 {% block title %}Home{% endblock title %}
-{% block content %}
+{% partialdef main %}
 <div class="py-8 px-4">
     <div class="flex items-center justify-center relative text-center w-full">
         <img class="size-128" src="{% static 'terminusgps/icon/logo-waypoint.svg' %}">
@@ -76,4 +76,7 @@
         </div>
     </div>
 </div>
+{% endpartialdef main %}
+{% block content %}
+{% partial main %}
 {% endblock content %}
