@@ -10,7 +10,8 @@
         <link rel="preload" href="{% static 'terminusgps/icon/logo-waypoint.svg' %}" as="image">
         <link rel="preload" href="{% static 'terminusgps/icon/logo-text.svg' %}" as="image">
         <link rel="stylesheet" href="{% static 'terminusgps/css/output.css' %}"/>
-        <script src="{% static 'terminusgps/js/htmx.min.4.0.0.js' %}" defer></script>
+        <script src="{% static 'terminusgps/js/htmx.min.js' %}" defer></script>
+        <script src="{% static 'terminusgps/js/hx-preload.js' %}" defer></script>
         <title>{% block title %}{% endblock title %} | Terminus GPS</title>
     </head>
     <body class="text-gray-800 bg-stone-200 dark:text-gray-100 dark:bg-gray-700">
