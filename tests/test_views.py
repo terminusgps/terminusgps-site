@@ -30,19 +30,23 @@ class HomeViewTestCase(TestCase):
 
     def test_full_template_used_on_non_htmx_request(self):
         """Fails if a partial HTML template was used instead of a full page on htmx request."""
+        expected_template_name = "terminusgps/home.html"
         headers = {"HX-Request": "true", "HX-Boosted": "true"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "terminusgps/home.html")
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "true"}
-        self.assertTemplateUsed(response, "terminusgps/home.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "false"}
-        self.assertTemplateUsed(response, "terminusgps/home.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
 
     def test_partial_template_used_on_htmx_request(self):
         """Fails if a full HTML response instead of a partial is rendered on htmx request."""
+        expected_template_name = "main"
         headers = {"HX-Request": "true", "HX-Boosted": "false"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "main")
+        self.assertTemplateUsed(response, expected_template_name)
 
 
 class ContactViewTestCase(TestCase):
@@ -69,19 +73,23 @@ class ContactViewTestCase(TestCase):
 
     def test_full_template_used_on_non_htmx_request(self):
         """Fails if a partial HTML template was used instead of a full page on htmx request."""
+        expected_template_name = "terminusgps/contact.html"
         headers = {"HX-Request": "true", "HX-Boosted": "true"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "terminusgps/contact.html")
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "true"}
-        self.assertTemplateUsed(response, "terminusgps/contact.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "false"}
-        self.assertTemplateUsed(response, "terminusgps/contact.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
 
     def test_partial_template_used_on_htmx_request(self):
         """Fails if a full HTML response instead of a partial is rendered on htmx request."""
+        expected_template_name = "main"
         headers = {"HX-Request": "true", "HX-Boosted": "false"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "main")
+        self.assertTemplateUsed(response, expected_template_name)
 
     def test_form_in_context(self):
         """Fails if an empty form wasn't added to the view context."""
@@ -106,19 +114,23 @@ class ContactFormViewTestCase(TestCase):
 
     def test_full_template_used_on_non_htmx_request(self):
         """Fails if a partial HTML template was used instead of a full page on htmx request."""
+        expected_template_name = "terminusgps/contact_form.html"
         headers = {"HX-Request": "true", "HX-Boosted": "true"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "terminusgps/contact_form.html")
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "true"}
-        self.assertTemplateUsed(response, "terminusgps/contact_form.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "false"}
-        self.assertTemplateUsed(response, "terminusgps/contact_form.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
 
     def test_partial_template_used_on_htmx_request(self):
         """Fails if a full HTML response instead of a partial is rendered on htmx request."""
+        expected_template_name = "main"
         headers = {"HX-Request": "true", "HX-Boosted": "false"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "main")
+        self.assertTemplateUsed(response, expected_template_name)
 
     def test_post_with_valid_data_saves_and_redirects(self):
         """Fails if a POST request with valid data doesn't save the response and redirect the client."""
@@ -182,25 +194,23 @@ class ContactFormSuccessViewTestCase(TestCase):
 
     def test_full_template_used_on_non_htmx_request(self):
         """Fails if a partial HTML template was used instead of a full page on htmx request."""
+        expected_template_name = "terminusgps/contact_form_success.html"
         headers = {"HX-Request": "true", "HX-Boosted": "true"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(
-            response, "terminusgps/contact_form_success.html"
-        )
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "true"}
-        self.assertTemplateUsed(
-            response, "terminusgps/contact_form_success.html"
-        )
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "false"}
-        self.assertTemplateUsed(
-            response, "terminusgps/contact_form_success.html"
-        )
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
 
     def test_partial_template_used_on_htmx_request(self):
         """Fails if a full HTML response instead of a partial is rendered on htmx request."""
+        expected_template_name = "main"
         headers = {"HX-Request": "true", "HX-Boosted": "false"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "main")
+        self.assertTemplateUsed(response, expected_template_name)
 
 
 class AboutViewTestCase(TestCase):
@@ -227,19 +237,23 @@ class AboutViewTestCase(TestCase):
 
     def test_full_template_used_on_non_htmx_request(self):
         """Fails if a partial HTML template was used instead of a full page on htmx request."""
+        expected_template_name = "terminusgps/about.html"
         headers = {"HX-Request": "true", "HX-Boosted": "true"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "terminusgps/about.html")
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "true"}
-        self.assertTemplateUsed(response, "terminusgps/about.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "false"}
-        self.assertTemplateUsed(response, "terminusgps/about.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
 
     def test_partial_template_used_on_htmx_request(self):
         """Fails if a full HTML response instead of a partial is rendered on htmx request."""
+        expected_template_name = "main"
         headers = {"HX-Request": "true", "HX-Boosted": "false"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "main")
+        self.assertTemplateUsed(response, expected_template_name)
 
 
 class TermsViewTestCase(TestCase):
@@ -266,19 +280,23 @@ class TermsViewTestCase(TestCase):
 
     def test_full_template_used_on_non_htmx_request(self):
         """Fails if a partial HTML template was used instead of a full page on htmx request."""
+        expected_template_name = "terminusgps/terms.html"
         headers = {"HX-Request": "true", "HX-Boosted": "true"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "terminusgps/terms.html")
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "true"}
-        self.assertTemplateUsed(response, "terminusgps/terms.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "false"}
-        self.assertTemplateUsed(response, "terminusgps/terms.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
 
     def test_partial_template_used_on_htmx_request(self):
         """Fails if a full HTML response instead of a partial is rendered on htmx request."""
+        expected_template_name = "main"
         headers = {"HX-Request": "true", "HX-Boosted": "false"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "main")
+        self.assertTemplateUsed(response, expected_template_name)
 
 
 class PrivacyViewTestCase(TestCase):
@@ -305,19 +323,23 @@ class PrivacyViewTestCase(TestCase):
 
     def test_full_template_used_on_non_htmx_request(self):
         """Fails if a partial HTML template was used instead of a full page on htmx request."""
+        expected_template_name = "terminusgps/privacy.html"
         headers = {"HX-Request": "true", "HX-Boosted": "true"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "terminusgps/privacy.html")
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "true"}
-        self.assertTemplateUsed(response, "terminusgps/privacy.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "false"}
-        self.assertTemplateUsed(response, "terminusgps/privacy.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
 
     def test_partial_template_used_on_htmx_request(self):
         """Fails if a full HTML response instead of a partial is rendered on htmx request."""
+        expected_template_name = "main"
         headers = {"HX-Request": "true", "HX-Boosted": "false"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "main")
+        self.assertTemplateUsed(response, expected_template_name)
 
 
 class FeaturesViewTestCase(TestCase):
@@ -344,19 +366,23 @@ class FeaturesViewTestCase(TestCase):
 
     def test_full_template_used_on_non_htmx_request(self):
         """Fails if a partial HTML template was used instead of a full page on htmx request."""
+        expected_template_name = "terminusgps/features.html"
         headers = {"HX-Request": "true", "HX-Boosted": "true"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "terminusgps/features.html")
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "true"}
-        self.assertTemplateUsed(response, "terminusgps/features.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "false"}
-        self.assertTemplateUsed(response, "terminusgps/features.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
 
     def test_partial_template_used_on_htmx_request(self):
         """Fails if a full HTML response instead of a partial is rendered on htmx request."""
+        expected_template_name = "main"
         headers = {"HX-Request": "true", "HX-Boosted": "false"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "main")
+        self.assertTemplateUsed(response, expected_template_name)
 
 
 class FaqViewTestCase(TestCase):
@@ -383,19 +409,23 @@ class FaqViewTestCase(TestCase):
 
     def test_full_template_used_on_non_htmx_request(self):
         """Fails if a partial HTML template was used instead of a full page on htmx request."""
+        expected_template_name = "terminusgps/faq.html"
         headers = {"HX-Request": "true", "HX-Boosted": "true"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "terminusgps/faq.html")
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "true"}
-        self.assertTemplateUsed(response, "terminusgps/faq.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
         headers = {"HX-Request": "false", "HX-Boosted": "false"}
-        self.assertTemplateUsed(response, "terminusgps/faq.html")
+        response = self.client.get(self.location, headers=headers)
+        self.assertTemplateUsed(response, expected_template_name)
 
     def test_partial_template_used_on_htmx_request(self):
         """Fails if a full HTML response instead of a partial is rendered on htmx request."""
+        expected_template_name = "main"
         headers = {"HX-Request": "true", "HX-Boosted": "false"}
         response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, "main")
+        self.assertTemplateUsed(response, expected_template_name)
 
 
 class SourceCodeViewTestCase(TestCase):
