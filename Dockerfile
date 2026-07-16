@@ -20,6 +20,6 @@ ENV PATH="/usr/local/terminusgps-site/.venv/bin:$PATH"
 
 ENTRYPOINT []
 
-CMD ["uv", "run", "gunicorn", "-w", "4", "-b", "0.0.0.0:8001", "terminusgps.wsgi"]
+CMD ["uv", "run", "gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "terminusgps.wsgi"]
 
 EXPOSE 8001
