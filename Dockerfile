@@ -22,4 +22,4 @@ ENTRYPOINT []
 
 CMD ["uv", "run", "gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "terminusgps.wsgi"]
 
-EXPOSE 8001
+EXPOSE 8000
