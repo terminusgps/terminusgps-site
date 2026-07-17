@@ -1,0 +1,7 @@
+[
+    {
+        "model": "terminusgps_installer.employee",
+        "pk": 1,
+        "fields": {"user": 1}
+    }
+]
