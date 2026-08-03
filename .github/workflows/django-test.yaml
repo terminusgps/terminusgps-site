@@ -27,7 +27,7 @@ jobs:
           python-version-file: ".python-version"
 
       - name: Install project
-        run: uv sync --locked
+        run: uv sync --all-groups --locked
 
       - name: Run tests
-        run: uv run manage.py test --parallel --settings=terminusgps.settings.dev
+        run: uv run --all-groups pytest
