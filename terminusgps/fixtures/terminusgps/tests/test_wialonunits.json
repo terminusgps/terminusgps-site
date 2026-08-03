@@ -1,0 +1,28 @@
+[
+    {
+        "model": "terminusgps_installer.wialonunit",
+        "pk": 1,
+        "fields": {
+            "job": 1,
+            "name": "",
+            "imei": "000000000000001",
+            "vin": "",
+            "plate": "",
+            "mileage": 0,
+            "locator_url": ""
+        }
+    },
+    {
+        "model": "terminusgps_installer.wialonunit",
+        "pk": 2,
+        "fields": {
+            "job": 2,
+            "name": "",
+            "imei": "000000000000002",
+            "vin": "",
+            "plate": "",
+            "mileage": 0,
+            "locator_url": ""
+        }
+    }
+]
