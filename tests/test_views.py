@@ -541,8 +541,9 @@ class InstallerHomeViewTestCase(TestCase):
 
 class InstallerNewJobFormViewTestCase(TestCase):
     fixtures = [
-        "terminusgps/fixtures/terminusgps/tests/test_users.json",
         "terminusgps/fixtures/terminusgps/tests/test_employees.json",
+        "terminusgps/fixtures/terminusgps/tests/test_users.json",
+        "terminusgps/fixtures/terminusgps/tests/test_wialonresources.json",
     ]
 
     def setUp(self):
@@ -570,47 +571,14 @@ class InstallerNewJobFormViewTestCase(TestCase):
         response = self.client.get(self.location)
         self.assertEqual(response.status_code, 200)
 
-    def test_post_allowed(self):
-        """Fails if a POST request doesn't respond with status code 200."""
-        response = self.client.post(self.location)
-        self.assertEqual(response.status_code, 200)
-
-    def test_vary_on_header(self):
-        """Fails if ``HX-Request`` wasn't present in the ``Vary`` response header."""
-        response = self.client.get(self.location)
-        self.assertIn("HX-Request", response.headers.get("Vary", ""))
-
-    def test_full_template_used_on_non_htmx_request(self):
-        """Fails if a partial HTML template was used instead of a full page on htmx request."""
-        expected_template_name = "installer/new_job_form.html"
-        headers = {"HX-Request": "true", "HX-Boosted": "true"}
-        response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, expected_template_name)
-        headers = {"HX-Request": "false", "HX-Boosted": "true"}
-        response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, expected_template_name)
-        headers = {"HX-Request": "false", "HX-Boosted": "false"}
-        response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, expected_template_name)
-
-    def test_partial_template_used_on_htmx_request(self):
-        """Fails if a full HTML response instead of a partial is rendered on htmx request."""
-        expected_template_name = "main"
-        headers = {"HX-Request": "true", "HX-Boosted": "false"}
-        response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, expected_template_name)
-
-    def test_form_in_context(self):
-        """Fails if the view context didn't have ``form`` present."""
-        response = self.client.get(self.location)
-        self.assertIn("form", response.context)
-
 
 class InstallJobListViewTestCase(TestCase):
     fixtures = [
         "terminusgps/fixtures/terminusgps/tests/test_users.json",
         "terminusgps/fixtures/terminusgps/tests/test_employees.json",
         "terminusgps/fixtures/terminusgps/tests/test_installjobs.json",
+        "terminusgps/fixtures/terminusgps/tests/test_wialonresources.json",
+        "terminusgps/fixtures/terminusgps/tests/test_wialonunits.json",
     ]
 
     def setUp(self):

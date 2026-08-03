@@ -4,15 +4,14 @@ import wialon.api
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest as HttpRequestBase
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
+from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_control, never_cache
-from django.views.decorators.http import (
-    require_GET,
-    require_http_methods,
-    require_POST,
-)
+from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.vary import vary_on_headers
+from formset.views import FormCollectionView
 
 from terminusgps.decorators import htmx_template
 from terminusgps.wialon import (
@@ -20,12 +19,10 @@ from terminusgps.wialon import (
     get_resource_choices,
     get_session,
     get_unit_by_id,
-    get_unit_by_imei,
 )
 
-from .forms import CommandExecutionForm, NewInstallJobForm
-from .models import Employee, InstallJob
-from .tasks import send_job_created_email
+from .forms import CommandExecutionForm, InstallJobCollection
+from .models import Employee, InstallJob, WialonUnit
 
 logger = logging.getLogger(__name__)
 
@@ -43,25 +40,29 @@ def home_view(request: HttpRequest) -> HttpResponse:
     return TemplateResponse(request, request.template_name)
 
 
-@login_required
-@vary_on_headers("HX-Request")
-@never_cache
-@htmx_template("installer/new_job_form.html")
-@require_http_methods(["GET", "POST"])
-def new_job_form_view(request: HttpRequest) -> HttpResponse:
-    try:
-        employee = Employee.objects.get(user=request.user)
-    except Employee.DoesNotExist:
-        employee = None
-    initial = {"employee": employee}
-    form = NewInstallJobForm(initial=initial)
-    if request.method == "POST":
-        form = NewInstallJobForm(request.POST, initial=initial)
-        if form.is_valid():
-            job = form.save(commit=True)
-            send_job_created_email.enqueue(job.pk)
-            return redirect("installer:job details", job_pk=job.pk)
-    return TemplateResponse(request, request.template_name, {"form": form})
+@method_decorator(cache_control(max_age=300), name="dispatch")
+@method_decorator(login_required, name="dispatch")
+class NewJobFormView(FormCollectionView):
+    collection_class = InstallJobCollection
+    template_name = "installer/new_job.html"
+    success_url = reverse_lazy("installer:job list")
+
+    def form_collection_valid(self, form_collection):
+        job = InstallJob.objects.create(
+            employee=form_collection.cleaned_data["job"]["employee"],
+            company=form_collection.cleaned_data["job"]["company"],
+        )
+        for data in form_collection.cleaned_data["units"]:
+            unit = WialonUnit()
+            unit.job = job
+            unit.imei = data["unit"]["imei"]
+            unit.vin = data["unit"].get("vin", "")
+            unit.plate = data["unit"].get("plate", "")
+            unit.mileage = data["unit"].get("mileage", 0)
+            unit.save()
+            unit.get_wialon_unit_name_and_save()
+            unit.refresh_locator_url_and_save()
+        return super().form_collection_valid(form_collection)
 
 
 @login_required
@@ -83,15 +84,7 @@ def job_list_view(request: HttpRequest) -> HttpResponse:
 @require_GET
 def job_details_view(request: HttpRequest, job_pk: int) -> HttpResponse:
     job = get_object_or_404(InstallJob, pk=job_pk)
-    if not job.locator_url:
-        job.refresh_locator_url()
-    session = get_session()
-    try:
-        unit = get_unit_by_imei(session, job.imei, flags=513)
-    except wialon.api.WialonError as error:
-        logger.error(error)
-        unit = None
-    context = {"job": job, "unit": unit}
+    context = {"job": job, "units": job.units.filter()}
     return TemplateResponse(request, request.template_name, context)
 
 
@@ -119,7 +112,6 @@ def execute_command_view(request: HttpRequest, unit_id: int) -> HttpResponse:
     form = CommandExecutionForm(request.POST)
     if not form.is_valid():
         context = {"command": None, "queued": False}
-        return TemplateResponse(request, request.template_name, context)
     else:
         command = form.cleaned_data["command_name"]
         session = get_session(sid=None)
@@ -131,7 +123,7 @@ def execute_command_view(request: HttpRequest, unit_id: int) -> HttpResponse:
         else:
             queued = True
         context = {"command": command, "queued": queued}
-        return TemplateResponse(request, request.template_name, context)
+    return TemplateResponse(request, request.template_name, context)
 
 
 @login_required

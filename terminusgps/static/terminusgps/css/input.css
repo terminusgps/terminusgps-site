@@ -27,6 +27,27 @@
     --animate-coin-slow: coin 4s linear infinite;
 }
 
+@layer components {
+    legend {
+        @apply text-xl font-bold mb-4
+    }
+    .formset-label {
+        @apply text-lg
+    }
+    .formset-text-input,.formset-number-input,.formset-textarea,.formset-select {
+        @apply p-2 border border-current bg-stone-50 rounded w-full
+    }
+    .formset-help-text {
+        @apply text-gray-700 dark:text-gray-300
+    }
+    .formset-button-base,.formset-button-default {
+        @apply cursor-pointer p-2 flex w-fit items-center gap-2 rounded border transition-colors duration-300 ease-in-out
+    }
+    .formset-button-primary {
+        @apply bg-terminus-red-500 text-gray-100 border-terminus-red-600 hover:bg-terminus-red-200
+    }
+}
+
 @keyframes coin {
     0% {transform: rotateY(0deg);}
     50% {transform: rotateY(90deg);}

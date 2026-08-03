@@ -14,10 +14,7 @@ ALLOWED_HOSTS = [
     socket.gethostbyname(socket.gethostname()),
 ]
 
-ADMINS = [
-    ("Peter", "pspeckman@terminusgps.com"),
-    ("Blake", "blake@terminusgps.com"),
-]
+ADMINS = ["pspeckman@terminusgps.com", "blake@terminusgps.com"]
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 
@@ -85,7 +82,7 @@ STATIC_URL = "static/"
 
 TIME_ZONE = "America/Chicago"
 
-USE_I18N = False
+USE_I18N = True
 
 USE_TZ = True
 

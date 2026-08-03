@@ -3,34 +3,22 @@
         "model": "terminusgps_installer.installjob",
         "pk": 1,
         "fields": {
-            "resource": "12345678",
-            "imei": "000000000000001",
+            "company": 14744460,
             "employee": 1,
-            "vin": "",
-            "license_plate": "",
-            "mileage": 0,
-            "vehicle_id": "",
             "status": "done",
             "crt_date": "2026-06-24T16:50:01.734Z",
-            "mod_date": "2026-06-24T16:51:32.029Z",
-            "locator_url": ""
+            "mod_date": "2026-06-24T16:51:32.029Z"
         }
     },
     {
         "model": "terminusgps_installer.installjob",
         "pk": 2,
         "fields": {
-            "resource": "12345678",
-            "imei": "000000000000002",
+            "company": 14744460,
             "employee": 1,
-            "vin": "",
-            "license_plate": "",
-            "mileage": 0,
-            "vehicle_id": "",
             "status": "needs_billing",
             "crt_date": "2026-06-24T16:50:01.734Z",
-            "mod_date": "2026-06-24T16:51:32.029Z",
-            "locator_url": ""
+            "mod_date": "2026-06-24T16:51:32.029Z"
         }
     }
 ]

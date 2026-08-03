@@ -64,19 +64,19 @@ class WialonSession:
     def wialon_api(self):
         return self._wialon_api
 
-    @property
+    @functools.cached_property
     def uid(self):
         return self._uid
 
-    @property
+    @functools.cached_property
     def username(self):
         return self._username
 
-    @property
+    @functools.cached_property
     def id(self):
         return self.wialon_api.sid
 
-    @property
+    @functools.cached_property
     def gis_sid(self):
         return self._gis_sid
 
@@ -103,10 +103,10 @@ def generate_locator_token(
 
 
 def generate_locator_url(token: str) -> str:
-    query = urllib.parse.urlencode({"t": token})
-    base = "https://hosting.terminusgps.com/"
-    url = "/locator/index.html?" + query
-    return urllib.parse.urljoin(base, url)
+    return (
+        "https://hosting.terminusgps.com/locator/index.html?"
+        + urllib.parse.urlencode({"t": token})
+    )
 
 
 def session_is_active(session: WialonSession) -> bool:
@@ -209,6 +209,26 @@ def get_unit_by_id(
         **{"id": unit_id, "flags": flags}
     )
     return response["item"]
+
+
+@functools.lru_cache(maxsize=300)
+def get_resources(session: WialonSession) -> list[dict]:
+    response = session.wialon_api.core_search_items(
+        **{
+            "spec": {
+                "itemsType": "avl_resource",
+                "propName": "sys_name",
+                "propValueMask": "*",
+                "sortType": "sys_name",
+                "propType": "property",
+            },
+            "force": 0,
+            "from": 0,
+            "to": 0,
+            "flags": 1,
+        }
+    )
+    return response["items"]
 
 
 @functools.lru_cache(maxsize=300)
@@ -515,4 +535,23 @@ def update_vin(session: WialonSession, unit_id: int, vin: str) -> None:
     """
     session.wialon_api.item_update_profile_field(
         **{"itemId": unit_id, "n": "vin", "v": vin}
+    )
+
+
+def update_name(session: WialonSession, unit_id: int, new_name: str) -> None:
+    """
+    Updates a unit's name in Wialon.
+
+    :param session: A valid Wialon API session.
+    :type session: ~terminusgps.wialon.WialonSesison
+    :param unit_id: A Wialon unit id.
+    :type unit_id: int
+    :param new_name: The new unit name.
+    :type new_name: str
+    :returns: Nothing.
+    :rtype: None
+
+    """
+    session.wialon_api.item_update_name(
+        **{"itemId": unit_id, "name": new_name}
     )

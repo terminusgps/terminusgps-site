@@ -8,10 +8,7 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".awswaf.com"]
 
-ADMINS = [
-    ("Peter", "pspeckman@terminusgps.com"),
-    ("Blake", "blake@terminusgps.com"),
-]
+ADMINS = ["pspeckman@terminusgps.com", "blake@terminusgps.com"]
 
 DEBUG = True
 
@@ -61,7 +58,7 @@ STATIC_URL = "static/"
 
 TIME_ZONE = "America/Chicago"
 
-USE_I18N = False
+USE_I18N = True
 
 USE_TZ = True
 
@@ -114,6 +111,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.forms",
     "phonenumber_field",
+    "formset",
     "terminusgps_site.apps.TerminusgpsSiteConfig",
     "terminusgps_installer.apps.TerminusgpsInstallerConfig",
 ]
