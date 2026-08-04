@@ -29,7 +29,7 @@ class WialonSession:
         return f"WialonSession #{self.id}"
 
     def __repr__(self) -> str:
-        return f"{self.__class__}(sid={self.id})"
+        return f"WialonSession(sid={self.id})"
 
     def __enter__(self) -> "WialonSession":
         if self.id is None:

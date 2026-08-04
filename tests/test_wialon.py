@@ -11,7 +11,11 @@ from terminusgps.wialon import (
     generate_locator_token,
     generate_locator_url,
     get_command_name,
+    get_resource,
+    get_resources,
+    get_unit_by_id,
     get_unit_by_imei,
+    get_vin_info,
     session_is_active,
 )
 
@@ -203,6 +207,102 @@ class WialonSessionTestCase(TestCase):
             mock_api.core_logout.assert_called_once()
             session.__exit__("", "", "")
             mock_api.core_logout.assert_called_once()
+
+    def test___str__(self):
+        """Fails if :py:meth:`__str__` returns unexpected values."""
+        with patch("terminusgps.wialon.Wialon") as mock_wialon_cls:
+            test_eid = "abc123"
+            test_uid = 1
+            test_username = "test"
+            test_user = {"id": test_uid}
+            test_gis_sid = "def456"
+            test_token = "super_secure_token"
+            mock_api = MagicMock()
+            mock_api.token_login.return_value = {
+                "eid": test_eid,
+                "au": test_username,
+                "user": test_user,
+                "gis_sid": test_gis_sid,
+            }
+            mock_wialon_cls.return_value = mock_api
+            session = WialonSession(token=test_token)
+            session.login()
+            self.assertEqual(str(session), f"WialonSession #{session.id}")
+
+    def test___repr__(self):
+        """Fails if :py:meth:`__repr__` returns unexpected values."""
+        with patch("terminusgps.wialon.Wialon") as mock_wialon_cls:
+            test_eid = "abc123"
+            test_uid = 1
+            test_username = "test"
+            test_user = {"id": test_uid}
+            test_gis_sid = "def456"
+            test_token = "super_secure_token"
+            mock_api = MagicMock()
+            mock_api.token_login.return_value = {
+                "eid": test_eid,
+                "au": test_username,
+                "user": test_user,
+                "gis_sid": test_gis_sid,
+            }
+            mock_wialon_cls.return_value = mock_api
+            session = WialonSession(token=test_token)
+            session.login()
+            self.assertEqual(repr(session), f"WialonSession(sid={session.id})")
+
+
+class GetUnitByIdTestCase(TestCase):
+    def test_return_value(self):
+        """Fails if the function doesn't return the expected Wialon unit."""
+        test_unit_id = 12345678
+        test_flags = 42
+        test_unit_name = "Test Unit"
+        mock_session = MagicMock(WialonSession)
+        mock_session.wialon_api.core_search_item.return_value = {
+            "item": {"id": test_unit_id, "nm": test_unit_name}
+        }
+        result = get_unit_by_id(mock_session, test_unit_id, test_flags)
+        self.assertEqual(result["id"], test_unit_id)
+        self.assertEqual(result["nm"], test_unit_name)
+
+
+class GetResourcesTestCase(TestCase):
+    def test_return_value(self):
+        """Fails if the function doesn't return the expected Wialon resources."""
+        mock_session = MagicMock(WialonSession)
+        mock_response = {"totalItemsCount": 2, "items": [{"id": 1}, {"id": 2}]}
+        mock_session.wialon_api.core_search_items.return_value = mock_response
+        result = get_resources(mock_session)
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0]["id"], 1)
+        self.assertEqual(result[1]["id"], 2)
+
+
+class GetResourceTestCase(TestCase):
+    def test_return_value(self):
+        """Fails if the function doesn't return the expected Wialon resource."""
+        test_resource_id = 12345678
+        test_flags = 42
+        test_resource_name = "Test Resource"
+        mock_session = MagicMock(WialonSession)
+        mock_session.wialon_api.core_search_item.return_value = {
+            "item": {"id": test_resource_id, "nm": test_resource_name}
+        }
+        result = get_resource(mock_session, test_resource_id, test_flags)
+        self.assertEqual(result["id"], test_resource_id)
+        self.assertEqual(result["nm"], test_resource_name)
+
+
+class GetVinInfoTestCase(TestCase):
+    def test_return_value(self):
+        """Fails if the function doesn't return the expected VIN info."""
+        test_vin = ""
+        mock_session = MagicMock(WialonSession)
+        mock_session.wialon_api.unit_get_vin_info.return_value = {
+            "vin_lookup_result": {"pflds": []}
+        }
+        result = get_vin_info(mock_session, test_vin)
+        self.assertEqual(result["pflds"], [])
 
 
 class GenerateLocatorTokenTestCase(TestCase):
