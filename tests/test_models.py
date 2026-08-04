@@ -164,22 +164,24 @@ class WialonUnitTestCase(TestCase):
     def test_refresh_locator_url_and_save(self):
         """Fails if :py:meth:`refresh_locator_url_and_save` doesn't refresh the unit's :py:attr:`locator_url` and save it."""
         expected_url = "http://localhost:8000/locator/"
-        test_unit = WialonUnit.objects.first()
-        with mock.patch(
-            "terminusgps_installer.models.get_unit_by_imei",
-            return_value={"id": 1},
-        ):
-            with mock.patch(
+        with (
+            mock.patch(
+                "terminusgps_installer.models.get_unit_by_imei",
+                return_value={"id": 1},
+            ),
+            mock.patch(
                 "terminusgps_installer.models.generate_locator_token",
                 return_value="super_secure_token",
-            ):
-                with mock.patch(
-                    "terminusgps_installer.models.generate_locator_url",
-                    return_value=expected_url,
-                ):
-                    self.assertEqual(test_unit.locator_url, "")
-                    test_unit.refresh_locator_url_and_save()
-                    self.assertEqual(test_unit.locator_url, expected_url)
+            ),
+            mock.patch(
+                "terminusgps_installer.models.generate_locator_url",
+                return_value=expected_url,
+            ),
+        ):
+            test_unit = WialonUnit.objects.first()
+            self.assertEqual(test_unit.locator_url, "")
+            test_unit.refresh_locator_url_and_save()
+            self.assertEqual(test_unit.locator_url, expected_url)
 
     def test_with_wialon_commands(self):
         """Fails if :py:meth:`with_wialon_commands` doesn't return a list of tuples containing a WialonUnit and its commands from the Wialon API."""

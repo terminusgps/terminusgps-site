@@ -33,14 +33,18 @@ class WialonSession:
 
     def __enter__(self) -> "WialonSession":
         if self.id is None:
-            self.token_login(token=self._token, username=self._username)
+            self.login(token=self._token, username=self._username)
         return self
 
     def __exit__(self, a, b, c) -> None:
         if self.id is not None:
             self.logout()
 
-    def token_login(self, token: str, username: str | None = None) -> None:
+    def login(
+        self, token: str | None = None, username: str | None = None
+    ) -> None:
+        if token is None:
+            token = self._token
         params = {"token": token, "flags": 0x3 if username else 0x1}
         if username is not None:
             params["operateAs"] = username
@@ -142,10 +146,12 @@ def get_session(sid: str | None = None) -> WialonSession:
 
     """
     session = WialonSession(sid=sid)
+    print(f"{session = }")
+    print(f"{session_is_active(session) = }")
     if session_is_active(session):
         return session
     else:
-        session.token_login(token=settings.WIALON_TOKEN)
+        session.login(token=settings.WIALON_TOKEN)
         return session
 
 

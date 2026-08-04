@@ -1,3 +1,5 @@
+import random
+import string
 from unittest.mock import MagicMock, patch
 
 from django.conf import settings
@@ -6,6 +8,8 @@ from wialon.api import WialonError
 
 from terminusgps.wialon import (
     WialonSession,
+    generate_locator_token,
+    generate_locator_url,
     get_command_name,
     get_unit_by_imei,
     session_is_active,
@@ -21,8 +25,216 @@ class WialonSessionTestCase(TestCase):
 
     def test_token_provided_overrides_wialon_token_setting(self):
         """Fails if opening a Wialon session with an explicit token instead sets the token provided in settings."""
-        session = WialonSession(token="another_secure_token")
+        expected_token = "another_secure_token"
+        session = WialonSession(token=expected_token)
         self.assertNotEqual(session._token, settings.WIALON_TOKEN)
+        self.assertEqual(session._token, expected_token)
+
+    def test_login(self):
+        """Fails if :py:meth:`login` doesn't properly login to the Wialon API and save its session id."""
+        with patch("terminusgps.wialon.Wialon") as mock_wialon_cls:
+            test_eid = "abc123"
+            test_uid = 1
+            test_username = "test"
+            test_user = {"id": test_uid}
+            test_gis_sid = "def456"
+            test_token = "super_secure_token"
+            mock_api = MagicMock()
+            mock_api.token_login.return_value = {
+                "eid": test_eid,
+                "au": test_username,
+                "user": test_user,
+                "gis_sid": test_gis_sid,
+            }
+            mock_wialon_cls.return_value = mock_api
+            session = WialonSession(token=test_token)
+            session.login()
+            self.assertEqual(session._uid, test_uid)
+            self.assertEqual(session._username, test_username)
+            self.assertEqual(session._gis_sid, test_gis_sid)
+            self.assertEqual(mock_api.sid, test_eid)
+
+    def test_login_with_username(self):
+        """Fails if :py:meth:`login` doesn't properly login to the Wialon API and save its session id with an explicit username."""
+        with patch("terminusgps.wialon.Wialon") as mock_wialon_cls:
+            test_eid = "abc123"
+            test_uid = 1
+            test_username = "test"
+            test_user = {"id": test_uid}
+            test_gis_sid = "def456"
+            test_token = "super_secure_token"
+            mock_api = MagicMock()
+            mock_api.token_login.return_value = {
+                "eid": test_eid,
+                "au": test_username,
+                "user": test_user,
+                "gis_sid": test_gis_sid,
+            }
+            mock_wialon_cls.return_value = mock_api
+            session = WialonSession(token=test_token)
+            session.login(username=test_username)
+            mock_api.token_login.assert_called_once_with(
+                token=test_token, flags=0x3, operateAs=test_username
+            )
+            self.assertEqual(session._uid, test_uid)
+            self.assertEqual(session._username, test_username)
+            self.assertEqual(session._gis_sid, test_gis_sid)
+            self.assertEqual(mock_api.sid, test_eid)
+
+    def test_logout(self):
+        """Fails if :py:meth:`logout` doesn't properly logout of the Wialon API and set its session id to :py:obj:`None`."""
+        with patch("terminusgps.wialon.Wialon") as mock_wialon_cls:
+            test_eid = "abc123"
+            test_uid = 1
+            test_username = "test"
+            test_user = {"id": test_uid}
+            test_gis_sid = "def456"
+            test_token = "super_secure_token"
+            mock_api = MagicMock()
+            mock_api.token_login.return_value = {
+                "eid": test_eid,
+                "au": test_username,
+                "user": test_user,
+                "gis_sid": test_gis_sid,
+            }
+            mock_api.core_logout.return_value = {"error": 0}
+            mock_wialon_cls.return_value = mock_api
+            session = WialonSession(token=test_token)
+            session.login()
+            self.assertEqual(session.wialon_api.sid, test_eid)
+            session.logout()
+            self.assertIsNone(session.wialon_api.sid)
+
+    def test_logout_error(self):
+        """Fails if a Wialon API error happened during logout and wasn't reraised."""
+        with patch("terminusgps.wialon.Wialon") as mock_wialon_cls:
+            test_eid = "abc123"
+            test_uid = 1
+            test_username = "test"
+            test_user = {"id": test_uid}
+            test_gis_sid = "def456"
+            test_token = "super_secure_token"
+            mock_api = MagicMock()
+            mock_api.token_login.return_value = {
+                "eid": test_eid,
+                "au": test_username,
+                "user": test_user,
+                "gis_sid": test_gis_sid,
+            }
+            mock_api.core_logout.return_value = {"error": 1}
+            mock_wialon_cls.return_value = mock_api
+            session = WialonSession(token=test_token)
+            session.login()
+            self.assertEqual(session.wialon_api.sid, test_eid)
+            with self.assertRaises(WialonError):
+                session.logout()
+
+    def test_public_attributes(self):
+        """Fails if required attributes weren't set after successfully logging in."""
+        with patch("terminusgps.wialon.Wialon") as mock_wialon_cls:
+            test_eid = "abc123"
+            test_uid = 1
+            test_username = "test"
+            test_user = {"id": test_uid}
+            test_gis_sid = "def456"
+            test_token = "super_secure_token"
+            mock_api = MagicMock()
+            mock_api.token_login.return_value = {
+                "eid": test_eid,
+                "au": test_username,
+                "user": test_user,
+                "gis_sid": test_gis_sid,
+            }
+            mock_wialon_cls.return_value = mock_api
+            session = WialonSession(token=test_token)
+            session.login()
+            self.assertEqual(session.wialon_api, mock_api)
+            self.assertEqual(session.uid, test_uid)
+            self.assertEqual(session.username, test_username)
+            self.assertEqual(session.id, test_eid)
+            self.assertEqual(session.gis_sid, test_gis_sid)
+
+    def test___exit__(self):
+        """Fails if :py:meth:`__exit__` didn't call :py:meth:`logout` if required."""
+        with patch("terminusgps.wialon.Wialon") as mock_wialon_cls:
+            test_eid = "abc123"
+            test_uid = 1
+            test_username = "test"
+            test_user = {"id": test_uid}
+            test_gis_sid = "def456"
+            test_token = "super_secure_token"
+            mock_api = MagicMock()
+            mock_api.token_login.return_value = {
+                "eid": test_eid,
+                "au": test_username,
+                "user": test_user,
+                "gis_sid": test_gis_sid,
+            }
+            mock_api.core_logout.return_value = {"error": 0}
+            mock_wialon_cls.return_value = mock_api
+            session = WialonSession(token=test_token)
+            session.login()
+            session.__exit__("", "", "")
+            mock_api.core_logout.assert_called_once()
+            session.__exit__("", "", "")
+            mock_api.core_logout.assert_called_once()
+
+    def test___enter__(self):
+        """Fails if :py:meth:`__enter__` didn't call :py:meth:`login` if required."""
+        with patch("terminusgps.wialon.Wialon") as mock_wialon_cls:
+            test_eid = "abc123"
+            test_uid = 1
+            test_username = "test"
+            test_user = {"id": test_uid}
+            test_gis_sid = "def456"
+            test_token = "super_secure_token"
+            mock_api = MagicMock()
+            mock_api.token_login.return_value = {
+                "eid": test_eid,
+                "au": test_username,
+                "user": test_user,
+                "gis_sid": test_gis_sid,
+            }
+            mock_api.core_logout.return_value = {"error": 0}
+            mock_wialon_cls.return_value = mock_api
+            session = WialonSession(token=test_token)
+            session.login()
+            session.__exit__("", "", "")
+            mock_api.core_logout.assert_called_once()
+            session.__exit__("", "", "")
+            mock_api.core_logout.assert_called_once()
+
+
+class GenerateLocatorTokenTestCase(TestCase):
+    def setUp(self):
+        self.generate_test_token = lambda k: "".join(
+            random.choices(string.ascii_letters + string.digits, k=k)
+        )
+
+    def test_token_returned(self):
+        """Fails if the function doesn't return a locator token."""
+        expected_token = self.generate_test_token(72)
+        expected_unit_ids = [1, 2, 3]
+        mock_session = MagicMock(WialonSession)
+        mock_session.wialon_api.token_update.return_value = {
+            "h": expected_token
+        }
+        result = generate_locator_token(mock_session, expected_unit_ids)
+        self.assertEqual(result, expected_token)
+
+
+class GenerateLocatorUrlTestCase(TestCase):
+    def setUp(self):
+        self.generate_test_token = lambda k: "".join(
+            random.choices(string.ascii_letters + string.digits, k=k)
+        )
+
+    def test_url_returned(self):
+        """Fails if the function doesn't reutrn a locator url."""
+        expected_token = self.generate_test_token(72)
+        expected_url = f"https://hosting.terminusgps.com/locator/index.html?t={expected_token}"
+        result = generate_locator_url(expected_token)
+        self.assertEqual(result, expected_url)
 
 
 class SessionIsActiveTestCase(TestCase):
