@@ -146,8 +146,6 @@ def get_session(sid: str | None = None) -> WialonSession:
 
     """
     session = WialonSession(sid=sid)
-    print(f"{session = }")
-    print(f"{session_is_active(session) = }")
     if session_is_active(session):
         return session
     else:
