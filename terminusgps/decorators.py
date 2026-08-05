@@ -6,8 +6,8 @@ from terminusgps.wialon import get_session
 
 
 def is_htmx_request(request: HttpRequest) -> bool:
-    hx_request = bool(request.headers.get("HX-Request"))
-    hx_boosted = bool(request.headers.get("HX-Boosted"))
+    hx_request = request.headers.get("HX-Request", "false") == "true"
+    hx_boosted = request.headers.get("HX-Boosted", "false") == "true"
     return hx_request and not hx_boosted
 
 
