@@ -8,95 +8,91 @@ from terminusgps_installer.models import InstallJob
 from terminusgps_site.models import ContactFormResponse
 
 
-def test_home_view_get_allowed():
+@pytest.fixture
+def client():
+    return Client()
+
+
+def test_home_view_get_allowed(client):
     """Fails if a GET request doesn't respond with status code 200."""
-    client = Client()
     response = client.get(reverse("home"))
     assert response.status_code == 200
 
 
-def test_home_view_cache_control_header():
+def test_home_view_cache_control_header(client):
     """Fails if ``max-age=`` wasn't present in the ``Cache-Control`` response header."""
-    client = Client()
     response = client.get(reverse("home"))
     assert response.has_header("Cache-Control")
     assert response.headers["Cache-Control"].startswith("max-age=")
 
 
-def test_home_view_vary_on_header():
+def test_home_view_vary_on_header(client):
     """Fails if ``HX-Request`` wasn't present in the ``Vary`` response header."""
-    client = Client()
     response = client.get(reverse("home"))
     assert response.has_header("Vary")
     assert "HX-Request" in response.headers["Vary"]
 
 
-def test_home_view_full_template_used_on_non_htmx_request():
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {},
+        {"HX-Request": "true", "HX-Boosted": "true"},
+        {"HX-Request": "false", "HX-Boosted": "true"},
+    ],
+)
+def test_home_view_full_template_used_on_non_htmx_request(client, headers):
     """Fails if a partial HTML template was used instead of a full page on htmx request."""
-    client = Client()
-    expected_template_name = "terminusgps/home.html"
-    headers = {}
     response = client.get(reverse("home"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "true"}
-    response = client.get(reverse("home"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "false", "HX-Boosted": "true"}
-    response = client.get(reverse("home"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/home.html"
 
 
-def test_home_view_partial_template_used_on_htmx_request():
+@pytest.mark.parametrize(
+    "headers",
+    [{"HX-Request": "true"}, {"HX-Request": "true", "HX-Boosted": "false"}],
+)
+def test_home_view_partial_template_used_on_htmx_request(client, headers):
     """Fails if a full HTML response instead of a partial is rendered on htmx request."""
-    client = Client()
-    expected_template_name = "terminusgps/home.html#main"
-    headers = {"HX-Request": "true"}
     response = client.get(reverse("home"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "false"}
-    response = client.get(reverse("home"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/home.html#main"
 
 
-def test_contact_view_get_allowed():
+def test_contact_view_get_allowed(client):
     """Fails if a GET request doesn't respond with status code 200."""
-    client = Client()
     response = client.get(reverse("contact"))
     assert response.status_code == 200
 
 
-def test_contact_view_cache_control_header():
+def test_contact_view_cache_control_header(client):
     """Fails if ``max-age=`` wasn't present in the ``Cache-Control`` response header."""
-    client = Client()
     response = client.get(reverse("contact"))
-    assert response.headers.get("Cache-Control", "").startswith("max-age=")
+    assert response.has_header("Cache-Control")
+    assert response.headers["Cache-Control"].startswith("max-age=")
 
 
-def test_contact_view_vary_on_header():
+def test_contact_view_vary_on_header(client):
     """Fails if ``HX-Request`` wasn't present in the ``Vary`` response header."""
-    client = Client()
     response = client.get(reverse("contact"))
-    assert "HX-Request" in response.headers.get("Vary", "")
+    assert response.has_header("Vary")
+    assert "HX-Request" in response.headers["Vary"]
 
 
-def test_contact_view_full_template_used_on_non_htmx_request():
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {},
+        {"HX-Request": "true", "HX-Boosted": "true"},
+        {"HX-Request": "false", "HX-Boosted": "true"},
+    ],
+)
+def test_contact_view_full_template_used_on_non_htmx_request(client, headers):
     """Fails if a partial HTML template was used instead of a full page on htmx request."""
-    client = Client()
-    expected_template_name = "terminusgps/contact.html"
-    headers = {}
     response = client.get(reverse("contact"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "true"}
-    response = client.get(reverse("contact"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "false", "HX-Boosted": "true"}
-    response = client.get(reverse("contact"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/contact.html"
 
 
-def test_contact_view_partial_template_used_on_htmx_request():
+def test_contact_view_partial_template_used_on_htmx_request(client):
     """Fails if a full HTML response instead of a partial is rendered on htmx request."""
-    client = Client()
     expected_template_name = "terminusgps/contact.html#main"
     headers = {"HX-Request": "true"}
     response = client.get(reverse("contact"), headers=headers)
@@ -106,45 +102,42 @@ def test_contact_view_partial_template_used_on_htmx_request():
     assert response.template_name == expected_template_name
 
 
-def test_contact_view_form_in_context():
+def test_contact_view_form_in_context(client):
     """Fails if an empty form wasn't added to the view context."""
-    client = Client()
     response = client.get(reverse("contact"))
     assert "form" in response.context
 
 
-def test_contact_form_view_get_allowed():
+def test_contact_form_view_get_allowed(client):
     """Fails if a GET request doesn't respond with status code 200."""
-    client = Client()
     response = client.get(reverse("contact form"))
     assert response.status_code == 200
 
 
-def test_contact_form_view_post_allowed():
+def test_contact_form_view_post_allowed(client):
     """Fails if a POST request doesn't respond with status code 200."""
-    client = Client()
     response = client.post(reverse("contact form"))
     assert response.status_code == 200
 
 
-def test_contact_form_view_full_template_used_on_non_htmx_request():
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {},
+        {"HX-Request": "true", "HX-Boosted": "true"},
+        {"HX-Request": "false", "HX-Boosted": "true"},
+    ],
+)
+def test_contact_form_view_full_template_used_on_non_htmx_request(
+    client, headers
+):
     """Fails if a partial HTML template was used instead of a full page on htmx request."""
-    client = Client()
-    expected_template_name = "terminusgps/contact_form.html"
-    headers = {}
     response = client.get(reverse("contact form"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "true"}
-    response = client.get(reverse("contact form"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "false", "HX-Boosted": "true"}
-    response = client.get(reverse("contact form"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/contact_form.html"
 
 
-def test_contact_form_view_partial_template_used_on_htmx_request():
+def test_contact_form_view_partial_template_used_on_htmx_request(client):
     """Fails if a full HTML response instead of a partial is rendered on htmx request."""
-    client = Client()
     expected_template_name = "terminusgps/contact_form.html#main"
     headers = {"HX-Request": "true"}
     response = client.get(reverse("contact form"), headers=headers)
@@ -155,8 +148,7 @@ def test_contact_form_view_partial_template_used_on_htmx_request():
 
 
 @pytest.mark.django_db
-def test_contact_form_view_post_with_valid_data_saves_and_redirects():
-    client = Client()
+def test_contact_form_view_post_with_valid_data_saves_and_redirects(client):
     response = client.post(
         reverse("contact form"),
         data={
@@ -170,8 +162,7 @@ def test_contact_form_view_post_with_valid_data_saves_and_redirects():
 
 
 @pytest.mark.django_db
-def test_contact_form_view_post_with_valid_data_triggers_admin_email():
-    client = Client()
+def test_contact_form_view_post_with_valid_data_triggers_admin_email(client):
     with mock.patch(
         "terminusgps_site.models.ContactFormResponse.email_to_admins"
     ) as mock_email_to_admins:
@@ -187,8 +178,9 @@ def test_contact_form_view_post_with_valid_data_triggers_admin_email():
 
 
 @pytest.mark.django_db
-def test_contact_form_view_post_with_invalid_data_renders_form_with_errors():
-    client = Client()
+def test_contact_form_view_post_with_invalid_data_renders_form_with_errors(
+    client,
+):
     response = client.post(
         reverse("contact form"), data={"name": "", "email": "", "message": ""}
     )
@@ -197,40 +189,41 @@ def test_contact_form_view_post_with_invalid_data_renders_form_with_errors():
     assert ContactFormResponse.objects.count() == 0
 
 
-def test_contact_form_success_view_get_allowed():
-    client = Client()
+def test_contact_form_success_view_get_allowed(client):
     response = client.get(reverse("contact form success"))
     assert response.status_code == 200
 
 
-def test_contact_form_success_view_cache_control_header():
-    client = Client()
+def test_contact_form_success_view_cache_control_header(client):
     response = client.get(reverse("contact form success"))
-    assert response.headers.get("Cache-Control", "").startswith("max-age=")
+    assert response.has_header("Cache-Control")
+    assert response.headers["Cache-Control"].startswith("max-age=")
 
 
-def test_contact_form_success_view_vary_on_header():
-    client = Client()
+def test_contact_form_success_view_vary_on_header(client):
     response = client.get(reverse("contact form success"))
-    assert "HX-Request" in response.headers.get("Vary", "")
+    assert response.has_header("Vary")
+    assert "HX-Request" in response.headers["Vary"]
 
 
-def test_contact_form_success_view_full_template_used_on_non_htmx_request():
-    client = Client()
-    expected_template_name = "terminusgps/contact_form_success.html"
-    headers = {}
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {},
+        {"HX-Request": "true", "HX-Boosted": "true"},
+        {"HX-Request": "false", "HX-Boosted": "true"},
+    ],
+)
+def test_contact_form_success_view_full_template_used_on_non_htmx_request(
+    client, headers
+):
     response = client.get(reverse("contact form success"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "true"}
-    response = client.get(reverse("contact form success"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "false", "HX-Boosted": "true"}
-    response = client.get(reverse("contact form success"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/contact_form_success.html"
 
 
-def test_contact_form_success_view_partial_template_used_on_htmx_request():
-    client = Client()
+def test_contact_form_success_view_partial_template_used_on_htmx_request(
+    client,
+):
     expected_template_name = "terminusgps/contact_form_success.html#main"
     headers = {"HX-Request": "true"}
     response = client.get(reverse("contact form success"), headers=headers)
@@ -240,26 +233,24 @@ def test_contact_form_success_view_partial_template_used_on_htmx_request():
     assert response.template_name == expected_template_name
 
 
-def test_about_view_get_allowed():
-    client = Client()
+def test_about_view_get_allowed(client):
     response = client.get(reverse("about"))
     assert response.status_code == 200
 
 
-def test_about_view_cache_control_header():
-    client = Client()
+def test_about_view_cache_control_header(client):
     response = client.get(reverse("about"))
-    assert response.headers.get("Cache-Control", "").startswith("max-age=")
+    assert response.has_header("Cache-Control")
+    assert response.headers["Cache-Control"].startswith("max-age=")
 
 
-def test_about_view_vary_on_header():
-    client = Client()
+def test_about_view_vary_on_header(client):
     response = client.get(reverse("about"))
-    assert "HX-Request" in response.headers.get("Vary", "")
+    assert response.has_header("Vary")
+    assert "HX-Request" in response.headers["Vary"]
 
 
-def test_about_view_full_template_used_on_non_htmx_request():
-    client = Client()
+def test_about_view_full_template_used_on_non_htmx_request(client):
     expected_template_name = "terminusgps/about.html"
     headers = {}
     response = client.get(reverse("about"), headers=headers)
@@ -272,8 +263,7 @@ def test_about_view_full_template_used_on_non_htmx_request():
     assert response.template_name == expected_template_name
 
 
-def test_about_view_partial_template_used_on_htmx_request():
-    client = Client()
+def test_about_view_partial_template_used_on_htmx_request(client):
     expected_template_name = "terminusgps/about.html#main"
     headers = {"HX-Request": "true"}
     response = client.get(reverse("about"), headers=headers)
@@ -283,40 +273,36 @@ def test_about_view_partial_template_used_on_htmx_request():
     assert response.template_name == expected_template_name
 
 
-def test_terms_view_get_allowed():
-    client = Client()
+def test_terms_view_get_allowed(client):
     response = client.get(reverse("terms"))
     assert response.status_code == 200
 
 
-def test_terms_view_cache_control_header():
-    client = Client()
+def test_terms_view_cache_control_header(client):
     response = client.get(reverse("terms"))
-    assert response.headers.get("Cache-Control", "").startswith("max-age=")
+    assert response.has_header("Cache-Control")
+    assert response.headers["Cache-Control"].startswith("max-age=")
 
 
-def test_terms_view_vary_on_header():
-    client = Client()
+def test_terms_view_vary_on_header(client):
     response = client.get(reverse("terms"))
     assert "HX-Request" in response.headers.get("Vary", "")
 
 
-def test_terms_view_full_template_used_on_non_htmx_request():
-    client = Client()
-    expected_template_name = "terminusgps/terms.html"
-    headers = {}
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {},
+        {"HX-Request": "true", "HX-Boosted": "true"},
+        {"HX-Request": "false", "HX-Boosted": "true"},
+    ],
+)
+def test_terms_view_full_template_used_on_non_htmx_request(client, headers):
     response = client.get(reverse("terms"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "true"}
-    response = client.get(reverse("terms"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "false", "HX-Boosted": "true"}
-    response = client.get(reverse("terms"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/terms.html"
 
 
-def test_terms_view_partial_template_used_on_htmx_request():
-    client = Client()
+def test_terms_view_partial_template_used_on_htmx_request(client):
     expected_template_name = "terminusgps/terms.html#main"
     headers = {"HX-Request": "true"}
     response = client.get(reverse("terms"), headers=headers)
@@ -326,40 +312,37 @@ def test_terms_view_partial_template_used_on_htmx_request():
     assert response.template_name == expected_template_name
 
 
-def test_privacy_view_get_allowed():
-    client = Client()
+def test_privacy_view_get_allowed(client):
     response = client.get(reverse("privacy"))
     assert response.status_code == 200
 
 
-def test_privacy_view_cache_control_header():
-    client = Client()
+def test_privacy_view_cache_control_header(client):
     response = client.get(reverse("privacy"))
-    assert response.headers.get("Cache-Control", "").startswith("max-age=")
+    assert response.has_header("Cache-Control")
+    assert response.headers["Cache-Control"].startswith("max-age=")
 
 
-def test_privacy_view_vary_on_header():
-    client = Client()
+def test_privacy_view_vary_on_header(client):
     response = client.get(reverse("privacy"))
-    assert "HX-Request" in response.headers.get("Vary", "")
+    assert response.has_header("Vary")
+    assert "HX-Request" in response.headers["Vary"]
 
 
-def test_privacy_view_full_template_used_on_non_htmx_request():
-    client = Client()
-    expected_template_name = "terminusgps/privacy.html"
-    headers = {}
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {},
+        {"HX-Request": "true", "HX-Boosted": "true"},
+        {"HX-Request": "false", "HX-Boosted": "true"},
+    ],
+)
+def test_privacy_view_full_template_used_on_non_htmx_request(client, headers):
     response = client.get(reverse("privacy"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "true"}
-    response = client.get(reverse("privacy"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "false", "HX-Boosted": "true"}
-    response = client.get(reverse("privacy"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/privacy.html"
 
 
-def test_privacy_view_partial_template_used_on_htmx_request():
-    client = Client()
+def test_privacy_view_partial_template_used_on_htmx_request(client):
     expected_template_name = "terminusgps/privacy.html#main"
     headers = {"HX-Request": "true"}
     response = client.get(reverse("privacy"), headers=headers)
@@ -369,40 +352,37 @@ def test_privacy_view_partial_template_used_on_htmx_request():
     assert response.template_name == expected_template_name
 
 
-def test_features_view_get_allowed():
-    client = Client()
+def test_features_view_get_allowed(client):
     response = client.get(reverse("features"))
     assert response.status_code == 200
 
 
-def test_features_view_cache_control_header():
-    client = Client()
+def test_features_view_cache_control_header(client):
     response = client.get(reverse("features"))
-    assert response.headers.get("Cache-Control", "").startswith("max-age=")
+    assert response.has_header("Cache-Control")
+    assert response.headers["Cache-Control"].startswith("max-age=")
 
 
-def test_features_view_vary_on_header():
-    client = Client()
+def test_features_view_vary_on_header(client):
     response = client.get(reverse("features"))
-    assert "HX-Request" in response.headers.get("Vary", "")
+    assert response.has_header("Vary")
+    assert "HX-Request" in response.headers["Vary"]
 
 
-def test_features_view_full_template_used_on_non_htmx_request():
-    client = Client()
-    expected_template_name = "terminusgps/features.html"
-    headers = {}
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {},
+        {"HX-Request": "true", "HX-Boosted": "true"},
+        {"HX-Request": "false", "HX-Boosted": "true"},
+    ],
+)
+def test_features_view_full_template_used_on_non_htmx_request(client, headers):
     response = client.get(reverse("features"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "true"}
-    response = client.get(reverse("features"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "false", "HX-Boosted": "true"}
-    response = client.get(reverse("features"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/features.html"
 
 
-def test_features_view_partial_template_used_on_htmx_request():
-    client = Client()
+def test_features_view_partial_template_used_on_htmx_request(client):
     expected_template_name = "terminusgps/features.html#main"
     headers = {"HX-Request": "true"}
     response = client.get(reverse("features"), headers=headers)
@@ -412,40 +392,37 @@ def test_features_view_partial_template_used_on_htmx_request():
     assert response.template_name == expected_template_name
 
 
-def test_faq_view_get_allowed():
-    client = Client()
+def test_faq_view_get_allowed(client):
     response = client.get(reverse("faq"))
     assert response.status_code == 200
 
 
-def test_faq_view_cache_control_header():
-    client = Client()
+def test_faq_view_cache_control_header(client):
     response = client.get(reverse("faq"))
-    assert response.headers.get("Cache-Control", "").startswith("max-age=")
+    assert response.has_header("Cache-Control")
+    assert response.headers["Cache-Control"].startswith("max-age=")
 
 
-def test_faq_view_vary_on_header():
-    client = Client()
+def test_faq_view_vary_on_header(client):
     response = client.get(reverse("faq"))
-    assert "HX-Request" in response.headers.get("Vary", "")
+    assert response.has_header("Vary")
+    assert "HX-Request" in response.headers["Vary"]
 
 
-def test_faq_view_full_template_used_on_non_htmx_request():
-    client = Client()
-    expected_template_name = "terminusgps/faq.html"
-    headers = {}
+@pytest.mark.parametrize(
+    "headers",
+    [
+        {},
+        {"HX-Request": "true", "HX-Boosted": "true"},
+        {"HX-Request": "false", "HX-Boosted": "true"},
+    ],
+)
+def test_faq_view_full_template_used_on_non_htmx_request(client, headers):
     response = client.get(reverse("faq"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "true"}
-    response = client.get(reverse("faq"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "false", "HX-Boosted": "true"}
-    response = client.get(reverse("faq"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/faq.html"
 
 
-def test_faq_view_partial_template_used_on_htmx_request():
-    client = Client()
+def test_faq_view_partial_template_used_on_htmx_request(client):
     expected_template_name = "terminusgps/faq.html#main"
     headers = {"HX-Request": "true"}
     response = client.get(reverse("faq"), headers=headers)
@@ -455,29 +432,25 @@ def test_faq_view_partial_template_used_on_htmx_request():
     assert response.template_name == expected_template_name
 
 
-def test_source_code_view_redirect():
-    client = Client()
+def test_source_code_view_redirect(client):
     response = client.get(reverse("source code"))
     assert response.status_code == 301
     assert response.url == "https://github.com/terminusgps/terminusgps-site/"
 
 
-def test_platform_view_redirect():
-    client = Client()
+def test_platform_view_redirect(client):
     response = client.get(reverse("platform"))
     assert response.status_code == 301
     assert response.url == "https://hosting.terminusgps.com/"
 
 
-def test_cameras_view_redirect():
-    client = Client()
+def test_cameras_view_redirect(client):
     response = client.get(reverse("cameras"))
     assert response.status_code == 301
     assert response.url == "https://camera.terminusgps.com/"
 
 
-def test_ios_app_view_redirect():
-    client = Client()
+def test_ios_app_view_redirect(client):
     response = client.get(reverse("ios app"))
     assert response.status_code == 301
     assert (
@@ -486,8 +459,7 @@ def test_ios_app_view_redirect():
     )
 
 
-def test_android_app_view_redirect():
-    client = Client()
+def test_android_app_view_redirect(client):
     response = client.get(reverse("android app"))
     assert response.status_code == 301
     assert (

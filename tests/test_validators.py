@@ -8,6 +8,10 @@ from terminusgps.wialon import WialonSession
 from terminusgps_installer.validators import validate_imei, validate_is_digit
 
 
+def test_validate_imei_multiple_units_found_raises_validationerror():
+    pass
+
+
 class ValidateImeiTestCase(TestCase):
     def test_multiple_units_found_raises_validationerror(self):
         """Fails if the IMEI number pointed to multiple units and :py:exec:`~django.core.exceptions.ValidationError` wasn't raised."""
