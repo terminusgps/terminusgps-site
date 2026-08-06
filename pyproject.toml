@@ -16,10 +16,6 @@ dependencies = [
     "python-wialon>=1.2.4",
 ]
 
-[tool.pytest]
-DJANGO_SETTINGS_MODULE = "terminusgps.settings.prod"
-python_files = ["test_*.py", "tests/test_*.py"]
-
 [tool.pyright]
 strictListInference = false
 strictDictionaryInference = false

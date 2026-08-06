@@ -1,6 +1,7 @@
 .*
 !.gitignore
 !.github/
+!.dockerignore
 
 node_modules/
 __pycache__/
@@ -9,6 +10,7 @@ db.*
 build/
 docs/build/
 media/
+cov_html/
 
 .env
 .venv

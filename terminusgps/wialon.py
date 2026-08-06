@@ -1,7 +1,6 @@
 import functools
 import json
 import urllib.parse
-from collections.abc import Sequence
 from typing import Any
 
 from django.conf import settings
@@ -407,33 +406,9 @@ def enable_account(session: WialonSession, resource_id: int) -> None:
     )
 
 
-def create_new_account_user(username: str) -> int:
-    """
-    Creates a resource, user and an account then returns the user id.
-
-    :param username: New user name.
-    :type username: str
-    :param password: New user password.
-    :type password: str
-    :returns: The Wialon user id.
-    :rtype: int
-
-    """
-    session = get_session(sid=None)
-    # User *must* change password on first login
-    user_id = create_user(session, int(session.uid), username, "Terminus#1!")
-    resource_id = create_resource(session, user_id, f"account_{username}")
-    create_account(session, resource_id, plan="terminusgps_ext_hist")
-    enable_account(session, resource_id)
-    disable_account(session, resource_id)
-    return user_id
-
-
 @functools.lru_cache(maxsize=300)
 def get_command_definition_data(
-    session: WialonSession,
-    unit_id: int,
-    command_ids: Sequence[int] | None = None,
+    session: WialonSession, unit_id: int, command_ids: tuple[int] | None = None
 ) -> list[dict]:
     """
     Returns definition data for all unit commmands.
@@ -444,15 +419,15 @@ def get_command_definition_data(
     :type session: ~terminusgps.wialon.WialonSession
     :param unit_id: A Wialon unit id.
     :type unit_id: int
-    :param command_ids: Optional. A sequence of command ids.
-    :type command_ids: ~collections.abc.Sequence[int] | None
+    :param command_ids: Optional. A list of command ids.
+    :type command_ids: list | None
     :returns: A list of command definition data dictionaries.
     :rtype: list[dict]
 
     """
     params: dict[str, Any] = {"itemId": unit_id}
-    if command_ids is not None:
-        params["col"] = command_ids
+    if command_ids:
+        params["col"] = list(command_ids)
     return session.wialon_api.unit_get_command_definition_data(**params)
 
 
