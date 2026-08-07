@@ -13,16 +13,6 @@ def client():
     return Client()
 
 
-@pytest.fixture
-def hx_request_headers():
-    return {"HX-Request": "true"}
-
-
-@pytest.fixture
-def hx_boosted_headers():
-    return {"HX-Request": "true", "HX-Boosted": "true"}
-
-
 def test_login_view_get_allowed(client):
     """Fails if a GET request doesn't respond with status code 200."""
     response = client.get(reverse("login"))
@@ -153,15 +143,16 @@ def test_contact_form_view_full_template_used_on_non_htmx_request(
     assert response.template_name == "terminusgps/contact_form.html"
 
 
-def test_contact_form_view_partial_template_used_on_htmx_request(client):
+@pytest.mark.parametrize(
+    "headers",
+    [{"HX-Request": "true"}, {"HX-Request": "true", "HX-Boosted": "false"}],
+)
+def test_contact_form_view_partial_template_used_on_htmx_request(
+    client, headers
+):
     """Fails if a full HTML response instead of a partial is rendered on htmx request."""
-    expected_template_name = "terminusgps/contact_form.html#main"
-    headers = {"HX-Request": "true"}
     response = client.get(reverse("contact form"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "false"}
-    response = client.get(reverse("contact form"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/contact_form.html#main"
 
 
 @pytest.mark.django_db
@@ -238,16 +229,17 @@ def test_contact_form_success_view_full_template_used_on_non_htmx_request(
     assert response.template_name == "terminusgps/contact_form_success.html"
 
 
+@pytest.mark.parametrize(
+    "headers",
+    [{"HX-Request": "true"}, {"HX-Request": "true", "HX-Boosted": "false"}],
+)
 def test_contact_form_success_view_partial_template_used_on_htmx_request(
-    client,
+    client, headers
 ):
-    expected_template_name = "terminusgps/contact_form_success.html#main"
-    headers = {"HX-Request": "true"}
     response = client.get(reverse("contact form success"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "false"}
-    response = client.get(reverse("contact form success"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert (
+        response.template_name == "terminusgps/contact_form_success.html#main"
+    )
 
 
 def test_about_view_get_allowed(client):
@@ -280,14 +272,13 @@ def test_about_view_full_template_used_on_non_htmx_request(client):
     assert response.template_name == expected_template_name
 
 
-def test_about_view_partial_template_used_on_htmx_request(client):
-    expected_template_name = "terminusgps/about.html#main"
-    headers = {"HX-Request": "true"}
+@pytest.mark.parametrize(
+    "headers",
+    [{"HX-Request": "true"}, {"HX-Request": "true", "HX-Boosted": "false"}],
+)
+def test_about_view_partial_template_used_on_htmx_request(client, headers):
     response = client.get(reverse("about"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "false"}
-    response = client.get(reverse("about"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/about.html#main"
 
 
 def test_terms_view_get_allowed(client):
@@ -319,14 +310,13 @@ def test_terms_view_full_template_used_on_non_htmx_request(client, headers):
     assert response.template_name == "terminusgps/terms.html"
 
 
-def test_terms_view_partial_template_used_on_htmx_request(client):
-    expected_template_name = "terminusgps/terms.html#main"
-    headers = {"HX-Request": "true"}
+@pytest.mark.parametrize(
+    "headers",
+    [{"HX-Request": "true"}, {"HX-Request": "true", "HX-Boosted": "false"}],
+)
+def test_terms_view_partial_template_used_on_htmx_request(client, headers):
     response = client.get(reverse("terms"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "false"}
-    response = client.get(reverse("terms"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/terms.html#main"
 
 
 def test_privacy_view_get_allowed(client):
@@ -359,14 +349,13 @@ def test_privacy_view_full_template_used_on_non_htmx_request(client, headers):
     assert response.template_name == "terminusgps/privacy.html"
 
 
-def test_privacy_view_partial_template_used_on_htmx_request(client):
-    expected_template_name = "terminusgps/privacy.html#main"
-    headers = {"HX-Request": "true"}
+@pytest.mark.parametrize(
+    "headers",
+    [{"HX-Request": "true"}, {"HX-Request": "true", "HX-Boosted": "false"}],
+)
+def test_privacy_view_partial_template_used_on_htmx_request(client, headers):
     response = client.get(reverse("privacy"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "false"}
-    response = client.get(reverse("privacy"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/privacy.html#main"
 
 
 def test_features_view_get_allowed(client):
@@ -399,14 +388,13 @@ def test_features_view_full_template_used_on_non_htmx_request(client, headers):
     assert response.template_name == "terminusgps/features.html"
 
 
-def test_features_view_partial_template_used_on_htmx_request(client):
-    expected_template_name = "terminusgps/features.html#main"
-    headers = {"HX-Request": "true"}
+@pytest.mark.parametrize(
+    "headers",
+    [{"HX-Request": "true"}, {"HX-Request": "true", "HX-Boosted": "false"}],
+)
+def test_features_view_partial_template_used_on_htmx_request(client, headers):
     response = client.get(reverse("features"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "false"}
-    response = client.get(reverse("features"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/features.html#main"
 
 
 def test_faq_view_get_allowed(client):
@@ -439,14 +427,13 @@ def test_faq_view_full_template_used_on_non_htmx_request(client, headers):
     assert response.template_name == "terminusgps/faq.html"
 
 
-def test_faq_view_partial_template_used_on_htmx_request(client):
-    expected_template_name = "terminusgps/faq.html#main"
-    headers = {"HX-Request": "true"}
+@pytest.mark.parametrize(
+    "headers",
+    [{"HX-Request": "true"}, {"HX-Request": "true", "HX-Boosted": "false"}],
+)
+def test_faq_view_partial_template_used_on_htmx_request(client, headers):
     response = client.get(reverse("faq"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "false"}
-    response = client.get(reverse("faq"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/faq.html#main"
 
 
 def test_source_code_view_redirect(client):
