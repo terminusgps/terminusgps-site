@@ -1,5 +1,3 @@
-import random
-import string
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -210,13 +208,11 @@ def test_get_vin_info(mock_api):
 
 
 def test_generate_locator_token(mock_api):
-    expected_token = "".join(
-        random.choices(string.ascii_letters + string.digits, k=72)
-    )
+    expected_token = "cadwc9GtAKcptXuTOX2oWJCA1Df9R360tWilwUZcoFPqH1SceGGoLET0v8h75nzIuaAEUwqs"
     mock_api.token_update.return_value = {"h": expected_token}
     session = WialonSession()
     session.login()
-    result = generate_locator_token(session, [1])
+    result = generate_locator_token(session, unit_ids=[1])
     assert result == expected_token
 
 

@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -11,6 +12,18 @@ from terminusgps_site.models import ContactFormResponse
 @pytest.fixture
 def client():
     return Client()
+
+
+def test_login_view_get_allowed(client):
+    """Fails if a GET request doesn't respond with status code 200."""
+    response = client.get(reverse("login"))
+    assert response.status_code == 200
+
+
+def test_login_view_post_allowed(client):
+    """Fails if a POST request doesn't respond with status code 200."""
+    response = client.post(reverse("login"))
+    assert response.status_code == 200
 
 
 def test_home_view_get_allowed(client):
@@ -466,6 +479,21 @@ def test_android_app_view_redirect(client):
         response.url
         == "https://play.google.com/store/apps/details?id=com.terminusgps.track&pcampaignid=web_share"
     )
+
+
+def test_installer_home_view_anonymous_get_forbidden(client):
+    response = client.get(reverse("installer:home"))
+    assert response.status_code == 302
+
+
+@pytest.mark.django_db
+def test_installer_home_view_get_allowed(client):
+    username = "testuser"
+    password = "super_secure_password1!"
+    get_user_model().objects.create_user(username=username, password=password)
+    client.login(username=username, password=password)
+    response = client.get(reverse("installer:home"))
+    assert response.status_code == 200
 
 
 class InstallerHomeViewTestCase(TestCase):

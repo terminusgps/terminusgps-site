@@ -30,4 +30,4 @@ jobs:
         run: uv sync --locked
 
       - name: Run tests
-        run: uv run pytest --ds=terminusgps.settings.dev
+        run: uv run pytest --ds=terminusgps.settings.dev -m "not e2e"

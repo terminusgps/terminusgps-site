@@ -16,6 +16,11 @@ dependencies = [
     "python-wialon>=1.2.4",
 ]
 
+[tool.pytest.ini_options]
+markers = [
+"e2e: end-to-end browser tests via Playwright"
+]
+
 [tool.pyright]
 strictListInference = false
 strictDictionaryInference = false
@@ -70,7 +75,9 @@ deploy = [
 ]
 dev = [
     "ipython>=9.14.1",
+    "playwright>=1.62.0",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "pytest-django>=4.12.0",
+    "pytest-playwright>=0.8.0",
 ]
