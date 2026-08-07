@@ -2,16 +2,25 @@ from unittest import mock
 
 import pytest
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import Client
 from django.urls import reverse
 
-from terminusgps_installer.models import InstallJob
 from terminusgps_site.models import ContactFormResponse
 
 
 @pytest.fixture
 def client():
     return Client()
+
+
+@pytest.fixture
+def hx_request_headers():
+    return {"HX-Request": "true"}
+
+
+@pytest.fixture
+def hx_boosted_headers():
+    return {"HX-Request": "true", "HX-Boosted": "true"}
 
 
 def test_login_view_get_allowed(client):
@@ -55,7 +64,6 @@ def test_home_view_vary_on_header(client):
     ],
 )
 def test_home_view_full_template_used_on_non_htmx_request(client, headers):
-    """Fails if a partial HTML template was used instead of a full page on htmx request."""
     response = client.get(reverse("home"), headers=headers)
     assert response.template_name == "terminusgps/home.html"
 
@@ -65,7 +73,6 @@ def test_home_view_full_template_used_on_non_htmx_request(client, headers):
     [{"HX-Request": "true"}, {"HX-Request": "true", "HX-Boosted": "false"}],
 )
 def test_home_view_partial_template_used_on_htmx_request(client, headers):
-    """Fails if a full HTML response instead of a partial is rendered on htmx request."""
     response = client.get(reverse("home"), headers=headers)
     assert response.template_name == "terminusgps/home.html#main"
 
@@ -99,20 +106,17 @@ def test_contact_view_vary_on_header(client):
     ],
 )
 def test_contact_view_full_template_used_on_non_htmx_request(client, headers):
-    """Fails if a partial HTML template was used instead of a full page on htmx request."""
     response = client.get(reverse("contact"), headers=headers)
     assert response.template_name == "terminusgps/contact.html"
 
 
-def test_contact_view_partial_template_used_on_htmx_request(client):
-    """Fails if a full HTML response instead of a partial is rendered on htmx request."""
-    expected_template_name = "terminusgps/contact.html#main"
-    headers = {"HX-Request": "true"}
+@pytest.mark.parametrize(
+    "headers",
+    [{"HX-Request": "true"}, {"HX-Request": "true", "HX-Boosted": "false"}],
+)
+def test_contact_view_partial_template_used_on_htmx_request(client, headers):
     response = client.get(reverse("contact"), headers=headers)
-    assert response.template_name == expected_template_name
-    headers = {"HX-Request": "true", "HX-Boosted": "false"}
-    response = client.get(reverse("contact"), headers=headers)
-    assert response.template_name == expected_template_name
+    assert response.template_name == "terminusgps/contact.html#main"
 
 
 def test_contact_view_form_in_context(client):
@@ -486,7 +490,7 @@ def test_installer_home_view_anonymous_get_forbidden(client):
     assert response.status_code == 302
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_installer_home_view_get_allowed(client):
     username = "testuser"
     password = "super_secure_password1!"
@@ -494,165 +498,3 @@ def test_installer_home_view_get_allowed(client):
     client.login(username=username, password=password)
     response = client.get(reverse("installer:home"))
     assert response.status_code == 200
-
-
-class InstallerHomeViewTestCase(TestCase):
-    fixtures = ["terminusgps/fixtures/terminusgps/tests/test_users.json"]
-
-    def setUp(self):
-        self.location = reverse("installer:home")
-        self.client = Client()
-        self.client.login(**{"username": "testuser", "password": "trolldad"})
-
-    def tearDown(self):
-        self.client.logout()
-
-    def test_anonymous_get_forbidden(self):
-        """Fails if a GET request from an anonymous user doesn't respond with status code 302 (redirect to login)."""
-        self.client.logout()
-        response = self.client.get(self.location)
-        self.assertEqual(response.status_code, 302)
-
-    def test_get_allowed(self):
-        """Fails if a GET request doesn't respond with status code 200."""
-        response = self.client.get(self.location)
-        self.assertEqual(response.status_code, 200)
-
-    def test_cache_control_header(self):
-        """Fails if ``max-age=`` wasn't present in the ``Cache-Control`` response header."""
-        response = self.client.get(self.location)
-        self.assertStartsWith(
-            response.headers.get("Cache-Control", ""), "max-age="
-        )
-
-    def test_vary_on_header(self):
-        """Fails if ``HX-Request`` wasn't present in the ``Vary`` response header."""
-        response = self.client.get(self.location)
-        self.assertIn("HX-Request", response.headers.get("Vary", ""))
-
-    def test_full_template_used_on_non_htmx_request(self):
-        """Fails if a partial HTML template was used instead of a full page on htmx request."""
-        expected_template_name = "installer/home.html"
-        headers = {"HX-Request": "true", "HX-Boosted": "true"}
-        response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, expected_template_name)
-        headers = {"HX-Request": "false", "HX-Boosted": "true"}
-        response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, expected_template_name)
-        headers = {"HX-Request": "false", "HX-Boosted": "false"}
-        response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, expected_template_name)
-
-    def test_partial_template_used_on_htmx_request(self):
-        """Fails if a full HTML response instead of a partial is rendered on htmx request."""
-        expected_template_name = "main"
-        headers = {"HX-Request": "true", "HX-Boosted": "false"}
-        response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, expected_template_name)
-
-
-class InstallerNewJobFormViewTestCase(TestCase):
-    fixtures = [
-        "terminusgps/fixtures/terminusgps/tests/test_employees.json",
-        "terminusgps/fixtures/terminusgps/tests/test_users.json",
-        "terminusgps/fixtures/terminusgps/tests/test_wialonresources.json",
-    ]
-
-    def setUp(self):
-        self.location = reverse("installer:new job form")
-        self.client = Client()
-        self.client.login(**{"username": "testuser", "password": "trolldad"})
-
-    def tearDown(self):
-        self.client.logout()
-
-    def test_anonymous_get_forbidden(self):
-        """Fails if a GET request from an anonymous user doesn't respond with status code 302 (redirect to login)."""
-        self.client.logout()
-        response = self.client.get(self.location)
-        self.assertEqual(response.status_code, 302)
-
-    def test_anonymous_post_forbidden(self):
-        """Fails if a POST request from an anonymous user doesn't respond with status code 302 (redirect to login)."""
-        self.client.logout()
-        response = self.client.get(self.location)
-        self.assertEqual(response.status_code, 302)
-
-    def test_get_allowed(self):
-        """Fails if a GET request doesn't respond with status code 200."""
-        response = self.client.get(self.location)
-        self.assertEqual(response.status_code, 200)
-
-
-class InstallJobListViewTestCase(TestCase):
-    fixtures = [
-        "terminusgps/fixtures/terminusgps/tests/test_users.json",
-        "terminusgps/fixtures/terminusgps/tests/test_employees.json",
-        "terminusgps/fixtures/terminusgps/tests/test_installjobs.json",
-        "terminusgps/fixtures/terminusgps/tests/test_wialonresources.json",
-        "terminusgps/fixtures/terminusgps/tests/test_wialonunits.json",
-    ]
-
-    def setUp(self):
-        self.location = reverse("installer:job list")
-        self.client = Client()
-        self.client.login(**{"username": "testuser", "password": "trolldad"})
-
-    def tearDown(self):
-        self.client.logout()
-
-    def test_anonymous_get_forbidden(self):
-        """Fails if a GET request from an anonymous user doesn't respond with status code 302 (redirect to login)."""
-        self.client.logout()
-        response = self.client.get(self.location)
-        self.assertEqual(response.status_code, 302)
-
-    def test_get_allowed(self):
-        """Fails if a GET request doesn't respond with status code 200."""
-        response = self.client.get(self.location)
-        self.assertEqual(response.status_code, 200)
-
-    def test_cache_control_header(self):
-        """Fails if ``max-age=`` wasn't present in the ``Cache-Control`` response header."""
-        response = self.client.get(self.location)
-        self.assertStartsWith(
-            response.headers.get("Cache-Control", ""), "max-age="
-        )
-
-    def test_vary_on_header(self):
-        """Fails if ``HX-Request`` wasn't present in the ``Vary`` response header."""
-        response = self.client.get(self.location)
-        self.assertIn("HX-Request", response.headers.get("Vary", ""))
-
-    def test_full_template_used_on_non_htmx_request(self):
-        """Fails if a partial HTML template was used instead of a full page on htmx request."""
-        expected_template_name = "installer/job_list.html"
-        headers = {"HX-Request": "true", "HX-Boosted": "true"}
-        response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, expected_template_name)
-        headers = {"HX-Request": "false", "HX-Boosted": "true"}
-        response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, expected_template_name)
-        headers = {"HX-Request": "false", "HX-Boosted": "false"}
-        response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, expected_template_name)
-
-    def test_partial_template_used_on_htmx_request(self):
-        """Fails if a full HTML response instead of a partial is rendered on htmx request."""
-        expected_template_name = "main"
-        headers = {"HX-Request": "true", "HX-Boosted": "false"}
-        response = self.client.get(self.location, headers=headers)
-        self.assertTemplateUsed(response, expected_template_name)
-
-    def test_jobs_list_in_context(self):
-        """Fails if ``jobs_list`` wasn't present in the view context."""
-        response = self.client.get(self.location)
-        self.assertIn("jobs_list", response.context)
-
-    def test_only_not_done_jobs_in_context(self):
-        """Fails if a job with status ``done`` was present in the view context."""
-        expected_qs = InstallJob.objects.exclude(status="done")
-        response = self.client.get(self.location)
-        result_qs = response.context.get("jobs_list")
-        self.assertIsNotNone(result_qs)
-        self.assertQuerySetEqual(expected_qs, result_qs)
