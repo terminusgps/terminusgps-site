@@ -535,6 +535,3 @@ def test_new_job_form_post_creates_new_job(client, credentials):
     get_user_model().objects.create_user(**credentials)
     client.login(**credentials)
     response = client.post(reverse("installer:new job form"), data={})
-    print(f"{response.status_code = }")
-    print(f"{dir(response) = }")
-    assert 0
