@@ -113,11 +113,6 @@ class WialonUnit(models.Model):
         unit = get_unit_by_imei(session, self.imei)
         return unit["nm"]
 
-    def _get_wialon_unit_id(self, sid: str | None = None) -> int:
-        session = get_session(sid=sid)
-        unit = get_unit_by_imei(session, self.imei)
-        return unit["id"]
-
     def _get_wialon_commands(self, sid: str | None = None) -> list[dict]:
         session = get_session(sid=sid)
         unit = get_unit_by_imei(session, self.imei, flags=512)

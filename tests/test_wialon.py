@@ -16,6 +16,7 @@ from terminusgps.wialon import (
     generate_locator_token,
     generate_locator_url,
     get_command_definition_data,
+    get_command_name,
     get_resource,
     get_resource_choices,
     get_resources,
@@ -563,3 +564,30 @@ def test_update_name(mock_api, unit_id, new_name):
     mock_api.item_update_name.assert_called_once_with(
         **{"itemId": unit_id, "name": new_name}
     )
+
+
+def test_get_command_name(mock_api):
+    mock_api.unit_get_command_definition_data.return_value = [
+        {
+            "id": 1,
+            "n": "Ignition Off",
+            "c": "custom_msg",
+            "l": "vrt",
+            "p": "relay#0",
+            "a": 1,
+            "f": 0,
+            "jp": "",
+        }
+    ]
+    session = WialonSession()
+    session.login()
+    result = get_command_name(session, 1, 1)
+    assert result == "Ignition Off"
+
+
+def test_get_command_name_with_nonexistant_command(mock_api):
+    mock_api.unit_get_command_definition_data.return_value = []
+    session = WialonSession()
+    session.login()
+    result = get_command_name(session, 1, 1)
+    assert result is None

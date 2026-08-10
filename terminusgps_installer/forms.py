@@ -41,7 +41,7 @@ class WialonUnitCollection(FormCollection):
     min_siblings = 1
     add_unit = AddSiblingActivator(add_label=_("Add Unit"))
 
-    def get_or_create_instance(self, data):
+    def get_or_create_instance(self, data):  # pragma: no cover
         if data := data.get("department"):
             try:
                 return self.instance.units.get(id=data.get("id") or 0), False

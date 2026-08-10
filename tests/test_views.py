@@ -5,12 +5,18 @@ from django.contrib.auth import get_user_model
 from django.test import Client
 from django.urls import reverse
 
+from terminusgps_installer.models import Employee
 from terminusgps_site.models import ContactFormResponse
 
 
 @pytest.fixture
 def client():
     return Client()
+
+
+@pytest.fixture
+def credentials():
+    return {"username": "testuser", "password": "super_secure_password1!"}
 
 
 def test_login_view_get_allowed(client):
@@ -472,16 +478,63 @@ def test_android_app_view_redirect(client):
     )
 
 
+@pytest.mark.django_db
+def test_installer_home_view_get_allowed(client, credentials):
+    get_user_model().objects.create_user(**credentials)
+    client.login(**credentials)
+    response = client.get(reverse("installer:home"))
+    assert response.status_code == 200
+
+
 def test_installer_home_view_anonymous_get_forbidden(client):
     response = client.get(reverse("installer:home"))
     assert response.status_code == 302
+    assert response.url.startswith(reverse("login"))
 
 
-@pytest.mark.django_db(transaction=True)
-def test_installer_home_view_get_allowed(client):
-    username = "testuser"
-    password = "super_secure_password1!"
-    get_user_model().objects.create_user(username=username, password=password)
-    client.login(username=username, password=password)
-    response = client.get(reverse("installer:home"))
+def test_job_list_view_anonymous_get_forbidden(client):
+    """Fails if a GET request to job list succeeds from an anonymous client."""
+    response = client.get(reverse("installer:job list"))
+    assert response.status_code == 302
+    assert response.url.startswith(reverse("login"))
+
+
+@pytest.mark.django_db
+def test_job_list_view_authenticated_get_allowed(client, credentials):
+    """Fails if a GET request to job list fails from an authenticated client with a corresponding employee."""
+    user = get_user_model().objects.create_user(**credentials)
+    Employee.objects.create(user=user)
+    client.login(**credentials)
+    response = client.get(reverse("installer:job list"))
     assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_job_list_view_authenticated_get_without_employee_returns_404(
+    client, credentials
+):
+    """Fails if a GET request to job list succeeds from an authenticated client without a corresponding employee."""
+    user = get_user_model().objects.create_user(**credentials)
+    client.login(**credentials)
+    response = client.get(reverse("installer:job list"))
+    with pytest.raises(Employee.DoesNotExist):
+        Employee.objects.get(user=user)
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
+def test_new_job_form_post_with_no_data_returns_422(client, credentials):
+    get_user_model().objects.create_user(**credentials)
+    client.login(**credentials)
+    response = client.post(reverse("installer:new job form"), data={})
+    assert response.status_code == 422
+
+
+@pytest.mark.django_db
+def test_new_job_form_post_creates_new_job(client, credentials):
+    get_user_model().objects.create_user(**credentials)
+    client.login(**credentials)
+    response = client.post(reverse("installer:new job form"), data={})
+    print(f"{response.status_code = }")
+    print(f"{dir(response) = }")
+    assert 0

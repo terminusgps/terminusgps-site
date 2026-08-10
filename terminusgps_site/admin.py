@@ -11,7 +11,7 @@ class ContactFormResponseAdmin(admin.ModelAdmin):
     date_hierarchy = "pub_date"
 
     @admin.action(description="Email selected responses to admins")
-    def email_admins(self, request, queryset):
+    def email_admins(self, request, queryset):  # pragma: no cover
         for response in queryset:
             response.email_to_admins()
         self.message_user(

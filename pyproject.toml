@@ -74,6 +74,7 @@ deploy = [
     "django-redis>=7.0.0",
 ]
 dev = [
+    "django-types>=0.24.0",
     "ipython>=9.14.1",
     "playwright>=1.62.0",
     "pytest>=9.1.1",
