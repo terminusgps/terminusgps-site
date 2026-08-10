@@ -9,7 +9,7 @@ authors = [
     { name = "Blake Nall", email = "blake@terminusgps.com" },
 ]
 dependencies = [
-    "django==6.0.6",
+    "django==6.0.7",
     "django-formset>=2.2.4",
     "django-phonenumber-field[phonenumbers]>=8.4.0",
     "pillow==12.3.0",
