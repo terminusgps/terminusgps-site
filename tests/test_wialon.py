@@ -1,5 +1,3 @@
-from unittest.mock import MagicMock, patch
-
 import pytest
 from django.conf import settings
 from wialon.api import WialonError
@@ -32,20 +30,6 @@ from terminusgps.wialon import (
 @pytest.fixture(autouse=True)
 def use_default_wialon_token(settings):
     settings.WIALON_TOKEN = "super_secure_token"
-
-
-@pytest.fixture
-def mock_api():
-    with patch("terminusgps.wialon.Wialon") as mock_wialon_cls:
-        mock_api = MagicMock()
-        mock_api.token_login.return_value = {
-            "eid": "abc123",
-            "au": "test",
-            "user": {"id": 1},
-            "gis_sid": "def456",
-        }
-        mock_wialon_cls.return_value = mock_api
-        yield mock_api
 
 
 def test_wialonsession_no_token_provided_uses_wialon_token_setting(mock_api):
