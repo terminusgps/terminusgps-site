@@ -10,6 +10,7 @@ from terminusgps.wialon import (
     get_session,
     get_unit_by_imei,
 )
+from terminusgps_installer.validators import validate_is_digit
 
 
 class InstallJobStatus(models.TextChoices):
@@ -85,7 +86,7 @@ class WialonUnit(models.Model):
         related_name="units",
     )
     name = models.CharField(blank=True, max_length=50)
-    imei = models.CharField(max_length=20)
+    imei = models.CharField(max_length=20, validators=[validate_is_digit])
     vin = models.CharField(blank=True, max_length=17)
     plate = models.CharField(blank=True, max_length=12)
     mileage = models.PositiveIntegerField(blank=True, default=0)

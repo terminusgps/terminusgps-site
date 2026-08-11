@@ -1,4 +1,4 @@
-name: "Django Test"
+name: "Django End-to-End Test"
 on:
   push:
     branches: [ "main" ]
@@ -29,5 +29,8 @@ jobs:
       - name: Install project
         run: uv sync --locked
 
+      - name: Install browser
+        run: uv run playwright install --with-deps --only-shell
+
       - name: Run tests
-        run: uv run pytest -m "not e2e" --ds=terminusgps.settings.dev
+        run: uv run pytest -m e2e --ds=terminusgps.settings.dev
