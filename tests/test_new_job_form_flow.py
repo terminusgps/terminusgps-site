@@ -116,10 +116,8 @@ def test_new_job_form_two_units_redirects_and_saves(live_server, credentials):
         page.get_by_label("Vin:").nth(1).fill("98765432198765432")
         page.get_by_label("Plate:").nth(1).fill("ABC1234")
         page.get_by_role("button", name="Submit").click()
-        print(f"{dir(page) = }")
-        print(f"{page.aria_snapshot() = }")
+        expect(page).to_have_title("In-Progress Jobs | Terminus GPS")
         browser.close()
-    assert 0
     assert WialonUnit.objects.count() == 2
     assert WialonUnit.objects.get(imei="12345678912345678")
     assert WialonUnit.objects.get(imei="98765432198765432")

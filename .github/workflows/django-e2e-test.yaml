@@ -33,4 +33,4 @@ jobs:
         run: uv run playwright install --with-deps --only-shell
 
       - name: Run tests
-        run: uv run pytest -m e2e --ds=terminusgps.settings.dev
+        run: uv run pytest -ms e2e --ds=terminusgps.settings.dev
