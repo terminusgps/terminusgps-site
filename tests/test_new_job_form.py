@@ -7,7 +7,12 @@ from django.test import Client
 from django.urls import reverse
 from playwright.sync_api import expect, sync_playwright
 
-from terminusgps_installer.models import Employee, WialonResource, WialonUnit
+from terminusgps_installer.models import (
+    Employee,
+    InstallJob,
+    WialonResource,
+    WialonUnit,
+)
 
 logging.disable(logging.CRITICAL)
 
@@ -118,6 +123,7 @@ def test_new_job_form_two_units_redirects_and_saves(live_server, credentials):
         page.get_by_role("button", name="Submit").click()
         expect(page).to_have_title("In-Progress Jobs | Terminus GPS")
         browser.close()
+    assert InstallJob.objects.count() == 1
     assert WialonUnit.objects.count() == 2
     assert WialonUnit.objects.get(imei="12345678912345678")
     assert WialonUnit.objects.get(imei="98765432198765432")
