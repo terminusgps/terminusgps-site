@@ -2,26 +2,15 @@ import logging
 
 import pytest
 from django.contrib.auth import get_user_model
-from django.test import Client
 from django.urls import reverse
 from playwright.sync_api import expect, sync_playwright
 
 logging.disable(logging.CRITICAL)
 
 
-@pytest.fixture
-def client():
-    return Client()
-
-
-@pytest.fixture
-def credentials():
-    return {"username": "testuser", "password": "super_secure_password1!"}
-
-
 @pytest.fixture(autouse=True)
 def user(credentials):
-    return get_user_model().objects.create_user(**credentials)
+    yield get_user_model().objects.create_user(**credentials)
 
 
 @pytest.mark.e2e

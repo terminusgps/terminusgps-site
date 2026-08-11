@@ -1,5 +1,3 @@
-from unittest.mock import MagicMock, patch
-
 import pytest
 from django.contrib.auth import get_user_model
 
@@ -12,25 +10,9 @@ from terminusgps_installer.models import (
 )
 
 
-@pytest.fixture
-def mock_api():
-    with patch("terminusgps.wialon.Wialon") as mock_wialon_cls:
-        mock_api = MagicMock()
-        mock_api.token_login.return_value = {
-            "eid": "abc123",
-            "au": "test",
-            "user": {"id": 1},
-            "gis_sid": "def456",
-        }
-        mock_wialon_cls.return_value = mock_api
-        yield mock_api
-
-
 @pytest.fixture(autouse=True)
-def user(db):
-    return get_user_model().objects.create_user(
-        username="testuser", password="super_secure_password1!"
-    )
+def user(credentials):
+    yield get_user_model().objects.create_user(**credentials)
 
 
 @pytest.fixture(autouse=True)
@@ -39,7 +21,7 @@ def employee(user):
 
 
 @pytest.fixture(autouse=True)
-def resource(db):
+def resource():
     return WialonResource.objects.create(id=1, name="Resource #1")
 
 

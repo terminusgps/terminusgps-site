@@ -1,5 +1,3 @@
-from unittest.mock import MagicMock, patch
-
 import pytest
 from django.core.exceptions import ValidationError
 
@@ -8,20 +6,6 @@ from terminusgps_installer.validators import (
     validate_is_digit,
     validate_vin,
 )
-
-
-@pytest.fixture
-def mock_api():
-    with patch("terminusgps.wialon.Wialon") as mock_wialon_cls:
-        mock_api = MagicMock()
-        mock_api.token_login.return_value = {
-            "eid": "abc123",
-            "au": "test",
-            "user": {"id": 1},
-            "gis_sid": "def456",
-        }
-        mock_wialon_cls.return_value = mock_api
-        yield mock_api
 
 
 @pytest.mark.parametrize(
