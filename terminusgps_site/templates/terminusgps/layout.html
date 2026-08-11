@@ -20,8 +20,8 @@
         <nav class="bg-stone-100 border-b border-stone-200 drop-shadow dark:border-gray-500 dark:bg-gray-600 print:hidden">
             <div class="flex justify-between items-center">
                 <a href="{% url 'home' %}" class="group flex items-center space-x-1 w-fit">
-                    <img src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="animate-coin-slow size-16 group-hover:animate-none"/>
-                    <img src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24"/>
+                    <img alt="Black waypoint with a circular head, road running upwards along its center" src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="animate-coin-slow size-16 group-hover:animate-none"/>
+                    <img alt="Terminus GPS" src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24"/>
                 </a>
                 {% if request.user.is_authenticated %}
                 <form method="post" action="{% url 'logout' %}" hx-boost="true" hx-confirm="Are you sure you want to logout?">
