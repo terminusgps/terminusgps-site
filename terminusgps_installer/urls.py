@@ -13,15 +13,12 @@ urlpatterns = [
         name="job details",
     ),
     path(
-        "select-resource/", views.select_resource_view, name="select resource"
-    ),
-    path(
-        "units/<int:unit_id>/exec_cmd/",
+        "units/<int:unit_pk>/exec_cmd/",
         views.execute_command_view,
         name="execute command",
     ),
     path(
-        "units/<int:unit_id>/cmds/",
+        "units/<int:unit_pk>/cmds/",
         views.command_list_view,
         name="command list",
     ),

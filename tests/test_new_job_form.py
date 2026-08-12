@@ -35,6 +35,7 @@ def resource():
 def test_new_job_form_one_unit_redirects_and_saves(
     live_server, credentials, mock_api
 ):
+    """Fails if submitting the form with one unit doesn't save the job and redirect the client."""
     mock_api.core_search_items.return_value = {
         "totalItemsCount": 1,
         "items": [{"id": 1, "nm": "Unit #1"}],
@@ -64,6 +65,7 @@ def test_new_job_form_one_unit_redirects_and_saves(
 def test_new_job_form_non_digit_imei_adds_error(
     live_server, credentials, mock_api
 ):
+    """Fails if inputting an invalid IMEI number doesn't display the expected error message."""
     mock_api.core_search_items.return_value = {
         "totalItemsCount": 1,
         "items": [{"id": 1, "nm": "Unit #1"}],
@@ -92,6 +94,7 @@ def test_new_job_form_non_digit_imei_adds_error(
 def test_new_job_form_two_units_redirects_and_saves(
     live_server, credentials, mock_api
 ):
+    """Fails if submitting the form with two units doesn't save the job and redirect the client."""
     mock_api.core_search_items.return_value = {
         "totalItemsCount": 1,
         "items": [{"id": 1, "nm": "Unit #1"}],
@@ -124,6 +127,7 @@ def test_new_job_form_two_units_redirects_and_saves(
 @pytest.mark.e2e
 @pytest.mark.django_db
 def test_new_job_form_reset_button(live_server, credentials, mock_api):
+    """Fails if the reset button doesn't clear the form."""
     mock_api.core_search_items.return_value = {
         "totalItemsCount": 1,
         "items": [{"id": 1, "nm": "Unit #1"}],

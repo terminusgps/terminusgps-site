@@ -59,6 +59,11 @@ def test_installjob_str(install_jobs):
 
 
 @pytest.mark.django_db
+def test_installjob_get_absolute_url(install_jobs):
+    assert install_jobs[0].get_absolute_url() == "/install/jobs/1/details/"
+
+
+@pytest.mark.django_db
 def test_employee_str(employee):
     assert str(employee) == "testuser"
 
@@ -109,33 +114,13 @@ def test_wialonunitqueryset_with_wialon_commands(mock_api, install_jobs):
     WialonUnit.objects.create(job=install_jobs[0], imei="abc")
     mock_api.core_search_items.return_value = {
         "totalItemsCount": 1,
-        "items": [
-            {
-                "id": 1,
-                "nm": "Unit #1",
-                "cmds": [
-                    {
-                        "n": "Ignition On",
-                        "a": 1,
-                        "t": "vrt",
-                        "c": "custom_msg",
-                    },
-                    {
-                        "n": "Ignition Off",
-                        "a": 1,
-                        "t": "vrt",
-                        "c": "custom_msg",
-                    },
-                    {
-                        "n": "Location Query",
-                        "a": 1,
-                        "t": "vrt",
-                        "c": "custom_msg",
-                    },
-                ],
-            }
-        ],
+        "items": [{"id": 1, "nm": "Unit #1"}],
     }
+    mock_api.unit_get_command_definition_data.return_value = [
+        {"n": "Ignition On", "a": 1, "t": "vrt", "c": "custom_msg"},
+        {"n": "Ignition Off", "a": 1, "t": "vrt", "c": "custom_msg"},
+        {"n": "Location Query", "a": 1, "t": "vrt", "c": "custom_msg"},
+    ]
     result = WialonUnit.objects.with_wialon_commands()
     unit, commands = result[0][0], result[0][1]
     assert unit.pk == 1

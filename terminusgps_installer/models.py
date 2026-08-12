@@ -1,11 +1,17 @@
+import functools
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from terminusgps.constants import CommandFlag, CommandLinkType
 from terminusgps.wialon import (
+    execute_command,
     generate_locator_token,
     generate_locator_url,
+    get_command_definition_data,
     get_resources,
     get_session,
     get_unit_by_imei,
@@ -48,7 +54,7 @@ class WialonResourceQuerySet(models.QuerySet):
 class WialonUnitQuerySet(models.QuerySet):
     def with_wialon_commands(self, sid: str | None = None) -> list:
         unit_qs = self.filter()
-        commands = [unit._get_wialon_commands(sid=sid) for unit in unit_qs]
+        commands = [unit.get_wialon_commands(sid=sid) for unit in unit_qs]
         return list(zip(unit_qs, commands))
 
 
@@ -109,15 +115,44 @@ class WialonUnit(models.Model):
         self.save(update_fields=["locator_url"])
         return self.locator_url
 
+    def execute_wialon_command(
+        self,
+        command_name: str,
+        sid: str | None = None,
+        link_type: CommandLinkType = CommandLinkType.AUTO,
+        param: str = "",
+        timeout: int = 300,
+        flags: CommandFlag = CommandFlag.USE_ANY,
+    ) -> None:
+        unit_id = self.get_wialon_unit_id(sid=sid)
+        session = get_session(sid=sid)
+        execute_command(
+            session,
+            unit_id,
+            command_name,
+            link_type=link_type,
+            param=param,
+            timeout=timeout,
+            flags=flags,
+        )
+
+    @functools.lru_cache(maxsize=300)
+    def get_wialon_unit_id(self, sid: str | None = None) -> int:
+        session = get_session(sid=sid)
+        unit = get_unit_by_imei(session, self.imei)
+        return int(unit["id"])
+
+    @functools.lru_cache(maxsize=300)
+    def get_wialon_commands(self, sid: str | None = None) -> list[dict]:
+        unit_id = self.get_wialon_unit_id(sid=sid)
+        session = get_session(sid=sid)
+        return get_command_definition_data(session, unit_id)
+
+    @functools.lru_cache(maxsize=300)
     def _get_wialon_unit_name(self, sid: str | None = None) -> str:
         session = get_session(sid=sid)
         unit = get_unit_by_imei(session, self.imei)
         return unit["nm"]
-
-    def _get_wialon_commands(self, sid: str | None = None) -> list[dict]:
-        session = get_session(sid=sid)
-        unit = get_unit_by_imei(session, self.imei, flags=512)
-        return unit["cmds"]
 
 
 class InstallJob(models.Model):
@@ -149,3 +184,6 @@ class InstallJob(models.Model):
 
     def __str__(self) -> str:
         return f"InstallJob #{self.pk}"
+
+    def get_absolute_url(self):
+        return reverse("installer:job details", kwargs={"job_pk": self.pk})

@@ -6,11 +6,12 @@
         <p class="text-3xl text-gray-800 dark:text-gray-100">Job #{{ job.pk }}</p>
         <p class="text-lg text-gray-700 dark:text-gray-200">Use the blue buttons below to queue up a command.</p>
     </section>
-    <div id="units" class="@container flex flex-col gap-8 bg-stone-300 border border-stone-600 rounded p-8">
-        <div id="unit-{{ unit.pk }}">
-            <div class="flex flex-col">
-                <p class="text-gray-800 select-all font-semibold">{{ unit.name }}</p>
-                <p class="text-gray-700 select-all">{{ unit.imei }}</p>
+    <div id="units" class="@container flex flex-col gap-8">
+        {% for unit, commands in units %}
+        <div id="unit-{{ unit.pk }}" class="bg-stone-300 border border-stone-600 rounded p-8">
+            <div class="flex flex-col mb-4">
+                <p class="text-xl text-gray-800 select-all font-semibold">{{ unit.name }}</p>
+                <p class="text-lg text-gray-700 select-all">{{ unit.imei }}</p>
                 {% if unit.vin %}<p class="text-gray-700 select-all">{{ unit.vin }}</p>{% endif %}
                 <a href="{{ unit.locator_url }}" rel="nofollow" class="w-fit decoration text-terminus-red-200 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-100 hover:decoration-dotted dark:decoration-white">Locator</a>
             </div>
@@ -22,12 +23,15 @@
                     <p>Refresh Commands</p>
                 </button>
                 <div id="command-list" class="flex flex-col gap-4" hx-get="{% url 'installer:command list' unit.id %}" hx-target="this" hx-trigger="load once">
-                    {% for cmd in unit.cmds %}
-                    <div class="px-4 py-6 bg-gray-500 animate-pulse rounded"></div>
+                    {% for command in commands %}
+                    <div class="py-2 px-4 rounded bg-gray-400 animate-pulse">
+                        <p class="invisible">text</p>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
+        {% endfor %}
     </div>
 </article>
 {% endpartialdef main %}
