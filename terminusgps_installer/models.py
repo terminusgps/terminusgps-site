@@ -91,8 +91,10 @@ class WialonUnit(models.Model):
         on_delete=models.CASCADE,
         related_name="units",
     )
+    imei = models.CharField(
+        max_length=20, unique=True, validators=[validate_is_digit]
+    )
     name = models.CharField(blank=True, max_length=50)
-    imei = models.CharField(max_length=20, validators=[validate_is_digit])
     vin = models.CharField(blank=True, max_length=17)
     plate = models.CharField(blank=True, max_length=12)
     mileage = models.PositiveIntegerField(blank=True, default=0)
