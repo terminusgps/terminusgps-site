@@ -1,18 +1,7 @@
 import pytest
-from django.contrib.auth import get_user_model
 from django.urls import reverse
 
 
-@pytest.fixture(scope="module")
-def user(django_db_blocker, credentials):
-    with django_db_blocker.unblock():
-        user = get_user_model().objects.create_user(**credentials)
-    yield user
-    with django_db_blocker.unblock():
-        user.delete()
-
-
-@pytest.mark.django_db
 @pytest.mark.parametrize(
     "location,expected_template_name",
     [
@@ -38,7 +27,6 @@ def test_full_template_rendered_on_non_htmx_request(
     assert response.template_name == expected_template_name
 
 
-@pytest.mark.django_db
 @pytest.mark.parametrize(
     "location,expected_template_name",
     [
@@ -64,7 +52,6 @@ def test_full_template_rendered_on_boosted_htmx_request(
     assert response.template_name == expected_template_name
 
 
-@pytest.mark.django_db
 @pytest.mark.parametrize(
     "location,expected_template_name",
     [
@@ -90,7 +77,6 @@ def test_partial_template_rendered_on_htmx_request(
     assert response.template_name == expected_template_name
 
 
-@pytest.mark.django_db
 @pytest.mark.parametrize(
     "location",
     [
@@ -110,7 +96,6 @@ def test_get_allowed(client, location):
     assert response.status_code == 200
 
 
-@pytest.mark.django_db
 @pytest.mark.parametrize(
     "location",
     [
@@ -131,7 +116,6 @@ def test_vary_header(client, location):
     assert "HX-Request" in response.headers["Vary"]
 
 
-@pytest.mark.django_db
 @pytest.mark.parametrize(
     "location",
     [
