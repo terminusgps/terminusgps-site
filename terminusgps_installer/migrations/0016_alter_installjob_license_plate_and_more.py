@@ -4,20 +4,30 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('terminusgps_installer', '0015_installjob_license_plate_installjob_mileage_and_more'),
+        (
+            "terminusgps_installer",
+            "0015_installjob_license_plate_installjob_mileage_and_more",
+        )
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='installjob',
-            name='license_plate',
-            field=models.CharField(blank=True, help_text="Optional. Provide the vehicle's license plate number."),
+            model_name="installjob",
+            name="license_plate",
+            field=models.CharField(
+                blank=True,
+                help_text="Optional. Provide the vehicle's license plate number.",
+                default="",
+            ),
         ),
         migrations.AlterField(
-            model_name='installjob',
-            name='mileage',
-            field=models.IntegerField(blank=True, help_text="Optional. Provide the vehicle's current mileage."),
+            model_name="installjob",
+            name="mileage",
+            field=models.IntegerField(
+                blank=True,
+                help_text="Optional. Provide the vehicle's current mileage.",
+                default=0,
+            ),
         ),
     ]
