@@ -25,6 +25,8 @@ CSRF_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = ["https://*.terminusgps.com", "https://terminusgps.com"]
 
+CORS_ALLOWED_ORIGINS = ["https://terminusgps-site-bucket.s3.amazonaws.com"]
+
 DEBUG = False
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -175,12 +177,14 @@ INSTALLED_APPS = [
     "django.forms",
     "formset",
     "phonenumber_field",
+    "corsheaders",
     "terminusgps_site.apps.TerminusgpsSiteConfig",
     "terminusgps_installer.apps.TerminusgpsInstallerConfig",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.cache.UpdateCacheMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
