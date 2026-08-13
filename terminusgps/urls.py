@@ -9,6 +9,7 @@ urlpatterns = [
     path(
         "jsi18n/",
         cache_page(3600)(JavaScriptCatalog.as_view(packages=["formset"])),
+        name="javascript-catalog",
     ),
     path("", include("terminusgps_site.urls")),
     path(
