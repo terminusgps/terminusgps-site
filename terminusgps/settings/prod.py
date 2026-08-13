@@ -10,6 +10,7 @@ ALLOWED_HOSTS = [
     "terminusgps.com",
     ".terminusgps.com",
     ".elb.amazonaws.com",
+    ".s3.amazonaws.com",
     ".awswaf.com",
     socket.gethostbyname(socket.gethostname()),
 ]
