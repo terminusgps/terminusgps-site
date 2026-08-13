@@ -8,7 +8,7 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = [
     "terminusgps.com",
-    "app.terminusgps.com",
+    ".terminusgps.com",
     ".elb.amazonaws.com",
     ".awswaf.com",
     socket.gethostbyname(socket.gethostname()),
@@ -172,6 +172,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.forms",
+    "formset",
     "phonenumber_field",
     "terminusgps_site.apps.TerminusgpsSiteConfig",
     "terminusgps_installer.apps.TerminusgpsInstallerConfig",
