@@ -97,29 +97,32 @@ def faq_view(request: HttpRequest) -> HttpResponse:
 
 @require_GET
 def source_code_view(request: HttpRequest) -> HttpResponsePermanentRedirect:
-    url = "https://github.com/terminusgps/terminusgps-site/"
-    return redirect(url, permanent=True)
+    return redirect(
+        "https://github.com/terminusgps/terminusgps-site/", permanent=True
+    )
 
 
 @require_GET
 def platform_view(request: HttpRequest) -> HttpResponsePermanentRedirect:
-    url = "https://hosting.terminusgps.com/"
-    return redirect(url, permanent=True)
+    return redirect("https://hosting.terminusgps.com/", permanent=True)
 
 
 @require_GET
 def cameras_view(request: HttpRequest) -> HttpResponsePermanentRedirect:
-    url = "https://camera.terminusgps.com/"
-    return redirect(url, permanent=True)
+    return redirect("https://camera.terminusgps.com/", permanent=True)
 
 
 @require_GET
 def ios_app_view(request: HttpRequest) -> HttpResponsePermanentRedirect:
-    url = "https://apps.apple.com/us/app/terminus-gps-mobile/id1419439009"
-    return redirect(url, permanent=True)
+    return redirect(
+        "https://apps.apple.com/us/app/terminus-gps-mobile/id1419439009",
+        permanent=True,
+    )
 
 
 @require_GET
 def android_app_view(request: HttpRequest) -> HttpResponsePermanentRedirect:
-    url = "https://play.google.com/store/apps/details?id=com.terminusgps.track&pcampaignid=web_share"
-    return redirect(url, permanent=True)
+    return redirect(
+        "https://play.google.com/store/apps/details?id=com.terminusgps.track&pcampaignid=web_share",
+        permanent=True,
+    )
