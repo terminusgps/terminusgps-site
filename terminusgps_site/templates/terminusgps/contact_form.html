@@ -2,38 +2,38 @@
 {% partialdef main %}
 <form method="post" class="@container flex flex-col gap-4" hx-post="{% url 'contact form' %}" hx-target="this">
     {% csrf_token %}
-    <div id="id_{{ form.name.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
+    <div id="{{ form.name.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
         {{ form.name }}
         <label for="{{ form.name.id_for_label }}" class="order-first font-semibold peer-user-valid:text-green-800 peer-user-invalid:text-red-800 dark:peer-user-invalid:text-red-400 dark:peer-user-valid:text-green-400">{{ form.name.label }}<span class="text-terminus-red-700">*</span></label>
-        <div id="id_{{ form.name.id_for_label }}_helptext" class="peer-user-valid:text-green-800 peer-user-invalid:text-red-800 dark:peer-user-valid:text-green-400 dark:peer-user-invalid:text-red-400">
+        <div id="{{ form.name.id_for_label }}_helptext" class="peer-user-valid:text-green-800 peer-user-invalid:text-red-800 dark:peer-user-valid:text-green-400 dark:peer-user-invalid:text-red-400">
             <p>{{ form.name.help_text }}</p>
         </div>
         {% if form.name.errors %}
-        <div id="id_{{ form.name.id_for_label }}_errors" class="text-red-800 dark:text-red-400">
+        <div id="{{ form.name.id_for_label }}_errors" class="text-red-800 dark:text-red-400">
             {{ form.name.errors }}
         </div>
         {% endif %}
     </div>
-    <div id="id_{{ form.email.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
+    <div id="{{ form.email.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
         {{ form.email }}
         <label for="{{ form.email.id_for_label }}" class="order-first font-semibold peer-user-valid:text-green-800 peer-user-invalid:text-red-800 dark:peer-user-invalid:text-red-400 dark:peer-user-valid:text-green-400">{{ form.email.label }}<span class="text-terminus-red-700">*</span></label>
-        <div id="id_{{ form.email.id_for_label }}_helptext" class="peer-user-valid:text-green-800 peer-user-invalid:text-red-800 dark:peer-user-valid:text-green-400 dark:peer-user-invalid:text-red-400">
+        <div id="{{ form.email.id_for_label }}_helptext" class="peer-user-valid:text-green-800 peer-user-invalid:text-red-800 dark:peer-user-valid:text-green-400 dark:peer-user-invalid:text-red-400">
             <p>{{ form.email.help_text }}</p>
         </div>
         {% if form.email.errors %}
-        <div id="id_{{ form.email.id_for_label }}_errors" class="text-red-800 dark:text-red-400">
+        <div id="{{ form.email.id_for_label }}_errors" class="text-red-800 dark:text-red-400">
             {{ form.email.errors }}
         </div>
         {% endif %}
     </div>
-    <div id="id_{{ form.message.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
+    <div id="{{ form.message.id_for_label }}_container" class="flex flex-col gap-2 min-w-0">
         {{ form.message }}
         <label for="{{ form.message.id_for_label }}" class="order-first font-semibold peer-user-valid:text-green-800 peer-user-invalid:text-red-800 dark:peer-user-invalid:text-red-400 dark:peer-user-valid:text-green-400">{{ form.message.label }}<span class="text-terminus-red-700">*</span></label>
-        <div id="id_{{ form.message.id_for_label }}_helptext" class="peer-user-valid:text-green-800 peer-user-invalid:text-red-800 dark:peer-user-valid:text-green-400 dark:peer-user-invalid:text-red-400">
+        <div id="{{ form.message.id_for_label }}_helptext" class="peer-user-valid:text-green-800 peer-user-invalid:text-red-800 dark:peer-user-valid:text-green-400 dark:peer-user-invalid:text-red-400">
             <p>{{ form.message.help_text }}</p>
         </div>
         {% if form.message.errors %}
-        <div id="id_{{ form.message.id_for_label }}_errors" class="text-red-800 dark:text-red-400">
+        <div id="{{ form.message.id_for_label }}_errors" class="text-red-800 dark:text-red-400">
             {{ form.message.errors }}
         </div>
         {% endif %}

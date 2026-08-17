@@ -1,14 +1,14 @@
 {% extends "terminusgps/layout.html" %}
 {% block title %}Contact{% endblock title %}
 {% partialdef main %}
-<article class="@container p-8 flex flex-col gap-8">
-    <section id="header" class="flex flex-col gap-2">
-        <p class="text-4xl @2xl:text-6xl font-bold text-gray-800 dark:text-gray-100">Get In Touch</p>
-        <p class="text-xl @2xl:text-2xl font-semibold text-gray-600 dark:text-gray-300">Ready to get started?</p>
-    </section>
-    <section class="p-8 bg-stone-100 border-stone-300 border-2 rounded drop-shadow-sm dark:bg-gray-600 dark:border-gray-400">
+<article title="Terminus GPS Features" class="@container p-8 flex flex-col gap-8">
+    <div class="flex flex-col gap-2">
+        <h1 class="text-4xl @2xl:text-6xl font-bold text-gray-800 dark:text-gray-100">Get In Touch</h1>
+        <h2 class="text-xl @2xl:text-2xl font-semibold text-gray-600 dark:text-gray-300">Ready to get started?</h2>
+    </div>
+    <div class="p-8 bg-stone-100 border-stone-300 border-2 rounded drop-shadow-sm dark:bg-gray-600 dark:border-gray-400">
         {% include "terminusgps/contact_form.html#main" with form=form %}
-    </section>
+    </div>
 </article>
 {% endpartialdef main %}
 {% block content %}
