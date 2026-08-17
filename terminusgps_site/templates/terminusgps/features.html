@@ -2,62 +2,62 @@
 {% load static %}
 {% block title %}Features{% endblock title %}
 {% partialdef main %}
-<article class="@container p-8 flex flex-col gap-8">
-    <section id="header" class="flex flex-col gap-2">
-        <p class="text-4xl @2xl:text-6xl font-bold text-gray-800 dark:text-gray-100">What Do You Get?</p>
-        <p class="text-xl @2xl:text-2xl font-semibold text-gray-600 dark:text-gray-300">A GPS tracking solution for <em>everyone</em>.</p>
-    </section>
-    <div class="@container -mx-8">
-        <section class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
-            <img class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/wialon/fleet-digitalization.jpg' %}">
+<article title="Terminus GPS Features" class="@container p-8 flex flex-col gap-8">
+    <div class="flex flex-col gap-2">
+        <h1 class="text-4xl @2xl:text-6xl font-bold text-gray-800 dark:text-gray-100">What Do You Get?</h1>
+        <h2 class="text-xl @2xl:text-2xl font-semibold text-gray-600 dark:text-gray-300">A GPS tracking solution for <em>everyone</em>.</h2>
+    </div>
+    <div class="-mx-8">
+        <article title="One Platform To Digitalize Them All" class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
+            <img alt="Multiple 18-wheelers in a busy loading bay" class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/wialon/fleet-digitalization.jpg' %}">
             <div class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700 dark:text-gray-200">
-                <p class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">One Platform to Digitalize Them All</p>
+                <h2 class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">One Platform to Digitalize Them All</h2>
                 <div class="flex flex-col gap-4 @md:text-lg">
                     <p>Terminus GPS illuminates every part of your fleet in a simple, easy-to-use, always online interface. From trucks and trailers to drivers and passengers, every individual part of your fleet is conveniently digitalized.</p>
                     <p>Can't access a desktop computer? Terminus GPS is also available as native <a href="{% url 'ios app' %}" rel="nofollow" class="w-fit decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-600 hover:decoration-dotted dark:decoration-white dark:text-red-200 hover:dark:text-red-50">iOS</a> and <a href="{% url 'android app' %}" rel="nofollow" class="w-fit decoration text-terminus-red-800 underline decoration-terminus-black underline-offset-4 hover:text-terminus-red-600 hover:decoration-dotted dark:decoration-white dark:text-red-200 hover:dark:text-red-50">Android</a> applications.</p>
                 </div>
             </div>
-        </section>
-        <section class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
-            <img class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/wialon/fleet-digitalization-notifications.jpg' %}">
+        </article>
+        <article title="Live Alerts Delivered Directly to Your Phone" class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
+            <img alt="An 18-wheeler driving towards the camera on a rural road" class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/wialon/fleet-digitalization-notifications.jpg' %}">
             <div class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700 dark:text-gray-200">
-                <p class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">Live Alerts Delivered Directly to Your Phone</p>
+                <h2 class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">Live Alerts Delivered Directly to Your Phone</h2>
                 <div class="flex flex-col gap-4 @md:text-lg">
                     <p>Maintenance coming due? Refueling needed before the next leg? Engine temperature running way too high?</p>
                     <p>Terminus GPS turns your mobile device into an always-on lifeline to your fleet. Stay up-to-date with live sms or text-to-speech voice notifications configured specifically for <em>your</em> fleets' needs.</p>
                 </div>
             </div>
-        </section>
-        <section class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
-            <img class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/wialon/fuel-management.jpg' %}">
+        </article>
+        <article title="Fuel Micro, Managed" class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
+            <img alt="Multiple 18-wheelers refueling at a truck stop" class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/wialon/fuel-management.jpg' %}">
             <div class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700 dark:text-gray-200">
-                <p class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">Fuel Micro, Managed</p>
+                <h2 class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">Fuel Micro, Managed</h2>
                 <div class="flex flex-col gap-4 @md:text-lg">
                     <p>You shouldn't be in the dark when it comes to your fleets' fuel levels. Every vehicle's fuel level is constantly tracked and logged, illuminating all aspects of your fleet's fuel management.</p>
                     <p>Stay on top of fuel requirements and mitigate fuel theft, keeping your business operating smoothly and efficiently without lifting a finger.</p>
                 </div>
             </div>
-        </section>
-        <section class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
-            <img class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/wialon/geofencing.jpg' %}">
+        </article>
+        <article title="Still on the Geofence?" class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
+            <img alt="A busy loading bay with an example geofence overlaid" class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/wialon/geofencing.jpg' %}">
             <div class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700 dark:text-gray-200">
-                <p class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">Still on the Geofence?</p>
+                <h2 class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">Still on the Geofence?</h2>
                 <div class="flex flex-col gap-4 @md:text-lg">
                     <p>Need to know <em>exactly</em> when a vehicle enters a jobsite, the office or the shop?</p>
                     <p>Draw custom geofence zones in the platform, areas of Earth's surface you configure in our convenient web interface, and get informed instantly when a vehicle enters or exits that location.</p>
                 </div>
             </div>
-        </section>
-        <section class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
-            <img class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/wialon/route-optimization.jpg' %}">
+        </article>
+        <article title="Optimal Routing with One Click" class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
+            <img alt="Top-down 18-wheeler driving from right to left on an empty road" class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/wialon/route-optimization.jpg' %}">
             <div class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700 dark:text-gray-200">
-                <p class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">Optimal Routing With One Click</p>
+                <h2 class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">Optimal Routing With One Click</h2>
                 <div class="flex flex-col gap-4 @md:text-lg">
                     <p>Terminus GPS algorithmically optimizes your fleets' routes so you can focus on actually running your business.</p>
                     <p>Define routes in the Terminus GPS platform, scheduled rides with configured checkpoints. Once created, you may generate reports, optimize for fuel efficiency and monitor route progress of those routes in the same, convenient interface.</p>
                 </div>
             </div>
-        </section>
+        </article>
     </div>
 </article>
 {% endpartialdef main %}
