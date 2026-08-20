@@ -35,7 +35,7 @@ def home_view(request: HttpRequest) -> HttpResponse:
     return TemplateResponse(request, request.template_name)
 
 
-@method_decorator(cache_control(max_age=300), name="dispatch")
+@method_decorator(never_cache, name="dispatch")
 @method_decorator(login_required, name="dispatch")
 class NewJobFormView(FormCollectionView):
     collection_class = InstallJobCollection
