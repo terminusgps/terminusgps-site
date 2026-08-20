@@ -35,7 +35,7 @@
         @apply text-lg
     }
     .formset-text-input,.formset-number-input,.formset-textarea,.formset-select {
-        @apply p-2 border border-current bg-stone-50 rounded w-full
+        @apply p-2 border border-current bg-stone-50 rounded w-full dark:bg-gray-800
     }
     .formset-help-text {
         @apply text-gray-700 dark:text-gray-300
