@@ -10,6 +10,8 @@ ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".awswaf.com"]
 
 ADMINS = ["pspeckman@terminusgps.com", "blake@terminusgps.com"]
 
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
+
 DEBUG = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -30,7 +32,7 @@ LOGIN_URL = "/accounts/login/"
 
 MEDIA_ROOT = BASE_DIR / "media"
 
-MEDIA_URL = "media/"
+MEDIA_URL = "/media/"
 
 MERCHANT_AUTH_LOGIN_ID = os.getenv("MERCHANT_AUTH_LOGIN_ID")
 
@@ -54,7 +56,7 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 
 TIME_ZONE = "America/Chicago"
 
@@ -65,6 +67,25 @@ USE_TZ = True
 WSGI_APPLICATION = "terminusgps.wsgi.application"
 
 WIALON_TOKEN = os.getenv("WIALON_TOKEN")
+
+WAGTAIL_SITE_NAME = "Terminus GPS"
+
+WAGTAILADMIN_BASE_URL = "http://localhost:8000"
+
+WAGTAILDOCS_EXTENSIONS = [
+    "csv",
+    "docx",
+    "key",
+    "odt",
+    "pdf",
+    "pptx",
+    "rtf",
+    "txt",
+    "xlsx",
+    "zip",
+]
+
+WAGTAILIMAGES_EXTENSIONS = ["avif", "gif", "jpg", "jpeg", "png", "webp", "svg"]
 
 MESSAGE_TAGS = {
     message_constants.DEBUG: "p-2 bg-gray-50 text-gray-700 border border-current rounded",
@@ -101,6 +122,22 @@ TASKS = {
 }
 
 INSTALLED_APPS = [
+    "home.apps.HomeConfig",
+    "wagtail.contrib.forms",
+    "wagtail.contrib.redirects",
+    "wagtail.contrib.settings",
+    "wagtail.embeds",
+    "wagtail.sites",
+    "wagtail.users",
+    "wagtail.snippets",
+    "wagtail.documents",
+    "wagtail.images",
+    "wagtail.search",
+    "wagtail.admin",
+    "wagtail",
+    "modelcluster",
+    "taggit",
+    "django.forms",
     "django.contrib.admin",
     "django.contrib.admindocs",
     "django.contrib.auth",
@@ -109,11 +146,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.sessions",
     "django.contrib.staticfiles",
-    "django.forms",
-    "phonenumber_field",
-    "formset",
-    "terminusgps_site.apps.TerminusgpsSiteConfig",
-    "terminusgps_installer.apps.TerminusgpsInstallerConfig",
 ]
 
 MIDDLEWARE = [
@@ -125,6 +157,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "wagtail.contrib.redirects.middleware.RedirectMiddleware",
 ]
 
 LOGGING = {
@@ -172,6 +205,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "wagtail.contrib.settings.context_processors.settings",
             ]
         },
     }
