@@ -9,9 +9,7 @@ authors = [
     { name = "Blake Nall", email = "blake@terminusgps.com" },
 ]
 dependencies = [
-    "django==6.0.7",
-    "django-formset>=2.2.4",
-    "django-phonenumber-field[phonenumbers]>=8.4.0",
+    "django==6.1.1",
     "pillow==12.3.0",
     "python-wialon>=1.2.4",
     "wagtail>=8.0",
@@ -67,11 +65,11 @@ skip-magic-trailing-comma = true
 
 [dependency-groups]
 deploy = [
-    "django-storages[s3]>=1.14.4",
-    "gunicorn>=23.0.0",
-    "psycopg>=3.3.4",
-    "psycopg2-binary>=2.9.10",
-    "certifi>=2026.6.17",
+    "django-storages[s3]>=1.14.6",
+    "gunicorn>=26.2.0",
+    "psycopg>=3.3.5",
+    "psycopg2-binary>=2.9.13",
+    "certifi>=2026.7.22",
     "django-redis>=7.0.0",
     "django-cors-headers>=4.9.0",
 ]
