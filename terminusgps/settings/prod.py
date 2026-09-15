@@ -161,7 +161,18 @@ CACHES = {
 }
 
 STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": os.getenv(
+                "AWS_S3_BUCKET_NAME", "terminusgps-site-bucket"
+            ),
+            "location": os.getenv("AWS_S3_BUCKET_LOCATION", "uploads/"),
+            "region_name": os.getenv("AWS_S3_BUCKET_REGION", "us-east-1"),
+            "verify": os.getenv("AWS_S3_CERT_PATH", False),
+            "query_auth": False,
+        },
+    },
     "staticfiles": {
         "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {
@@ -171,6 +182,7 @@ STORAGES = {
             "location": os.getenv("AWS_S3_BUCKET_LOCATION", "static/"),
             "region_name": os.getenv("AWS_S3_BUCKET_REGION", "us-east-1"),
             "verify": os.getenv("AWS_S3_CERT_PATH", False),
+            "query_auth": False,
         },
     },
 }
@@ -184,6 +196,7 @@ TASKS = {
 
 INSTALLED_APPS = [
     "home.apps.HomeConfig",
+    "storages",
     "corsheaders",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
