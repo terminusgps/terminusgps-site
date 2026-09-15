@@ -170,7 +170,6 @@ STORAGES = {
             "location": os.getenv("AWS_S3_BUCKET_LOCATION", "uploads/"),
             "region_name": os.getenv("AWS_S3_BUCKET_REGION", "us-east-1"),
             "verify": os.getenv("AWS_S3_CERT_PATH", False),
-            "query_auth": False,
         },
     },
     "staticfiles": {
@@ -182,7 +181,6 @@ STORAGES = {
             "location": os.getenv("AWS_S3_BUCKET_LOCATION", "static/"),
             "region_name": os.getenv("AWS_S3_BUCKET_REGION", "us-east-1"),
             "verify": os.getenv("AWS_S3_CERT_PATH", False),
-            "query_auth": False,
         },
     },
 }
