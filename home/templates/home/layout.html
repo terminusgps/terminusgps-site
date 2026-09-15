@@ -1,0 +1,82 @@
+{% load cache static wagtailsettings_tags wagtailcore_tags navigation_tags %}
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <link rel="icon" href="{% static 'terminusgps/favicon.ico' %}">
+        <link rel="preload" href="{% static 'terminusgps/css/output.css' %}" as="style">
+        <link rel="preload" href="{% static 'terminusgps/js/htmx.min.js' %}" as="script">
+        <link rel="preload" href="{% static 'terminusgps/icon/logo-waypoint.svg' %}" as="image">
+        <link rel="preload" href="{% static 'terminusgps/icon/logo-text.svg' %}" as="image">
+        {% if request.in_preview_panel %}
+        <base target="_blank">
+        {% endif %}
+        <link rel="stylesheet" href="{% static 'terminusgps/css/output.css' %}">
+        <script src="{% static 'terminusgps/js/htmx.min.js' %}" defer></script>
+        <title>
+            {% block title %}
+            {% if page.seo_title %}{{ page.seo_title }}{% else %}{{ page.title }}{% endif %}
+            {% endblock title %}
+            {% block title_suffix %}
+            {% wagtail_site as current_site %}
+            {% if current_site and current_site.site_name %} | {{ current_site.site_name }}{% endif %}
+            {% endblock title_suffix %}
+        </title>
+    </head>
+    {% get_site_root as site_root %}
+    <body class="text-gray-800 bg-stone-200 dark:text-gray-100 dark:bg-gray-700">
+        <nav class="bg-stone-100 border-b border-stone-200 drop-shadow dark:border-gray-500 dark:bg-gray-600 print:hidden">
+            <div class="flex justify-between items-center">
+                <div class="flex justify-between items-center">
+                    <a href="{% pageurl site_root %}" class="group flex items-center space-x-1 w-fit">
+                        <img alt="Black waypoint with a circular head, road running upwards along its center" src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="animate-coin-slow size-16 group-hover:animate-none"/>
+                        <img alt="Terminus GPS" src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24"/>
+                    </a>
+                </div>
+                {% if request.user.is_authenticated %}
+                <a class="mx-4 p-2 border-2 rounded" href="/cms/">
+                    <div class="flex items-center gap-2 font-semibold">
+                        <p>Admin</p>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                    </div>
+                </a>
+                {% endif %}
+            </div>
+        </nav>
+        <main class="@container">
+            {% block content %}{% endblock content %}
+        </main>
+        <footer class="bottom-0 left-0 z-20 w-full drop-shadow border-t border-stone-200 bg-stone-100 p-4 shadow-sm md:flex md:items-center md:justify-between md:p-6 dark:bg-gray-600 dark:border-gray-500 print:hidden">
+            {% get_footer_text %}
+            {% with repository_url=settings.home.ExternalURLSettings.repository_url %}
+            <ul class="mt-3 flex flex-wrap items-center text-sm sm:mt-0">
+                {% for menuitem in site_root.get_children.live.in_menu %}
+                <li>
+                    <a
+                        href="{% pageurl menuitem %}"
+                        class="me-4 hover:underline md:me-6"
+                    >
+                        {{ menuitem.title }}
+                    </a>
+                </li>
+                {% endfor %}
+                {% if repository_url %}
+                <li>
+                    <a
+                        hx-boost="false"
+                        rel="external"
+                        href="{{ repository_url }}"
+                        class="me-4 hover:underline md:me-6"
+                    >
+                        Source
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+            {% endwith %}
+        </footer>
+    </body>
+</html>

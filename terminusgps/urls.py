@@ -1,19 +1,23 @@
+import wagtail.admin.urls
+import wagtail.documents.urls
+import wagtail.urls
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from django.views.decorators.cache import cache_page
-from django.views.i18n import JavaScriptCatalog
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),
-    path(
-        "jsi18n/",
-        cache_page(3600)(JavaScriptCatalog.as_view(packages=["formset"])),
-        name="javascript-catalog",
-    ),
-    path("", include("terminusgps_site.urls")),
-    path(
-        "install/",
-        include("terminusgps_installer.urls", namespace="installer"),
-    ),
+    path("cms/", include(wagtail.admin.urls)),
+    path("documents/", include(wagtail.documents.urls)),
+    path("", include(wagtail.urls)),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
+    )
+    urlpatterns += static(
+        settings.STATIC_URL, document_root=settings.STATIC_ROOT
+    )

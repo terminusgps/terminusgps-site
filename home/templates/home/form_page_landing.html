@@ -1,0 +1,21 @@
+{% extends "home/layout.html" %}
+{% load wagtailcore_tags %}
+{% block content %}
+<article class="@container @md:text-lg p-8 flex flex-col gap-8">
+    {% if page.header_title or page.header_text %}
+    <div class="flex flex-col gap-2">
+        {% if page.header_title %}
+        <h1 class="text-4xl @2xl:text-6xl font-bold text-gray-800 dark:text-gray-100">
+            {{ page.header_title }}
+        </h1>
+        {% endif %}
+        {% if page.header_subtitle %}
+        <h2 class="text-xl @2xl:text-2xl font-semibold text-gray-600 dark:text-gray-300">
+            {{ page.header_subtitle }}
+        </h2>
+        {% endif %}
+    </div>
+    {% endif %}
+    <p>{{ page.thank_you_text|richtext }}</p>
+</article>
+{% endblock content %}
