@@ -8,7 +8,7 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".awswaf.com"]
 
-ADMINS = ["pspeckman@terminusgps.com", "blake@terminusgps.com"]
+ADMINS = ["pspeckman3@terminusgps.com", "blake@terminusgps.com"]
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
 
@@ -25,10 +25,6 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 INTERNAL_IPS = ["127.0.0.1"]
 
 LANGUAGE_CODE = "en-us"
-
-LOGIN_REDIRECT_URL = "/"
-
-LOGIN_URL = "/accounts/login/"
 
 MEDIA_ROOT = BASE_DIR / "media"
 
