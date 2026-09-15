@@ -1,5 +1,5 @@
 {% extends "home/layout.html" %}
-{% load static wagtailadmin_tags %}
+{% load static wagtailcore_tags wagtailadmin_tags wagtailimages_tags %}
 {% block title %}Home{% endblock title %}
 {% block content %}
 <div class="py-8 px-4">
@@ -50,32 +50,35 @@
 </div>
 <div class="@container">
     <div class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
-        <img class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/online-tracking.jpg' %}" alt="A black 18-wheeler on a highway, Terminus GPS tracking platform component overlaid.">
-        <article title="For Your Fleet" class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700 dark:text-gray-200">
-            <h2 class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">For Your Fleet</h2>
+        <div class="@4xl:group-even:order-last *:max-h-128 *:w-full *:object-cover">
+            {% picture page.featured_section_1_image width-1000 %}
+        </div>
+        <article title="{{ page.featured_section_1_headline }}" class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700 dark:text-gray-200">
+            <h2 class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">{{ page.featured_section_1_headline }}</h2>
             <div class="flex flex-col gap-4 @md:text-lg">
-                <p>Terminus GPS scales alongside your company, streamlining fleet management in a single, convenient, always-online platform.</p>
-                <p>You'll be able to see where your vehicles are, how your drivers are behaving and what maintenance is upcoming, all at a glance.</p>
+                {{ page.featured_section_1_text|richtext }}
             </div>
         </article>
     </div>
     <div class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
-        <img class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/sedan.jpg' %}" alt="A young woman leaning against the driver side of a vehicle jinging car keys next to her face.">
-        <article title="For Your Family" class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700 dark:text-gray-200">
-            <h2 class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">For Your Family</h2>
+        <div class="@4xl:group-even:order-last *:max-h-128 *:w-full *:object-cover">
+            {% picture page.featured_section_2_image width-1000 %}
+        </div>
+        <article title="{{ page.featured_section_2_headline }}" class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700 dark:text-gray-200">
+            <h2 class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">{{ page.featured_section_2_headline }}</h2>
             <div class="flex flex-col gap-4 @md:text-lg">
-                <p>Whether you're monitoring a teen or an elderly driver, Terminus GPS allows you to <em>always know where yours are</em>.</p>
-                <p>We work directly with you to make the software fit your needs, providing you top-of-the-line, commercial-grade GPS tracking technology without the headache.</p>
+                {{ page.featured_section_2_text|richtext }}
             </div>
         </article>
     </div>
     <div class="group flex flex-col @4xl:grid @4xl:grid-cols-2">
-        <img class="@4xl:group-even:order-last max-h-128 w-full object-cover" src="{% static 'terminusgps/img/video-telematics-square.jpg' %}" alt="An over-the-shoulder shot of a man driving down a mountain pass.">
-        <article title="Fleet AI Dash Cameras" class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700 dark:text-gray-200">
-            <h2 class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">Fleet AI Dash Cameras</h2>
+        <div class="@4xl:group-even:order-last *:max-h-128 *:w-full *:object-cover">
+            {% picture page.featured_section_3_image width-1000 %}
+        </div>
+        <article title="{{ page.featured_section_3_headline }}" class="p-4 flex flex-col gap-4 @md:p-8 text-gray-700 dark:text-gray-200">
+            <h2 class="font-semibold text-2xl @md:text-4xl text-gray-800 dark:text-gray-100">{{ page.featured_section_3_headline }}</h2>
             <div class="flex flex-col gap-4 @md:text-lg">
-                <p>Add an extra layer of accountability with our Fleet AI camera solutions.</p>
-                <p>Front and dual-facing cameras capture video evidence in real-time, protecting your drivers from false claims, reducing insurance liability and giving you visibility into exactly what happened on every trip.</p>
+                {{ page.featured_section_3_text|richtext }}
             </div>
         </article>
     </div>

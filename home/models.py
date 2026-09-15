@@ -36,7 +36,7 @@ class FooterText(
     TranslatableMixin,
     models.Model,
 ):
-    body = RichTextField()
+    body = RichTextField(blank=True)
 
     panels = [FieldPanel("body"), PublishingPanel()]
 
@@ -69,23 +69,84 @@ class HomePage(Page):
         verbose_name=_("Call to Action Link"),
         help_text=_("Choose a page to link to for the Call to Action"),
     )
+    featured_section_1_image = models.ForeignKey(
+        "wagtailimages.Image",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    featured_section_1_headline = models.CharField(blank=True)
+    featured_section_1_text = RichTextField(blank=True)
+    featured_section_2_image = models.ForeignKey(
+        "wagtailimages.Image",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    featured_section_2_headline = models.CharField(blank=True)
+    featured_section_2_text = RichTextField(blank=True)
+    featured_section_3_image = models.ForeignKey(
+        "wagtailimages.Image",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    featured_section_3_headline = models.CharField(blank=True)
+    featured_section_3_text = RichTextField(blank=True)
 
     content_panels = Page.content_panels + [
         MultiFieldPanel(
             [FieldPanel("cta_text"), FieldPanel("cta_link")],
             heading=_("Call to Action section"),
-        )
+        ),
+        MultiFieldPanel(
+            [
+                MultiFieldPanel(
+                    [
+                        FieldPanel("featured_section_1_image"),
+                        FieldPanel("featured_section_1_headline"),
+                        FieldPanel("featured_section_1_text"),
+                    ]
+                ),
+                MultiFieldPanel(
+                    [
+                        FieldPanel("featured_section_2_image"),
+                        FieldPanel("featured_section_2_headline"),
+                        FieldPanel("featured_section_2_text"),
+                    ]
+                ),
+                MultiFieldPanel(
+                    [
+                        FieldPanel("featured_section_3_image"),
+                        FieldPanel("featured_section_3_headline"),
+                        FieldPanel("featured_section_3_text"),
+                    ]
+                ),
+            ],
+            heading=_("Featured homepage sections"),
+        ),
     ]
 
 
 class StandardPage(Page):
     header_title = models.CharField(blank=True)
     header_subtitle = models.CharField(blank=True)
+    image = models.ForeignKey(
+        "wagtailimages.Image",
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
     body = RichTextField(blank=True)
 
     content_panels = Page.content_panels + [
         FieldPanel("header_title"),
         FieldPanel("header_subtitle"),
+        FieldPanel("image"),
         FieldPanel("body"),
     ]
 

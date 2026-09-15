@@ -28,10 +28,22 @@
     <body class="text-gray-800 bg-stone-200 dark:text-gray-100 dark:bg-gray-700">
         <nav class="bg-stone-100 border-b border-stone-200 drop-shadow dark:border-gray-500 dark:bg-gray-600 print:hidden">
             <div class="flex justify-between items-center">
-                <a href="{% pageurl site_root %}" class="group flex items-center space-x-1 w-fit">
-                    <img alt="Black waypoint with a circular head, road running upwards along its center" src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="animate-coin-slow size-16 group-hover:animate-none"/>
-                    <img alt="Terminus GPS" src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24"/>
+                <div class="flex justify-between items-center">
+                    <a href="{% pageurl site_root %}" class="group flex items-center space-x-1 w-fit">
+                        <img alt="Black waypoint with a circular head, road running upwards along its center" src="{% static 'terminusgps/icon/logo-waypoint.svg' %}" class="animate-coin-slow size-16 group-hover:animate-none"/>
+                        <img alt="Terminus GPS" src="{% static 'terminusgps/icon/logo-text.svg' %}" class="size-24"/>
+                    </a>
+                </div>
+                {% if request.user.is_authenticated %}
+                <a class="mx-4 p-2 border-2 rounded" href="/cms/">
+                    <div class="flex items-center gap-2 font-semibold">
+                        <p>Admin</p>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                        </svg>
+                    </div>
                 </a>
+                {% endif %}
             </div>
         </nav>
         <main class="@container">
