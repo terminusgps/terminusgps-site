@@ -371,6 +371,9 @@ wheels = [
 ]
 
 [package.optional-dependencies]
+boto3 = [
+    { name = "boto3" },
+]
 s3 = [
     { name = "boto3" },
 ]
@@ -1243,7 +1246,7 @@ deploy = [
     { name = "certifi" },
     { name = "django-cors-headers" },
     { name = "django-redis" },
-    { name = "django-storages", extra = ["s3"] },
+    { name = "django-storages", extra = ["boto3", "s3"] },
     { name = "gunicorn" },
     { name = "psycopg" },
     { name = "psycopg2-binary" },
@@ -1271,7 +1274,7 @@ deploy = [
     { name = "certifi", specifier = ">=2026.7.22" },
     { name = "django-cors-headers", specifier = ">=4.9.0" },
     { name = "django-redis", specifier = ">=7.0.0" },
-    { name = "django-storages", extras = ["s3"], specifier = ">=1.14.6" },
+    { name = "django-storages", extras = ["boto3", "s3"], specifier = ">=1.14.6" },
     { name = "gunicorn", specifier = ">=26.2.0" },
     { name = "psycopg", specifier = ">=3.3.5" },
     { name = "psycopg2-binary", specifier = ">=2.9.13" },

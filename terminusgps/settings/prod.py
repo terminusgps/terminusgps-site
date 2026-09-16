@@ -17,13 +17,9 @@ ALLOWED_HOSTS = [
 
 ADMINS = ["pspeckman3@terminusgps.com", "blake@terminusgps.com"]
 
-AWS_S3_CUSTOM_DOMAIN = "terminusgps-site-bucket.s3.amazonaws.com"
-
 CSRF_COOKIE_SECURE = True
 
 CSRF_TRUSTED_ORIGINS = ["https://*.terminusgps.com", "https://terminusgps.com"]
-
-CORS_ALLOWED_ORIGINS = ["https://terminusgps-site-bucket.s3.amazonaws.com"]
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
 
@@ -89,7 +85,7 @@ USE_X_FORWARDED_HOST = True
 
 WAGTAIL_SITE_NAME = "Terminus GPS"
 
-WAGTAILADMIN_BASE_URL = "https://terminusgps.com"
+WAGTAILADMIN_BASE_URL = "https://app.terminusgps.com"
 
 WAGTAILDOCS_EXTENSIONS = [
     "csv",
@@ -164,15 +160,11 @@ STORAGES = {
         "OPTIONS": {
             "access_key": os.getenv("AWS_ACCESS_KEY_ID"),
             "secret_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
-            "bucket_name": os.getenv(
-                "AWS_S3_BUCKET_NAME", "terminusgps-site-bucket"
-            ),
-            "location": os.getenv("AWS_S3_UPLOADS_LOCATION", "uploads/"),
-            "region_name": os.getenv("AWS_S3_BUCKET_REGION", "us-east-1"),
+            "bucket_name": "media.terminusgps.com",
+            "location": "uploads/",
+            "region_name": "us-east-1",
             "verify": True,
             "querystring_auth": False,
-            "default_acl": None,
-            "custom_domain": "terminusgps-site-bucket.s3.amazonaws.com",
         },
     },
     "staticfiles": {
@@ -180,15 +172,11 @@ STORAGES = {
         "OPTIONS": {
             "access_key": os.getenv("AWS_ACCESS_KEY_ID"),
             "secret_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
-            "bucket_name": os.getenv(
-                "AWS_S3_BUCKET_NAME", "terminusgps-site-bucket"
-            ),
-            "location": os.getenv("AWS_S3_STATIC_LOCATION", "static/"),
-            "region_name": os.getenv("AWS_S3_BUCKET_REGION", "us-east-1"),
+            "bucket_name": "media.terminusgps.com",
+            "location": "static/",
+            "region_name": "us-east-1",
             "verify": True,
             "querystring_auth": False,
-            "default_acl": None,
-            "custom_domain": "terminusgps-site-bucket.s3.amazonaws.com",
         },
     },
 }
@@ -203,7 +191,6 @@ TASKS = {
 INSTALLED_APPS = [
     "home.apps.HomeConfig",
     "storages",
-    "corsheaders",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
     "wagtail.contrib.settings",
@@ -232,7 +219,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.cache.UpdateCacheMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
