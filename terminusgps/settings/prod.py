@@ -21,12 +21,6 @@ AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 
-AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_S3_BUCKET_NAME")
-
-AWS_DEFAULT_ACL = None
-
-AWS_QUERYSTRING_AUTH = False
-
 AWS_S3_CUSTOM_DOMAIN = "terminusgps-site-bucket.s3.amazonaws.com"
 
 CSRF_COOKIE_SECURE = True
@@ -175,9 +169,12 @@ STORAGES = {
             "bucket_name": os.getenv(
                 "AWS_S3_BUCKET_NAME", "terminusgps-site-bucket"
             ),
-            "location": os.getenv("AWS_S3_BUCKET_LOCATION", "uploads/"),
+            "location": os.getenv("AWS_S3_UPLOADS_LOCATION", "uploads/"),
             "region_name": os.getenv("AWS_S3_BUCKET_REGION", "us-east-1"),
             "verify": os.getenv("AWS_S3_CERT_PATH", False),
+            "querystring_auth": False,
+            "default_acl": None,
+            "custom_domain": "terminusgps-site-bucket.s3.amazonaws.com",
         },
     },
     "staticfiles": {
@@ -186,9 +183,12 @@ STORAGES = {
             "bucket_name": os.getenv(
                 "AWS_S3_BUCKET_NAME", "terminusgps-site-bucket"
             ),
-            "location": os.getenv("AWS_S3_BUCKET_LOCATION", "static/"),
+            "location": os.getenv("AWS_S3_STATIC_LOCATION", "static/"),
             "region_name": os.getenv("AWS_S3_BUCKET_REGION", "us-east-1"),
             "verify": os.getenv("AWS_S3_CERT_PATH", False),
+            "querystring_auth": False,
+            "default_acl": None,
+            "custom_domain": "terminusgps-site-bucket.s3.amazonaws.com",
         },
     },
 }
