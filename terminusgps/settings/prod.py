@@ -17,10 +17,6 @@ ALLOWED_HOSTS = [
 
 ADMINS = ["pspeckman3@terminusgps.com", "blake@terminusgps.com"]
 
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-
 AWS_S3_CUSTOM_DOMAIN = "terminusgps-site-bucket.s3.amazonaws.com"
 
 CSRF_COOKIE_SECURE = True
@@ -166,6 +162,8 @@ STORAGES = {
     "default": {
         "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {
+            "access_key": os.getenv("AWS_ACCESS_KEY_ID"),
+            "secret_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
             "bucket_name": os.getenv(
                 "AWS_S3_BUCKET_NAME", "terminusgps-site-bucket"
             ),
@@ -180,6 +178,8 @@ STORAGES = {
     "staticfiles": {
         "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {
+            "access_key": os.getenv("AWS_ACCESS_KEY_ID"),
+            "secret_key": os.getenv("AWS_SECRET_ACCESS_KEY"),
             "bucket_name": os.getenv(
                 "AWS_S3_BUCKET_NAME", "terminusgps-site-bucket"
             ),
