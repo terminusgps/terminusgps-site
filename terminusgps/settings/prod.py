@@ -164,7 +164,6 @@ STORAGES = {
             "location": "uploads/",
             "region_name": "us-east-1",
             "verify": True,
-            "querystring_auth": False,
         },
     },
     "staticfiles": {
@@ -176,7 +175,6 @@ STORAGES = {
             "location": "static/",
             "region_name": "us-east-1",
             "verify": True,
-            "querystring_auth": False,
         },
     },
 }
