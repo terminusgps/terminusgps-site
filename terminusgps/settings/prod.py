@@ -3,6 +3,7 @@ import os
 import pathlib
 import socket
 import sys
+from base64 import b64decode
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
@@ -164,6 +165,9 @@ STORAGES = {
             "location": "uploads/",
             "region_name": "us-east-1",
             "verify": True,
+            "custom_domain": "media.terminusgps.com",
+            "cloudfront_key": b64decode(os.getenv("CLOUDFRONT_KEY", "")),
+            "cloudfront_key_id": os.getenv("CLOUDFRONT_KEY_ID"),
         },
     },
     "staticfiles": {
@@ -175,6 +179,9 @@ STORAGES = {
             "location": "static/",
             "region_name": "us-east-1",
             "verify": True,
+            "custom_domain": "media.terminusgps.com",
+            "cloudfront_key": b64decode(os.getenv("CLOUDFRONT_KEY", "")),
+            "cloudfront_key_id": os.getenv("CLOUDFRONT_KEY_ID"),
         },
     },
 }
