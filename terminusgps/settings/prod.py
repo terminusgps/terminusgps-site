@@ -203,6 +203,7 @@ STORAGES = {
                 secrets.get("AWS_CLOUDFRONT_KEY")
             ),
             "querystring_auth": True,
+            "endpoint_url": "https://s3.us-east-1.amazonaws.com",
         },
     },
     "staticfiles": {
@@ -220,6 +221,7 @@ STORAGES = {
                 secrets.get("AWS_CLOUDFRONT_KEY")
             ),
             "querystring_auth": True,
+            "endpoint_url": "https://s3.us-east-1.amazonaws.com",
         },
     },
 }
