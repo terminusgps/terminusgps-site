@@ -73,6 +73,7 @@ deploy = [
     "django-redis>=7.0.0",
     "cryptography>=50.0.1",
     "django-cors-headers>=4.9.0",
+    "django-tasks-redis>=0.3.0",
 ]
 dev = [
     "django-types>=0.24.0",

@@ -527,6 +527,19 @@ wheels = [
 ]
 
 [[package]]
+name = "django-tasks-redis"
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "redis" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d6/eb/110d1ca65045930f950f172aaec9c886f3c8b6d61232d2e9f4736181929c/django_tasks_redis-0.3.0.tar.gz", hash = "sha256:34d7dd84a640d98f269ddb677d08538de3d2b2c0f53714c03694b981e42d4f22", size = 126236, upload-time = "2026-09-16T06:18:38.943Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2d/c3/1bd60a4baa709c466e36fbddfc33d6494b141d2fba55c18ac9040a31f1fd/django_tasks_redis-0.3.0-py3-none-any.whl", hash = "sha256:dad9f19fda3d5e3d57a571dc47bf49b5c81885db917db577741327af7e6b588b", size = 69139, upload-time = "2026-09-16T06:18:37.406Z" },
+]
+
+[[package]]
 name = "django-treebeard"
 version = "5.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1366,6 +1379,7 @@ deploy = [
     { name = "django-cors-headers" },
     { name = "django-redis" },
     { name = "django-storages", extra = ["boto3", "s3"] },
+    { name = "django-tasks-redis" },
     { name = "gunicorn" },
     { name = "psycopg" },
     { name = "psycopg2-binary" },
@@ -1395,6 +1409,7 @@ deploy = [
     { name = "django-cors-headers", specifier = ">=4.9.0" },
     { name = "django-redis", specifier = ">=7.0.0" },
     { name = "django-storages", extras = ["boto3", "s3"], specifier = ">=1.14.6" },
+    { name = "django-tasks-redis", specifier = ">=0.3.0" },
     { name = "gunicorn", specifier = ">=26.2.0" },
     { name = "psycopg", specifier = ">=3.3.5" },
     { name = "psycopg2-binary", specifier = ">=2.9.13" },

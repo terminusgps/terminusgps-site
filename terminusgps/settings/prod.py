@@ -228,13 +228,15 @@ STORAGES = {
 
 TASKS = {
     "default": {
-        "BACKEND": "django.tasks.backends.immediate.ImmediateBackend",
+        "BACKEND": "django_tasks_redis.RedisTaskBackend",
         "QUEUES": ["default"],
+        "OPTIONS": {"REDIS_URL": "redis://127.0.0.1:6379/1"},
     }
 }
 
 INSTALLED_APPS = [
     "home.apps.HomeConfig",
+    "django_tasks_redis",
     "corsheaders",
     "storages",
     "wagtail.contrib.forms",
