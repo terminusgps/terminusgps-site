@@ -102,7 +102,9 @@ SERVER_EMAIL = "noreply@terminusgps.com"
 
 SESSION_COOKIE_SECURE = True
 
-SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+
+SESSION_ALIAS = "default"
 
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
