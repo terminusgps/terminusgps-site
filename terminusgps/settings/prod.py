@@ -202,6 +202,7 @@ STORAGES = {
             "cloudfront_key": base64.b64decode(
                 secrets.get("AWS_CLOUDFRONT_KEY")
             ),
+            "querystring_auth": True,
         },
     },
     "staticfiles": {
@@ -218,6 +219,7 @@ STORAGES = {
             "cloudfront_key": base64.b64decode(
                 secrets.get("AWS_CLOUDFRONT_KEY")
             ),
+            "querystring_auth": True,
         },
     },
 }
