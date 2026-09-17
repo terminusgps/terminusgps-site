@@ -218,11 +218,7 @@ STORAGES = {
             "region_name": "us-east-1",
             "verify": True,
             "custom_domain": secrets.get("AWS_CLOUDFRONT_CUSTOM_DOMAIN"),
-            "cloudfront_key_id": secrets.get("AWS_CLOUDFRONT_KEY_ID"),
-            "cloudfront_key": base64.b64decode(
-                secrets.get("AWS_CLOUDFRONT_KEY")
-            ),
-            "querystring_auth": True,
+            "querystring_auth": False,
             "endpoint_url": "https://s3.us-east-1.amazonaws.com",
         },
     },
