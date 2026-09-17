@@ -1,9 +1,29 @@
+import base64
+import json
 import logging.config
 import os
 import pathlib
 import socket
 import sys
-from base64 import b64decode
+
+import boto3
+
+session = boto3.session.Session()
+client = session.client(
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    service_name="secretsmanager",
+    region_name="us-east-1",
+)
+get_secret_value_response = client.get_secret_value(
+    SecretId="terminusgps-site/env"
+)
+if "SecretString" in get_secret_value_response:
+    secret_value = get_secret_value_response["SecretString"]
+else:
+    secret_value = base64.b64decode(get_secret_value_response["SecretBinary"])
+secrets = json.loads(secret_value)
+
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
 
@@ -20,7 +40,19 @@ ADMINS = ["pspeckman3@terminusgps.com", "blake@terminusgps.com"]
 
 CSRF_COOKIE_SECURE = True
 
-CSRF_TRUSTED_ORIGINS = ["https://*.terminusgps.com", "https://terminusgps.com"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://terminusgps.com",
+    "https://api.terminusgps.com",
+    "https://app.terminusgps.com",
+    "https://media.terminusgps.com",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://terminusgps.com",
+    "https://api.terminusgps.com",
+    "https://app.terminusgps.com",
+    "https://media.terminusgps.com",
+]
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
 
@@ -36,11 +68,11 @@ DEFAULT_REPLY_TO_EMAIL = "support@terminusgps.com"
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
-EMAIL_HOST = os.getenv("EMAIL_HOST", "email-smtp.us-east-1.amazonaws.com")
+EMAIL_HOST = secrets.get("EMAIL_HOST", "email-smtp.us-east-1.amazonaws.com")
 
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_HOST_PASSWORD = secrets.get("EMAIL_HOST_PASSWORD")
 
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_USER = secrets.get("EMAIL_HOST_USER")
 
 EMAIL_PORT = 587
 
@@ -58,7 +90,7 @@ MEDIA_URL = "/media/"
 
 ROOT_URLCONF = "terminusgps.urls"
 
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = secrets.get("SECRET_KEY")
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "unsafe-none"
 
@@ -103,7 +135,7 @@ WAGTAILDOCS_EXTENSIONS = [
 
 WAGTAILIMAGES_EXTENSIONS = ["avif", "gif", "jpg", "jpeg", "png", "webp", "svg"]
 
-WIALON_TOKEN = os.getenv("WIALON_TOKEN")
+WIALON_TOKEN = secrets.get("WIALON_TOKEN")
 
 WSGI_APPLICATION = "terminusgps.wsgi.application"
 
@@ -165,9 +197,11 @@ STORAGES = {
             "location": "uploads/",
             "region_name": "us-east-1",
             "verify": True,
-            "custom_domain": "media.terminusgps.com",
-            "cloudfront_key": b64decode(os.getenv("CLOUDFRONT_KEY", "")),
-            "cloudfront_key_id": os.getenv("CLOUDFRONT_KEY_ID"),
+            "custom_domain": secrets.get("AWS_CLOUDFRONT_CUSTOM_DOMAIN"),
+            "cloudfront_key_id": secrets.get("AWS_CLOUDFRONT_KEY_ID"),
+            "cloudfront_key": base64.b64decode(
+                secrets.get("AWS_CLOUDFRONT_KEY")
+            ),
         },
     },
     "staticfiles": {
@@ -179,9 +213,11 @@ STORAGES = {
             "location": "static/",
             "region_name": "us-east-1",
             "verify": True,
-            "custom_domain": "media.terminusgps.com",
-            "cloudfront_key": b64decode(os.getenv("CLOUDFRONT_KEY", "")),
-            "cloudfront_key_id": os.getenv("CLOUDFRONT_KEY_ID"),
+            "custom_domain": secrets.get("AWS_CLOUDFRONT_CUSTOM_DOMAIN"),
+            "cloudfront_key_id": secrets.get("AWS_CLOUDFRONT_KEY_ID"),
+            "cloudfront_key": base64.b64decode(
+                secrets.get("AWS_CLOUDFRONT_KEY")
+            ),
         },
     },
 }
@@ -195,6 +231,7 @@ TASKS = {
 
 INSTALLED_APPS = [
     "home.apps.HomeConfig",
+    "corsheaders",
     "storages",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
@@ -224,6 +261,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.cache.UpdateCacheMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -254,11 +292,11 @@ TEMPLATES = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME"),
-        "HOST": os.getenv("DB_HOST"),
-        "USER": os.getenv("DB_USERNAME"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "PORT": os.getenv("DB_PORT", 5432),
+        "NAME": secrets.get("DB_NAME"),
+        "HOST": secrets.get("DB_HOST"),
+        "USER": secrets.get("DB_USERNAME"),
+        "PASSWORD": secrets.get("DB_PASSWORD"),
+        "PORT": secrets.get("DB_PORT", 5432),
         "OPTIONS": {"client_encoding": "UTF8"},
         "CONN_MAX_AGE": None,
     }
