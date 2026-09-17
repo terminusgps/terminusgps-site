@@ -92,7 +92,7 @@ ROOT_URLCONF = "terminusgps.urls"
 
 SECRET_KEY = secrets.get("SECRET_KEY")
 
-SECURE_CROSS_ORIGIN_OPENER_POLICY = "unsafe-none"
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
