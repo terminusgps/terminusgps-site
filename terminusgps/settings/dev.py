@@ -20,6 +20,10 @@ DEFAULT_FROM_EMAIL = "noreply@terminusgps.com"
 
 DEFAULT_REPLY_TO_EMAIL = "support@terminusgps.com"
 
+DOCS_ROOT = BASE_DIR / "docs" / "build" / "html"
+
+DOCS_ACCESS = "login_required"
+
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 INTERNAL_IPS = ["127.0.0.1"]
@@ -119,6 +123,7 @@ TASKS = {
 
 INSTALLED_APPS = [
     "home.apps.HomeConfig",
+    "docs",
     "wagtail.contrib.forms",
     "wagtail.contrib.redirects",
     "wagtail.contrib.settings",

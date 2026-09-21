@@ -56,6 +56,10 @@ CORS_ALLOWED_ORIGINS = [
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
 
+DOCS_ROOT = BASE_DIR / "docs" / "build" / "html"
+
+DOCS_ACCESS = "login_required"
+
 DEBUG = False
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -234,6 +238,7 @@ TASKS = {
 
 INSTALLED_APPS = [
     "home.apps.HomeConfig",
+    "docs",
     "django_tasks_redis",
     "corsheaders",
     "storages",
