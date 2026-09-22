@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+
+<html :class="{ 'dark' : darkMode === true }" data-content_root="../" lang="en" x-data="{ darkMode: $persist(window.matchMedia('(prefers-color-scheme: dark)').matches), activeSection: ''}">
+<head>
+<script>
+    (function () {
+      // Set initial color scheme
+      if ((localStorage.getItem("_x_darkMode") === "true") || (window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        document.documentElement.classList.add("dark");
+      }
+
+      // Watch for media preference changes
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (event) => {
+        localStorage.setItem("_x_darkMode", event.matches);
+        document.documentElement.classList.toggle("dark", event.matches);
+      });
+    })();
+  </script>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta charset="utf-8"/>
+<meta content="#ffffff" media="(prefers-color-scheme: light)" name="theme-color"/>
+<meta content="#030711" media="(prefers-color-scheme: dark)" name="theme-color"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>How to install the MiTAC K245 Camera | terminusgps-site 3.0.0 documentation</title>
+<meta content="How to install the MiTAC K245 Camera | terminusgps-site 3.0.0 documentation" property="og:title"/>
+<meta content="How to install the MiTAC K245 Camera | terminusgps-site 3.0.0 documentation" name="twitter:title"/>
+<link href="../_static/pygments.css?v=e72c8e07" rel="stylesheet" type="text/css"/>
+<link href="../_static/theme.css?v=d6d7c91b" rel="stylesheet" type="text/css"/>
+<link href="../search.html" rel="search" title="Search"/>
+<link href="../genindex.html" rel="index" title="Index"/>
+<link href="index.html" rel="prev" title="How-To Guides"/>
+</head>
+<body :class="{ 'overflow-hidden': showSidebar }" class="min-h-screen font-sans antialiased bg-background text-foreground" x-data="{ showSidebar: false, showScrollTop: false }">
+<div @click.self="showSidebar = false" class="fixed inset-0 z-50 overflow-hidden bg-background/80 backdrop-blur-sm md:hidden" x-cloak="" x-show="showSidebar"></div><div class="relative flex flex-col min-h-screen" id="page"><a class="absolute top-0 left-0 z-[100] block bg-background p-4 text-xl transition -translate-x-full opacity-0 focus:translate-x-0 focus:opacity-100" href="#content">
+      Skip to content
+    </a><header class="sticky top-0 z-40 w-full border-b shadow-xs border-border bg-background/90 backdrop-blur"><div class="container flex items-center h-14">
+<div class="hidden mr-4 md:flex">
+<a class="flex items-center mr-6" href="../index.html"><span class="hidden font-bold sm:inline-block text-clip whitespace-nowrap">terminusgps-site 3.0.0 documentation</span>
+</a></div><button @click="showSidebar = true" class="inline-flex items-center justify-center h-10 px-0 py-2 mr-2 text-base font-medium transition-colors rounded-md hover:text-accent-foreground hover:bg-transparent md:hidden" type="button">
+<svg aria-hidden="true" fill="currentColor" height="24" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M152.587 825.087q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440Zm0-203.587q-19.152 0-32.326-13.174T107.087 576q0-19.152 13.174-32.326t32.326-13.174h320q19.152 0 32.326 13.174T518.087 576q0 19.152-13.174 32.326T472.587 621.5h-320Zm0-203.587q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440ZM708.913 576l112.174 112.174q12.674 12.674 12.674 31.826t-12.674 31.826Q808.413 764.5 789.261 764.5t-31.826-12.674l-144-144Q600 594.391 600 576t13.435-31.826l144-144q12.674-12.674 31.826-12.674t31.826 12.674q12.674 12.674 12.674 31.826t-12.674 31.826L708.913 576Z"></path>
+</svg>
+<span class="sr-only">Toggle navigation menu</span>
+</button>
+<div class="flex items-center justify-between flex-1 gap-2 sm:gap-4 md:justify-end">
+<div class="flex-1 w-full md:w-auto md:flex-none"><form @keydown.k.window.meta="$refs.search.focus()" action="../search.html" class="relative flex items-center group" id="searchbox" method="get">
+<input aria-label="Search the docs" class="inline-flex items-center font-medium transition-colors bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background border border-input hover:bg-accent focus:bg-accent hover:text-accent-foreground focus:text-accent-foreground hover:placeholder-accent-foreground py-2 px-4 relative h-9 w-full justify-start rounded-[0.5rem] text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64" id="search-input" name="q" placeholder="Search ..." type="search" x-ref="search"/>
+<kbd class="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none text-muted-foreground items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex group-hover:bg-accent group-hover:text-accent-foreground">
+<span class="text-xs">⌘</span>
+    K
+  </kbd>
+</form>
+</div>
+<nav class="flex items-center gap-1">
+<button @click="darkMode = !darkMode" class="relative inline-flex items-center justify-center px-0 text-sm font-medium transition-colors rounded-md hover:bg-accent hover:text-accent-foreground h-9 w-9" title="Toggle color scheme" type="button">
+<svg class="absolute transition-all scale-100 rotate-0 dark:-rotate-90 dark:scale-0" fill="currentColor" height="16" viewbox="0 96 960 960" width="16" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 685q45.456 0 77.228-31.772Q589 621.456 589 576q0-45.456-31.772-77.228Q525.456 467 480 467q-45.456 0-77.228 31.772Q371 530.544 371 576q0 45.456 31.772 77.228Q434.544 685 480 685Zm0 91q-83 0-141.5-58.5T280 576q0-83 58.5-141.5T480 376q83 0 141.5 58.5T680 576q0 83-58.5 141.5T480 776ZM80 621.5q-19.152 0-32.326-13.174T34.5 576q0-19.152 13.174-32.326T80 530.5h80q19.152 0 32.326 13.174T205.5 576q0 19.152-13.174 32.326T160 621.5H80Zm720 0q-19.152 0-32.326-13.174T754.5 576q0-19.152 13.174-32.326T800 530.5h80q19.152 0 32.326 13.174T925.5 576q0 19.152-13.174 32.326T880 621.5h-80Zm-320-320q-19.152 0-32.326-13.174T434.5 256v-80q0-19.152 13.174-32.326T480 130.5q19.152 0 32.326 13.174T525.5 176v80q0 19.152-13.174 32.326T480 301.5Zm0 720q-19.152 0-32.326-13.17Q434.5 995.152 434.5 976v-80q0-19.152 13.174-32.326T480 850.5q19.152 0 32.326 13.174T525.5 896v80q0 19.152-13.174 32.33-13.174 13.17-32.326 13.17ZM222.174 382.065l-43-42Q165.5 327.391 166 308.239t13.174-33.065q13.435-13.674 32.587-13.674t32.065 13.674l42.239 43q12.674 13.435 12.555 31.706-.12 18.272-12.555 31.946-12.674 13.674-31.445 13.413-18.772-.261-32.446-13.174Zm494 494.761-42.239-43q-12.674-13.435-12.674-32.087t12.674-31.565Q686.609 756.5 705.38 757q18.772.5 32.446 13.174l43 41.761Q794.5 824.609 794 843.761t-13.174 33.065Q767.391 890.5 748.239 890.5t-32.065-13.674Zm-42-494.761Q660.5 369.391 661 350.62q.5-18.772 13.174-32.446l41.761-43Q728.609 261.5 747.761 262t33.065 13.174q13.674 13.435 13.674 32.587t-13.674 32.065l-43 42.239q-13.435 12.674-31.706 12.555-18.272-.12-31.946-12.555Zm-495 494.761Q165.5 863.391 165.5 844.239t13.674-32.065l43-42.239q13.435-12.674 32.087-12.674t31.565 12.674Q299.5 782.609 299 801.38q-.5 18.772-13.174 32.446l-41.761 43Q231.391 890.5 212.239 890t-33.065-13.174ZM480 576Z"></path>
+</svg>
+<svg class="absolute transition-all scale-0 rotate-90 dark:rotate-0 dark:scale-100" fill="currentColor" height="16" viewbox="0 96 960 960" width="16" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 936q-151 0-255.5-104.5T120 576q0-138 90-239.5T440 218q25-3 39 18t-1 44q-17 26-25.5 55t-8.5 61q0 90 63 153t153 63q31 0 61.5-9t54.5-25q21-14 43-1.5t19 39.5q-14 138-117.5 229T480 936Zm0-80q88 0 158-48.5T740 681q-20 5-40 8t-40 3q-123 0-209.5-86.5T364 396q0-20 3-40t8-40q-78 32-126.5 102T200 576q0 116 82 198t198 82Zm-10-270Z"></path>
+</svg>
+</button>
+</nav>
+</div>
+</div>
+</header>
+<div class="flex-1"><div class="container md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10"><aside :aria-hidden="!showSidebar" :class="{ 'translate-x-0': showSidebar }" class="fixed inset-y-0 left-0 md:top-14 z-50 md:z-30 bg-background md:bg-transparent transition-all duration-100 -translate-x-full md:translate-x-0 ml-0 p-6 md:p-0 md:-ml-2 md:h-[calc(100vh-3.5rem)] w-5/6 md:w-full overflow-y-auto border-r border-border md:sticky" id="left-sidebar">
+<a class="justify-start text-sm md:!hidden bg-background" href="../index.html"><span class="font-bold text-clip whitespace-nowrap">terminusgps-site 3.0.0 documentation</span>
+</a>
+<div class="relative overflow-hidden md:overflow-auto my-4 md:my-0">
+<div class="overflow-y-auto h-full w-full relative pr-6"><nav class="table w-full min-w-full my-6 lg:my-8">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../tutorials/index.html">Tutorials<button @click.prevent.stop="expanded = !expanded" type="button" x-cloak=""><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul class="simple" x-cloak="" x-show="expanded">
+</ul>
+</li>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../topics/index.html">Topic Guides<button @click.prevent.stop="expanded = !expanded" type="button" x-cloak=""><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul class="simple" x-cloak="" x-show="expanded">
+</ul>
+</li>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="../references/index.html">Reference Guides<button @click.prevent.stop="expanded = !expanded" type="button" x-cloak=""><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul class="simple" x-cloak="" x-show="expanded">
+</ul>
+</li>
+<li class="toctree-l1 current" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="index.html">How-To Guides<button @click.prevent.stop="expanded = !expanded" type="button" x-cloak=""><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul class="current" x-show="expanded">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">How to install the MiTAC K245 Camera</a></li>
+</ul>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+<button @click="showSidebar = false" class="absolute md:hidden right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100" type="button">
+<svg class="h-4 w-4" fill="currentColor" height="24" stroke="none" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 632 284 828q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536 576l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480 632Z"></path>
+</svg>
+</button>
+</aside>
+<main class="relative py-6 lg:gap-10 lg:py-8 xl:grid xl:grid-cols-[1fr_300px]">
+<div class="w-full min-w-0 mx-auto">
+<nav aria-label="breadcrumbs" class="flex items-center mb-4 space-x-1 text-sm text-muted-foreground">
+<a class="overflow-hidden text-ellipsis whitespace-nowrap hover:text-foreground" href="../index.html">
+<span class="hidden md:inline">terminusgps-site 3.0.0 documentation</span>
+<svg aria-label="Home" class="md:hidden" fill="currentColor" height="18" stroke="none" viewbox="0 96 960 960" width="18" xmlns="http://www.w3.org/2000/svg">
+<path d="M240 856h120V616h240v240h120V496L480 316 240 496v360Zm-80 80V456l320-240 320 240v480H520V696h-80v240H160Zm320-350Z"></path>
+</svg>
+</a>
+<div class="mr-1">/</div><a class="hover:text-foreground overflow-hidden text-ellipsis whitespace-nowrap" href="index.html">How-To Guides</a>
+<div class="mr-1">/</div><span aria-current="page" class="font-medium text-foreground overflow-hidden text-ellipsis whitespace-nowrap">How to install the MiTAC K245 Camera</span>
+</nav>
+<div id="content" role="main">
+<section id="how-to-install-the-mitac-k245-camera">
+<h1>How to install the MiTAC K245 Camera<a class="headerlink" href="#how-to-install-the-mitac-k245-camera" title="Link to this heading">¶</a></h1>
+
+<section id="reference-document">
+<h2>Reference Document<a class="headerlink" href="#reference-document" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#reference-document'">¶</a></h2>
+<p>This how-to guide is a reference to <a class="reference download internal" download="" href="../_downloads/c4d5b90063ba854cd0a7a6905bf7ad72/Mitac-K245.pdf"><code class="xref download docutils literal notranslate"><span class="pre">this</span> <span class="pre">official</span> <span class="pre">MiTAC</span> <span class="pre">K245</span> <span class="pre">installation</span> <span class="pre">guide</span></code></a>.</p>
+</section>
+<section id="i-checking-the-camera-box">
+<h2>I. Checking the camera box<a class="headerlink" href="#i-checking-the-camera-box" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#i-checking-the-camera-box'">¶</a></h2>
+<p>Go through the box and check if you have received all the following items.</p>
+<img alt="../_images/mitac_k245_box.png" src="../_images/mitac_k245_box.png"/>
+<ol class="arabic simple">
+<li><p>K245 Camera (x1)</p></li>
+<li><p>Power harness</p></li>
+<li><p>Tamper proof cover/lid</p></li>
+<li><p>Mounting bracket</p></li>
+<li><p>User guide</p></li>
+<li><p>Alcohol wipes</p></li>
+<li><p>SIM</p></li>
+<li><p>Allen key</p></li>
+</ol>
+</section>
+<section id="ii-pre-installation-checks">
+<h2>II. Pre-installation checks<a class="headerlink" href="#ii-pre-installation-checks" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#ii-pre-installation-checks'">¶</a></h2>
+<p>Before you being the physical installation of the dashcam, performing these pre-installation checks is crucial.</p>
+<p>Taking a few minutes now to verify these points will save you time later and ensure a successful and reliable camera setup.</p>
+<section id="vehicle-and-environment">
+<h3>1. Vehicle and Environment<a class="headerlink" href="#vehicle-and-environment" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#vehicle-and-environment'">¶</a></h3>
+<section id="a-compatibility">
+<h4>1a. Compatibility<a class="headerlink" href="#a-compatibility" title="Link to this heading">¶</a></h4>
+<p>Ensure that the vehicle can supply the specified power to the camera through the OBD-2 port or the 3-wire cable.</p>
+<p>Refer to the <a class="reference internal" href="#wiring-and-harness-management"><span class="std std-ref">wiring section</span></a> of this guide for more information.</p>
+</section>
+<section id="b-network-coverage">
+<h4>1b. Network Coverage<a class="headerlink" href="#b-network-coverage" title="Link to this heading">¶</a></h4>
+<p>Make sure the vehicle is parked outdoors, typically in an open parking lot, with good connectivity and at least 82ft (25m) of clear line-of-sight in front of the vehicle.</p>
+</section>
+<section id="c-clean-windshield">
+<h4>1c. Clean Windshield<a class="headerlink" href="#c-clean-windshield" title="Link to this heading">¶</a></h4>
+<p>The position where the mounting bracket is affixed on the windshield should be clean and free from any obstructions such as wipers, stickets or dirt.</p>
+<p>Check the <a class="reference internal" href="#mounting-the-camera"><span class="std std-ref">mounting section</span></a> for more information.</p>
+</section>
+</section>
+<section id="device-and-power">
+<h3>2. Device and Power<a class="headerlink" href="#device-and-power" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#device-and-power'">¶</a></h3>
+<section id="a-camera-provisioning">
+<h4>2a. Camera Provisioning<a class="headerlink" href="#a-camera-provisioning" title="Link to this heading">¶</a></h4>
+<p>Before you start, ensure that the dashcam is provisioned properly on the <a class="reference external" href="https://hosting.terminusgps.com/">Terminus GPS platform</a>.</p>
+<p>If you observe a blinking <strong>green</strong> LED, this indicates that the camera has been provisioned properly and is connected to the Internet.</p>
+<img alt="../_images/mitac_k245_green_led.png" src="../_images/mitac_k245_green_led.png"/>
+<p>If you observe a blinking <strong>cyan</strong> LED, it indicates that the camera has not been provisioned properly on the Terminus GPS platform.</p>
+<p>If you observe a blinking <strong>blue</strong> LED, it indicates that the camera does not have connectivity.</p>
+<img alt="../_images/mitac_k245_cyan_led.png" src="../_images/mitac_k245_cyan_led.png"/>
+</section>
+<section id="b-power-source">
+<h4>2b. Power Source<a class="headerlink" href="#b-power-source" title="Link to this heading">¶</a></h4>
+<p>Make sure the vehicle’s power source is working and has the correct voltage.</p>
+</section>
+<section id="b-sim-activation">
+<h4>3b. SIM Activation<a class="headerlink" href="#b-sim-activation" title="Link to this heading">¶</a></h4>
+<p>Make sure that the SIM card is active, inserted properly and has a data plan.</p>
+</section>
+</section>
+</section>
+<section id="iii-installing-the-camera">
+<h2>III. Installing the camera<a class="headerlink" href="#iii-installing-the-camera" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#iii-installing-the-camera'">¶</a></h2>
+<p>The camera needs to be connected to a power source using either an <a class="reference internal" href="#connect-using-the-obd2-port"><span class="std std-ref">OBD-2 harness</span></a> or a <a class="reference internal" href="#connect-using-the-3-wire-connector"><span class="std std-ref">3-wire fuse box connection</span></a>.</p>
+<section id="connect-using-the-obd-2-port">
+<span id="connect-using-the-obd2-port"></span><h3>1. Connect using the OBD-2 port<a class="headerlink" href="#connect-using-the-obd-2-port" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#connect-using-the-obd-2-port'">¶</a></h3>
+<section id="a-locate-obd-2-port">
+<h4>1a. Locate OBD-2 port<a class="headerlink" href="#a-locate-obd-2-port" title="Link to this heading">¶</a></h4>
+<p>Locate the OBD-2 port on the vehicle, usually found under the dashboard or steering column.</p>
+<img alt="../_images/mitac_k245_obd2_location.png" src="../_images/mitac_k245_obd2_location.png"/>
+<img alt="../_images/mitac_k245_obd2_reference.png" src="../_images/mitac_k245_obd2_reference.png"/>
+</section>
+<section id="b-secure-connection">
+<h4>1b. Secure Connection<a class="headerlink" href="#b-secure-connection" title="Link to this heading">¶</a></h4>
+<p>Plug the harness securely into the port.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>If the port is being used by another device, a Y-splitter can be safely used to connect both devices to the OBD-2 port.</p>
+</div>
+<img alt="../_images/mitac_k245_obd2_unplugged.png" src="../_images/mitac_k245_obd2_unplugged.png"/>
+<img alt="../_images/mitac_k245_obd2_plugged.png" src="../_images/mitac_k245_obd2_plugged.png"/>
+</section>
+<section id="c-ignition-on">
+<h4>1c. Ignition On<a class="headerlink" href="#c-ignition-on" title="Link to this heading">¶</a></h4>
+<p>Turn on the vehicle’s ignition and wait 10 seconds for the camera to boot up.</p>
+<p>During the boot up, the camera will blink cyan LED for 15 seconds. If this continues to blink cyan even after a minute, please check the Terminus GPS platform to ensure the camera was provisioned correctly and it has Internet connectivity.</p>
+</section>
+<section id="d-audio-confirmation">
+<h4>1d. Audio Confirmation<a class="headerlink" href="#d-audio-confirmation" title="Link to this heading">¶</a></h4>
+<p>A single beep will sound to indicate a proper power connection. The camera will also announce that the trip has started.</p>
+</section>
+</section>
+<section id="connect-using-3-wire-connector">
+<span id="connect-using-the-3-wire-connector"></span><h3>2. Connect using 3-wire connector<a class="headerlink" href="#connect-using-3-wire-connector" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#connect-using-3-wire-connector'">¶</a></h3>
+<img alt="../_images/mitac_k245_3_wire_reference.png" src="../_images/mitac_k245_3_wire_reference.png"/>
+<section id="a-initial-hook-up">
+<h4>2a. Initial hook-up<a class="headerlink" href="#a-initial-hook-up" title="Link to this heading">¶</a></h4>
+<p>Make sure the engine is off, connect the mini display port connector (point A) of the harness to the matching connector on the camera.</p>
+<p>Make sure that the connector lock latches into place.</p>
+<p>The other side of the harness has three wires: ACC (red), Power/B+ (yellow) and Ground/GND (black).</p>
+</section>
+<section id="b-engine-off">
+<h4>2b. Engine Off<a class="headerlink" href="#b-engine-off" title="Link to this heading">¶</a></h4>
+<p>Ensure the vehicle ignition and engine is turned off before you proceed.</p>
+</section>
+<section id="c-red-wire-ignition">
+<h4>2c. Red Wire (Ignition)<a class="headerlink" href="#c-red-wire-ignition" title="Link to this heading">¶</a></h4>
+<p>Connect the red wire to an ignition line or ACC.</p>
+</section>
+<section id="d-yellow-wire-constant-power-b">
+<h4>2d. Yellow Wire (Constant Power B+)<a class="headerlink" href="#d-yellow-wire-constant-power-b" title="Link to this heading">¶</a></h4>
+<p>Find a constant 12-24V power source. Please use a multimeter to verify the rated voltage.</p>
+<p>Connect the yellow wire to the identified continuous power source.</p>
+</section>
+<section id="e-black-wire-ground">
+<h4>2e. Black Wire (Ground)<a class="headerlink" href="#e-black-wire-ground" title="Link to this heading">¶</a></h4>
+<p>Connect the black wire to a factory bolt or a spare ground lead.</p>
+<p>Use chassis ground only in light vehicles–do not use it in light or heavy duty trucks.</p>
+</section>
+<section id="f-final-step">
+<h4>2f. Final Step<a class="headerlink" href="#f-final-step" title="Link to this heading">¶</a></h4>
+<p>Turn on the vehicle ignition and wait 2 minutes.</p>
+<p>The LED should blink cyan, blue then green.</p>
+<img alt="../_images/mitac_k245_3_wire_hands.png" src="../_images/mitac_k245_3_wire_hands.png"/>
+</section>
+</section>
+</section>
+<section id="iv-mounting-the-camera">
+<span id="mounting-the-camera"></span><h2>IV. Mounting the camera<a class="headerlink" href="#iv-mounting-the-camera" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#iv-mounting-the-camera'">¶</a></h2>
+<section id="removing-the-side-panel">
+<h3>1. Removing the side panel<a class="headerlink" href="#removing-the-side-panel" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#removing-the-side-panel'">¶</a></h3>
+<p>Hold the camera up-right, keeping the logo (panic button) facing the cabin/driver.</p>
+<p>Lossen the screws shown below to reorient the driver and road and lock it in place. The two screws should remain attached to the panel.</p>
+<img alt="../_images/mitac_k245_mounting_panel.png" src="../_images/mitac_k245_mounting_panel.png"/>
+</section>
+<section id="inserting-the-sd-card">
+<h3>2. Inserting the SD card<a class="headerlink" href="#inserting-the-sd-card" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#inserting-the-sd-card'">¶</a></h3>
+<p>Verify if the camera already has an SD card.</p>
+<img alt="../_images/mitac_k245_mounting_sd_card.png" src="../_images/mitac_k245_mounting_sd_card.png"/>
+<p>Find the SD card slot, which is located below the SIM card slot.</p>
+<p>Insert the new SD card by pushign it into the slot until your hear and feel it click into place.</p>
+<p>If the camera already has an SD card, gently press on it to release and remove it, then insert a new SD card.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Having an SD card is essential for storing video footage captured during each trip. This ensures that critical events or incidents are recorded and and be reviewed later.</p>
+</div>
+</section>
+<section id="choosing-the-mounting-area">
+<h3>3. Choosing the mounting area<a class="headerlink" href="#choosing-the-mounting-area" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#choosing-the-mounting-area'">¶</a></h3>
+<p>Sit in the driver’s seat and pull down both sun visors.</p>
+<p>Hold the camera in the recommended shaded area on the windshield, making sure that:</p>
+<ul class="simple">
+<li><p>It doesn’t block the driver’s view.</p></li>
+<li><p>The sun visors and rearview mirror don’t block the driver-facing camera.</p></li>
+<li><p>The sunstrip doesn’t block the road-facing camera or expose it to too much heat.</p></li>
+<li><p>The camera should be mounted on the driver’s side of the rearview mirror.</p></li>
+</ul>
+<img alt="../_images/mitac_k245_mounting_location.png" src="../_images/mitac_k245_mounting_location.png"/>
+</section>
+<section id="adjusting-road-facing-camera">
+<h3>4. Adjusting road-facing camera<a class="headerlink" href="#adjusting-road-facing-camera" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#adjusting-road-facing-camera'">¶</a></h3>
+<p>Reorient/pitch the lens up or down to give the camera a clear view in front of the vehicle.</p>
+<p>Red line below is only an indicator of the horizon line in the camera field of view.</p>
+<p>GOOD</p>
+<img alt="../_images/mitac_k245_mounting_road_facing_good.png" src="../_images/mitac_k245_mounting_road_facing_good.png"/>
+<p>BAD</p>
+<img alt="../_images/mitac_k245_mounting_road_facing_bad_1.png" src="../_images/mitac_k245_mounting_road_facing_bad_1.png"/>
+<p>BAD</p>
+<img alt="../_images/mitac_k245_mounting_road_facing_bad_2.png" src="../_images/mitac_k245_mounting_road_facing_bad_2.png"/>
+</section>
+<section id="adjusting-driver-facing-camera">
+<h3>5. Adjusting driver-facing camera<a class="headerlink" href="#adjusting-driver-facing-camera" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#adjusting-driver-facing-camera'">¶</a></h3>
+<p>Reorient the driver camera lens such that the camera has a clear and unobstructed view of the driver’s face and torso.</p>
+<p>Mount the camera on the driver’s side of the rearview mirror.</p>
+<p>Center it on the driver’s seat.</p>
+<p>The camera should be mounted towards the top edge of the windshield just above the wiper zone.</p>
+<p>Make sure the head rest on the driver’s seat is visible in the top quarter of the camera preview.</p>
+<p>Position the driver’s face within the recommended zone shown in the reference images.</p>
+<p>Make sure the seat belt on the driver’s torso is clearly visible to the camera field-of-view.</p>
+<p>Position the camera for a full-frontal or near-frontal view of the driver, instead of a side view.</p>
+<img alt="../_images/mitac_k245_mounting_driver_facing_1.png" src="../_images/mitac_k245_mounting_driver_facing_1.png"/>
+<img alt="../_images/mitac_k245_mounting_driver_facing_2.png" src="../_images/mitac_k245_mounting_driver_facing_2.png"/>
+<img alt="../_images/mitac_k245_mounting_driver_facing_3.png" src="../_images/mitac_k245_mounting_driver_facing_3.png"/>
+</section>
+<section id="cleaning-the-windshield">
+<h3>6. Cleaning the windshield<a class="headerlink" href="#cleaning-the-windshield" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#cleaning-the-windshield'">¶</a></h3>
+<p>Use the provided alcohol wipes to clean the area on the windshield where the mounting bracket is to be affixed.</p>
+<p>Let it air dry for 60 seconds, then wipe it dry with a cloth.</p>
+</section>
+<section id="id1">
+<h3>7. Mounting the camera<a class="headerlink" href="#id1" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#id1'">¶</a></h3>
+<p>Make sure the windshield is between 50°F and 80°F (10-26°C) so the adhesive will stick properly.</p>
+<p>Remove the protective film from both camera lenses.</p>
+<p>Place the camera and look for the horizon. If the placement is correct, remove the 3M sticker from the bracket.</p>
+<p>Stick the bracket to the windshield and press firmly for 30 seconds.</p>
+</section>
+<section id="locking-the-road-facing-camera">
+<h3>8. Locking the road-facing camera<a class="headerlink" href="#locking-the-road-facing-camera" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#locking-the-road-facing-camera'">¶</a></h3>
+<p>Slide the camera to the left to detach it from the bracket.</p>
+<p>Use the provided screwdriver to secure the road-facing cameras at the chosen orientation/pitch.</p>
+<p>Slide the camera back onto the bracket until it is latched in.</p>
+</section>
+<section id="locking-the-driver-facing-camera">
+<h3>9. Locking the driver-facing camera<a class="headerlink" href="#locking-the-driver-facing-camera" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#locking-the-driver-facing-camera'">¶</a></h3>
+<p>Reattach the side panel.</p>
+<p>Tighten the two screws with the provided screwdriver.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Attach the tamper-proof cover to the camera and tighten the locking screw with the Allen key (included in the box).</p>
+</div>
+</section>
+</section>
+<section id="v-wiring-and-harness-management">
+<span id="wiring-and-harness-management"></span><h2>V. Wiring and harness management<a class="headerlink" href="#v-wiring-and-harness-management" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#v-wiring-and-harness-management'">¶</a></h2>
+<img alt="../_images/mitac_k245_wiring_harness_reference.png" src="../_images/mitac_k245_wiring_harness_reference.png"/>
+<section id="conceal-the-harness">
+<h3>1. Conceal the harness<a class="headerlink" href="#conceal-the-harness" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#conceal-the-harness'">¶</a></h3>
+<p>Ensure the harness is properly tucked inside the top trim.</p>
+</section>
+<section id="use-the-provided-tool-for-routing">
+<h3>2. Use the provided tool for routing<a class="headerlink" href="#use-the-provided-tool-for-routing" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#use-the-provided-tool-for-routing'">¶</a></h3>
+<p>Utilize the tool provided with the camera to neatly route the harness along the headliner and the A-pillar.</p>
+</section>
+<section id="follow-the-harness-path">
+<h3>3. Follow the harness path<a class="headerlink" href="#follow-the-harness-path" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#follow-the-harness-path'">¶</a></h3>
+<p>Guide the harness along the side or behind the interior panels towards the power source.</p>
+</section>
+<section id="secure-excess-wiring">
+<h3>4. Secure excess wiring<a class="headerlink" href="#secure-excess-wiring" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#secure-excess-wiring'">¶</a></h3>
+<p>Use the wire ties to fasten any excess/loose harness.</p>
+</section>
+<section id="prioritize-safety">
+<h3>5. Prioritize safety<a class="headerlink" href="#prioritize-safety" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#prioritize-safety'">¶</a></h3>
+<p>Verify that no part of the harness comes in the way of normal vehicle/driver function.</p>
+<img alt="../_images/mitac_k245_wiring_hands.png" src="../_images/mitac_k245_wiring_hands.png"/>
+</section>
+</section>
+<section id="vi-connecting-and-testing-the-camera">
+<h2>VI. Connecting and testing the camera<a class="headerlink" href="#vi-connecting-and-testing-the-camera" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#vi-connecting-and-testing-the-camera'">¶</a></h2>
+<section id="start-the-vehicle">
+<h3>1. Start the vehicle<a class="headerlink" href="#start-the-vehicle" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#start-the-vehicle'">¶</a></h3>
+<p>Turn on the vehicle’s ignition.</p>
+</section>
+<section id="check-the-led-light">
+<h3>2. Check the LED light<a class="headerlink" href="#check-the-led-light" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#check-the-led-light'">¶</a></h3>
+<p>Wait for one minute and observe the camera’s LED. A green LED blinking every 15 seconds indicates that the camera is functioning correctly.</p>
+</section>
+<section id="listen-for-alerts">
+<h3>3. Listen for alerts<a class="headerlink" href="#listen-for-alerts" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#listen-for-alerts'">¶</a></h3>
+<p>Ensure that you can hear audible alerts from the camera.</p>
+</section>
+</section>
+<section id="vii-final-steps-and-troubleshooting">
+<h2>VII. Final steps and troubleshooting<a class="headerlink" href="#vii-final-steps-and-troubleshooting" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#vii-final-steps-and-troubleshooting'">¶</a></h2>
+<section id="ensure-clear-visiblity">
+<h3>1. Ensure clear visiblity<a class="headerlink" href="#ensure-clear-visiblity" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#ensure-clear-visiblity'">¶</a></h3>
+<p>Confirm that the camera has a clear and unobstructed view of both the road and the driver field-of-view.</p>
+<p>Remember to remove the protective film from both camera lenses.</p>
+</section>
+<section id="verify-network-connectivity">
+<h3>2. Verify network connectivity<a class="headerlink" href="#verify-network-connectivity" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#verify-network-connectivity'">¶</a></h3>
+<p>Check for a green LED light blinking every 15 seconds, this confirms that the camera is connected to the network.</p>
+</section>
+<section id="confirm-recording">
+<h3>3. Confirm recording<a class="headerlink" href="#confirm-recording" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#confirm-recording'">¶</a></h3>
+<p>Verify that the camera is recording properly.</p>
+<p>Press the panic button to capture media and listen for the audible alert.</p>
+<p>Wait for a minute and then check the Terminus GPS platform to confirm the video or image is accessible.</p>
+</section>
+<section id="check-camera-alignment">
+<h3>4. Check camera alignment<a class="headerlink" href="#check-camera-alignment" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#check-camera-alignment'">¶</a></h3>
+<p>Ensure that the camera lens is oriented correctly. Make any necessary adjustments, if needed.</p>
+</section>
+</section>
+<section id="viii-completing-the-installation">
+<h2>VIII. Completing the installation<a class="headerlink" href="#viii-completing-the-installation" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#viii-completing-the-installation'">¶</a></h2>
+<section id="secure-the-camera">
+<h3>1. Secure the camera<a class="headerlink" href="#secure-the-camera" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#secure-the-camera'">¶</a></h3>
+<p>Ensure the camera is firmly mounted and fastened in place.</p>
+</section>
+<section id="brief-the-driver">
+<h3>2. Brief the driver<a class="headerlink" href="#brief-the-driver" title="Link to this heading" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#brief-the-driver'">¶</a></h3>
+<p>Explain the system’s operation to the driver.</p>
+</section>
+</section>
+</section>
+</div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
+<div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
+<ul>
+<li><a :data-current="activeSection === '#reference-document'" class="reference internal" href="#reference-document">Reference Document</a></li>
+<li><a :data-current="activeSection === '#i-checking-the-camera-box'" class="reference internal" href="#i-checking-the-camera-box">I. Checking the camera box</a></li>
+<li><a :data-current="activeSection === '#ii-pre-installation-checks'" class="reference internal" href="#ii-pre-installation-checks">II. Pre-installation checks</a><ul>
+<li><a :data-current="activeSection === '#vehicle-and-environment'" class="reference internal" href="#vehicle-and-environment">1. Vehicle and Environment</a><ul>
+<li><a :data-current="activeSection === '#a-compatibility'" class="reference internal" href="#a-compatibility">1a. Compatibility</a></li>
+<li><a :data-current="activeSection === '#b-network-coverage'" class="reference internal" href="#b-network-coverage">1b. Network Coverage</a></li>
+<li><a :data-current="activeSection === '#c-clean-windshield'" class="reference internal" href="#c-clean-windshield">1c. Clean Windshield</a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#device-and-power'" class="reference internal" href="#device-and-power">2. Device and Power</a><ul>
+<li><a :data-current="activeSection === '#a-camera-provisioning'" class="reference internal" href="#a-camera-provisioning">2a. Camera Provisioning</a></li>
+<li><a :data-current="activeSection === '#b-power-source'" class="reference internal" href="#b-power-source">2b. Power Source</a></li>
+<li><a :data-current="activeSection === '#b-sim-activation'" class="reference internal" href="#b-sim-activation">3b. SIM Activation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#iii-installing-the-camera'" class="reference internal" href="#iii-installing-the-camera">III. Installing the camera</a><ul>
+<li><a :data-current="activeSection === '#connect-using-the-obd-2-port'" class="reference internal" href="#connect-using-the-obd-2-port">1. Connect using the OBD-2 port</a><ul>
+<li><a :data-current="activeSection === '#a-locate-obd-2-port'" class="reference internal" href="#a-locate-obd-2-port">1a. Locate OBD-2 port</a></li>
+<li><a :data-current="activeSection === '#b-secure-connection'" class="reference internal" href="#b-secure-connection">1b. Secure Connection</a></li>
+<li><a :data-current="activeSection === '#c-ignition-on'" class="reference internal" href="#c-ignition-on">1c. Ignition On</a></li>
+<li><a :data-current="activeSection === '#d-audio-confirmation'" class="reference internal" href="#d-audio-confirmation">1d. Audio Confirmation</a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#connect-using-3-wire-connector'" class="reference internal" href="#connect-using-3-wire-connector">2. Connect using 3-wire connector</a><ul>
+<li><a :data-current="activeSection === '#a-initial-hook-up'" class="reference internal" href="#a-initial-hook-up">2a. Initial hook-up</a></li>
+<li><a :data-current="activeSection === '#b-engine-off'" class="reference internal" href="#b-engine-off">2b. Engine Off</a></li>
+<li><a :data-current="activeSection === '#c-red-wire-ignition'" class="reference internal" href="#c-red-wire-ignition">2c. Red Wire (Ignition)</a></li>
+<li><a :data-current="activeSection === '#d-yellow-wire-constant-power-b'" class="reference internal" href="#d-yellow-wire-constant-power-b">2d. Yellow Wire (Constant Power B+)</a></li>
+<li><a :data-current="activeSection === '#e-black-wire-ground'" class="reference internal" href="#e-black-wire-ground">2e. Black Wire (Ground)</a></li>
+<li><a :data-current="activeSection === '#f-final-step'" class="reference internal" href="#f-final-step">2f. Final Step</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#iv-mounting-the-camera'" class="reference internal" href="#iv-mounting-the-camera">IV. Mounting the camera</a><ul>
+<li><a :data-current="activeSection === '#removing-the-side-panel'" class="reference internal" href="#removing-the-side-panel">1. Removing the side panel</a></li>
+<li><a :data-current="activeSection === '#inserting-the-sd-card'" class="reference internal" href="#inserting-the-sd-card">2. Inserting the SD card</a></li>
+<li><a :data-current="activeSection === '#choosing-the-mounting-area'" class="reference internal" href="#choosing-the-mounting-area">3. Choosing the mounting area</a></li>
+<li><a :data-current="activeSection === '#adjusting-road-facing-camera'" class="reference internal" href="#adjusting-road-facing-camera">4. Adjusting road-facing camera</a></li>
+<li><a :data-current="activeSection === '#adjusting-driver-facing-camera'" class="reference internal" href="#adjusting-driver-facing-camera">5. Adjusting driver-facing camera</a></li>
+<li><a :data-current="activeSection === '#cleaning-the-windshield'" class="reference internal" href="#cleaning-the-windshield">6. Cleaning the windshield</a></li>
+<li><a :data-current="activeSection === '#id1'" class="reference internal" href="#id1">7. Mounting the camera</a></li>
+<li><a :data-current="activeSection === '#locking-the-road-facing-camera'" class="reference internal" href="#locking-the-road-facing-camera">8. Locking the road-facing camera</a></li>
+<li><a :data-current="activeSection === '#locking-the-driver-facing-camera'" class="reference internal" href="#locking-the-driver-facing-camera">9. Locking the driver-facing camera</a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#v-wiring-and-harness-management'" class="reference internal" href="#v-wiring-and-harness-management">V. Wiring and harness management</a><ul>
+<li><a :data-current="activeSection === '#conceal-the-harness'" class="reference internal" href="#conceal-the-harness">1. Conceal the harness</a></li>
+<li><a :data-current="activeSection === '#use-the-provided-tool-for-routing'" class="reference internal" href="#use-the-provided-tool-for-routing">2. Use the provided tool for routing</a></li>
+<li><a :data-current="activeSection === '#follow-the-harness-path'" class="reference internal" href="#follow-the-harness-path">3. Follow the harness path</a></li>
+<li><a :data-current="activeSection === '#secure-excess-wiring'" class="reference internal" href="#secure-excess-wiring">4. Secure excess wiring</a></li>
+<li><a :data-current="activeSection === '#prioritize-safety'" class="reference internal" href="#prioritize-safety">5. Prioritize safety</a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#vi-connecting-and-testing-the-camera'" class="reference internal" href="#vi-connecting-and-testing-the-camera">VI. Connecting and testing the camera</a><ul>
+<li><a :data-current="activeSection === '#start-the-vehicle'" class="reference internal" href="#start-the-vehicle">1. Start the vehicle</a></li>
+<li><a :data-current="activeSection === '#check-the-led-light'" class="reference internal" href="#check-the-led-light">2. Check the LED light</a></li>
+<li><a :data-current="activeSection === '#listen-for-alerts'" class="reference internal" href="#listen-for-alerts">3. Listen for alerts</a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#vii-final-steps-and-troubleshooting'" class="reference internal" href="#vii-final-steps-and-troubleshooting">VII. Final steps and troubleshooting</a><ul>
+<li><a :data-current="activeSection === '#ensure-clear-visiblity'" class="reference internal" href="#ensure-clear-visiblity">1. Ensure clear visiblity</a></li>
+<li><a :data-current="activeSection === '#verify-network-connectivity'" class="reference internal" href="#verify-network-connectivity">2. Verify network connectivity</a></li>
+<li><a :data-current="activeSection === '#confirm-recording'" class="reference internal" href="#confirm-recording">3. Confirm recording</a></li>
+<li><a :data-current="activeSection === '#check-camera-alignment'" class="reference internal" href="#check-camera-alignment">4. Check camera alignment</a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#viii-completing-the-installation'" class="reference internal" href="#viii-completing-the-installation">VIII. Completing the installation</a><ul>
+<li><a :data-current="activeSection === '#secure-the-camera'" class="reference internal" href="#secure-the-camera">1. Secure the camera</a></li>
+<li><a :data-current="activeSection === '#brief-the-driver'" class="reference internal" href="#brief-the-driver">2. Brief the driver</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</aside>
+</main>
+</div>
+</div><footer class="py-6 border-t border-border md:py-0">
+<div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+<div class="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
+<p class="text-sm leading-loose text-center text-muted-foreground md:text-left">© 2026, Terminus GPS Built with <a class="font-medium underline underline-offset-4" href="https://www.sphinx-doc.org" rel="noreferrer">Sphinx 9.1.0</a></p>
+</div>
+</div>
+</footer>
+</div>
+<script src="../_static/documentation_options.js?v=acc74ff5"></script>
+<script src="../_static/doctools.js?v=fd6eb6e6"></script>
+<script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+<script defer="defer" src="../_static/theme.js?v=5db23cf8"></script>
+</body>
+</html>
