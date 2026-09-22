@@ -142,10 +142,12 @@ class StandardPage(Page):
         related_name="+",
     )
     body = RichTextField(blank=True)
+    show_last_updated = models.BooleanField(default=False)
 
     content_panels = Page.content_panels + [
         FieldPanel("header_title"),
         FieldPanel("header_subtitle"),
+        FieldPanel("show_last_updated"),
         FieldPanel("image"),
         FieldPanel("body"),
     ]
